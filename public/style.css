@@ -105,3 +105,65 @@ header{margin:8px 0 18px}
 .chat-compose button{font-size:9px;padding:10px 13px}
 @media(max-width:850px){.battlefield{min-height:320px;padding:12px 0 8px}.sprites{min-height:220px}.hero-figure .sprite-img{width:clamp(90px,18vw,135px);height:clamp(160px,27vw,220px)}.monster-img{width:clamp(185px,34vw,270px);height:clamp(185px,30vw,255px)}}
 @media(max-width:520px){.battlefield{min-height:270px;gap:4px}.sprites{min-height:175px;gap:2px}.hero-figure .sprite-img{width:76px;height:142px}.hero-figure span{font-size:7px;max-width:85px}.hero-figure small{font-size:12px;max-width:85px}.monster-img{width:155px;height:170px}.stat-buttons{grid-template-columns:repeat(2,1fr)}.chat-compose button{font-size:8px;padding:8px}}
+
+
+/* v0.10 — medieval fantasy realm overhaul */
+:root{--gold:#d8b875;--text:#f2e6cc;--muted:#b8a98e;--line:#80694a;--red:#b64d48}
+body{font-family:"IM Fell English",Georgia,serif;font-size:19px;background:#100e0c url("assets/scenes/castle.svg") center top/cover fixed no-repeat;color:#eadfc8}
+body:before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(13,10,8,.76),rgba(13,10,8,.94) 55%,#0b0908)}
+.shell{max-width:1320px;padding:26px 22px 60px}
+.site-header{text-align:center;position:relative;padding:30px 18px 24px;margin:0 auto 28px;max-width:1040px;border:1px solid #806747;border-top:3px solid #c8a86d;border-bottom:3px solid #6d5132;background:linear-gradient(180deg,rgba(30,24,18,.97),rgba(14,12,10,.94));box-shadow:0 14px 42px #000b,inset 0 0 0 5px #21190f,inset 0 0 0 6px #6f5838}
+.site-header:before,.site-header:after{content:"✦";position:absolute;top:12px;color:#d8b875;font-size:20px}.site-header:before{left:18px}.site-header:after{right:18px}
+.brand-seal{width:76px;height:88px;margin:0 auto 7px;filter:drop-shadow(0 5px 9px #000)}.brand-seal svg{width:100%;height:100%}
+.brand{font-family:"Cinzel",serif;font-weight:900;font-size:clamp(38px,7vw,76px);letter-spacing:.13em;line-height:1.05;color:#f1d99e;text-shadow:0 2px 0 #634526,0 4px 0 #25170e,0 0 24px #d5a84b55}
+.subtitle{font-family:"Cinzel",serif;font-size:clamp(13px,2vw,20px);letter-spacing:.32em;color:#d7bd8c;margin-top:12px}
+.tagline{font-family:"Cinzel",serif;font-size:11px;letter-spacing:.25em;color:#a99878;margin-top:8px}
+.version{font:9px "Cinzel",serif;letter-spacing:.15em;color:#9b8766;margin-top:14px}
+.header-controls{display:flex;justify-content:center;align-items:center;gap:18px;flex-wrap:wrap;margin:20px auto 4px}
+.music-control{font:700 11px "Cinzel",serif;letter-spacing:.08em;padding:12px 18px;background:linear-gradient(#51402a,#251b12);border:1px solid #c7a66b;color:#f2dba6;box-shadow:inset 0 1px #fff3,0 4px 0 #0b0806}
+.music-control.music-on{background:linear-gradient(#31583e,#182c20)!important;border-color:#8cc69a!important;color:#e7ffe9!important}
+.volume-control{display:flex;align-items:center;gap:10px;font:10px "Cinzel",serif;letter-spacing:.12em;color:#c7b48e}
+.volume-control input{width:110px;margin:0;accent-color:#c8a66a}
+.panel{background:linear-gradient(145deg,rgba(43,34,25,.97),rgba(22,18,14,.98));border:1px solid #806747;border-radius:2px;box-shadow:0 8px 0 #080605,0 12px 25px #0006,inset 0 0 0 3px #1b150f;padding:20px}
+.pixel-title{font:700 13px "Cinzel",serif;letter-spacing:.13em;color:#e5c98e;border-bottom:1px solid #765b38;padding-bottom:10px}
+.small,.tiny{font-family:"IM Fell English",serif;color:#b9aa8d;font-size:17px}
+label{font-family:"Cinzel",serif;font-size:11px;letter-spacing:.1em;color:#c7b48e}
+input,select{font:19px "IM Fell English",serif;background:#100d0a;border:1px solid #796143;color:#f3e8d0;border-radius:1px;padding:12px}
+button{font:700 10px "Cinzel",serif;letter-spacing:.07em;background:linear-gradient(180deg,#51402c,#2a2016);border:1px solid #a88a5b;color:#f1e2c2;border-radius:1px;box-shadow:inset 0 1px #fff2,0 4px 0 #090705;padding:13px 14px}
+button:hover{filter:brightness(1.22);border-color:#e2c487}
+button.gold,#start,#next,#openShop,#continueShop{background:linear-gradient(180deg,#9a733b,#5c3e20);border-color:#e4c17d;color:#fff0c9}
+button.secondary{background:linear-gradient(#40352a,#211a13);border-color:#89704e}
+#account,#lobby{max-width:850px;margin:0 auto 18px;padding:clamp(20px,4vw,38px)}
+#account .pixel-title,#lobby .pixel-title{font-size:clamp(13px,2vw,17px);text-align:center;margin:14px 0 18px}
+#account .small{text-align:center}
+#guestPlay{min-height:58px;font-size:12px;letter-spacing:.1em}
+.class-card,.my-gear{background:#17120d;border:1px solid #6d5839;color:#d8c69f}
+.roomline{background:linear-gradient(90deg,#21180f,#3b2b1b,#21180f);border-color:#9c7a49}
+.campaign-track span{background:#211a13;border-color:#665035;color:#c4b18d;font-family:"Cinzel",serif}
+.campaign-track .done{background:#203626;color:#b9e4bb}.campaign-track .current{background:#74512a;color:#fff0c4;border-color:#e5c27b}
+.arena{border:2px solid #a98954!important;border-radius:2px!important;box-shadow:inset 0 0 0 5px #1a130c,0 8px 0 #080605,0 14px 34px #0009!important}
+.arena:before{background:linear-gradient(180deg,rgba(9,8,7,.12),rgba(9,8,7,.1) 35%,rgba(9,8,7,.82))!important}
+.scene-label{font:700 13px "Cinzel",serif;letter-spacing:.2em;color:#ffe7b4}
+.scene-hint,.status,.caption{font-family:"IM Fell English",serif;color:#f1dfb8}
+.versus{font-family:"Cinzel",serif;color:#e9c77d}
+.hpbar{border-color:#b58a64;background:#160e0b}.hpbar i{background:linear-gradient(90deg,#762b2a,#e46a50)}
+.hero-hud,.race-card,.stat-panel,.party-chat{border-radius:2px;background:linear-gradient(145deg,#33291d,#17130f);border-color:#806747}
+.hero-hud-top strong,.hero-hud-top span{font-family:"Cinzel",serif}
+.hero-bar{border-radius:1px}.hero-bar i{border-radius:1px}
+.stat-title,.race-eyebrow{font-family:"Cinzel",serif;letter-spacing:.1em}
+.stat-buttons button{background:linear-gradient(#514632,#292216);border-color:#9a8054}
+.actions button{border-radius:1px}
+.actions button[data-action="attack"]{background:linear-gradient(#743c31,#3c201b);border-color:#c17b5e}
+.actions button[data-action^="skill"]{background:linear-gradient(#50427a,#28213e);border-color:#a997d4}
+.actions button[data-action="heal"],.actions button[data-action="mana"]{background:linear-gradient(#315b42,#1c3227);border-color:#8dbb8b}
+.actions button[data-action="guard"]{background:linear-gradient(#62502e,#302417);border-color:#c2a46a}
+.players .player,.shop-item{border-radius:2px;background:linear-gradient(100deg,#302719,#17130e);border-color:#715a3b}
+.player-head strong,.shop-item strong{color:#f0d69e}
+.log,.chat-messages{background:#100d09;border-color:#5b4932}
+.chat-line b{color:#e5c17e}.chat-line span{color:#e5ddca}
+.footer-note{font:11px "Cinzel",serif;letter-spacing:.18em;color:#a78d61}
+.boss-tag{font-family:"Cinzel",serif;color:#ffc0a6}
+.gacha-window{border-radius:2px;border-color:#c7a66b;background:radial-gradient(ellipse at 50% 0%,#4c3829,#21180f 60%,#100d0a)}
+.gacha-kicker,.gacha-window h2,.summon-card b{font-family:"Cinzel",serif}
+.summon-card{border-radius:2px;background:linear-gradient(160deg,#59432c,#1b140e);border-color:#c6a46b}
+@media(max-width:650px){.shell{padding:12px 9px 36px}.site-header{padding:25px 12px 20px}.brand{letter-spacing:.08em}.brand-seal{width:62px;height:72px}.header-controls{gap:12px}.panel{padding:15px}.pixel-title{font-size:12px}.roomline{justify-content:center}.volume-control input{width:90px}}
