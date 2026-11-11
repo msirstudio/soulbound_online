@@ -1,70 +1,8 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SOULBOUND Online v0.2</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
-</head>
-<body>
-<div class="shell">
-<header><div class="brand">⚔ SOULBOUND</div><div class="subtitle">THE FORGOTTEN KINGDOM · ONLINE PARTY RPG</div><div class="version">VERSION 0.2 · PERSISTENT HEROES</div></header>
-<main>
-<section id="account" class="panel">
- <div class="pixel-title">HERO ACCOUNT</div>
- <p class="small">Create an account or sign in to save your hero between visits.</p>
- <label>EMAIL<input id="email" type="email" autocomplete="email" placeholder="you@example.com"></label>
- <label>PASSWORD<input id="password" type="password" autocomplete="current-password" placeholder="At least 6 characters"></label>
- <div class="lobby-actions"><button id="signup" class="gold">CREATE ACCOUNT</button><button id="signin">SIGN IN</button></div>
- <p id="authNotice" class="notice">Connect Supabase first. See SETUP-V0.2.md.</p>
- <div id="accountInfo" class="account-info" hidden><span id="accountEmail"></span><button id="signout" class="secondary">SIGN OUT</button></div>
-</section>
-<section id="lobby" class="panel" hidden>
- <div class="pixel-title">GATHER YOUR PARTY</div>
- <label>HERO NAME<input id="name" maxlength="16" value="Adventurer"></label>
- <div class="lobby-actions">
-  <button id="create" class="gold">CREATE PARTY</button>
-  <div class="join"><input id="roomCode" maxlength="5" placeholder="ROOM CODE"><button id="join">JOIN</button></div>
- </div>
- <p id="notice" class="notice">Create a party and share its 5-character code with friends.</p>
- <div class="small">Up to 4 players · Turn-based co-op · Your hero save is linked to your account</div>
-</section>
-<section id="game" hidden>
- <div class="roomline panel"><div>PARTY CODE <b id="code">-----</b></div><button id="copy">COPY INVITE</button></div>
- <div class="arena panel">
-  <div class="scene-label">✦ THE CURSED WILDS ✦</div>
-  <div class="battlefield">
-   <div class="party-side"><div id="partySprites" class="sprites"></div><div class="caption">YOUR PARTY</div></div>
-   <div class="versus">VS</div>
-   <div class="monster-side"><div id="monsterSprite" class="monster">🐺</div><div id="monsterName" class="caption">SHADOW WOLF</div><div class="hpbar"><i id="monsterHp"></i></div><div id="monsterHpText" class="tiny">90 / 90 HP</div></div>
-  </div>
-  <div id="status" class="status">Waiting for party leader...</div>
- </div>
- <div class="grid">
-  <section class="panel">
-   <div class="pixel-title">BATTLE COMMAND</div>
-   <div id="myStats" class="my-stats"></div>
-   <div class="actions">
-    <button data-action="attack">⚔ ATTACK</button><button data-action="skill">🔥 FLAME BLADE <small>12 MP</small></button>
-    <button data-action="heal">🧪 POTION</button><button data-action="guard">🛡 GUARD <small>+5 MP</small></button>
-   </div>
-   <button id="start" class="gold wide">START ADVENTURE</button>
-   <button id="next" class="gold wide" hidden>NEXT ENCOUNTER →</button>
-   <button id="restart" class="wide secondary" hidden>RESTART ADVENTURE</button>
-   <button id="leave" class="wide secondary">LEAVE PARTY</button>
-  </section>
-  <section class="panel">
-   <div class="pixel-title">PARTY MEMBERS</div><div id="players" class="players"></div>
-   <div class="pixel-title log-title">BATTLE LOG</div><div id="log" class="log"></div>
-  </section>
- </div>
- <div class="footer-note">SOULBOUND ONLINE · ADVENTURE TOGETHER</div>
-</section>
-</main>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
-<script src="/socket.io/socket.io.js"></script>
-<script src="game.js"></script>
-</body></html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SOULBOUND Online v0.3</title><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"><link rel="stylesheet" href="style.css"></head><body><div class="shell"><header><div class="brand">⚔ SOULBOUND</div><div class="subtitle">THE FORGOTTEN KINGDOM · ONLINE PARTY RPG</div><div class="version">VERSION 0.3 · THE 24-STAGE CAMPAIGN</div></header><main>
+<section id="account" class="panel"><div class="pixel-title">HERO ACCOUNT</div><p class="small">Sign in to continue your persistent hero.</p><label>EMAIL<input id="email" type="email" autocomplete="email" placeholder="you@example.com"></label><label>PASSWORD<input id="password" type="password" autocomplete="current-password" placeholder="At least 6 characters"></label><div class="lobby-actions"><button id="signup" class="gold">CREATE ACCOUNT</button><button id="signin">SIGN IN</button></div><p id="authNotice" class="notice">Connect Supabase first. See SETUP-V0.2.md.</p><div id="accountInfo" class="account-info" hidden><span id="accountEmail"></span><button id="signout" class="secondary">SIGN OUT</button></div></section>
+<section id="lobby" class="panel" hidden><div class="pixel-title">CHOOSE YOUR HERO</div><label>HERO NAME<input id="name" maxlength="16" value="Adventurer"></label><label>CLASS<select id="classId"><option value="swordsman">⚔ Swordsman · Frontline fighter</option><option value="mage">🔮 Mage · Arcane damage</option></select></label><div class="class-card" id="classInfo">High HP and defense. Power Strike, then Whirlwind at level 3.</div><div class="pixel-title">GATHER YOUR PARTY</div><div class="lobby-actions"><button id="create" class="gold">CREATE PARTY</button><div class="join"><input id="roomCode" maxlength="5" placeholder="ROOM CODE"><button id="join">JOIN</button></div></div><p id="notice" class="notice">Up to 4 players · 24 stages · 8 bosses · Merchant every 4 stages</p></section>
+<section id="game" hidden><div class="roomline panel"><div>PARTY CODE <b id="code">-----</b></div><div id="stageBadge">STAGE 1 / 24</div><button id="copy">COPY INVITE</button></div><div class="campaign"><div class="campaign-track" id="campaignTrack"></div></div>
+<div class="arena panel wilds" id="arena"><div class="scene-label" id="sceneName">✦ THE CURSED WILDS ✦</div><div class="scene-hint" id="sceneHint"></div><div class="battlefield"><div class="party-side"><div id="partySprites" class="sprites"></div><div class="caption">YOUR PARTY</div></div><div class="versus">VS</div><div class="monster-side"><div id="monsterSprite" class="monster">🐺</div><div id="monsterName" class="caption">MOSSFANG WOLF</div><div class="hpbar"><i id="monsterHp"></i></div><div id="monsterHpText" class="tiny"></div><div id="bossTag" class="boss-tag" hidden>✦ BOSS ✦</div></div></div><div id="status" class="status">Waiting for party leader...</div></div>
+<div class="grid"><section class="panel"><div class="pixel-title">BATTLE COMMAND</div><div id="myStats" class="my-stats"></div><div id="myGear" class="my-gear"></div><div class="actions"><button data-action="attack">⚔ ATTACK</button><button data-action="skill" id="skillButton">🔥 POWER STRIKE <small>12 MP</small></button><button data-action="skill2" id="skill2Button" hidden>✴ WHIRLWIND <small>25 MP · LV 3</small></button><button data-action="heal">🧪 HEALTH POTION <small id="healthCount"></small></button><button data-action="mana">🔷 MANA POTION <small id="manaCount"></small></button><button data-action="guard">🛡 GUARD <small>+8 MP</small></button></div><button id="start" class="gold wide">START ADVENTURE</button><button id="next" class="gold wide" hidden>NEXT STAGE →</button><button id="openShop" class="gold wide" hidden>VISIT MERCHANT 🛒</button><button id="continueShop" class="gold wide" hidden>LEAVE SHOP · NEXT STAGE →</button><button id="restart" class="wide secondary" hidden>RESTART CAMPAIGN</button><button id="leave" class="wide secondary">LEAVE PARTY</button></section>
+<section class="panel"><div class="pixel-title">PARTY MEMBERS</div><div id="players" class="players"></div><div id="shopPanel" hidden><div class="pixel-title log-title">TRAVELING MERCHANT</div><p class="small">Spend gold on supplies and equipment. Each hero buys for themselves.</p><div id="shopItems" class="shop-items"></div></div><div class="pixel-title log-title">BATTLE LOG</div><div id="log" class="log"></div></section></div><div class="footer-note">SOULBOUND ONLINE · YOUR LEGEND IS ONLY BEGINNING</div></section></main></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="config.js"></script><script src="/socket.io/socket.io.js"></script><script src="game.js"></script></body></html>
