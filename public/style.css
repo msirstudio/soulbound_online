@@ -173,3 +173,67 @@ button.secondary{background:linear-gradient(#40352a,#211a13);border-color:#89704
 #game .actions button[data-action="guard"]{background:linear-gradient(180deg,#62502e,#302417);border-color:#c2a46a}
 #game .gear-slot[data-tooltip]:hover:after{bottom:calc(100% + 6px)}
 @media(min-width:951px) and (max-height:850px){#game .arena{min-height:160px;padding:8px 12px}#game .battlefield{min-height:105px}#game .monster-img{width:145px;height:130px}#game .panel{padding:9px}#game .hero-panel .hero-hud{padding:5px 8px;margin-bottom:5px}#game .race-card{padding:5px 8px;margin-bottom:4px}#game .actions button{min-height:35px;padding:6px 5px}#game .gear-slot{padding:6px}}
+
+/* v0.11 — compact desktop battle layout, separated inventory and equipment */
+body:has(#game:not([hidden])) .site-header{display:none}
+#game:not([hidden]){width:100%;max-width:100%;}
+#game .roomline{padding:9px 12px;min-height:48px;margin-bottom:8px}
+#game .campaign{margin:0 0 8px}
+#game .campaign-track{min-width:0;grid-template-columns:repeat(24,minmax(18px,1fr));gap:3px}
+#game .campaign-track span{font-size:12px;padding:4px 1px}
+#game .arena{min-height:210px;margin-bottom:10px;padding:12px 16px}
+#game .battlefield{min-height:145px}
+#game .monster-img{width:clamp(145px,18vw,235px);height:clamp(130px,16vw,200px)}
+.game-layout{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(285px,.78fr);gap:10px;align-items:start}
+.game-main-column,.game-side-column{display:grid;gap:10px;min-width:0}
+#game .panel{padding:12px;margin:0;box-shadow:0 4px 0 #080605,inset 0 0 0 2px #1b150f}
+#game .pixel-title{font-size:11px;margin-bottom:9px;padding-bottom:7px}
+.hero-panel .hero-hud{padding:8px 10px;margin-bottom:8px}
+.hero-panel .race-card{padding:8px 10px;margin:0 0 7px;gap:10px}
+.hero-panel .race-points button{padding:7px 9px;font-size:8px}
+#game .my-stats{font-size:14px;margin:0}
+.character-panels{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:stretch}
+#game .stat-panel{margin:0;padding:9px;background:linear-gradient(135deg,#292217,#17130f)}
+#game .stat-title{font-size:9px;margin-bottom:7px}
+#game .stat-buttons{gap:5px;margin:7px 0}
+#game .stat-buttons button{font-size:8px;padding:8px 4px;min-height:32px}
+#game .stat-panel>small{font-size:13px}
+.class-path-status{padding:7px 9px;margin-top:7px;border:1px solid #a68b5c;background:#20190f;color:#f3d99d;font-size:14px}
+.class-path-status strong{font-family:Cinzel,serif;font-size:11px}
+.combat-panels{display:grid;grid-template-columns:minmax(0,1.12fr) minmax(0,.88fr);gap:10px;align-items:stretch}
+#game .actions{gap:6px}
+#game .actions button{min-height:42px;padding:8px 6px;font-size:8px;line-height:1.4}
+#game .actions small{font-size:13px;line-height:1.15}
+.skill-actions{grid-template-columns:repeat(2,minmax(0,1fr))}
+.potion-group{margin:6px 0 9px}
+.potion-group>strong{display:block;font:10px Cinzel,serif;color:#e8d4a8;margin-bottom:5px}
+.potion-actions{grid-template-columns:repeat(3,minmax(0,1fr))}
+.potion-actions button{min-height:48px!important}
+.potion-note{margin:5px 0 0;color:#bcae91;font-size:13px}
+.gear-slots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.gear-slot{min-width:0;padding:9px;background:linear-gradient(145deg,#302719,#17130e);border:1px solid #806747;display:grid;gap:4px}
+.gear-slot span{font:9px Cinzel,serif;color:#c9ad76;letter-spacing:.1em}
+.gear-slot strong{font:600 15px Cinzel,serif;color:#f1d99e;overflow-wrap:anywhere}
+.gear-slot small{font-size:13px;color:#b9aa8d}
+.stage-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.stage-actions .wide{margin:0;min-height:39px;padding:8px;font-size:9px}
+.game-side-column{position:sticky;top:8px;max-height:calc(100vh - 16px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:#8a704a #1a140e}
+.game-side-column .players{gap:6px}
+.game-side-column .player{padding:7px}
+.game-side-column .player-bars{font-size:13px;line-height:1.25}
+.game-side-column .party-chat{margin-top:10px;padding:8px}
+.game-side-column .chat-messages{height:115px}
+.game-side-column .chat-compose input{font-size:15px;padding:8px}
+.game-side-column .chat-compose button{font-size:8px;padding:8px}
+.game-side-column .log{height:145px;font-size:14px}
+.merchant-log-panel:has(#shopPanel[hidden]){padding-top:7px!important}
+#game [data-tooltip]{position:relative}
+#game [data-tooltip]:hover:after,#game [data-tooltip]:focus-visible:after{content:attr(data-tooltip);position:absolute;z-index:30;left:50%;bottom:calc(100% + 8px);transform:translateX(-50%);width:min(270px,75vw);white-space:pre-line;text-align:left;padding:9px 11px;background:#100d09;border:1px solid #d0ad70;box-shadow:0 5px 18px #000c;color:#f4e5c5;font:14px/1.35 "IM Fell English",serif;pointer-events:none}
+#game .skill-guide{display:none}
+@media(max-width:950px){.game-layout{grid-template-columns:minmax(0,1fr) minmax(250px,.75fr)}.character-panels,.combat-panels{grid-template-columns:1fr}.game-side-column{position:static;max-height:none}}
+@media(max-width:680px){.game-layout{grid-template-columns:1fr}.character-panels,.combat-panels{grid-template-columns:1fr}.game-side-column{position:static;max-height:none}.stage-actions{grid-template-columns:1fr 1fr}#game .campaign-track{grid-template-columns:repeat(24,minmax(22px,1fr));min-width:560px}.game-side-column .chat-messages{height:130px}}
+/* v0.11 visual polish */
+#game .actions button[data-action^="heal"],#game .actions button[data-action^="mana"]{background:linear-gradient(180deg,#315b42,#1c3227);border-color:#8dbb8b}
+#game .actions button[data-action="guard"]{background:linear-gradient(180deg,#62502e,#302417);border-color:#c2a46a}
+#game .gear-slot[data-tooltip]:hover:after{bottom:calc(100% + 6px)}
+@media(min-width:951px) and (max-height:850px){#game .arena{min-height:160px;padding:8px 12px}#game .battlefield{min-height:105px}#game .monster-img{width:145px;height:130px}#game .panel{padding:9px}#game .hero-panel .hero-hud{padding:5px 8px;margin-bottom:5px}#game .race-card{padding:5px 8px;margin-bottom:4px}#game .actions button{min-height:35px;padding:6px 5px}#game .gear-slot{padding:6px}}
