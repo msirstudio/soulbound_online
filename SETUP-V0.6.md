@@ -57,3 +57,12 @@ Rates and balance are initial game values and can be tuned after playtesting.
 - Continue restores the saved hero and race.
 - Stage progress is still not saved between separate rooms; the persistent save covers hero progression and equipment.
 - The summon result is decided by the game server, not by the visual animation.
+
+
+## v0.7 — Guest mode, equipment and skills
+
+- **Play as Guest:** no account required. Guests can create a room or join a friend using the room code, just like account players.
+- **Guest saving:** the hero profile is stored in the browser localStorage. It survives refreshes and browser restarts on the same browser/device, but does not sync across devices or browsers. Clearing site data removes the guest save. Creating a New Game overwrites the guest save.
+- **Equipment:** more weapons and armor are available in the merchant shop. Weapon and armor purchases are restricted by class where applicable and by minimum level (levels 1, 3, 5, 8, 12). The server validates the required level, so the browser cannot bypass it.
+- **Skills:** two additional active skills unlock at levels 5 and 8. The server calculates damage; the game UI lists each skill multiplier, MP cost and extra effect.
+- Existing account sign-in remains available for cross-device cloud saves.
