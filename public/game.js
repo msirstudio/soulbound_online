@@ -36,18 +36,18 @@ $("partySprites").innerHTML=s.players.map(p=>'<img class="sprite-img" title="'+e
 $("myStats").textContent=me?"XP "+me.xp+"/"+(me.level*100)+" · GOLD "+me.gold:"Waiting for player data";$("myGear").textContent=me?"Weapon: "+me.weapon+" | Armor: "+me.armor:"";if(me){const pct=(v,m)=>Math.max(0,Math.min(100,v/Math.max(1,m)*100));$("heroIdentity").textContent=me.name.toUpperCase()+" · "+me.className.toUpperCase();$("heroLevel").textContent="LV "+me.level;$("heroHpText").textContent=me.hp+" / "+me.maxHp;$("heroMpText").textContent=me.mp+" / "+me.maxMp;$("myHpBar").style.width=pct(me.hp,me.maxHp)+"%";$("myMpBar").style.width=pct(me.mp,me.maxMp)+"%";$("heroMeta").textContent="ATK "+me.atk+" · DEF "+me.def+" · 🧪 "+me.potions+" · 🪙 "+me.gold;const rn=raceNames[me.raceId]||"Human";$("raceName").textContent=rn;$("raceRarity").textContent=(me.raceRarity||"common").toUpperCase();$("raceRarity").className="rarity "+rarityClass(me.raceRarity);$("racePassive").textContent=me.racePassive||"Balanced and adaptable.";$("raceBuffs").textContent=(me.raceBuffs||[]).join(" · ");$("racePoints").textContent=me.racePoints||0;$("openGacha").disabled=(me.racePoints||0)<1;$("openGacha").textContent=(me.racePoints||0)>0?"SUMMON RACE · 1 PT":"NEED 1 POINT";}$("healthCount").textContent="OWNED: "+(me?.potions||0);$("manaCount").textContent="OWNED: "+(me?.manaPotions||0);
 const mage=me?.classId==="mage";const elf=me?.raceId==="elf";const skillCost=elf?11:12,skill2Cost=elf?23:25,skill3Cost=elf?19:20,skill4Cost=elf?28:30;
 const skillTips=mage?[
-"ARCANE BOLT\\nDamage: 1.9× ATK\\nMana: "+skillCost+" MP\\nA focused bolt of arcane energy.",
-"METEOR\\nDamage: 2.5× ATK\\nMana: "+skill2Cost+" MP\\nUnlocks at Level 3. Calls down a crushing meteor.",
-"FROST NOVA\\nDamage: 1.6× ATK\\nMana: "+skill3Cost+" MP\\nUnlocks at Level 5. Also restores 10% of your Max HP.",
-"ARCANE SURGE\\nDamage: 3× ATK\\nMana: "+skill4Cost+" MP\\nUnlocks at Level 8. Unleashes overwhelming arcane force."
+"ARCANE BOLT\nDamage: 1.9× ATK\nMana: "+skillCost+" MP\nA focused bolt of arcane energy.",
+"METEOR\nDamage: 2.5× ATK\nMana: "+skill2Cost+" MP\nUnlocks at Level 3. Calls down a crushing meteor.",
+"FROST NOVA\nDamage: 1.6× ATK\nMana: "+skill3Cost+" MP\nUnlocks at Level 5. Also restores 10% of your Max HP.",
+"ARCANE SURGE\nDamage: 3× ATK\nMana: "+skill4Cost+" MP\nUnlocks at Level 8. Unleashes overwhelming arcane force."
 ]:[
-"POWER STRIKE\\nDamage: 1.8× ATK\\nMana: "+skillCost+" MP\\nA powerful single-target strike.",
-"WHIRLWIND\\nDamage: 2.5× ATK\\nMana: "+skill2Cost+" MP\\nUnlocks at Level 3. A sweeping spinning attack.",
-"SHIELD BREAKER\\nDamage: 2× ATK\\nMana: "+skill3Cost+" MP\\nUnlocks at Level 5. Also grants +3 DEF for this battle.",
-"RALLYING SLASH\\nDamage: 3× ATK\\nMana: "+skill4Cost+" MP\\nUnlocks at Level 8. A devastating finishing slash."
+"POWER STRIKE\nDamage: 1.8× ATK\nMana: "+skillCost+" MP\nA powerful single-target strike.",
+"WHIRLWIND\nDamage: 2.5× ATK\nMana: "+skill2Cost+" MP\nUnlocks at Level 3. A sweeping spinning attack.",
+"SHIELD BREAKER\nDamage: 2× ATK\nMana: "+skill3Cost+" MP\nUnlocks at Level 5. Also grants +3 DEF for this battle.",
+"RALLYING SLASH\nDamage: 3× ATK\nMana: "+skill4Cost+" MP\nUnlocks at Level 8. A devastating finishing slash."
 ];
 const skillButtons=[$("skillButton"),$("skill2Button"),$("skill3Button"),$("skill4Button")];
-skillButtons.forEach((b,i)=>{b.dataset.tooltip=skillTips[i];b.title=skillTips[i].replace(/\\n/g," · ");b.setAttribute("aria-label",b.title)});
+skillButtons.forEach((b,i)=>{b.dataset.tooltip=skillTips[i];b.title=skillTips[i].replaceAll("\n"," · ");b.setAttribute("aria-label",b.title)});
 $("skillButton").textContent=mage?"🔮 ARCANE BOLT":"🔥 POWER STRIKE";
 $("skill2Button").textContent=mage?"☄ METEOR":"✴ WHIRLWIND";
 $("skill3Button").textContent=mage?"❄ FROST NOVA":"🛡 SHIELD BREAKER";
