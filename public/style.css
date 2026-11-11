@@ -12,3 +12,58 @@
 .hero-hud{background:linear-gradient(135deg,#171b2d,#252238);border:1px solid #655c7a;border-radius:8px;padding:13px 15px;margin:0 0 12px}.hero-hud-top,.hero-bar-label{display:flex;justify-content:space-between;align-items:center;gap:10px}.hero-hud-top strong{font:10px 'Press Start 2P';color:#f5d68e}.hero-hud-top span{color:#d6c5ff;font-size:19px}.hero-bar-label{font-size:15px;color:#d4ccdf;margin-top:9px}.hero-bar-label b{font-size:16px;color:#fff}.hero-bar{height:13px;background:#090b14;border:1px solid #6d657b;border-radius:20px;overflow:hidden;padding:1px}.hero-bar i{display:block;height:100%;width:100%;border-radius:20px;transition:width .35s ease}.hp-hero i{background:linear-gradient(90deg,#a92743,#ff6677);box-shadow:0 0 10px #ff536a88}.mp-hero i{background:linear-gradient(90deg,#2355bd,#65c9ff);box-shadow:0 0 10px #42aaff88}.hero-meta{font-size:16px;color:#bcb3ca;margin-top:10px}.race-card{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;margin-bottom:14px;border:1px solid #625774;border-radius:8px;background:linear-gradient(120deg,#242039,#171a2b)}.race-card>div:first-child{display:grid;grid-template-columns:auto auto;gap:4px 9px;align-items:center}.race-eyebrow{grid-column:1/-1;color:#a99ab9;font:8px 'Press Start 2P'}.race-card strong{font:11px 'Press Start 2P';color:#fff0c5}.race-card small{grid-column:1/-1;color:#bdb3ca;font-size:16px}.race-points{display:flex;align-items:center;gap:5px;flex-direction:column}.race-points>b{font:20px 'Press Start 2P';color:#f4d16f}.race-points>small{font-size:12px;color:#c4b9d2}.race-points button{font-size:8px;padding:9px 7px;white-space:nowrap}.rarity{display:inline-block;border-radius:4px;padding:4px 6px;font:8px 'Press Start 2P'}.rarity.common{color:#e4e0eb;background:#5a5664}.rarity.rare{color:#8cd4ff;background:#183d69}.rarity.epic{color:#e3a3ff;background:#51246d}.rarity.legend{color:#ffd477;background:#69451a}.rarity.mythic{color:#fff;background:linear-gradient(90deg,#8c3aff,#e33d9b,#ffb83f);box-shadow:0 0 12px #d36bff88}.gacha-modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:16px}.gacha-modal[hidden]{display:none}.gacha-backdrop{position:absolute;inset:0;background:#070711ef;backdrop-filter:blur(8px)}.gacha-window{position:relative;width:min(620px,100%);padding:24px 20px 20px;text-align:center;border:2px solid #a58a60;border-radius:12px;background:radial-gradient(ellipse at 50% 0%,#51406c,#211d34 55%,#11121e);box-shadow:0 0 0 5px #0b0915,0 0 60px #9c67e888}.gacha-kicker{font:8px 'Press Start 2P';letter-spacing:2px;color:#d5b977}.gacha-window h2{font:clamp(13px,3vw,19px) 'Press Start 2P';line-height:1.8;color:#fff0c5;margin:15px 0 8px}.gacha-window p{color:#c9bdd4;margin:5px 0 14px}.summon-stage{height:190px;position:relative;display:grid;place-items:center;overflow:hidden;border:1px solid #82719a;border-radius:9px;background:radial-gradient(ellipse,#41345d 0%,#171629 65%,#10111b)}.summon-glow{position:absolute;width:170px;height:170px;border-radius:50%;background:#b07aff55;filter:blur(30px);animation:summonPulse 1.3s ease-in-out infinite alternate}.summon-reel{position:relative;display:flex;justify-content:center;align-items:center;gap:10px}.summon-card{width:128px;height:146px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:9px;border:2px solid #bca0df;border-radius:8px;background:linear-gradient(160deg,#4a3c66,#1b1b2d);box-shadow:0 0 24px #b17aff77}.summon-card span{font-size:26px;color:#ffe19a}.summon-card b{font:15px 'Press Start 2P';color:white}.summon-card small{font:8px 'Press Start 2P';color:#c8b8e8}.gacha-result{padding:14px 5px 4px;animation:resultReveal .55s ease both}.gacha-result h3{font:clamp(18px,4vw,25px) 'Press Start 2P';margin:10px 0;color:#fff0bf;text-shadow:0 0 18px #e8bc74}.gacha-result p{margin:8px 0;color:#d8cbe1}.gacha-result #resultBuffs{font-size:16px;color:#b9e6ce;line-height:1.8}.gacha-actions{display:flex;justify-content:center;gap:10px;margin-top:14px}.gacha-actions button{font-size:9px;min-width:145px}@keyframes summonPulse{to{transform:scale(1.3);opacity:.55}}@keyframes resultReveal{from{opacity:0;transform:translateY(18px) scale(.9);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}@media(max-width:650px){.race-card{align-items:flex-start}.race-points button{font-size:7px}.gacha-window{padding:18px 12px}.summon-stage{height:165px}.gacha-actions{flex-wrap:wrap}}
 
 .skill-guide{font-size:13px;line-height:1.6;color:#e5d6b3;background:#171522;border:1px solid #635276;border-radius:6px;padding:9px;margin:8px 0}#guestPlay{margin:10px 0 14px}.shop-item small{display:block;line-height:1.5}
+/* v0.8 — MMO battle interface */
+:root{--gold:#f0c879;--panel:#191b2b;--line:#625778;--cyan:#75d9f3;--violet:#a98be8}
+.shell{max-width:1500px;padding:18px 22px 56px}
+header{margin:8px 0 18px}
+.brand{letter-spacing:2px;text-shadow:0 0 18px #e8b95b66,3px 3px #704b3c}
+.panel{background:linear-gradient(145deg,rgba(35,35,55,.97),rgba(17,20,34,.98));border:1px solid #78668b;box-shadow:inset 0 1px #ffffff12,0 8px 24px #05050b99,0 4px 0 #090912;border-radius:8px}
+.roomline{background:linear-gradient(90deg,#25243b,#171a2c);border-color:#8a744e}
+#stageBadge{font:10px 'Press Start 2P';color:#f3d58e}
+.campaign{padding:3px 2px 8px}
+.campaign-track span{border-radius:3px}
+.arena{min-height:490px;padding:22px 26px 16px;background-color:#141827;border:2px solid #a78a5b;box-shadow:inset 0 0 0 4px #111321,inset 0 0 65px #07091488,0 8px 28px #05050b99}
+.scene-label{font-size:12px;letter-spacing:3px;color:#ffe7ac}
+.scene-hint{font-size:19px}
+.battlefield{min-height:340px;gap:28px;justify-content:space-between;padding:10px 5%}
+.party-side,.monster-side{flex:1;min-width:0}
+.party-side{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:270px}
+.sprites{gap:18px;align-items:flex-end;min-height:200px}
+.sprite-img{width:clamp(100px,11vw,150px);height:clamp(145px,17vw,205px);filter:drop-shadow(0 9px 0 #080b16) drop-shadow(0 0 16px #6ca7ff55)}
+.monster-side{display:flex;flex-direction:column;align-items:center;justify-content:center}
+.monster-img{width:clamp(230px,30vw,370px);height:clamp(220px,28vw,330px);filter:drop-shadow(0 12px 0 #080b16) drop-shadow(0 0 24px #e4a85c77)}
+.versus{font-size:16px;text-shadow:0 0 15px #f3c86e}
+.caption{font-size:11px;letter-spacing:1px}
+.hpbar{height:14px;max-width:280px;width:80%;border-radius:10px;overflow:hidden}
+.hpbar i{background:linear-gradient(90deg,#9e263e,#ff6678);box-shadow:0 0 12px #ff526a88}
+.status{font-size:21px;background:#11152499;border:1px solid #ffffff20;border-radius:5px;padding:12px;margin-top:8px}
+.grid{grid-template-columns:minmax(0,1.15fr) minmax(320px,.85fr);gap:16px;margin-top:16px}
+.grid .panel{padding:20px}
+.pixel-title{font-size:11px;letter-spacing:1px;padding-bottom:8px;border-bottom:1px solid #ffffff20}
+.hero-hud{background:linear-gradient(120deg,#17263c,#24213c);border:1px solid #6785a4;box-shadow:inset 0 0 20px #3d8cbb18}
+.hero-bar{height:16px}
+.hero-meta{font-size:18px}
+.race-card{border-color:#8c754d;background:linear-gradient(120deg,#2b263d,#171b2b);box-shadow:inset 0 0 20px #d3a45a0d}
+.actions{gap:11px;margin:12px 0 16px}
+.actions button{position:relative;min-height:68px;background:linear-gradient(180deg,#41415d,#292b43);border:1px solid #827d9f;border-radius:6px;box-shadow:inset 0 1px #ffffff20,0 4px 0 #0a0b14,0 0 0 1px #090b16;transition:transform .12s,border-color .12s,filter .12s}
+.actions button:hover:not(:disabled){transform:translateY(-2px);border-color:#f0ce84;filter:brightness(1.18);z-index:20}
+.actions button[data-action="attack"]{background:linear-gradient(180deg,#733d4b,#422735);border-color:#bb6978}
+.actions button[data-action^="skill"]{background:linear-gradient(180deg,#3d426e,#252b4b);border-color:#778bd0}
+.actions button[data-action="heal"],.actions button[data-action="mana"]{background:linear-gradient(180deg,#285c51,#1b3938);border-color:#65b69e}
+.actions button[data-action="guard"]{background:linear-gradient(180deg,#665437,#393047);border-color:#b99b62}
+.actions button small{display:none}
+.skill-guide{display:none}
+.actions button[data-tooltip]::after{content:attr(data-tooltip);position:absolute;left:50%;bottom:calc(100% + 12px);transform:translate(-50%,5px);width:max-content;max-width:min(310px,80vw);white-space:pre-line;text-align:left;line-height:1.55;font:18px 'VT323';letter-spacing:.2px;color:#f9edcf;background:linear-gradient(145deg,#28243b,#111522);border:1px solid #c4a66e;border-radius:7px;padding:11px 14px;box-shadow:0 8px 26px #000c, inset 0 1px #ffffff18;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .12s,transform .12s;z-index:80}
+.actions button[data-tooltip]::before{content:"";position:absolute;left:50%;bottom:calc(100% + 5px);border:7px solid transparent;border-top-color:#c4a66e;opacity:0;visibility:hidden;z-index:81}
+.actions button[data-tooltip]:hover::after,.actions button[data-tooltip]:focus-visible::after{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.actions button[data-tooltip]:hover::before,.actions button[data-tooltip]:focus-visible::before{opacity:1;visibility:visible}
+#start,#next,#openShop,#continueShop{background:linear-gradient(180deg,#9a7138,#614324);border-color:#e7c47e;color:#fff2ce}
+.players .player{border:1px solid #5e607c;border-radius:6px;background:linear-gradient(100deg,#20263a,#171a29);padding:12px}
+.player-bars{font-size:17px;line-height:1.5}
+.shop-item{border-radius:6px;background:#1b2031;border-color:#615d7c}
+.log{height:250px;padding:8px 12px;border:1px solid #3d4058;border-radius:6px;background:#111522aa}
+.log div{font-size:18px}
+#myStats,#myGear{font-size:18px}
+.footer-note{letter-spacing:2px}
+@media(max-width:850px){.shell{padding:12px 10px 40px}.arena{min-height:390px;padding:17px 12px}.battlefield{min-height:270px;padding:8px 0;gap:8px}.sprites{min-height:160px;gap:5px}.sprite-img{width:clamp(64px,15vw,105px);height:clamp(110px,20vw,155px)}.monster-img{width:clamp(150px,30vw,240px);height:clamp(150px,28vw,220px)}.grid{grid-template-columns:1fr}.grid .panel{padding:15px}}
+@media(max-width:520px){.battlefield{min-height:230px}.arena{min-height:340px}.sprite-img{width:66px;height:105px}.monster-img{width:155px;height:150px}.versus{font-size:10px}.actions{grid-template-columns:1fr 1fr}.actions button{font-size:9px;padding:10px 6px}.actions button[data-tooltip]::after{left:auto;right:0;transform:translateY(5px);max-width:240px}.actions button[data-tooltip]:hover::after,.actions button[data-tooltip]:focus-visible::after{transform:translateY(0)}}
