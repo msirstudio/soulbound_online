@@ -5,7 +5,7 @@ A browser-based co-op turn-based RPG. Version 0.2 adds Supabase email/password a
 ## Features
 - Create/join parties with a 5-character room code
 - Up to four players per party
-- Four turn-based encounters and server-authoritative battle actions
+- Eight turn-based encounters and server-authoritative battle actions
 - XP, level-ups, gold, HP/MP and potions
 - Supabase account registration and sign-in
 - Per-account character profile save and restore
