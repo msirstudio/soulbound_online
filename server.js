@@ -16,7 +16,11 @@ const monsters = [
   { name: "Shadow Wolf", icon: "🐺", hp: 90, atk: 12, def: 2, xp: 35, gold: 18 },
   { name: "Goblin Raider", icon: "👺", hp: 130, atk: 17, def: 5, xp: 55, gold: 30 },
   { name: "Cursed Knight", icon: "💀", hp: 210, atk: 23, def: 8, xp: 90, gold: 55 },
-  { name: "Ember Dragon", icon: "🐉", hp: 330, atk: 30, def: 11, xp: 150, gold: 100 }
+  { name: "Ember Dragon", icon: "🐉", hp: 330, atk: 30, def: 11, xp: 150, gold: 100 },
+  { name: "Frost Wraith", icon: "👻", hp: 390, atk: 34, def: 13, xp: 190, gold: 125 },
+  { name: "Ancient Golem", icon: "🗿", hp: 480, atk: 38, def: 17, xp: 240, gold: 160 },
+  { name: "Void Reaper", icon: "☠️", hp: 570, atk: 44, def: 19, xp: 310, gold: 210 },
+  { name: "Eclipse Sovereign", icon: "👑", hp: 760, atk: 52, def: 22, xp: 450, gold: 300 }
 ];
 
 function cleanName(value) {
