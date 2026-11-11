@@ -212,7 +212,7 @@ io.on("connection", socket => {
     if (!room) return callback({ ok: false, error: "Room not found." });
     if ([...room.players.keys()][0] !== socket.id) return callback({ ok: false, error: "Only the party leader can restart." });
     room.stage = 0; room.status = "waiting"; room.monster = null;
-    for (const p of room.players.values()) Object.assign(p, defaultPlayer(p.id, p.name));
+    for (const p of room.players.values()) { p.hp = p.maxHp; p.mp = p.maxMp; }
     room.log = ["A new adventure is ready. The party leader can start the battle."];
     emitRoom(room); callback({ ok: true });
   });
