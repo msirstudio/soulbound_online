@@ -167,3 +167,9 @@ button.secondary{background:linear-gradient(#40352a,#211a13);border-color:#89704
 .gacha-kicker,.gacha-window h2,.summon-card b{font-family:"Cinzel",serif}
 .summon-card{border-radius:2px;background:linear-gradient(160deg,#59432c,#1b140e);border-color:#c6a46b}
 @media(max-width:650px){.shell{padding:12px 9px 36px}.site-header{padding:25px 12px 20px}.brand{letter-spacing:.08em}.brand-seal{width:62px;height:72px}.header-controls{gap:12px}.panel{padding:15px}.pixel-title{font-size:12px}.roomline{justify-content:center}.volume-control input{width:90px}}
+
+/* v0.11 visual polish */
+#game .actions button[data-action^="heal"],#game .actions button[data-action^="mana"]{background:linear-gradient(180deg,#315b42,#1c3227);border-color:#8dbb8b}
+#game .actions button[data-action="guard"]{background:linear-gradient(180deg,#62502e,#302417);border-color:#c2a46a}
+#game .gear-slot[data-tooltip]:hover:after{bottom:calc(100% + 6px)}
+@media(min-width:951px) and (max-height:850px){#game .arena{min-height:160px;padding:8px 12px}#game .battlefield{min-height:105px}#game .monster-img{width:145px;height:130px}#game .panel{padding:9px}#game .hero-panel .hero-hud{padding:5px 8px;margin-bottom:5px}#game .race-card{padding:5px 8px;margin-bottom:4px}#game .actions button{min-height:35px;padding:6px 5px}#game .gear-slot{padding:6px}}
