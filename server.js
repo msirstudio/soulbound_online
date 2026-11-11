@@ -55,4 +55,4 @@ io.on("connection",s=>{
  s.on("partyChat",({message}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});const body=String(message||"").replace(/[<>]/g,"").trim().slice(0,180);if(!body)return cb({ok:false,error:"Message is empty."});r.chat=r.chat||[];r.chat.push({name:p.name,id:p.id,message:body,time:Date.now()});if(r.chat.length>60)r.chat.shift();emit(r);cb({ok:true})});
  s.on("disconnect",()=>{for(const r of rooms.values())if(r.players.has(s.id)){const p=r.players.get(s.id);r.players.delete(s.id);say(r,p.name+" disconnected.");if(!r.players.size)rooms.delete(r.code);else{r.turnIndex=0;emit(r)}}});
 });
-server.listen(PORT,()=>console.log("SOULBOUND Online v0.10.0 running on "+PORT));
+server.listen(PORT,()=>console.log("SOULBOUND Online v0.11.0 running on "+PORT));
