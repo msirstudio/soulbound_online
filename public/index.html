@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SOULBOUND Online</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="shell">
+<header><div class="brand">⚔ SOULBOUND</div><div class="subtitle">THE FORGOTTEN KINGDOM · ONLINE PARTY RPG</div></header>
+<main>
+<section id="lobby" class="panel">
+ <div class="pixel-title">GATHER YOUR PARTY</div>
+ <label>HERO NAME<input id="name" maxlength="16" value="Adventurer"></label>
+ <div class="lobby-actions">
+  <button id="create" class="gold">CREATE PARTY</button>
+  <div class="join"><input id="roomCode" maxlength="5" placeholder="ROOM CODE"><button id="join">JOIN</button></div>
+ </div>
+ <p id="notice" class="notice">Create a party and share its 5-character code with friends.</p>
+ <div class="small">Up to 4 players · Turn-based co-op · No installation required</div>
+</section>
+<section id="game" hidden>
+ <div class="roomline panel"><div>PARTY CODE <b id="code">-----</b></div><button id="copy">COPY INVITE</button></div>
+ <div class="arena panel">
+  <div class="scene-label">✦ THE CURSED WILDS ✦</div>
+  <div class="battlefield">
+   <div class="party-side"><div id="partySprites" class="sprites"></div><div class="caption">YOUR PARTY</div></div>
+   <div class="versus">VS</div>
+   <div class="monster-side"><div id="monsterSprite" class="monster">🐺</div><div id="monsterName" class="caption">SHADOW WOLF</div><div class="hpbar"><i id="monsterHp"></i></div><div id="monsterHpText" class="tiny">90 / 90 HP</div></div>
+  </div>
+  <div id="status" class="status">Waiting for party leader...</div>
+ </div>
+ <div class="grid">
+  <section class="panel">
+   <div class="pixel-title">BATTLE COMMAND</div>
+   <div id="myStats" class="my-stats"></div>
+   <div class="actions">
+    <button data-action="attack">⚔ ATTACK</button><button data-action="skill">🔥 FLAME BLADE <small>12 MP</small></button>
+    <button data-action="heal">🧪 POTION</button><button data-action="guard">🛡 GUARD <small>+5 MP</small></button>
+   </div>
+   <button id="start" class="gold wide">START ADVENTURE</button>
+   <button id="next" class="gold wide" hidden>NEXT ENCOUNTER →</button>
+   <button id="restart" class="wide secondary" hidden>RESTART ADVENTURE</button>
+  </section>
+  <section class="panel">
+   <div class="pixel-title">PARTY MEMBERS</div><div id="players" class="players"></div>
+   <div class="pixel-title log-title">BATTLE LOG</div><div id="log" class="log"></div>
+  </section>
+ </div>
+ <div class="footer-note">SOULBOUND ONLINE · ADVENTURE TOGETHER</div>
+</section>
+</main>
+</div>
+<script src="/socket.io/socket.io.js"></script><script src="game.js"></script>
+</body></html>
