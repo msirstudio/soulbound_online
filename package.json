@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "private": true,
-  "description": "SOULBOUND Online v0.11 - class path passives and compact interface",
+  "description": "SOULBOUND Online v0.12 - inventory, categorized merchant and viewport-fit UI",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
