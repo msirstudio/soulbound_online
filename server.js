@@ -1,237 +1,39 @@
-const express = require("express");
-const http = require("http");
-const { Server } = require("socket.io");
-const path = require("path");
-
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
-const PORT = process.env.PORT || 3000;
-
-app.use(express.static(path.join(__dirname, "public")));
-app.get("/health", (_, res) => res.json({ ok: true, game: "SOULBOUND Online", version: "0.2.0" }));
-
-const rooms = new Map();
-const monsters = [
-  { name: "Shadow Wolf", icon: "🐺", hp: 90, atk: 12, def: 2, xp: 35, gold: 18 },
-  { name: "Goblin Raider", icon: "👺", hp: 130, atk: 17, def: 5, xp: 55, gold: 30 },
-  { name: "Cursed Knight", icon: "💀", hp: 210, atk: 23, def: 8, xp: 90, gold: 55 },
-  { name: "Ember Dragon", icon: "🐉", hp: 330, atk: 30, def: 11, xp: 150, gold: 100 },
-  { name: "Frost Wraith", icon: "👻", hp: 390, atk: 34, def: 13, xp: 190, gold: 125 },
-  { name: "Ancient Golem", icon: "🗿", hp: 480, atk: 38, def: 17, xp: 240, gold: 160 },
-  { name: "Void Reaper", icon: "☠️", hp: 570, atk: 44, def: 19, xp: 310, gold: 210 },
-  { name: "Eclipse Sovereign", icon: "👑", hp: 760, atk: 52, def: 22, xp: 450, gold: 300 }
-];
-
-function cleanName(value) {
-  return String(value || "Adventurer").trim().replace(/[<>]/g, "").slice(0, 16) || "Adventurer";
-}
-function bounded(value, min, max, fallback) {
-  const n = Number(value);
-  return Number.isFinite(n) ? Math.max(min, Math.min(max, Math.floor(n))) : fallback;
-}
-function publicRoom(room) {
-  return {
-    code: room.code, stage: room.stage, monster: room.monster,
-    players: [...room.players.values()].map(p => ({
-      id: p.id, name: p.name, hp: p.hp, maxHp: p.maxHp,
-      mp: p.mp, maxMp: p.maxMp, level: p.level, xp: p.xp,
-      gold: p.gold, potions: p.potions, atk: p.atk, def: p.def,
-      alive: p.hp > 0
-    })),
-    turnIndex: room.turnIndex, status: room.status, log: room.log.slice(-12)
-  };
-}
-function emitRoom(room) { io.to(room.code).emit("state", publicRoom(room)); }
-function say(room, message) {
-  room.log.push(message);
-  if (room.log.length > 30) room.log.shift();
-}
-function createRoom(code) {
-  const room = { code, stage: 0, monster: null, players: new Map(), turnIndex: 0, status: "waiting", log: [] };
-  rooms.set(code, room);
-  return room;
-}
-function currentPlayer(room) {
-  const players = [...room.players.values()];
-  return players.length ? players[room.turnIndex % players.length] : null;
-}
-function livingPlayers(room) { return [...room.players.values()].filter(p => p.hp > 0); }
-function startBattle(room) {
-  const template = monsters[room.stage];
-  room.monster = { ...template, maxHp: template.hp };
-  room.status = "battle";
-  room.turnIndex = 0;
-  for (const p of room.players.values()) { p.hp = p.maxHp; p.mp = p.maxMp; }
-  say(room, `A ${room.monster.name} appears!`);
-}
-function nextTurn(room) {
-  const alive = livingPlayers(room);
-  if (!alive.length) {
-    room.status = "defeat";
-    say(room, "The party has fallen. The host can restart the adventure.");
-    return;
-  }
-  const all = [...room.players.values()];
-  let attempts = 0;
-  do {
-    room.turnIndex = (room.turnIndex + 1) % all.length;
-    attempts++;
-  } while (all[room.turnIndex].hp <= 0 && attempts <= all.length);
-}
-function endMonster(room) {
-  const m = room.monster;
-  room.status = "victory";
-  for (const p of room.players.values()) {
-    p.xp += m.xp; p.gold += m.gold;
-    while (p.xp >= p.level * 100) {
-      p.xp -= p.level * 100; p.level++;
-      p.maxHp += 20; p.maxMp += 8; p.atk += 4; p.def += 2;
-      p.hp = p.maxHp; p.mp = p.maxMp;
-      say(room, `${p.name} reached level ${p.level}!`);
-    }
-  }
-  say(room, `Victory! The party defeated ${m.name}.`);
-}
-function validTurn(socket, room) {
-  if (room.status !== "battle") return false;
-  const player = room.players.get(socket.id);
-  return !!player && player.hp > 0 && currentPlayer(room)?.id === socket.id;
-}
-function defaultPlayer(id, name) {
-  return { id, name: cleanName(name), hp: 120, maxHp: 120, mp: 40, maxMp: 40, level: 1, xp: 0, gold: 0, potions: 3, atk: 20, def: 8 };
-}
-
-io.on("connection", socket => {
-  socket.on("createRoom", ({ name } = {}, callback = () => {}) => {
-    const code = Math.random().toString(36).slice(2, 7).toUpperCase();
-    const room = createRoom(code);
-    room.players.set(socket.id, defaultPlayer(socket.id, name));
-    socket.join(code);
-    say(room, `${cleanName(name)} created the party.`);
-    emitRoom(room);
-    callback({ ok: true, code });
-  });
-
-  socket.on("joinRoom", ({ code, name } = {}, callback = () => {}) => {
-    code = String(code || "").trim().toUpperCase();
-    const room = rooms.get(code);
-    if (!room) return callback({ ok: false, error: "Room not found. Check the code." });
-    if (room.players.size >= 4) return callback({ ok: false, error: "This party is full (maximum 4)." });
-    if (room.status !== "waiting") return callback({ ok: false, error: "This adventure has already started." });
-    const playerName = cleanName(name);
-    room.players.set(socket.id, defaultPlayer(socket.id, playerName));
-    socket.join(code);
-    say(room, `${playerName} joined the party.`);
-    emitRoom(room);
-    callback({ ok: true, code });
-  });
-
-  // Prototype restore hook: only the connected player can restore their own room slot,
-  // and only before the party starts. Database ownership is enforced by Supabase RLS in the browser.
-  socket.on("restoreCharacter", (stats = {}, callback = () => {}) => {
-    const room = [...rooms.values()].find(r => r.players.has(socket.id));
-    if (!room || room.status !== "waiting") return callback({ ok: false, error: "Character can only be restored in the waiting room." });
-    const p = room.players.get(socket.id);
-    p.level = bounded(stats.level, 1, 999, 1);
-    p.xp = bounded(stats.xp, 0, 999999, 0);
-    p.gold = bounded(stats.gold, 0, 99999999, 0);
-    p.maxHp = bounded(stats.max_hp, 120, 999999, 120);
-    p.hp = bounded(stats.hp, 1, p.maxHp, p.maxHp);
-    p.maxMp = bounded(stats.max_mp, 40, 999999, 40);
-    p.mp = bounded(stats.mp, 0, p.maxMp, p.maxMp);
-    p.atk = bounded(stats.attack, 20, 999999, 20);
-    p.def = bounded(stats.defense, 8, 999999, 8);
-    p.potions = bounded(stats.potions, 0, 999999, 3);
-    emitRoom(room);
-    callback({ ok: true });
-  });
-
-  socket.on("startBattle", (_, callback = () => {}) => {
-    const room = [...rooms.values()].find(r => r.players.has(socket.id));
-    if (!room) return callback({ ok: false, error: "Join a room first." });
-    if ([...room.players.keys()][0] !== socket.id) return callback({ ok: false, error: "Only the party leader can start." });
-    if (room.status !== "waiting") return callback({ ok: false, error: "The battle has already started." });
-    startBattle(room); say(room, "The party's adventure begins!");
-    emitRoom(room); callback({ ok: true });
-  });
-
-  socket.on("action", ({ type } = {}, callback = () => {}) => {
-    const room = [...rooms.values()].find(r => r.players.has(socket.id));
-    if (!room) return callback({ ok: false, error: "You are not in a room." });
-    if (!validTurn(socket, room)) return callback({ ok: false, error: "Wait for your turn." });
-    const p = room.players.get(socket.id), m = room.monster;
-    let damage = 0;
-    if (type === "attack") {
-      damage = Math.max(1, p.atk + Math.floor(Math.random() * 8) - m.def);
-      m.hp = Math.max(0, m.hp - damage);
-      say(room, `${p.name} attacks for ${damage} damage.`);
-    } else if (type === "skill") {
-      if (p.mp < 12) return callback({ ok: false, error: "Not enough MP." });
-      p.mp -= 12;
-      damage = Math.max(1, Math.floor(p.atk * 1.8) + Math.floor(Math.random() * 10) - m.def);
-      m.hp = Math.max(0, m.hp - damage);
-      say(room, `${p.name} casts Flame Blade for ${damage} damage!`);
-    } else if (type === "heal") {
-      if (p.potions < 1 || p.hp === p.maxHp) return callback({ ok: false, error: "No potion available or HP is full." });
-      p.potions--;
-      const amount = Math.min(45, p.maxHp - p.hp);
-      p.hp += amount;
-      say(room, `${p.name} restores ${amount} HP.`);
-    } else if (type === "guard") {
-      p.mp = Math.min(p.maxMp, p.mp + 5);
-      say(room, `${p.name} guards and recovers 5 MP.`);
-    } else return callback({ ok: false, error: "Unknown action." });
-
-    if (m.hp <= 0) { endMonster(room); emitRoom(room); return callback({ ok: true }); }
-    nextTurn(room);
-    if (room.status === "battle" && currentPlayer(room)?.hp > 0 && room.turnIndex === 0) {
-      const allAlive = livingPlayers(room);
-      const target = allAlive[Math.floor(Math.random() * allAlive.length)];
-      if (target) {
-        const hit = Math.max(1, m.atk - target.def);
-        target.hp = Math.max(0, target.hp - hit);
-        say(room, `${m.name} strikes ${target.name} for ${hit} damage.`);
-        if (!livingPlayers(room).length) room.status = "defeat";
-      }
-    }
-    emitRoom(room); callback({ ok: true });
-  });
-
-  socket.on("nextStage", (_, callback = () => {}) => {
-    const room = [...rooms.values()].find(r => r.players.has(socket.id));
-    if (!room) return callback({ ok: false, error: "Room not found." });
-    if ([...room.players.keys()][0] !== socket.id) return callback({ ok: false, error: "Only the party leader can continue." });
-    if (room.status !== "victory") return callback({ ok: false, error: "Win the battle first." });
-    if (room.stage >= monsters.length - 1) {
-      room.status = "complete"; say(room, "The Ember Dragon has fallen. The kingdom is free!");
-    } else {
-      room.stage++; startBattle(room); say(room, "The party advances to the next encounter.");
-    }
-    emitRoom(room); callback({ ok: true });
-  });
-
-  socket.on("restart", (_, callback = () => {}) => {
-    const room = [...rooms.values()].find(r => r.players.has(socket.id));
-    if (!room) return callback({ ok: false, error: "Room not found." });
-    if ([...room.players.keys()][0] !== socket.id) return callback({ ok: false, error: "Only the party leader can restart." });
-    room.stage = 0; room.status = "waiting"; room.monster = null;
-    for (const p of room.players.values()) { p.hp = p.maxHp; p.mp = p.maxMp; }
-    room.log = ["A new adventure is ready. The party leader can start the battle."];
-    emitRoom(room); callback({ ok: true });
-  });
-
-  socket.on("disconnect", () => {
-    for (const room of rooms.values()) {
-      if (room.players.has(socket.id)) {
-        const player = room.players.get(socket.id);
-        room.players.delete(socket.id);
-        say(room, `${player.name} disconnected.`);
-        if (!room.players.size) rooms.delete(room.code);
-        else { room.turnIndex = 0; emitRoom(room); }
-      }
-    }
-  });
+const express=require("express"),http=require("http"),path=require("path");
+const {Server}=require("socket.io");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
+app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.3.0"}));
+const rooms=new Map();
+const normal=[{name:"Mossfang Wolf",icon:"🐺",hp:90,atk:12,def:2,xp:35,gold:18},{name:"Goblin Raider",icon:"👺",hp:115,atk:15,def:4,xp:45,gold:24},{name:"Grave Beetle",icon:"🪲",hp:140,atk:17,def:5,xp:55,gold:30},{name:"Cursed Knight",icon:"💀",hp:165,atk:19,def:7,xp:65,gold:36},{name:"Wisp Stalker",icon:"👻",hp:185,atk:21,def:8,xp:75,gold:42}];
+const bosses=[{name:"The Briarfang Alpha",icon:"🐺",hp:260,atk:22,def:7,xp:130,gold:90},{name:"Dreadforge Champion",icon:"🛡️",hp:390,atk:29,def:10,xp:180,gold:125},{name:"Ember Tyrant",icon:"🐉",hp:540,atk:36,def:13,xp:240,gold:165},{name:"The Hollow Oracle",icon:"🔮",hp:690,atk:42,def:16,xp:300,gold:210},{name:"Glacier Warden",icon:"🧊",hp:850,atk:48,def:19,xp:370,gold:260},{name:"Ancient World-Eater",icon:"🗿",hp:1030,atk:55,def:22,xp:450,gold:320},{name:"The Void Reaper",icon:"☠️",hp:1240,atk:62,def:25,xp:540,gold:390},{name:"Eclipse Sovereign",icon:"👑",hp:1500,atk:72,def:29,xp:700,gold:500}];
+const shopItems=[{id:"health_potion",name:"Health Potion",icon:"🧪",description:"Restore 60 HP",price:35},{id:"mana_potion",name:"Mana Potion",icon:"🔷",description:"Restore 35 MP",price:30},{id:"iron_sword",name:"Iron Sword",icon:"⚔️",description:"+8 Attack · Swordsman",price:120,class:"swordsman",slot:"weapon",value:8},{id:"arcane_staff",name:"Arcane Staff",icon:"🪄",description:"+8 Attack · Mage",price:120,class:"mage",slot:"weapon",value:8},{id:"iron_armor",name:"Iron Armor",icon:"🛡️",description:"+5 Defense · +20 Max HP",price:140,slot:"armor",defense:5,maxHp:20},{id:"sage_robe",name:"Sage Robe",icon:"🥋",description:"+3 Defense · +20 Max MP",price:140,slot:"armor",defense:3,maxMp:20}];
+const scenes=[{name:"THE CURSED WILDS",hint:"Ancient trees whisper in the dark.",css:"wilds"},{name:"FALLEN KINGDOM",hint:"Broken towers watch your every move.",css:"ruins"},{name:"EMBER CAVERNS",hint:"Heat shimmers above the black stone.",css:"cavern"},{name:"FROSTBOUND PASS",hint:"A cold wind sweeps across the ice.",css:"frost"},{name:"THE VOID",hint:"Something stirs beyond the veil.",css:"abyss"},{name:"ECLIPSE CITADEL",hint:"The final kingdom lies ahead.",css:"castle"}];
+function cleanName(v){return String(v||"Adventurer").trim().replace(/[<>]/g,"").slice(0,16)||"Adventurer"}function bounded(v,min,max,fb){const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.floor(n))):fb}
+function sceneFor(n){return scenes[Math.min(5,Math.floor((n-1)/4))]}
+function encounter(n){const scale=1+Math.floor((n-1)/3)*.23;if(n%3===0){const b=bosses[n/3-1],hp=Math.round(b.hp*scale);return {...b,hp,maxHp:hp,atk:Math.round(b.atk*scale),def:Math.round(b.def*scale),boss:true}}const b=normal[(n-1)%normal.length],hp=Math.round(b.hp*scale);return {...b,hp,maxHp:hp,atk:Math.round(b.atk*scale),def:Math.round(b.def*scale),boss:false}}
+function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:24,scene:sceneFor(r.stage),monster:r.monster,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,shopItems,log:r.log.slice(-14)}}
+function emit(r){io.to(r.code).emit("state",publicRoom(r))}function say(r,m){r.log.push(m);if(r.log.length>40)r.log.shift()}
+function createRoom(code){const r={code,stage:1,monster:null,players:new Map(),turnIndex:0,status:"waiting",log:[]};rooms.set(code,r);return r}
+function findRoom(s){return [...rooms.values()].find(r=>r.players.has(s.id))}function current(r){const a=[...r.players.values()];return a.length?a[r.turnIndex%a.length]:null}function alive(r){return [...r.players.values()].filter(p=>p.hp>0)}
+function player(id,name,c="swordsman"){const mage=c==="mage";return{id,name:cleanName(name),classId:mage?"mage":"swordsman",className:mage?"Mage":"Swordsman",hp:mage?95:130,maxHp:mage?95:130,mp:mage?65:35,maxMp:mage?65:35,level:1,xp:0,gold:80,potions:3,manaPotions:2,atk:mage?25:22,def:mage?5:10,weapon:mage?"Apprentice Staff":"Training Sword",armor:mage?"Novice Robe":"Traveler Armor"}}
+function start(r){r.monster=encounter(r.stage);r.status="battle";r.turnIndex=0;for(const p of r.players.values()){p.hp=p.maxHp;p.mp=p.maxMp}say(r,r.monster.boss?"BOSS ENCOUNTER: "+r.monster.name+"!":"Stage "+r.stage+": "+r.monster.name+" approaches!")}
+function nextTurn(r){const a=[...r.players.values()],living=alive(r);if(!living.length){r.status="defeat";say(r,"The party has fallen.");return}let tries=0;do{r.turnIndex=(r.turnIndex+1)%a.length;tries++}while(a[r.turnIndex].hp<=0&&tries<=a.length)}
+function finish(r){const m=r.monster;r.status=r.stage===24?"complete":"victory";for(const p of r.players.values()){p.xp+=m.xp;p.gold+=m.gold;while(p.xp>=p.level*100){p.xp-=p.level*100;p.level++;p.maxHp+=p.classId==="swordsman"?16:10;p.maxMp+=p.classId==="mage"?12:6;p.atk+=p.classId==="mage"?3:4;p.def+=p.classId==="swordsman"?2:1;p.hp=p.maxHp;p.mp=p.maxMp;say(r,p.name+" reached level "+p.level+"! New power unlocked.")}}say(r,"Victory! "+m.name+" defeated. +"+m.xp+" EXP · +"+m.gold+" GOLD.");if(r.stage===24)say(r,"THE ECLIPSE SOVEREIGN HAS FALLEN. THE KINGDOM IS FREE!")}
+function valid(s,r){const p=r.players.get(s.id);return r.status==="battle"&&p&&p.hp>0&&current(r)?.id===s.id}
+io.on("connection",s=>{
+ s.on("createRoom",({name,classId}={},cb=()=>{})=>{const code=Math.random().toString(36).slice(2,7).toUpperCase(),r=createRoom(code);r.players.set(s.id,player(s.id,name,classId));s.join(code);say(r,cleanName(name)+" founded the party.");emit(r);cb({ok:true,code})});
+ s.on("joinRoom",({code,name,classId}={},cb=()=>{})=>{code=String(code||"").trim().toUpperCase();const r=rooms.get(code);if(!r)return cb({ok:false,error:"Room not found. Check the code."});if(r.players.size>=4)return cb({ok:false,error:"Party full (maximum 4)."});if(r.status!=="waiting")return cb({ok:false,error:"Adventure already started."});const p=player(s.id,name,classId);r.players.set(s.id,p);s.join(code);say(r,p.name+" joined the party.");emit(r);cb({ok:true,code})});
+ s.on("restoreCharacter",(v={},cb=()=>{})=>{const r=findRoom(s);if(!r||r.status!=="waiting")return cb({ok:false,error:"Restore only works in the waiting room."});const p=r.players.get(s.id);p.classId=v.class_id==="mage"?"mage":"swordsman";p.className=p.classId==="mage"?"Mage":"Swordsman";p.level=bounded(v.level,1,999,1);p.xp=bounded(v.xp,0,999999,0);p.gold=bounded(v.gold,0,99999999,80);p.maxHp=bounded(v.max_hp,p.classId==="mage"?95:130,999999,p.classId==="mage"?95:130);p.hp=bounded(v.hp,1,p.maxHp,p.maxHp);p.maxMp=bounded(v.max_mp,p.classId==="mage"?65:35,999999,p.classId==="mage"?65:35);p.mp=bounded(v.mp,0,p.maxMp,p.maxMp);p.atk=bounded(v.attack,p.classId==="mage"?25:22,999999,p.classId==="mage"?25:22);p.def=bounded(v.defense,p.classId==="mage"?5:10,999999,p.classId==="mage"?5:10);p.potions=bounded(v.potions,0,999999,3);p.manaPotions=bounded(v.mana_potions,0,999999,2);p.weapon=String(v.weapon||p.weapon).slice(0,40);p.armor=String(v.armor||p.armor).slice(0,40);emit(r);cb({ok:true})});
+ s.on("startBattle",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a room first."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can start."});if(r.status!=="waiting")return cb({ok:false,error:"Adventure already started."});start(r);say(r,"Your 24-stage journey begins. Every third stage holds a boss.");emit(r);cb({ok:true})});
+ s.on("action",({type}={},cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a room first."});if(!valid(s,r))return cb({ok:false,error:"Wait for your turn."});const p=r.players.get(s.id),m=r.monster;let d=0;
+ if(type==="attack"){d=Math.max(1,p.atk+Math.floor(Math.random()*8)-m.def);m.hp=Math.max(0,m.hp-d);say(r,p.name+" attacks for "+d+" damage.")}
+ else if(type==="skill"||type==="skill2"){const second=type==="skill2",cost=second?25:12;if(p.mp<cost)return cb({ok:false,error:"Not enough MP."});if(second&&p.level<3)return cb({ok:false,error:"Unlocks at level 3."});p.mp-=cost;d=Math.max(1,Math.floor(p.atk*(second?2.5:p.classId==="mage"?1.9:1.8))+Math.floor(Math.random()*12)-m.def);m.hp=Math.max(0,m.hp-d);say(r,p.name+" uses "+(p.classId==="mage"?(second?"METEOR":"ARCANE BOLT"):(second?"WHIRLWIND":"POWER STRIKE"))+" for "+d+" damage!")}
+ else if(type==="heal"){if(!p.potions||p.hp===p.maxHp)return cb({ok:false,error:"No health potion or HP is full."});p.potions--;const n=Math.min(60,p.maxHp-p.hp);p.hp+=n;say(r,p.name+" restores "+n+" HP.")}
+ else if(type==="mana"){if(!p.manaPotions||p.mp===p.maxMp)return cb({ok:false,error:"No mana potion or MP is full."});p.manaPotions--;const n=Math.min(35,p.maxMp-p.mp);p.mp+=n;say(r,p.name+" restores "+n+" MP.")}
+ else if(type==="guard"){p.mp=Math.min(p.maxMp,p.mp+8);say(r,p.name+" guards and recovers 8 MP.")}else return cb({ok:false,error:"Unknown action."});
+ if(m.hp<=0){finish(r);emit(r);return cb({ok:true})}nextTurn(r);if(r.status==="battle"&&current(r)?.hp>0&&r.turnIndex===0){const a=alive(r),t=a[Math.floor(Math.random()*a.length)];if(t){const hit=Math.max(1,m.atk-t.def);t.hp=Math.max(0,t.hp-hit);say(r,m.name+" strikes "+t.name+" for "+hit+" damage.");if(!alive(r).length)r.status="defeat"}}emit(r);cb({ok:true)});
+ s.on("openShop",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Room not found."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can open shop."});if(r.status!=="victory"||r.stage%4!==0||r.stage===24)return cb({ok:false,error:"Shop unavailable."});r.status="shop";say(r,"A traveling merchant has arrived. Spend your gold wisely.");emit(r);cb({ok:true})});
+ s.on("buyItem",({itemId}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if(r.status!=="shop")return cb({ok:false,error:"Merchant is not here."});const it=shopItems.find(x=>x.id===itemId);if(!it)return cb({ok:false,error:"Item not found."});if(it.class&&it.class!==p.classId)return cb({ok:false,error:"This equipment is for another class."});if(p.gold<it.price)return cb({ok:false,error:"Not enough gold."});p.gold-=it.price;if(itemId==="health_potion")p.potions++;else if(itemId==="mana_potion")p.manaPotions++;else if(it.slot==="weapon"){p.atk+=it.value;p.weapon=it.name}else if(it.slot==="armor"){p.def+=it.defense||0;p.maxHp+=it.maxHp||0;p.maxMp+=it.maxMp||0;p.hp=Math.min(p.maxHp,p.hp+(it.maxHp||0));p.mp=Math.min(p.maxMp,p.mp+(it.maxMp||0));p.armor=it.name}say(r,p.name+" bought "+it.name+".");emit(r);cb({ok:true})});
+ s.on("nextStage",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Room not found."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can continue."});if(r.stage>=24)return cb({ok:false,error:"Campaign complete."});if(r.status!=="victory"&&r.status!=="shop")return cb({ok:false,error:"Win the encounter first."});if(r.stage%4===0&&r.status==="victory")return cb({ok:false,error:"Visit the merchant before continuing."});r.stage++;start(r);say(r,"The party advances to stage "+r.stage+" of 24.");emit(r);cb({ok:true})});
+ s.on("restart",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Room not found."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can restart."});r.stage=1;r.status="waiting";r.monster=null;for(const p of r.players.values()){p.hp=p.maxHp;p.mp=p.maxMp}r.log=["A new 24-stage campaign is ready."];emit(r);cb({ok:true})});
+ s.on("disconnect",()=>{for(const r of rooms.values())if(r.players.has(s.id)){const p=r.players.get(s.id);r.players.delete(s.id);say(r,p.name+" disconnected.");if(!r.players.size)rooms.delete(r.code);else{r.turnIndex=0;emit(r)}}});
 });
-
-server.listen(PORT, () => console.log(`SOULBOUND Online v0.2.0 running on ${PORT}`));
+server.listen(PORT,()=>console.log("SOULBOUND Online v0.3.0 running on "+PORT));
