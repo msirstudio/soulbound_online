@@ -1,138 +1,34 @@
-const socket = io();
-const $ = id => document.getElementById(id);
-let roomCode = null, gameState = null, myId = null, currentUser = null;
-let supabaseClient = null, savedCharacter = null, restoreComplete = false, saveTimer = null;
-const config = window.SOULBOUND_SUPABASE || {};
-const configured = !!(config.url && config.anonKey && !config.anonKey.includes("PASTE_YOUR"));
-if (configured && window.supabase) supabaseClient = window.supabase.createClient(config.url, config.anonKey);
-
-function notice(message, error=false){$("notice").textContent=message;$("notice").className=error?"notice error":"notice"}
-function authNotice(message, error=false){$("authNotice").textContent=message;$("authNotice").className=error?"notice error":"notice"}
-function call(event,data={}){return new Promise(resolve=>socket.emit(event,data,result=>resolve(result||{ok:false,error:"No response"})))}
-function enter(code){roomCode=code;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=code}
-function showAccount(user){
- currentUser=user;
- $("account").hidden=false;
- $("lobby").hidden=!user;
- $("accountInfo").hidden=!user;
- $("accountEmail").textContent=user?.email||"";
- $("signup").hidden=!!user;$("signin").hidden=!!user;
- $("email").disabled=!!user;$("password").disabled=!!user;
- if(user) authNotice("Signed in. Your hero data is linked to this account.");
-}
-function profileFromState(me){
- return {id:currentUser.id,username:me.name,level:me.level,xp:me.xp,gold:me.gold,hp:me.hp,max_hp:me.maxHp,mp:me.mp,max_mp:me.maxMp,attack:me.atk,defense:me.def,potions:me.potions,updated_at:new Date().toISOString()};
-}
-async function loadProfile(){
- if(!supabaseClient||!currentUser)return null;
- const {data,error}=await supabaseClient.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();
- if(error)throw error;
- if(data)return data;
- const fresh={id:currentUser.id,username:(currentUser.email||"Adventurer").split("@")[0].slice(0,16)||"Adventurer"};
- const {data:created,error:createError}=await supabaseClient.from("profiles").insert(fresh).select().single();
- if(createError)throw createError;
- return created;
-}
-async function saveProfile(me){
- if(!supabaseClient||!currentUser||!restoreComplete||!me)return;
- const {error}=await supabaseClient.from("profiles").upsert(profileFromState(me),{onConflict:"id"});
- if(error)authNotice("Save failed: "+error.message,true);
- else authNotice("Hero saved · "+new Date().toLocaleTimeString());
-}
-async function prepareCharacter(){
- try{
-  savedCharacter=await loadProfile();
-  $("name").value=savedCharacter.username||$("name").value;
-  authNotice("Hero save loaded. Create or join a party to continue.");
- }catch(e){authNotice("Could not load profile: "+e.message,true);}
-}
-async function afterJoin(){
- restoreComplete=false;
- if(savedCharacter){
-  const r=await call("restoreCharacter",savedCharacter);
-  if(!r.ok)notice(r.error,true);
- }
- restoreComplete=true;
- const me=gameState?.players.find(p=>p.id===myId);
- if(me)saveProfile(me);
-}
-if(!supabaseClient){
- $("signup").disabled=true;$("signin").disabled=true;
- authNotice("Supabase is not configured yet. Follow SETUP-V0.2.md and add your public key to config.js.",true);
-}
-$("signup").onclick=async()=>{
- if(!supabaseClient)return;
- const email=$("email").value.trim(),password=$("password").value;
- if(!email||password.length<6)return authNotice("Enter an email and a password with at least 6 characters.",true);
- const {data,error}=await supabaseClient.auth.signUp({email,password});
- if(error)return authNotice(error.message,true);
- if(data.session){showAccount(data.user);await prepareCharacter();}
- else authNotice("Account created. Check your email to confirm, then sign in.");
-};
-$("signin").onclick=async()=>{
- if(!supabaseClient)return;
- const {data,error}=await supabaseClient.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
- if(error)return authNotice(error.message,true);
- showAccount(data.user);await prepareCharacter();
-};
-$("signout").onclick=async()=>{
- if(supabaseClient)await supabaseClient.auth.signOut();
- currentUser=null;savedCharacter=null;restoreComplete=false;
- $("game").hidden=true;$("lobby").hidden=true;showAccount(null);
- authNotice("Signed out.");
-};
-$("create").onclick=async()=>{
- const r=await call("createRoom",{name:$("name").value});
- if(r.ok){enter(r.code);await afterJoin();notice("Party created.")}else notice(r.error,true);
-};
-$("join").onclick=async()=>{
- const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value});
- if(r.ok){enter(r.code);await afterJoin()}else notice(r.error,true);
-};
-$("copy").onclick=async()=>{
- const text=`Join my SOULBOUND party! Room code: ${roomCode}`;
- try{await navigator.clipboard.writeText(text);$("copy").textContent="COPIED!"}catch{$("copy").textContent=roomCode}
-};
-$("start").onclick=async()=>{const r=await call("startBattle");if(!r.ok)alert(r.error)};
-$("next").onclick=async()=>{const r=await call("nextStage");if(!r.ok)alert(r.error)};
-$("restart").onclick=async()=>{const r=await call("restart");if(!r.ok)alert(r.error)};
-$("leave").onclick=()=>{location.reload()};
-document.querySelectorAll("[data-action]").forEach(btn=>btn.onclick=async()=>{const r=await call("action",{type:btn.dataset.action});if(!r.ok)alert(r.error)});
-socket.on("connect",()=>{myId=socket.id});
-socket.on("disconnect",()=>{$("status").textContent="Connection lost. Refresh to reconnect."});
-socket.on("state",state=>{
- gameState=state;render();
- if(restoreComplete){
-  const me=state.players.find(p=>p.id===myId);
-  if(me){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProfile(me),500);}
- }
-});
-async function restoreSession(){
- if(!supabaseClient)return;
- const {data:{session}}=await supabaseClient.auth.getSession();
- if(session?.user){showAccount(session.user);await prepareCharacter();}
- else showAccount(null);
- supabaseClient.auth.onAuthStateChange((event,session)=>{
-  if(event==="SIGNED_OUT"){currentUser=null;savedCharacter=null;showAccount(null);}
- });
-}
-restoreSession();
-function render(){
- const s=gameState;if(!s)return;
- $("code").textContent=s.code;
- const me=s.players.find(p=>p.id===myId);
- const active=s.players[s.turnIndex];
- $("status").textContent=s.status==="waiting"?"Waiting for the party leader to start.":s.status==="battle"?(active?.id===myId?"YOUR TURN — choose an action!":`${active?.name||"Another hero"} is taking their turn...`):s.status==="victory"?"VICTORY! The party defeated the monster.":s.status==="complete"?"THE KINGDOM IS FREE!":"The party has fallen.";
- $("monsterSprite").textContent=s.monster?.icon||"🌲";$("monsterName").textContent=s.monster?.name?.toUpperCase()||"WAITING";
- const mh=s.monster?.hp||0,mm=s.monster?.maxHp||1;$("monsterHp").style.width=(mh/mm*100)+"%";$("monsterHpText").textContent=`${mh} / ${mm} HP`;
- $("partySprites").innerHTML=s.players.map(p=>`<span class="sprite" title="${escapeHtml(p.name)}">${p.alive?"🧙":"🪦"}</span>`).join("");
- $("players").innerHTML=s.players.map(p=>`<div class="player"><div class="player-head"><strong>${escapeHtml(p.name)} ${p.id===myId?"(YOU)":""}</strong><span>LV ${p.level}</span></div><div class="player-bars">HP ${p.hp}/${p.maxHp} · MP ${p.mp}/${p.maxMp}<br>ATK ${p.atk} · DEF ${p.def} · 🧪 ${p.potions} · 🪙 ${p.gold}</div></div>`).join("");
- $("myStats").textContent=me?`LV ${me.level} · HP ${me.hp}/${me.maxHp} · MP ${me.mp}/${me.maxMp} · EXP ${me.xp} · GOLD ${me.gold}`:"Waiting for your player data";
- const myTurn=!!me&&active?.id===myId&&s.status==="battle"&&me.hp>0;
- document.querySelectorAll("[data-action]").forEach(b=>{b.disabled=!myTurn||(b.dataset.action==="skill"&&me.mp<12)||(b.dataset.action==="heal"&&(me.potions<1||me.hp===me.maxHp))});
- $("start").hidden=s.status!=="waiting";$("start").disabled=s.players[0]?.id!==myId;
- $("next").hidden=s.status!=="victory";$("next").disabled=s.players[0]?.id!==myId;
- $("restart").hidden=!["complete","defeat"].includes(s.status);$("restart").disabled=s.players[0]?.id!==myId;
- $("log").innerHTML=s.log.slice().reverse().map(x=>`<div>› ${escapeHtml(x)}</div>`).join("");
-}
-function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+const socket=io(),$=id=>document.getElementById(id);let gameState=null,myId=null,currentUser=null,supabaseClient=null,savedCharacter=null,restoreComplete=false,saveTimer=null;
+const cfg=window.SOULBOUND_SUPABASE||{};if(cfg.url&&cfg.anonKey&&!cfg.anonKey.includes("PASTE_YOUR")&&window.supabase)supabaseClient=window.supabase.createClient(cfg.url,cfg.anonKey);
+function authNotice(m,e=false){$("authNotice").textContent=m;$("authNotice").className=e?"notice error":"notice"}function notice(m,e=false){$("notice").textContent=m;$("notice").className=e?"notice error":"notice"}function call(ev,data={}){return new Promise(resolve=>socket.emit(ev,data,r=>resolve(r||{ok:false,error:"No response"})))}
+function showAccount(u){currentUser=u;$("account").hidden=false;$("lobby").hidden=!u;$("accountInfo").hidden=!u;$("accountEmail").textContent=u?.email||"";$("signup").hidden=!!u;$("signin").hidden=!!u;$("email").disabled=!!u;$("password").disabled=!!u;if(u)authNotice("Signed in. Your hero data is linked to this account.")}
+function profile(p){return{id:currentUser.id,username:p.name,class_id:p.classId,level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,weapon:p.weapon,armor:p.armor,updated_at:new Date().toISOString()}}
+async function loadProfile(){const {data,error}=await supabaseClient.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();if(error)throw error;if(data)return data;const fresh={id:currentUser.id,username:(currentUser.email||"Adventurer").split("@")[0].slice(0,16)||"Adventurer"};const {data:created,error:e}=await supabaseClient.from("profiles").insert(fresh).select().single();if(e)throw e;return created}
+async function saveProfile(p){if(!supabaseClient||!currentUser||!restoreComplete||!p)return;const {error}=await supabaseClient.from("profiles").upsert(profile(p),{onConflict:"id"});if(error)authNotice("Save failed: "+error.message,true);else authNotice("Hero saved · "+new Date().toLocaleTimeString())}
+async function prepare(){try{savedCharacter=await loadProfile();$("name").value=savedCharacter.username||$("name").value;if(savedCharacter.class_id)$("classId").value=savedCharacter.class_id;classInfo();authNotice("Hero save loaded. Create or join a party.")}catch(e){authNotice("Could not load profile: "+e.message,true)}}
+async function afterJoin(){restoreComplete=false;if(savedCharacter){const r=await call("restoreCharacter",savedCharacter);if(!r.ok)notice(r.error,true)}restoreComplete=true;const p=gameState?.players.find(x=>x.id===myId);if(p)saveProfile(p)}
+function classInfo(){const mage=$("classId").value==="mage";$("classInfo").textContent=mage?"Lower HP and defense, high MP and magic attack. Arcane Bolt, then Meteor at level 3.":"High HP and defense. Power Strike, then Whirlwind at level 3."}
+if(!supabaseClient){$("signup").disabled=true;$("signin").disabled=true;authNotice("Supabase is not configured. Check public/config.js.",true)}
+$("signup").onclick=async()=>{const email=$("email").value.trim(),password=$("password").value;if(!email||password.length<6)return authNotice("Enter email and password (at least 6 characters).",true);const {data,error}=await supabaseClient.auth.signUp({email,password});if(error)return authNotice(error.message,true);if(data.session){showAccount(data.user);await prepare()}else authNotice("Account created. Check your email to confirm, then sign in.")};
+$("signin").onclick=async()=>{const {data,error}=await supabaseClient.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error)return authNotice(error.message,true);showAccount(data.user);await prepare()};
+$("signout").onclick=async()=>{await supabaseClient.auth.signOut();currentUser=null;savedCharacter=null;restoreComplete=false;$("game").hidden=true;$("lobby").hidden=true;showAccount(null);authNotice("Signed out.")};
+$("classId").onchange=classInfo;
+$("create").onclick=async()=>{const r=await call("createRoom",{name:$("name").value,classId:$("classId").value});if(r.ok){$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;await afterJoin()}else notice(r.error,true)};
+$("join").onclick=async()=>{const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value,classId:$("classId").value});if(r.ok){$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;await afterJoin()}else notice(r.error,true)};
+$("copy").onclick=async()=>{try{await navigator.clipboard.writeText("Join my SOULBOUND party! Room code: "+gameState.code);$("copy").textContent="COPIED!"}catch{$("copy").textContent=gameState.code}};
+$("start").onclick=async()=>{const r=await call("startBattle");if(!r.ok)alert(r.error)};$("next").onclick=async()=>{const r=await call("nextStage");if(!r.ok)alert(r.error)};$("openShop").onclick=async()=>{const r=await call("openShop");if(!r.ok)alert(r.error)};$("continueShop").onclick=async()=>{const r=await call("nextStage");if(!r.ok)alert(r.error)};$("restart").onclick=async()=>{const r=await call("restart");if(!r.ok)alert(r.error)};$("leave").onclick=()=>location.reload();
+document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{const r=await call("action",{type:b.dataset.action});if(!r.ok)alert(r.error)});
+socket.on("connect",()=>{myId=socket.id});socket.on("disconnect",()=>{$("status").textContent="Connection lost. Refresh to reconnect."});
+socket.on("state",s=>{gameState=s;render();if(restoreComplete){const p=s.players.find(x=>x.id===myId);if(p){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProfile(p),500)}}});
+async function restoreSession(){if(!supabaseClient)return;const {data:{session}}=await supabaseClient.auth.getSession();if(session?.user){showAccount(session.user);await prepare()}else showAccount(null);supabaseClient.auth.onAuthStateChange((ev,session)=>{if(ev==="SIGNED_OUT"){currentUser=null;savedCharacter=null;showAccount(null)}})}restoreSession();
+function render(){const s=gameState;if(!s)return;const me=s.players.find(p=>p.id===myId),active=s.players[s.turnIndex];$("code").textContent=s.code;$("stageBadge").textContent="STAGE "+s.stage+" / 24";
+$("campaignTrack").innerHTML=Array.from({length:24},(_,i)=>{const n=i+1;return '<span class="'+(n<s.stage?"done ":n===s.stage?"current ":"")+(n%3===0?"boss-node ":"")+(n%4===0?"shop-node":"")+'">'+n+"</span>"}).join("");
+$("arena").className="arena panel "+(s.scene?.css||"wilds");$("sceneName").textContent="✦ "+(s.scene?.name||"THE CURSED WILDS")+" ✦";$("sceneHint").textContent=s.scene?.hint||"";$("monsterSprite").textContent=s.monster?.icon||"🐺";$("monsterName").textContent=(s.monster?.name||"WAITING").toUpperCase();$("bossTag").hidden=!s.monster?.boss;const mh=s.monster?.hp||0,mm=s.monster?.maxHp||1;$("monsterHp").style.width=(mh/mm*100)+"%";$("monsterHpText").textContent=mh+" / "+mm+" HP";
+$("partySprites").innerHTML=s.players.map(p=>'<span class="sprite" title="'+esc(p.name)+'">'+(p.classId==="mage"?"🧙":"🛡️")+"</span>").join("");$("players").innerHTML=s.players.map(p=>'<div class="player"><div class="player-head"><strong>'+esc(p.name)+" · "+p.className+(p.id===myId?" (YOU)":"")+'</strong><span>LV '+p.level+'</span></div><div class="player-bars">HP '+p.hp+"/"+p.maxHp+" · MP "+p.mp+"/"+p.maxMp+"<br>ATK "+p.atk+" · DEF "+p.def+" · 🧪 "+p.potions+" · 🔷 "+p.manaPotions+" · 🪙 "+p.gold+"<br>⚔ "+esc(p.weapon)+" · 🛡 "+esc(p.armor)+"</div></div>").join("");
+$("myStats").textContent=me?"LV "+me.level+" · XP "+me.xp+"/"+(me.level*100)+" · HP "+me.hp+"/"+me.maxHp+" · MP "+me.mp+"/"+me.maxMp+" · GOLD "+me.gold:"Waiting for player data";$("myGear").textContent=me?me.className+" | Weapon: "+me.weapon+" | Armor: "+me.armor:"";$("healthCount").textContent="OWNED: "+(me?.potions||0);$("manaCount").textContent="OWNED: "+(me?.manaPotions||0);
+const mage=me?.classId==="mage";$("skillButton").innerHTML=mage?"🔮 ARCANE BOLT <small>12 MP</small>":"🔥 POWER STRIKE <small>12 MP</small>";$("skill2Button").innerHTML=mage?"☄ METEOR <small>25 MP · LV 3</small>":"✴ WHIRLWIND <small>25 MP · LV 3</small>";const turn=!!me&&active?.id===myId&&s.status==="battle"&&me.hp>0;
+document.querySelectorAll("[data-action]").forEach(b=>{const c=b.dataset.action==="skill"?12:b.dataset.action==="skill2"?25:0;b.disabled=!turn||(c>0&&me.mp<c)||(b.dataset.action==="skill2"&&me.level<3)||(b.dataset.action==="heal"&&(!me.potions||me.hp===me.maxHp))||(b.dataset.action==="mana"&&(!me.manaPotions||me.mp===me.maxMp))});$("skill2Button").hidden=!me||me.level<3;
+$("start").hidden=s.status!=="waiting";$("start").disabled=s.players[0]?.id!==myId;$("next").hidden=!(s.status==="victory"&&s.stage%4!==0&&s.stage<24);$("next").disabled=s.players[0]?.id!==myId;$("openShop").hidden=!(s.status==="victory"&&s.stage%4===0&&s.stage<24);$("openShop").disabled=s.players[0]?.id!==myId;$("continueShop").hidden=s.status!=="shop";$("continueShop").disabled=s.players[0]?.id!==myId;$("restart").hidden=!["complete","defeat"].includes(s.status);$("restart").disabled=s.players[0]?.id!==myId;$("shopPanel").hidden=s.status!=="shop";
+$("shopItems").innerHTML=s.shopItems.map(it=>'<div class="shop-item"><div><strong>'+it.icon+" "+it.name+'</strong><small>'+it.description+" · "+it.price+' G</small></div><button data-buy="'+it.id+'" '+((it.class&&it.class!==me?.classId)||!me||me.gold<it.price?"disabled":"")+">BUY</button></div>").join("");document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=async()=>{const r=await call("buyItem",{itemId:b.dataset.buy});if(!r.ok)alert(r.error)});
+$("status").textContent=s.status==="waiting"?"Waiting for party leader to start.":s.status==="battle"?(active?.id===myId?"YOUR TURN — choose an action!":(active?.name||"Another hero")+" is taking their turn..."):s.status==="victory"?(s.stage%4===0?"VICTORY! The merchant will arrive.":"VICTORY! Prepare for the next stage."):s.status==="shop"?"MERCHANT CAMP · Buy supplies before moving on.":s.status==="complete"?"THE KINGDOM IS FREE!":"The party has fallen.";$("log").innerHTML=s.log.slice().reverse().map(x=>"<div>› "+esc(x)+"</div>").join("")}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
