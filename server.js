@@ -9,7 +9,7 @@ const io = new Server(server);
 const PORT = process.env.PORT || 3000;
 
 app.use(express.static(path.join(__dirname, "public")));
-app.get("/health", (_, res) => res.json({ ok: true, game: "SOULBOUND Online" }));
+app.get("/health", (_, res) => res.json({ ok: true, game: "SOULBOUND Online", version: "0.2.0" }));
 
 const rooms = new Map();
 const monsters = [
@@ -21,6 +21,10 @@ const monsters = [
 
 function cleanName(value) {
   return String(value || "Adventurer").trim().replace(/[<>]/g, "").slice(0, 16) || "Adventurer";
+}
+function bounded(value, min, max, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.max(min, Math.min(max, Math.floor(n))) : fallback;
 }
 function publicRoom(room) {
   return {
@@ -34,37 +38,27 @@ function publicRoom(room) {
     turnIndex: room.turnIndex, status: room.status, log: room.log.slice(-12)
   };
 }
-function emitRoom(room) {
-  io.to(room.code).emit("state", publicRoom(room));
-}
+function emitRoom(room) { io.to(room.code).emit("state", publicRoom(room)); }
 function say(room, message) {
   room.log.push(message);
   if (room.log.length > 30) room.log.shift();
 }
 function createRoom(code) {
-  const room = {
-    code, stage: 0, monster: null, players: new Map(),
-    turnIndex: 0, status: "waiting", log: []
-  };
+  const room = { code, stage: 0, monster: null, players: new Map(), turnIndex: 0, status: "waiting", log: [] };
   rooms.set(code, room);
   return room;
 }
 function currentPlayer(room) {
   const players = [...room.players.values()];
-  if (!players.length) return null;
-  return players[room.turnIndex % players.length];
+  return players.length ? players[room.turnIndex % players.length] : null;
 }
-function livingPlayers(room) {
-  return [...room.players.values()].filter(p => p.hp > 0);
-}
+function livingPlayers(room) { return [...room.players.values()].filter(p => p.hp > 0); }
 function startBattle(room) {
   const template = monsters[room.stage];
   room.monster = { ...template, maxHp: template.hp };
   room.status = "battle";
   room.turnIndex = 0;
-  for (const p of room.players.values()) {
-    p.hp = p.maxHp; p.mp = p.maxMp;
-  }
+  for (const p of room.players.values()) { p.hp = p.maxHp; p.mp = p.maxMp; }
   say(room, `A ${room.monster.name} appears!`);
 }
 function nextTurn(room) {
@@ -98,19 +92,17 @@ function endMonster(room) {
 function validTurn(socket, room) {
   if (room.status !== "battle") return false;
   const player = room.players.get(socket.id);
-  if (!player || player.hp <= 0 || currentPlayer(room)?.id !== socket.id) return false;
-  return true;
+  return !!player && player.hp > 0 && currentPlayer(room)?.id === socket.id;
+}
+function defaultPlayer(id, name) {
+  return { id, name: cleanName(name), hp: 120, maxHp: 120, mp: 40, maxMp: 40, level: 1, xp: 0, gold: 0, potions: 3, atk: 20, def: 8 };
 }
 
 io.on("connection", socket => {
   socket.on("createRoom", ({ name } = {}, callback = () => {}) => {
     const code = Math.random().toString(36).slice(2, 7).toUpperCase();
     const room = createRoom(code);
-    room.players.set(socket.id, {
-      id: socket.id, name: cleanName(name), hp: 120, maxHp: 120,
-      mp: 40, maxMp: 40, level: 1, xp: 0, gold: 0,
-      potions: 3, atk: 20, def: 8
-    });
+    room.players.set(socket.id, defaultPlayer(socket.id, name));
     socket.join(code);
     say(room, `${cleanName(name)} created the party.`);
     emitRoom(room);
@@ -124,15 +116,31 @@ io.on("connection", socket => {
     if (room.players.size >= 4) return callback({ ok: false, error: "This party is full (maximum 4)." });
     if (room.status !== "waiting") return callback({ ok: false, error: "This adventure has already started." });
     const playerName = cleanName(name);
-    room.players.set(socket.id, {
-      id: socket.id, name: playerName, hp: 120, maxHp: 120,
-      mp: 40, maxMp: 40, level: 1, xp: 0, gold: 0,
-      potions: 3, atk: 20, def: 8
-    });
+    room.players.set(socket.id, defaultPlayer(socket.id, playerName));
     socket.join(code);
     say(room, `${playerName} joined the party.`);
     emitRoom(room);
     callback({ ok: true, code });
+  });
+
+  // Prototype restore hook: only the connected player can restore their own room slot,
+  // and only before the party starts. Database ownership is enforced by Supabase RLS in the browser.
+  socket.on("restoreCharacter", (stats = {}, callback = () => {}) => {
+    const room = [...rooms.values()].find(r => r.players.has(socket.id));
+    if (!room || room.status !== "waiting") return callback({ ok: false, error: "Character can only be restored in the waiting room." });
+    const p = room.players.get(socket.id);
+    p.level = bounded(stats.level, 1, 999, 1);
+    p.xp = bounded(stats.xp, 0, 999999, 0);
+    p.gold = bounded(stats.gold, 0, 99999999, 0);
+    p.maxHp = bounded(stats.max_hp, 120, 999999, 120);
+    p.hp = bounded(stats.hp, 1, p.maxHp, p.maxHp);
+    p.maxMp = bounded(stats.max_mp, 40, 999999, 40);
+    p.mp = bounded(stats.mp, 0, p.maxMp, p.maxMp);
+    p.atk = bounded(stats.attack, 20, 999999, 20);
+    p.def = bounded(stats.defense, 8, 999999, 8);
+    p.potions = bounded(stats.potions, 0, 999999, 3);
+    emitRoom(room);
+    callback({ ok: true });
   });
 
   socket.on("startBattle", (_, callback = () => {}) => {
@@ -140,7 +148,6 @@ io.on("connection", socket => {
     if (!room) return callback({ ok: false, error: "Join a room first." });
     if ([...room.players.keys()][0] !== socket.id) return callback({ ok: false, error: "Only the party leader can start." });
     if (room.status !== "waiting") return callback({ ok: false, error: "The battle has already started." });
-    if (room.players.size < 1) return callback({ ok: false, error: "Need at least one player." });
     startBattle(room); say(room, "The party's adventure begins!");
     emitRoom(room); callback({ ok: true });
   });
@@ -172,21 +179,16 @@ io.on("connection", socket => {
       say(room, `${p.name} guards and recovers 5 MP.`);
     } else return callback({ ok: false, error: "Unknown action." });
 
-    if (m.hp <= 0) {
-      endMonster(room); emitRoom(room); return callback({ ok: true });
-    }
+    if (m.hp <= 0) { endMonster(room); emitRoom(room); return callback({ ok: true }); }
     nextTurn(room);
-    if (room.status === "battle" && currentPlayer(room)?.hp > 0) {
-      // The monster acts after every full party round.
+    if (room.status === "battle" && currentPlayer(room)?.hp > 0 && room.turnIndex === 0) {
       const allAlive = livingPlayers(room);
-      if (room.turnIndex === 0) {
-        const target = allAlive[Math.floor(Math.random() * allAlive.length)];
-        if (target) {
-          const hit = Math.max(1, m.atk - target.def);
-          target.hp = Math.max(0, target.hp - hit);
-          say(room, `${m.name} strikes ${target.name} for ${hit} damage.`);
-          if (!livingPlayers(room).length) room.status = "defeat";
-        }
+      const target = allAlive[Math.floor(Math.random() * allAlive.length)];
+      if (target) {
+        const hit = Math.max(1, m.atk - target.def);
+        target.hp = Math.max(0, target.hp - hit);
+        say(room, `${m.name} strikes ${target.name} for ${hit} damage.`);
+        if (!livingPlayers(room).length) room.status = "defeat";
       }
     }
     emitRoom(room); callback({ ok: true });
@@ -210,9 +212,7 @@ io.on("connection", socket => {
     if (!room) return callback({ ok: false, error: "Room not found." });
     if ([...room.players.keys()][0] !== socket.id) return callback({ ok: false, error: "Only the party leader can restart." });
     room.stage = 0; room.status = "waiting"; room.monster = null;
-    for (const p of room.players.values()) {
-      Object.assign(p, { hp: 120, maxHp: 120, mp: 40, maxMp: 40, level: 1, xp: 0, gold: 0, potions: 3, atk: 20, def: 8 });
-    }
+    for (const p of room.players.values()) Object.assign(p, defaultPlayer(p.id, p.name));
     room.log = ["A new adventure is ready. The party leader can start the battle."];
     emitRoom(room); callback({ ok: true });
   });
@@ -224,13 +224,10 @@ io.on("connection", socket => {
         room.players.delete(socket.id);
         say(room, `${player.name} disconnected.`);
         if (!room.players.size) rooms.delete(room.code);
-        else {
-          room.turnIndex = 0;
-          emitRoom(room);
-        }
+        else { room.turnIndex = 0; emitRoom(room); }
       }
     }
   });
 });
 
-server.listen(PORT, () => console.log(`SOULBOUND Online running on ${PORT}`));
+server.listen(PORT, () => console.log(`SOULBOUND Online v0.2.0 running on ${PORT}`));
