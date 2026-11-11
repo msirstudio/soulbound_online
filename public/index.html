@@ -2,16 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>SOULBOUND Online</title>
+<title>SOULBOUND Online v0.2</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="shell">
-<header><div class="brand">⚔ SOULBOUND</div><div class="subtitle">THE FORGOTTEN KINGDOM · ONLINE PARTY RPG</div></header>
+<header><div class="brand">⚔ SOULBOUND</div><div class="subtitle">THE FORGOTTEN KINGDOM · ONLINE PARTY RPG</div><div class="version">VERSION 0.2 · PERSISTENT HEROES</div></header>
 <main>
-<section id="lobby" class="panel">
+<section id="account" class="panel">
+ <div class="pixel-title">HERO ACCOUNT</div>
+ <p class="small">Create an account or sign in to save your hero between visits.</p>
+ <label>EMAIL<input id="email" type="email" autocomplete="email" placeholder="you@example.com"></label>
+ <label>PASSWORD<input id="password" type="password" autocomplete="current-password" placeholder="At least 6 characters"></label>
+ <div class="lobby-actions"><button id="signup" class="gold">CREATE ACCOUNT</button><button id="signin">SIGN IN</button></div>
+ <p id="authNotice" class="notice">Connect Supabase first. See SETUP-V0.2.md.</p>
+ <div id="accountInfo" class="account-info" hidden><span id="accountEmail"></span><button id="signout" class="secondary">SIGN OUT</button></div>
+</section>
+<section id="lobby" class="panel" hidden>
  <div class="pixel-title">GATHER YOUR PARTY</div>
  <label>HERO NAME<input id="name" maxlength="16" value="Adventurer"></label>
  <div class="lobby-actions">
@@ -19,7 +28,7 @@
   <div class="join"><input id="roomCode" maxlength="5" placeholder="ROOM CODE"><button id="join">JOIN</button></div>
  </div>
  <p id="notice" class="notice">Create a party and share its 5-character code with friends.</p>
- <div class="small">Up to 4 players · Turn-based co-op · No installation required</div>
+ <div class="small">Up to 4 players · Turn-based co-op · Your hero save is linked to your account</div>
 </section>
 <section id="game" hidden>
  <div class="roomline panel"><div>PARTY CODE <b id="code">-----</b></div><button id="copy">COPY INVITE</button></div>
@@ -43,6 +52,7 @@
    <button id="start" class="gold wide">START ADVENTURE</button>
    <button id="next" class="gold wide" hidden>NEXT ENCOUNTER →</button>
    <button id="restart" class="wide secondary" hidden>RESTART ADVENTURE</button>
+   <button id="leave" class="wide secondary">LEAVE PARTY</button>
   </section>
   <section class="panel">
    <div class="pixel-title">PARTY MEMBERS</div><div id="players" class="players"></div>
@@ -53,5 +63,8 @@
 </section>
 </main>
 </div>
-<script src="/socket.io/socket.io.js"></script><script src="game.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="game.js"></script>
 </body></html>
