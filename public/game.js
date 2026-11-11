@@ -1,10 +1,10 @@
 const socket = io();
 const $ = id => document.getElementById(id);
 let roomCode = null, gameState = null, myId = null, currentUser = null;
-let supabase = null, savedCharacter = null, restoreComplete = false, saveTimer = null;
+let supabaseClient = null, savedCharacter = null, restoreComplete = false, saveTimer = null;
 const config = window.SOULBOUND_SUPABASE || {};
 const configured = !!(config.url && config.anonKey && !config.anonKey.includes("PASTE_YOUR"));
-if (configured && window.supabase) supabase = window.supabase.createClient(config.url, config.anonKey);
+if (configured && window.supabase) supabaseClient = window.supabase.createClient(config.url, config.anonKey);
 
 function notice(message, error=false){$("notice").textContent=message;$("notice").className=error?"notice error":"notice"}
 function authNotice(message, error=false){$("authNotice").textContent=message;$("authNotice").className=error?"notice error":"notice"}
@@ -24,18 +24,18 @@ function profileFromState(me){
  return {id:currentUser.id,username:me.name,level:me.level,xp:me.xp,gold:me.gold,hp:me.hp,max_hp:me.maxHp,mp:me.mp,max_mp:me.maxMp,attack:me.atk,defense:me.def,potions:me.potions,updated_at:new Date().toISOString()};
 }
 async function loadProfile(){
- if(!supabase||!currentUser)return null;
- const {data,error}=await supabase.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();
+ if(!supabaseClient||!currentUser)return null;
+ const {data,error}=await supabaseClient.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();
  if(error)throw error;
  if(data)return data;
  const fresh={id:currentUser.id,username:(currentUser.email||"Adventurer").split("@")[0].slice(0,16)||"Adventurer"};
- const {data:created,error:createError}=await supabase.from("profiles").insert(fresh).select().single();
+ const {data:created,error:createError}=await supabaseClient.from("profiles").insert(fresh).select().single();
  if(createError)throw createError;
  return created;
 }
 async function saveProfile(me){
- if(!supabase||!currentUser||!restoreComplete||!me)return;
- const {error}=await supabase.from("profiles").upsert(profileFromState(me),{onConflict:"id"});
+ if(!supabaseClient||!currentUser||!restoreComplete||!me)return;
+ const {error}=await supabaseClient.from("profiles").upsert(profileFromState(me),{onConflict:"id"});
  if(error)authNotice("Save failed: "+error.message,true);
  else authNotice("Hero saved · "+new Date().toLocaleTimeString());
 }
@@ -56,27 +56,27 @@ async function afterJoin(){
  const me=gameState?.players.find(p=>p.id===myId);
  if(me)saveProfile(me);
 }
-if(!supabase){
+if(!supabaseClient){
  $("signup").disabled=true;$("signin").disabled=true;
  authNotice("Supabase is not configured yet. Follow SETUP-V0.2.md and add your public key to config.js.",true);
 }
 $("signup").onclick=async()=>{
- if(!supabase)return;
+ if(!supabaseClient)return;
  const email=$("email").value.trim(),password=$("password").value;
  if(!email||password.length<6)return authNotice("Enter an email and a password with at least 6 characters.",true);
- const {data,error}=await supabase.auth.signUp({email,password});
+ const {data,error}=await supabaseClient.auth.signUp({email,password});
  if(error)return authNotice(error.message,true);
  if(data.session){showAccount(data.user);await prepareCharacter();}
  else authNotice("Account created. Check your email to confirm, then sign in.");
 };
 $("signin").onclick=async()=>{
- if(!supabase)return;
- const {data,error}=await supabase.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
+ if(!supabaseClient)return;
+ const {data,error}=await supabaseClient.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
  if(error)return authNotice(error.message,true);
  showAccount(data.user);await prepareCharacter();
 };
 $("signout").onclick=async()=>{
- if(supabase)await supabase.auth.signOut();
+ if(supabaseClient)await supabaseClient.auth.signOut();
  currentUser=null;savedCharacter=null;restoreComplete=false;
  $("game").hidden=true;$("lobby").hidden=true;showAccount(null);
  authNotice("Signed out.");
@@ -108,11 +108,11 @@ socket.on("state",state=>{
  }
 });
 async function restoreSession(){
- if(!supabase)return;
- const {data:{session}}=await supabase.auth.getSession();
+ if(!supabaseClient)return;
+ const {data:{session}}=await supabaseClient.auth.getSession();
  if(session?.user){showAccount(session.user);await prepareCharacter();}
  else showAccount(null);
- supabase.auth.onAuthStateChange((event,session)=>{
+ supabaseClient.auth.onAuthStateChange((event,session)=>{
   if(event==="SIGNED_OUT"){currentUser=null;savedCharacter=null;showAccount(null);}
  });
 }
