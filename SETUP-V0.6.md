@@ -41,7 +41,7 @@ The two races within each rarity have equal chances.
 | Common | Human | +5% EXP | Adaptable Spirit |
 | Common | Beastkin | +8% Max HP, +4% ATK | 10% chance to recover 3 MP on a basic hit |
 | Rare | High Elf | +18% Max MP, +4% ATK | Skills cost 5% less MP |
-| Rare | Orc | +12% Max HP, +13% ATK, -8% Max MP | Deal 8% extra damage while below 50% HP |
+| Rare | Orc | +12% Max HP, +13% ATK, -8% Max MP, -8% Max MP | Deal 8% extra damage while below 50% HP |
 | Epic | Stoneborn | +20% Max HP, +18% DEF | Take 3% less damage |
 | Epic | Sylvan | +10% Max HP, +14% Max MP, +4% ATK | Restore 3% Max HP after each victory |
 | Legend | Demon | +22% ATK, +8% Max MP, -4% Max HP | Hellfire damage |
