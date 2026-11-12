@@ -132,5 +132,33 @@ function url(p){
  memo.set(key,value);
  return value;
 }
-window.SoulboundSprite={url,svg:make};
+
+const iconCache=new Map();
+function itemIcon(name,slot="weapon"){
+ const key=String(name||"")+"|"+slot;if(iconCache.has(key))return iconCache.get(key);
+ const n=String(name||"").toLowerCase(),t=colors(name,"swordsman");
+ const glow=n.includes("crystal")||n.includes("star")||n.includes("void")||n.includes("tide")?"#83ddf0":
+  n.includes("ember")||n.includes("dragon")?"#f3945c":"#ead6a3";
+ const base='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" shape-rendering="crispEdges"><rect width="48" height="48" rx="5" fill="#171b2b"/><rect x="2" y="2" width="44" height="44" fill="#252533" stroke="#bd975b" stroke-width="2"/>';
+ let art="";
+ if(slot==="armor"){
+  art='<path d="M12 11l10-5 10 5 9 4-4 12-6-3v16H16V24l-7 3-4-12z" fill="'+t.base+'" stroke="#0e1b2b" stroke-width="3"/>'+
+  '<path d="M18 14h13v17H18z" fill="'+t.lite+'"/><path d="M20 17h9v6h-9z" fill="'+t.dark+'"/>'+
+  '<path d="M19 31h11v3H19z" fill="'+t.trim+'"/><path d="M8 17l6-3m22 0 6 3" stroke="'+t.trim+'" stroke-width="3"/>';
+ }else if(n.includes("staff")||n.includes("tide")){
+  art='<path d="M19 40L30 13" stroke="#a57a55" stroke-width="6"/><path d="M16 41l12-29" stroke="#d09f63" stroke-width="2"/>'+
+  '<path d="M32 5l9 7-5 10-10-3-2-8z" fill="'+glow+'" stroke="#f4e4c8" stroke-width="2"/>'+
+  '<path d="M32 8v9m-4-4h9" stroke="#f8ffff" stroke-width="2"/>';
+ }else if(n.includes("hammer")||n.includes("mace")||n.includes("maul")){
+  art='<path d="M12 38l20-26" stroke="#916546" stroke-width="6"/><path d="M8 13l12-10 15 12-12 12z" fill="'+t.lite+'" stroke="'+t.dark+'" stroke-width="3"/>'+
+  '<path d="M13 15l10-8 6 8-8 8z" fill="'+t.trim+'"/>';
+ }else{
+  art='<path d="M11 39l21-26" stroke="#ad8055" stroke-width="6"/><path d="M20 23L37 4l7 4-3 9-18 17z" fill="#d6e9e8" stroke="#46576a" stroke-width="2"/>'+
+  '<path d="M25 26l14-14" stroke="#fff9e8" stroke-width="3"/><path d="M16 27l12 9" stroke="'+t.trim+'" stroke-width="5"/>'+
+  '<path d="M14 38l-5 3" stroke="#c9aa74" stroke-width="3"/>';
+ }
+ const data="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(base+art+"</svg>");
+ if(iconCache.size>150)iconCache.clear();iconCache.set(key,data);return data;
+}
+window.SoulboundSprite={url,svg:make,itemIcon};
 })();
