@@ -1,6 +1,6 @@
 const express=require("express"),http=require("http"),path=require("path");
 const {Server}=require("socket.io");const loot=require("./loot-v034");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
-app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.34.0"}));
+app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.35.0"}));
 const rooms=new Map();
 const normal=[{name:"Mossfang Wolf",sprite:"mossfang-wolf",icon:"🐺",hp:90,atk:12,def:2,xp:35,gold:18},{name:"Goblin Raider",sprite:"goblin-raider",icon:"👺",hp:115,atk:15,def:4,xp:45,gold:24},{name:"Grave Beetle",sprite:"grave-beetle",icon:"🪲",hp:140,atk:17,def:5,xp:55,gold:30},{name:"Cursed Knight",sprite:"cursed-knight",icon:"💀",hp:165,atk:19,def:7,xp:65,gold:36},{name:"Wisp Stalker",sprite:"wisp-stalker",icon:"👻",hp:185,atk:21,def:8,xp:75,gold:42}];
 const bosses=[{name:"The Briarfang Alpha",sprite:"boss-briarfang",icon:"🐺",hp:260,atk:22,def:7,xp:130,gold:90},{name:"Dreadforge Champion",sprite:"boss-dreadforge",icon:"🛡️",hp:390,atk:29,def:10,xp:180,gold:125},{name:"Ember Tyrant",sprite:"boss-ember-tyrant",icon:"🐉",hp:540,atk:36,def:13,xp:240,gold:165},{name:"The Hollow Oracle",sprite:"boss-hollow-oracle",icon:"🔮",hp:690,atk:42,def:16,xp:300,gold:210},{name:"Glacier Warden",sprite:"boss-glacier-warden",icon:"🧊",hp:850,atk:48,def:19,xp:370,gold:260},{name:"Ancient World-Eater",sprite:"boss-world-eater",icon:"🗿",hp:1030,atk:55,def:22,xp:450,gold:320},{name:"The Void Reaper",sprite:"boss-void-reaper",icon:"☠️",hp:1240,atk:62,def:25,xp:540,gold:390},{name:"Eclipse Sovereign",sprite:"boss-eclipse-sovereign",icon:"👑",hp:1500,atk:72,def:29,xp:700,gold:500}];
@@ -23,6 +23,28 @@ function applyRace(p,newId){const old=raceById(p.raceId),next=raceById(newId),ra
 function cleanName(v){return String(v||"Adventurer").trim().replace(/[<>]/g,"").slice(0,16)||"Adventurer"}function bounded(v,min,max,fb){const n=Number(v);return Number.isFinite(n)?Math.max(min,Math.min(max,Math.floor(n))):fb}
 function sceneFor(n){return scenes[Math.min(5,Math.floor((n-1)/4))]}
 function encounter(n){const scale=1+Math.floor((n-1)/3)*.23;if(n%3===0){const b=bosses[n/3-1],hp=Math.round(b.hp*scale);return {...b,hp,maxHp:hp,atk:Math.round(b.atk*scale),def:Math.round(b.def*scale),boss:true}}const b=normal[(n-1)%normal.length],hp=Math.round(b.hp*scale);return {...b,hp,maxHp:hp,atk:Math.round(b.atk*scale),def:Math.round(b.def*scale),boss:false}}
+/* v0.35 in-game index: generated from the actual encounter, shop and boss loot rules.
+   Read-only route: no player data, saves, combat state or database changes. */
+app.get("/api/index",(_,res)=>{
+ const enemies=Array.from({length:24},(_,index)=>{
+  const stage=index+1,foe=encounter(stage),zone=sceneFor(stage);
+  return {id:"stage-"+stage,stage,name:foe.name,icon:foe.icon||"⚔",
+   sprite:foe.sprite,boss:!!foe.boss,zone:zone.name,hp:foe.maxHp,atk:foe.atk,def:foe.def,
+   xp:foe.xp,gold:foe.gold,loot:foe.boss?"1 individually rolled boss gear item per hero if bag has room":"No random equipment drops"};
+ });
+ const goods=shopItems.map(it=>({...it,category:it.category==="food"?"food":it.slot==="weapon"?"weapons":it.slot==="armor"?"armor":"consumables"}));
+ const drops=[];
+ for(let boss=1;boss<=8;boss++)for(const slot of loot.SLOTS)for(const rarity of loot.RARITIES){
+  const item=loot.factory("boss"+boss+"_"+slot,rarity);
+  if(item)drops.push({...item,category:slot==="main"||slot==="offhand"?"weapons":["head","chest","pants","boots"].includes(slot)?"armor":"accessories",source:bosses[boss-1].name,price:null});
+ }
+ res.set("Cache-Control","public, max-age=180");
+ res.json({version:"0.35.0",title:"SOULBOUND ADVENTURE INDEX",stageCount:24,
+  categories:["bosses","monsters","weapons","armor","accessories","food","consumables"],
+  rarityOdds:{common:50,uncommon:28,rare:16,epic:5,legendary:1},
+  lootRule:"Boss victories only. Each hero gets one independently randomized item if their bag has space.",
+  monsters:enemies,items:[...goods,...drops],zones:scenes.map((z,i)=>({...z,stages:(i===5?"21–24":(i*4+1)+"–"+(i*4+4))}))});
+});
 function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:24,scene:sceneFor(r.stage),monster:r.monster,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),log:r.log.slice(-14),chat:(r.chat||[]).slice(-40)}}
 function emit(r){io.to(r.code).emit("state",publicRoom(r))}function say(r,m){r.log.push(m);if(r.log.length>40)r.log.shift()}
 function createRoom(code){const r={code,stage:1,monster:null,players:new Map(),turnIndex:0,status:"waiting",log:[],chat:[]};rooms.set(code,r);return r}
