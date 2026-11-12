@@ -1,6 +1,6 @@
 const express=require("express"),http=require("http"),path=require("path");
 const {Server}=require("socket.io");const loot=require("./loot-v034");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
-app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.35.0"}));
+app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.37.0"}));
 const rooms=new Map();
 const normal=[{name:"Mossfang Wolf",sprite:"mossfang-wolf",icon:"🐺",hp:90,atk:12,def:2,xp:35,gold:18},{name:"Goblin Raider",sprite:"goblin-raider",icon:"👺",hp:115,atk:15,def:4,xp:45,gold:24},{name:"Grave Beetle",sprite:"grave-beetle",icon:"🪲",hp:140,atk:17,def:5,xp:55,gold:30},{name:"Cursed Knight",sprite:"cursed-knight",icon:"💀",hp:165,atk:19,def:7,xp:65,gold:36},{name:"Wisp Stalker",sprite:"wisp-stalker",icon:"👻",hp:185,atk:21,def:8,xp:75,gold:42}];
 const bosses=[{name:"The Briarfang Alpha",sprite:"boss-briarfang",icon:"🐺",hp:260,atk:22,def:7,xp:130,gold:90},{name:"Dreadforge Champion",sprite:"boss-dreadforge",icon:"🛡️",hp:390,atk:29,def:10,xp:180,gold:125},{name:"Ember Tyrant",sprite:"boss-ember-tyrant",icon:"🐉",hp:540,atk:36,def:13,xp:240,gold:165},{name:"The Hollow Oracle",sprite:"boss-hollow-oracle",icon:"🔮",hp:690,atk:42,def:16,xp:300,gold:210},{name:"Glacier Warden",sprite:"boss-glacier-warden",icon:"🧊",hp:850,atk:48,def:19,xp:370,gold:260},{name:"Ancient World-Eater",sprite:"boss-world-eater",icon:"🗿",hp:1030,atk:55,def:22,xp:450,gold:320},{name:"The Void Reaper",sprite:"boss-void-reaper",icon:"☠️",hp:1240,atk:62,def:25,xp:540,gold:390},{name:"Eclipse Sovereign",sprite:"boss-eclipse-sovereign",icon:"👑",hp:1500,atk:72,def:29,xp:700,gold:500}];
@@ -34,15 +34,20 @@ app.get("/api/index",(_,res)=>{
  });
  const goods=shopItems.map(it=>({...it,category:it.category==="food"?"food":it.slot==="weapon"?"weapons":it.slot==="armor"?"armor":"consumables"}));
  const drops=[];
- for(let boss=1;boss<=8;boss++)for(const slot of loot.SLOTS)for(const rarity of loot.RARITIES){
-  const item=loot.factory("boss"+boss+"_"+slot,rarity);
-  if(item)drops.push({...item,category:slot==="main"||slot==="offhand"?"weapons":["head","chest","pants","boots"].includes(slot)?"armor":"accessories",source:bosses[boss-1].name,price:null});
+ const bossDropTables={};
+ for(let boss=1;boss<=8;boss++){
+  const records=loot.bossDrops(boss).map(it=>({
+   ...it,category:it.slot==="main"||it.slot==="offhand"?"weapons":["head","chest","pants","boots"].includes(it.slot)?"armor":"accessories",
+   source:bosses[boss-1].name,sourceStage:boss*3,price:null
+  }));
+  drops.push(...records);
+  bossDropTables[boss*3]=records.map(({id,name,rarity,chance,slot,icon,category})=>({id,name,rarity,chance,slot,icon,category}));
  }
+ enemies.forEach(enemy=>{if(enemy.boss){enemy.drops=bossDropTables[enemy.stage]||[];enemy.loot="Each hero independently rolls once. Each listed chance is an unconditional percent; otherwise no item drops."}});
  res.set("Cache-Control","public, max-age=180");
- res.json({version:"0.35.0",title:"SOULBOUND ADVENTURE INDEX",stageCount:24,
+ res.json({version:"0.37.0",title:"SOULBOUND ADVENTURE INDEX",stageCount:24,
   categories:["bosses","monsters","weapons","armor","accessories","food","consumables"],
-  rarityOdds:{common:50,uncommon:28,rare:16,epic:5,legendary:1},
-  lootRule:"Boss victories only. Each hero gets one independently randomized item if their bag has space.",
+  bossDropTables,lootRule:"Bosses only. Each player rolls independently for at most one curated fixed-rarity item; a roll can award nothing.",
   monsters:enemies,items:[...goods,...drops],zones:scenes.map((z,i)=>({...z,stages:(i===5?"21–24":(i*4+1)+"–"+(i*4+4))}))});
 });
 function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:24,scene:sceneFor(r.stage),monster:r.monster,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),log:r.log.slice(-14),chat:(r.chat||[]).slice(-40)}}
