@@ -23,10 +23,59 @@ const raceNames={human:"Human",beastkin:"Beastkin",elf:"High Elf",orc:"Orc",dwar
 function rarityClass(v){return String(v||"common").toLowerCase()}
 function heroArt(p){const mage=p.classId==="mage",armor=String(p.armor||"").toLowerCase(),weapon=String(p.weapon||"").toLowerCase();let c="#315a86",trim="#d7dce5";if(armor.includes("dragon")){c="#9a3d34";trim="#e8a85d"}else if(armor.includes("void")){c="#34264e";trim="#a87cf0"}else if(armor.includes("guardian")){c="#78889b";trim="#d6e0ed"}else if(armor.includes("iron")){c="#657587";trim="#d0d7df"}else if(armor.includes("robe")||armor.includes("raiment")||armor.includes("sage")){c="#5b438e";trim="#c2a2ee"}let weaponArt=weapon.includes("staff")?'<path d="M105 55L112 183" stroke="#805b3d" stroke-width="8"/><path d="M101 54Q108 27 119 49Q126 66 107 70Z" fill="#82eaff" stroke="#e1fbff" stroke-width="4"/>':weapon.includes("great")?'<path d="M108 77L115 183" stroke="#805b3d" stroke-width="9"/><path d="M82 24L133 40L115 98L92 85Z" fill="#dbe7f2" stroke="#65748a" stroke-width="5"/>':'<path d="M106 72L113 183" stroke="#805b3d" stroke-width="8"/><path d="M91 24L109 17L122 91L107 100Z" fill="#dbe7f2" stroke="#65748a" stroke-width="4"/><path d="M89 78L126 72" stroke="#d6b56d" stroke-width="7"/>';let head=mage?'<path d="M35 54L68 2L101 54Z" fill="#46306f" stroke="#171a2a" stroke-width="6"/><ellipse cx="68" cy="59" rx="23" ry="26" fill="#c98f68" stroke="#171a2a" stroke-width="5"/>':'<path d="M42 48L40 23L57 9L84 9L99 31L94 58Z" fill="#7c8797" stroke="#171a2a" stroke-width="6"/><ellipse cx="70" cy="57" rx="24" ry="26" fill="#c98f68" stroke="#171a2a" stroke-width="5"/>';let body=mage?'<path d="M47 80L88 80L105 165L32 165Z" fill="'+c+'" stroke="#171a2a" stroke-width="6"/><path d="M62 82L79 82L92 153L53 153Z" fill="'+trim+'"/><path d="M49 87L23 145L39 154L64 102M86 87L108 139L91 150L75 103" fill="'+c+'" stroke="#171a2a" stroke-width="7"/>':'<path d="M42 80L91 80L99 148L34 148Z" fill="'+c+'" stroke="#171a2a" stroke-width="6"/><path d="M62 82L78 82L83 143L55 143Z" fill="'+trim+'"/><path d="M43 87L21 135L38 145L58 105M90 87L108 132L91 142L76 103" fill="'+c+'" stroke="#171a2a" stroke-width="7"/>';let svg='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 210"><ellipse cx="70" cy="201" rx="48" ry="8" fill="#080b16" opacity=".75"/><path d="M45 146L71 146L65 191L41 191ZM73 146L94 146L99 191L74 191Z" fill="#34384c" stroke="#171a2a" stroke-width="6"/><path d="M34 185L68 185L66 201L27 201ZM75 185L105 185L111 201L73 201Z" fill="#5b4030" stroke="#171a2a" stroke-width="5"/>'+body+head+'<path d="M54 52L63 52M78 52L87 52" stroke="#fff0c5" stroke-width="5"/>'+weaponArt+'<path d="M57 110L81 110L69 130Z" fill="#e7c36f" stroke="#493c36" stroke-width="3"/></svg>';return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg)}
 
-function openGacha(){const me=gameState?.players.find(p=>p.id===myId);if(!me||me.racePoints<1)return notice("You need 1 Race Point. Defeat a boss to earn one.",true);$("gachaModal").hidden=false;$("gachaTitle").textContent="AWAKEN YOUR BLOODLINE";$("gachaSubtitle").textContent="The ancient seal is opening...";$("gachaResult").hidden=true;$("skipGacha").hidden=false;$("closeGacha").hidden=true;gachaOutcome=null;gachaRevealed=false;call("rollRace").then(r=>{if(!r.ok){$("gachaModal").hidden=true;return notice(r.error,true)}gachaOutcome=r;startGachaAnimation()})}
-function revealGacha(){if(gachaRevealed||!gachaOutcome)return;gachaRevealed=true;clearInterval(gachaTimer);clearTimeout(gachaTimeout);const r=gachaOutcome.race;$("summonReel").innerHTML='<div class="summon-card"><span>'+r.icon+'</span><b>'+r.name.toUpperCase()+'</b><small>'+r.rarity.toUpperCase()+'</small></div>';$("gachaTitle").textContent="BLOODLINE AWAKENED";$("gachaSubtitle").textContent="A new power answers your call.";const badge=$("resultRarity");badge.textContent=r.rarity.toUpperCase();badge.className="rarity "+rarityClass(r.rarity);$("resultRace").textContent=r.name.toUpperCase();$("resultPassive").textContent=r.passive;$("resultBuffs").textContent=r.buffs.join(" · ");$("gachaResult").hidden=false;$("skipGacha").hidden=true;$("closeGacha").hidden=false;window.SoulboundAudio?.sfx("victory")}
-function startGachaAnimation(){const cards=["HUMAN","BEASTKIN","HIGH ELF","ORC","STONEBORN","SYLVAN","DEMON","DRAGONKIN","CELESTIAL","VOIDBORN"];let n=0;$("gachaSubtitle").textContent="Race Point consumed · Searching across the bloodlines...";gachaTimer=setInterval(()=>{const name=cards[n++%cards.length];$("summonReel").innerHTML='<div class="summon-card"><span>✧</span><b>'+name+'</b><small>??? RARITY</small></div>';if(n%3===0)window.SoulboundAudio?.sfx("buy")},110);gachaTimeout=setTimeout(revealGacha,3100)}
-$("openGacha").onclick=openGacha;$("skipGacha").onclick=revealGacha;$("closeGacha").onclick=()=>{$("gachaModal").hidden=true;gachaOutcome=null;gachaRevealed=false};
+function v25SetGachaPhase(phase,rarity=""){
+ const modal=$("gachaModal"),stage=$("v25SummonStage");
+ if(modal){modal.dataset.phase=phase;modal.dataset.rarity=rarityClass(rarity||"common")}
+ if(stage){stage.dataset.phase=phase;stage.dataset.rarity=rarityClass(rarity||"common")}
+}
+function openGacha(){
+ const me=gameState?.players.find(p=>p.id===myId);
+ if(!me||me.racePoints<1)return notice("You need 1 Race Point. Defeat a boss to earn one.",true);
+ clearInterval(gachaTimer);clearTimeout(gachaTimeout);
+ gachaOutcome=null;gachaRevealed=false;v25SetGachaPhase("charging");
+ $("gachaModal").hidden=false;
+ $("gachaTitle").textContent="AWAKEN YOUR BLOODLINE";
+ $("gachaSubtitle").textContent="Calling the ancient bloodlines...";
+ $("gachaResult").hidden=true;
+ $("skipGacha").hidden=false;$("skipGacha").disabled=true;
+ $("skipGacha").textContent="CHANNELING...";
+ $("closeGacha").hidden=true;
+ $("summonReel").innerHTML='<div class="summon-card"><span>✦</span><b>SUMMONING</b><small>ANCIENT BLOODLINE</small></div>';
+ call("rollRace").then(r=>{
+  if(!r.ok){$("gachaModal").hidden=true;v25SetGachaPhase("idle");return notice(r.error,true)}
+  gachaOutcome=r;
+  $("skipGacha").disabled=false;$("skipGacha").textContent="SKIP ANIMATION";
+  startGachaAnimation()
+ }).catch(()=>{v25SetGachaPhase("idle");$("gachaModal").hidden=true;notice("Summon failed. Check your connection and Race Points.",true)});
+}
+function revealGacha(){
+ if(gachaRevealed||!gachaOutcome)return;
+ gachaRevealed=true;clearInterval(gachaTimer);clearTimeout(gachaTimeout);
+ const r=gachaOutcome.race;
+ v25SetGachaPhase("revealed",r.rarity);
+ $("summonReel").innerHTML='<div class="summon-card"><span>'+esc(r.icon)+'</span><b>'+esc(r.name.toUpperCase())+'</b><small>'+esc(r.rarity.toUpperCase())+'</small></div>';
+ $("gachaTitle").textContent="BLOODLINE AWAKENED";
+ $("gachaSubtitle").textContent="The ancestral seal has chosen you.";
+ const badge=$("resultRarity");badge.textContent=r.rarity.toUpperCase();badge.className="rarity "+rarityClass(r.rarity);
+ $("resultRace").textContent=r.name.toUpperCase();
+ $("resultPassive").textContent=r.passive;
+ $("resultBuffs").textContent=r.buffs.join(" · ");
+ $("gachaResult").hidden=false;
+ $("skipGacha").hidden=true;$("closeGacha").hidden=false;
+ window.SoulboundAudio?.sfx("victory");
+}
+function startGachaAnimation(){
+ const cards=["HUMAN","BEASTKIN","HIGH ELF","ORC","STONEBORN","SYLVAN","DEMON","DRAGONKIN","CELESTIAL","VOIDBORN"];
+ let n=0;v25SetGachaPhase("spinning");
+ $("gachaSubtitle").textContent="The runes are deciding your fate...";
+ gachaTimer=setInterval(()=>{
+  const name=cards[n++%cards.length];
+  $("summonReel").innerHTML='<div class="summon-card"><span>✧</span><b>'+name+'</b><small>??? RARITY</small></div>';
+  if(n%4===0)window.SoulboundAudio?.sfx("buy");
+ },115);
+ gachaTimeout=setTimeout(()=>{v25SetGachaPhase("converging");gachaTimeout=setTimeout(revealGacha,550)},2700);
+}
+$("openGacha").onclick=openGacha;$("skipGacha").onclick=revealGacha;$("closeGacha").onclick=()=>{$("gachaModal").hidden=true;v25SetGachaPhase("idle");gachaOutcome=null;gachaRevealed=false};
 document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{const r=await call("action",{type:b.dataset.action});if(!r.ok)alert(r.error);else window.SoulboundAudio?.sfx(({attack:"attack",skill:"skill",skill2:"skill",skill3:"skill",skill4:"skill",skill5:"skill",heal:"heal",healSmall:"heal",healMedium:"heal",healLarge:"heal",mana:"heal",manaSmall:"heal",manaMedium:"heal",manaLarge:"heal",guard:"guard"})[b.dataset.action]||"attack")});
 document.querySelectorAll("[data-stat]").forEach(b=>b.onclick=async()=>{const r=await call("allocateStat",{stat:b.dataset.stat});if(!r.ok)notice(r.error,true)});
 $("shopCategories")?.querySelectorAll("[data-shop-category]").forEach(b=>b.onclick=()=>{activeShopCategory=b.dataset.shopCategory;$("shopCategories").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));if(gameState)render()});$("chatSend").onclick=sendChat;$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat()});function sendChat(){const input=$("chatInput"),message=input.value.trim();if(!message)return;call("partyChat",{message}).then(r=>{if(!r.ok)notice(r.error,true);else input.value=""})};
