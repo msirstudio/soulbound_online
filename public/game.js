@@ -17,7 +17,17 @@ $("newGame").onclick=async()=>{$("classId").disabled=false;if(!guestMode&&(!curr
 $("classId").onchange=()=>{classInfo()};$("guestPlay").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));guestMode=true;currentUser=null;showAccount({email:"Guest Player"});$("accountEmail").textContent="GUEST · LOCAL SAVE";$("signup").hidden=true;$("signin").hidden=true;$("email").hidden=true;$("password").hidden=true;$("guestPlay").hidden=true;await prepare();authNotice("Guest mode ready. Friends can join your room with its code.")};
 $("create").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("createRoom",{name:$("name").value,classId:$("classId").value});if(r.ok){$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;await afterJoin()}else notice(r.error,true)};
 $("join").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value,classId:$("classId").value});if(r.ok){$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;await afterJoin()}else notice(r.error,true)};
-function syncMusicUI(on){["musicToggle","musicQuick"].forEach(id=>{const b=$(id);if(!b)return;b.textContent="♫ MUSIC · "+(on?"ON":"OFF");b.classList.toggle("music-on",on);b.setAttribute("aria-pressed",String(on))})}function toggleMusic(){const on=window.SoulboundAudio.setMusic(!window.SoulboundAudio.musicOn);syncMusicUI(on)}$("musicToggle").onclick=toggleMusic;$("musicQuick").onclick=toggleMusic;$("musicVolume").oninput=e=>window.SoulboundAudio.setVolume(Number(e.target.value)/100);$("copy").onclick=async()=>{try{await navigator.clipboard.writeText("Join my SOULBOUND party! Room code: "+gameState.code);$("copy").textContent="COPIED!"}catch{$("copy").textContent=gameState.code}};
+function syncMusicUI(on){["musicToggle","musicQuick"].forEach(id=>{const b=$(id);if(!b)return;b.textContent="♫ MUSIC · "+(on?"ON":"OFF");b.classList.toggle("music-on",on);b.setAttribute("aria-pressed",String(on))})}function toggleMusic(){const on=window.SoulboundAudio.setMusic(!window.SoulboundAudio.musicOn);syncMusicUI(on)}$("musicToggle").onclick=toggleMusic;$("musicQuick").onclick=toggleMusic;$("musicVolume").oninput=e=>window.SoulboundAudio.setVolume(Number(e.target.value)/100);
+const sfxSlider=$("sfxVolume");
+if(sfxSlider)sfxSlider.oninput=e=>window.SoulboundAudio.setSfxVolume(Number(e.target.value)/100);
+const sfxQuick=$("sfxQuick");
+if(sfxQuick)sfxQuick.onclick=()=>{
+ const audio=window.SoulboundAudio,muted=audio.sfxVolume>0.01;
+ audio.setSfxVolume(muted?0:.76);if(sfxSlider)sfxSlider.value=muted?0:76;
+ sfxQuick.textContent=muted?"🔇 SFX OFF":"🔊 SFX ON";sfxQuick.setAttribute("aria-pressed",String(!muted));
+ if(!muted)audio.sfx("menu");
+};
+$("copy").onclick=async()=>{try{await navigator.clipboard.writeText("Join my SOULBOUND party! Room code: "+gameState.code);$("copy").textContent="COPIED!"}catch{$("copy").textContent=gameState.code}};
 $("start").onclick=async()=>{const r=await call("startBattle");if(!r.ok)alert(r.error);else window.SoulboundAudio?.sfx("buy")};$("next").onclick=async()=>{const r=await call("nextStage");if(!r.ok)alert(r.error);else window.SoulboundAudio?.sfx("buy")};$("openShop").onclick=async()=>{const r=await call("openShop");if(!r.ok)alert(r.error);else window.SoulboundAudio?.sfx("buy")};$("continueShop").onclick=async()=>{const r=await call("nextStage");if(!r.ok)alert(r.error);else window.SoulboundAudio?.sfx("buy")};$("restart").onclick=async()=>{const r=await call("restart");if(!r.ok)alert(r.error)};$("leave").onclick=()=>location.reload();
 const raceNames={human:"Human",beastkin:"Beastkin",elf:"High Elf",orc:"Orc",dwarf:"Stoneborn",sylvan:"Sylvan",demon:"Demon",dragonkin:"Dragonkin",celestial:"Celestial",voidborn:"Voidborn"};let gachaTimer=null,gachaTimeout=null,gachaOutcome=null,gachaRevealed=false;
 function rarityClass(v){return String(v||"common").toLowerCase()}
@@ -76,13 +86,16 @@ function startGachaAnimation(){
  gachaTimeout=setTimeout(()=>{v25SetGachaPhase("converging");gachaTimeout=setTimeout(revealGacha,550)},2700);
 }
 $("openGacha").onclick=openGacha;$("skipGacha").onclick=revealGacha;$("closeGacha").onclick=()=>{$("gachaModal").hidden=true;v25SetGachaPhase("idle");gachaOutcome=null;gachaRevealed=false};
-document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{const r=await call("action",{type:b.dataset.action});if(!r.ok)alert(r.error);else window.SoulboundAudio?.sfx(({attack:"attack",skill:"skill",skill2:"skill",skill3:"skill",skill4:"skill",skill5:"skill",heal:"heal",healSmall:"heal",healMedium:"heal",healLarge:"heal",mana:"heal",manaSmall:"heal",manaMedium:"heal",manaLarge:"heal",guard:"guard"})[b.dataset.action]||"attack")});
+document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{const r=await call("action",{type:b.dataset.action});if(!r.ok)alert(r.error);else{const a=b.dataset.action;const hero=gameState?.players?.find(p=>p.id===myId);const sound=({attack:"attack",skill:"skill",skill2:"skill",skill3:"skill",skill4:"skill",skill5:"skill",heal:"heal",healSmall:"heal",healMedium:"heal",healLarge:"heal",mana:"mana",manaSmall:"mana",manaMedium:"mana",manaLarge:"mana",guard:"guard"})[a]||"attack";window.SoulboundAudio?.sfx(sound,{weapon:hero?.weapon||"",classId:hero?.classId||""})}});
 document.querySelectorAll("[data-stat]").forEach(b=>b.onclick=async()=>{const r=await call("allocateStat",{stat:b.dataset.stat});if(!r.ok)notice(r.error,true)});
 $("shopCategories")?.querySelectorAll("[data-shop-category]").forEach(b=>b.onclick=()=>{activeShopCategory=b.dataset.shopCategory;$("shopCategories").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));if(gameState)render()});$("chatSend").onclick=sendChat;$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat()});function sendChat(){const input=$("chatInput"),message=input.value.trim();if(!message)return;call("partyChat",{message}).then(r=>{if(!r.ok)notice(r.error,true);else input.value=""})};
 socket.on("connect",()=>{myId=socket.id});socket.on("disconnect",()=>{$("status").textContent="Connection lost. Refresh to reconnect."});
 socket.on("state",s=>{gameState=s;render();if(restoreComplete){const p=s.players.find(x=>x.id===myId);if(p){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProfile(p),500)}}});
 async function restoreSession(){if(!supabaseClient)return;const {data:{session}}=await supabaseClient.auth.getSession();if(session?.user){showAccount(session.user);await prepare()}else showAccount(null);supabaseClient.auth.onAuthStateChange((ev,session)=>{if(ev==="SIGNED_OUT"){currentUser=null;savedCharacter=null;showAccount(null)}})}restoreSession();
 function render(){const s=gameState;if(!s)return;
+window.SoulboundAudio?.setScene(s.scene?.css||"wilds");
+window.SoulboundAudio?.setCombatMood(s.status==="battle");
+
 if(s.status==="shop"&&!v23ShopWasActive)v23ShopCollapsed=false;
 v23ShopWasActive=s.status==="shop";if(previousStatus!==s.status){if(s.status==="victory"||s.status==="complete")window.SoulboundAudio?.sfx("victory");else if(s.status==="defeat")window.SoulboundAudio?.sfx("defeat");else if(s.status==="battle"&&s.monster?.boss)window.SoulboundAudio?.sfx("boss");previousStatus=s.status;}const me=s.players.find(p=>p.id===myId),active=s.players[s.turnIndex];$("code").textContent=s.code;$("stageBadge").textContent="STAGE "+s.stage+" / 24";
 $("campaignTrack").innerHTML=Array.from({length:24},(_,i)=>{const n=i+1;return '<span class="'+(n<s.stage?"done ":n===s.stage?"current ":"")+(n%3===0?"boss-node ":"")+(n%4===0?"shop-node":"")+'">'+n+"</span>"}).join("");
@@ -127,35 +140,38 @@ document.querySelectorAll("[data-equip]").forEach(b=>b.onclick=async()=>{const r
 $("status").textContent=s.status==="waiting"?"Waiting for party leader to start.":s.status==="battle"?(active?.id===myId?"YOUR TURN — choose an action!":(active?.name||"Another hero")+" is taking their turn..."):s.status==="victory"?(s.stage%4===0?"VICTORY! The merchant will arrive.":"VICTORY! Prepare for the next stage."):s.status==="shop"?"MERCHANT CAMP · Buy supplies before moving on.":s.status==="complete"?"THE KINGDOM IS FREE!":"The party has fallen.";$("log").innerHTML=s.log.slice().reverse().map(x=>"<div>› "+esc(x)+"</div>").join("")}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
-/* v0.22: keyboard accessible inventory / equipment panels */
-(function initV22LoadoutDrawers(){
+/* v0.26.1: inline equipment/inventory spotlight — no dark modal backdrop.
+   All existing equip-item buttons and rendering stay in their original panels. */
+(function initV261LoadoutPanels(){
  const entries=[["toggleEquipment",".equipment-panel","⚔ EQUIPMENT"],["toggleInventory",".inventory-panel","🎒 INVENTORY"]];
  const backdrop=document.getElementById("v22PanelBackdrop");
+ if(backdrop){backdrop.hidden=true;backdrop.style.display="none";backdrop.setAttribute("aria-hidden","true")}
  const getPanel=(selector)=>document.querySelector("#game "+selector);
- function closeAll(){
-  entries.forEach(([id,selector,text])=>{
-   const button=document.getElementById(id),panel=getPanel(selector);
-   if(panel)panel.classList.remove("is-open");
-   if(button){button.setAttribute("aria-expanded","false");button.textContent=text}
+ const reset=()=>{
+  entries.forEach(([id,selector,label])=>{
+   const button=$(id),panel=getPanel(selector);
+   if(panel){panel.classList.remove("is-open","v261-focused");panel.removeAttribute("tabindex")}
+   if(button){button.textContent=label;button.setAttribute("aria-expanded","false")}
   });
   if(backdrop)backdrop.hidden=true;
- }
- entries.forEach(([id,selector,text])=>{
-  const button=document.getElementById(id),panel=getPanel(selector);
+ };
+ entries.forEach(([id,selector,label])=>{
+  const button=$(id),panel=getPanel(selector);
   if(!button||!panel)return;
   button.addEventListener("click",()=>{
-   const opening=!panel.classList.contains("is-open");
-   closeAll();
-   if(opening){
-    panel.classList.add("is-open");
+   const closing=panel.classList.contains("v261-focused");
+   reset();
+   if(!closing){
+    panel.classList.add("v261-focused");
+    panel.setAttribute("tabindex","-1");
+    button.textContent=label+" ✓";
     button.setAttribute("aria-expanded","true");
-    button.textContent=text+" ✕";
-    if(backdrop)backdrop.hidden=false;
+    panel.scrollIntoView({behavior:window.matchMedia?.("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"nearest",inline:"nearest"});
+    window.SoulboundAudio?.sfx("menu");
    }
   });
  });
- if(backdrop)backdrop.addEventListener("click",closeAll);
- document.addEventListener("keydown",(event)=>{if(event.key==="Escape")closeAll()});
+ document.addEventListener("keydown",e=>{if(e.key==="Escape")reset()});
 })();
 /* v0.15 contextual tooltips: fixed to viewport, no clipped popups */
 (function setupV15Tooltips(){
