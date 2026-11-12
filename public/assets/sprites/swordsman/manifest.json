@@ -1,0 +1,27 @@
+{
+  "version": "0.31.1",
+  "class": "swordsman",
+  "width": 192,
+  "height": 256,
+  "idle": {
+    "frames": 6,
+    "fps": 7,
+    "loop": true
+  },
+  "attack": {
+    "frames": 8,
+    "fps": 12,
+    "loop": false
+  },
+  "male": {
+    "idle": "assets/sprites/swordsman/male_idle.png",
+    "attack": "assets/sprites/swordsman/male_attack.png"
+  },
+  "female": {
+    "idle": "assets/sprites/swordsman/female_idle.png",
+    "attack": "assets/sprites/swordsman/female_attack.png"
+  },
+  "fallback": "hero-art-v030.js",
+  "status": "sprite engine in GitHub; binary PNGs require user upload",
+  "source": "AI-generated source images, cut into four transparent PNG horizontal sprite sheets"
+}
