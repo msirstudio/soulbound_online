@@ -63,7 +63,7 @@ function weaponMarkup(weapon,kind,c){
 function make(p={}){
  const kind=["mage","tank"].includes(p.classId)?p.classId:"swordsman";
  const gender=p.gender==="female"?"female":"male";
- const armor=String(p.armor||""),weapon=String(p.weapon||"");
+ const armor=String(p.armor||""),weapon=String(p.weapon||""),pose=p.pose==="attack"?"attack":p.pose==="cast"?"cast":"idle";
  const c=colors(armor,kind),hair=kind==="mage"?"#b4cfe0":gender==="female"?"#8d3f38":"#784b32";
  const armorPremium=/dragon|void|archmage|guardian plate|dawn|rift/i.test(armor);
  const robe=kind==="mage"||/robe|raiment|mantle/i.test(armor);
@@ -128,12 +128,18 @@ function make(p={}){
   rect(50,126,7,21,c.dark)+rect(98,126,7,19,c.dark)+
   (armorPremium?rect(60,132,8,8,c.gem)+rect(93,132,6,8,c.gem):"")+
   '</g>';
- const svg=base+garment+arms+face+hairMarkup+headgear+details+shield+weaponMarkup(weapon,kind,c)+
+ const stagedArms=pose==="idle"?arms:'<g transform="rotate('+(pose==="cast"?-15:kind==="tank"?-9:-18)+' 90 113)">'+arms+'</g>';
+ const stagedWeapon=pose==="idle"?weaponMarkup(weapon,kind,c):
+  '<g transform="rotate('+(pose==="cast"?-24:kind==="tank"?-60:-66)+' 139 135)">'+weaponMarkup(weapon,kind,c)+'</g>';
+ const attackAura=pose==="idle"?"":pose==="cast"?
+  '<g fill="none" stroke="#93edfc" stroke-width="4" opacity=".85"><circle cx="128" cy="43" r="23"/><path d="M101 45h55M129 14v54"/></g>':
+  '<g fill="none" stroke="#fff0a4" stroke-width="4" opacity=".9"><path d="M118 44q51 18 24 80"/><path d="M122 36q66 30 20 95" opacity=".45"/></g>';
+ const svg=base+garment+stagedArms+face+hairMarkup+headgear+details+shield+stagedWeapon+attackAura+
   '<g opacity=".7" fill="#f1ede0">'+rect(51,118,4,4,"#fff0c9")+rect(109,116,4,4,"#fff0c9")+'</g></svg>';
  return svg;
 }
 function url(p){
- const key=[p.classId,p.gender,p.armor,p.weapon].join("|");
+ const key=[p.classId,p.gender,p.armor,p.weapon,p.pose||"idle"].join("|");
  if(memo.has(key))return memo.get(key);
  const value="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(make(p));
  if(memo.size>200)memo.clear();
