@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.34.0",
+  "version": "0.35.0",
   "private": true,
-  "description": "SOULBOUND v0.34 - boss-only individual loot, 40-slot inventory, nine equip slots and dead-turn skipping",
+  "description": "SOULBOUND v0.35 — searchable in-game Adventure Index / Wiki with live encounter and equipment data",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
