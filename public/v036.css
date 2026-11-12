@@ -1,0 +1,45 @@
+/* SOULBOUND v0.36 — clean HUD and separate encyclopedia navigation */
+#game #v036GearData,#game #v036BagData{display:none!important}
+#game .game-layout .equipment-panel,#game .game-layout .inventory-panel{display:none!important}
+/* The Index is a separate information tool above Character Status,
+   never cramped beside the Equipment/Bag button. */
+#game .v22-hud-left #v035Open{
+ display:flex!important;align-items:center;justify-content:center;width:100%!important;
+ box-sizing:border-box;flex:0 0 35px!important;min-height:35px!important;
+ border:1px solid #c9a256!important;border-radius:6px!important;
+ padding:5px 9px!important;margin:0 0 2px!important;
+ color:#f6d9a1!important;background:linear-gradient(90deg,#292237,#4e3525,#292237)!important;
+ font:700 12px Georgia,serif!important;letter-spacing:1px!important;
+ cursor:pointer;text-align:center!important;white-space:nowrap
+}
+#game .v22-hud-left #v035Open:hover{filter:brightness(1.2)}
+#game .loadout-tools #v035Open{display:none!important}
+.v036-drop-list{display:flex;flex-direction:column;gap:6px;margin:8px 0 12px}
+.v036-drop-list button{
+ display:flex;align-items:center;justify-content:space-between;gap:9px;
+ border:1px solid #735d40;border-radius:5px;background:#252234;
+ color:#f1dcb8;text-align:left;cursor:pointer;padding:9px;
+ font:12px Georgia,serif
+}
+.v036-drop-list button:hover{border-color:#e8bd72;background:#3c2c32}
+.v036-drop-list button strong{flex:0 0 auto;color:#ffe29a;font-size:13px}
+.v036-source-link{
+ color:#f7d695;border:1px solid #c69c55;background:#2f2534;
+ border-radius:5px;padding:9px 11px;cursor:pointer;
+ text-align:left;font:700 12px Georgia,serif;width:100%
+}
+.v036-source-link:hover{background:#493329;border-color:#ffcf76}
+/* Camp food is now kept inside the bag, not below the quick potions. */
+.v032-bag .v036-food-heading{
+ font:700 11px Georgia,serif;letter-spacing:.4px;color:#e8c484;
+ border-top:1px solid #665037;padding:8px 2px 4px;margin-top:8px;flex:0 0 auto
+}
+.v032-bag #foodInventory{display:block!important;flex:0 0 auto;padding:4px 2px 8px;font-size:10px;max-height:145px;overflow-y:auto}
+.v032-bag #foodInventory .food-actions{display:flex;flex-wrap:wrap;gap:4px}
+.v032-bag #foodInventory button{font-size:10px;min-height:27px;padding:4px 6px}
+.v032-bag #foodInventory .food-title{display:none}
+.v032-bag #foodInventory small{line-height:1.4}
+@media(max-width:650px){
+ #game .v22-hud-left #v035Open{min-height:32px!important;font-size:11px!important}
+ .v032-bag #foodInventory{max-height:120px}
+}
