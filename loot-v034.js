@@ -51,7 +51,7 @@ function normalizeInventory(raw,shopItems){
   if(!item)continue;
   if(unique.has(item.uid))item.uid=randomUUID();
   unique.add(item.uid);
-  result.push(item);if(result.length>=40)break;
+  result.push(item); // Preserve pre-v0.34 saves even if they exceed the new 40-slot limit; block *new* items until space is available.
  }
  // Server only trusts one equipped item per slot; duplicate slots are kept in bag, unequipped.
  const seen=new Set();for(const it of result){if(it.equippedSlot){if(seen.has(it.equippedSlot))delete it.equippedSlot;else seen.add(it.equippedSlot)}}
