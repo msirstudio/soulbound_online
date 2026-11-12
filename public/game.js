@@ -54,7 +54,7 @@ const tank=me?.classId==="tank";const skillTips=tank?["SHIELD BASH\nDamage: 0.9�
 "ARMOR REND\nDamage: 1.25× ATK\nMana: "+skill5Cost+" MP\nUnlocks at Level 5 · Cooldown: 4 rounds\nMakes the monster take 20% more damage for 3 rounds."
 ];
 const skillButtons=[$("skillButton"),$("skill2Button"),$("skill3Button"),$("skill4Button"),$("skill5Button")];
-skillButtons.forEach((b,i)=>{b.dataset.tooltip=skillTips[i];b.title=skillTips[i].replaceAll("\n"," · ");b.setAttribute("aria-label",b.title)});
+skillButtons.forEach((b,i)=>{b.dataset.tooltip=skillTips[i];b.removeAttribute("title");b.setAttribute("aria-label",b.title)});
 $("skillButton").textContent=mage?"🔮 ARCANE BOLT":tank?"🛡 SHIELD BASH":"🔥 POWER STRIKE";
 $("skill2Button").textContent=mage?"☄ METEOR":tank?"🧱 IRON WALL":"✴ WHIRLWIND";
 $("skill3Button").textContent=mage?"❄ FROST NOVA":tank?"📣 PROVOKE":"🛡 SHIELD BREAKER";
