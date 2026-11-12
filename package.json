@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.30.0",
+  "version": "0.31.1",
   "private": true,
-  "description": "SOULBOUND v0.30 - character creator, class/gender preview, gear-aware animated hero graphics",
+  "description": "SOULBOUND v0.31.1 - frame-by-frame Swordsman sprite-sheet engine, 6 idle and 8 attack poses, male/female",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
