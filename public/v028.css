@@ -47,3 +47,5 @@
  #game .v28-exp-head{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){#game .v28-exp-meter span{transition:none!important}}
+
+#game .v28-audio-status{margin-top:8px;font-size:10px;line-height:1.45;color:#dec6a3;overflow-wrap:anywhere}
