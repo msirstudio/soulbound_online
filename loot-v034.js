@@ -71,12 +71,13 @@ function normalizeInventory(raw,shopItems){
  return result;
 }
 function bagUsed(player){return (player.inventory||[]).filter(it=>!it.equippedSlot).length}
-function dropBossLoot(player,stage,logger=()=>{}){
- if(stage%3!==0)return null;
+function dropBossLoot(player,stage,logger=()=>{},explicitBossIndex){
+ if(!explicitBossIndex&&stage%3!==0)return null;
  player.inventory=Array.isArray(player.inventory)?player.inventory:[];
  if(bagUsed(player)>=40){logger(player.name+"'s bag is full (40/40): boss loot was not collected.");return null}
  // Each player rolls once against a fixed per-boss drop table. A failed roll gives no item.
- const boss=Math.max(1,Math.min(8,Math.round(stage/3)));
+ const boss=explicitBossIndex?Math.round(Number(explicitBossIndex)):Math.max(1,Math.min(8,Math.round(stage/3)));
+ if(!Number.isInteger(boss)||!BOSS_DROPS[boss])return null;
  const roll=Math.random()*100;let sum=0,chosen=null;
  for(const entry of BOSS_DROPS[boss]){sum+=entry.chance;if(roll<sum){chosen=entry;break}}
  if(!chosen){logger(player.name+" received no boss equipment this time.");return null}
