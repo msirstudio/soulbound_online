@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 500" preserveAspectRatio="xMidYMid slice"><defs><radialGradient id="petal"><stop stop-color="#fbd9e0"/><stop offset=".52" stop-color="#eea4c4"/><stop offset="1" stop-color="#be6799"/></radialGradient></defs>
+<g fill="url(#petal)">
+<circle cx="48" cy="71" r="66"/><circle cx="107" cy="37" r="66"/><circle cx="175" cy="50" r="69"/><circle cx="240" cy="28" r="79"/><circle cx="311" cy="77" r="59"/><circle cx="380" cy="67" r="61"/>
+<circle cx="27" cy="149" r="61"/><circle cx="98" cy="129" r="68"/><circle cx="195" cy="107" r="66"/><circle cx="268" cy="109" r="74"/><circle cx="347" cy="123" r="55"/>
+</g>
+<g fill="#ffdbe1" opacity=".75"><circle cx="72" cy="28" r="20"/><circle cx="162" cy="20" r="24"/><circle cx="286" cy="13" r="25"/><circle cx="343" cy="84" r="22"/><circle cx="124" cy="95" r="23"/><circle cx="218" cy="138" r="19"/></g>
+<g fill="#9a4a81" opacity=".3"><path d="M0 150q40-25 80 10t100-7q90-15 134 23l63-27-21 56q-73-5-125-2-100-11-160 2H0z"/></g>
+</svg>
