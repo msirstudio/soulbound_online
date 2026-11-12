@@ -1,0 +1,28 @@
+/* SOULBOUND v0.39 — full-size, transparent pixel boss art.
+   Only applies if both normal and hit PNGs are available. All normal enemies,
+   and any missing boss PNG assets, keep the existing SVG styling. */
+#game .arena .monster-img.v039-boss-art{
+ width:clamp(125px,20vw,310px)!important;
+ height:clamp(125px,29dvh,310px)!important;
+ max-width:100%!important;
+ object-fit:contain!important;
+ object-position:center bottom!important;
+ image-rendering:pixelated;
+ background:transparent!important;
+ filter:drop-shadow(0 9px 6px #04040a99);
+ transition:filter 90ms ease-out,transform 90ms ease-out;
+}
+#game .arena .monster-img.v039-boss-art.v039-hit{
+ filter:brightness(1.32) saturate(1.15) drop-shadow(0 0 9px #ff6666a6);
+ transform:translateX(3px);
+}
+@media(max-width:700px){
+ #game .arena .monster-img.v039-boss-art{
+   height:clamp(115px,23dvh,210px)!important;
+   width:clamp(115px,33vw,225px)!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ #game .arena .monster-img.v039-boss-art{transition:none!important}
+ #game .arena .monster-img.v039-boss-art.v039-hit{transform:none!important}
+}
