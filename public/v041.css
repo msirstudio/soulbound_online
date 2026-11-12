@@ -289,3 +289,52 @@ body:not(:has(#game:not([hidden]))) #lobby:not([hidden]){
 @media(prefers-reduced-motion:reduce){
  #v041Front .v041-front-menu button,#game .game-side-column{transition:none!important}
 }
+
+/* Stable battle HUD slot placement. Prior releases placed individual panels in
+   a shared grid; v0.41 restores simple explicit columns with scrollable stacks. */
+#game .game-layout .v22-hud-left,
+#game .game-layout .v22-hud-center,
+#game .game-layout .v22-hud-right{
+ box-sizing:border-box!important;display:flex!important;flex-direction:column!important;
+ gap:7px!important;grid-row:1!important;height:auto!important;
+ min-width:0!important;position:relative!important;align-self:stretch!important}
+#game .game-layout .v22-hud-left{grid-column:1!important}
+#game .game-layout .v22-hud-center{grid-column:2!important}
+#game .game-layout .v22-hud-right{grid-column:3!important}
+#game .game-layout .v22-hud-stack>.panel{
+ grid-row:auto!important;grid-column:auto!important;transform:none!important;
+ height:auto!important;min-height:0!important;margin:0!important;
+ position:relative!important;inset:auto!important;align-self:stretch!important;
+ max-width:100%!important;flex:0 0 auto!important;overflow:visible!important;
+}
+#game .game-layout .v22-hud-stack>.panel[hidden]{display:none!important}
+#game .game-layout .v22-hud-stack .hero-panel,
+#game .game-layout .v22-hud-stack .progression-panel{margin-left:0!important}
+#game .game-layout .v22-hud-stack .skills-panel{flex:1 1 auto!important}
+#game .v22-hud-center .equipment-panel:not(.is-open),
+#game .v22-hud-right .inventory-panel:not(.is-open){display:none!important}
+#game .game-layout .v22-hud-stack .skills-panel .skill-actions{
+ display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:6px!important}
+#game .game-layout .v22-hud-stack .skills-panel .skill-actions button{
+ box-sizing:border-box!important;min-width:0!important;min-height:35px!important;
+ padding:7px 8px!important;white-space:normal!important;font-size:11px!important}
+#game .game-layout .v22-hud-stack .potion-panel .potion-actions button{min-width:0!important}
+#game .roomline{flex-wrap:wrap!important}
+#game.v040-hub .game-layout .v22-hud-left,
+#game.v040-hub .game-layout .v22-hud-center,
+#game.v040-hub .game-layout .v22-hud-right{grid-row:auto!important}
+#game.v040-hub .game-layout .v22-hud-left{display:grid!important;grid-column:1!important;
+ grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;grid-template-rows:auto!important;gap:10px!important}
+#game.v040-hub .game-layout .v22-hud-left .hero-panel{grid-column:1!important;grid-row:1!important}
+#game.v040-hub .game-layout .v22-hud-left .progression-panel{grid-column:2!important;grid-row:1!important}
+@media(max-width:1059px),(max-height:719px){
+ #game .game-layout .v22-hud-right{grid-column:1/-1!important;grid-row:2!important}
+ #game.v040-hub .game-layout .v22-hud-left{grid-template-columns:1fr!important}
+ #game.v040-hub .game-layout .v22-hud-left .progression-panel{grid-column:1!important;grid-row:2!important}
+}
+@media(max-width:720px){
+ #game .game-layout .v22-hud-left{grid-column:1!important;grid-row:1!important}
+ #game .game-layout .v22-hud-center{grid-column:1!important;grid-row:2!important}
+ #game .game-layout .v22-hud-right{grid-column:1!important;grid-row:3!important}
+ #game .game-layout .v22-hud-stack .skills-panel .skill-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
