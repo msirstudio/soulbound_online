@@ -3,7 +3,7 @@
 (()=>{
  "use strict";
  let ctx,master,musicBus,fxBus,loop=null,step=0,musicOn=false;
- let volume=.38,sfxVolume=.76,scene="wilds",combat=false, lastSfx=Object.create(null);
+ let volume=.72,sfxVolume=1,scene="wilds",combat=false, lastSfx=Object.create(null);
  const scales={
   wilds:{root:220,notes:[0,2,3,7,9,10,12,14],bpm:86,wave:"sine"},
   ruins:{root:196,notes:[0,2,5,7,10,12,14,17],bpm:78,wave:"triangle"},
@@ -19,7 +19,7 @@
   if(!AudioCtor)return null;
   if(!ctx){
    ctx=new AudioCtor();
-   master=ctx.createGain();master.gain.value=volume;master.connect(ctx.destination);
+   master=ctx.createGain();master.gain.value=volume;const limiter=ctx.createDynamicsCompressor();limiter.threshold.value=-12;limiter.knee.value=9;limiter.ratio.value=10;limiter.attack.value=.003;limiter.release.value=.16;master.connect(limiter);limiter.connect(ctx.destination);
    musicBus=ctx.createGain();musicBus.gain.value=.25;musicBus.connect(master);
    fxBus=ctx.createGain();fxBus.gain.value=sfxVolume;fxBus.connect(master);
   }
@@ -47,20 +47,29 @@
   env.gain.exponentialRampToValueAtTime(.0001,t+duration);
   source.connect(filter);filter.connect(env);env.connect(fxBus);source.start(t);source.stop(t+duration+.01);
  }
+ /* v0.26.1b: separate metal edge, air swing and blade impact layers.
+    Oscillators only carry a small tonal shimmer; noise supplies real attack texture. */
  function sword(){
-  noise(.18,.072,960);tone(860,.12,"sawtooth",.035,0,"fx",220);
-  noise(.055,.075,1600,.095);tone(154,.16,"triangle",.065,.09,"fx",70);
+  noise(.075,.26,1450);
+  tone(1560,.075,"sawtooth",.055,0,"fx",520);
+  noise(.19,.20,2400,.034);
+  tone(230,.105,"triangle",.12,.075,"fx",90);
+  noise(.10,.12,500,.11);
  }
  function blunt(){
-  tone(150,.22,"triangle",.083,0,"fx",54);noise(.14,.10,150,.035);tone(74,.25,"sine",.055,.06,"fx",42);
+  noise(.055,.11,600);
+  tone(138,.26,"triangle",.20,0,"fx",46);
+  noise(.20,.23,90,.03);
+  tone(88,.27,"sine",.16,.045,"fx",39);
  }
  function magic(){
-  [0,3,7,12].forEach((n,i)=>tone(hz(360,n),.27,"sine",.03,i*.04,"fx",hz(660,n)));
-  noise(.22,.025,1800,.1);
+  noise(.24,.14,1400);
+  [0,5,7,12].forEach((n,i)=>tone(hz(295,n),.36,"sine",.075,i*.034,"fx",hz(480,n)));
+  tone(95,.32,"triangle",.09,.06,"fx",45);
  }
- function guard(){tone(720,.23,"triangle",.055,0,"fx",380);tone(410,.34,"sine",.045,.03,"fx",290);noise(.15,.035,2400)}
+ function guard(){noise(.16,.16,1750);tone(940,.28,"triangle",.09,0,"fx",410);tone(385,.35,"sine",.075,.02,"fx",220)}
  function heal(){[523.25,659.25,783.99,1046.5].forEach((n,i)=>tone(n,.37,"sine",.035,i*.10))}
- function hit(){noise(.11,.06,240);tone(134,.21,"sawtooth",.065,0,"fx",55)}
+ function hit(){noise(.12,.19,180);tone(170,.20,"triangle",.15,0,"fx",58);noise(.055,.11,800,.026)}
  function ui(){tone(780,.065,"sine",.018);tone(1040,.085,"sine",.01,.055)}
  function win(){[392,523.25,659.25,784,1046.5].forEach((n,i)=>tone(n,.4,"triangle",.04,i*.12))}
  function lose(){[392,330,261.63,196,130.81].forEach((n,i)=>tone(n,.41,"triangle",.037,i*.17))}
@@ -72,7 +81,7 @@
    else if(name==="skill"){if(details.classId==="mage")magic();else{tone(330,.28,"sawtooth",.05,0,"fx",900);sword()}}
    else if(name==="hit")hit();else if(name==="heal")heal();else if(name==="mana")magic();else if(name==="guard")guard();
    else if(name==="victory")win();else if(name==="defeat")lose();else if(name==="boss")boss();
-   else if(name==="buy"||name==="menu"||name==="equip")ui();
+   else if(name==="levelup"){[294,440,587,880].forEach((f,i)=>tone(f,.42,"sine",.06,i*.08));noise(.30,.08,1400)}else if(name==="buy"||name==="menu"||name==="equip")ui();
   }catch(err){/* audio errors must never interrupt the game */ }
  }
  const patterns={
