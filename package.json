@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.29.0",
+  "version": "0.30.0",
   "private": true,
-  "description": "SOULBOUND v0.29: compact visible HUD at 100% zoom and tuned recorded combat SFX",
+  "description": "SOULBOUND v0.30 - character creator, class/gender preview, gear-aware animated hero graphics",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
