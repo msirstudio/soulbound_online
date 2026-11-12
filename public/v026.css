@@ -107,3 +107,22 @@
  #game .arena .hero-figure .sprite-img{animation:none!important;will-change:auto!important}
  #game .v22-hud-center .equipment-panel.is-open,#game .v22-hud-right .inventory-panel.is-open{animation:none!important}
 }
+
+/* Three independent class-themed impact FX: CSS only, no extra image downloads. */
+#game .arena .v26-impact{position:absolute!important;left:71%;top:49%;width:110px;height:110px;z-index:11!important;pointer-events:none!important;opacity:0;transform:translate(-50%,-50%);border-radius:50%;overflow:visible!important}
+#game .arena .v26-impact::before,#game .arena .v26-impact::after{content:"";position:absolute;pointer-events:none}
+#game .arena .v26-impact-slash{animation:v26-impact-enter .45s ease-out both}
+#game .arena .v26-impact-slash::before{left:10%;top:43%;width:90%;height:15%;border-radius:70%;background:linear-gradient(90deg,transparent,#b8f5fb,#fff,transparent);box-shadow:0 0 18px #e6ffff;transform:rotate(-42deg);animation:v26-slash-sweep .45s ease-out both}
+#game .arena .v26-impact-slash::after{inset:20%;border:3px solid #fff1b8;border-left-color:transparent;border-bottom-color:transparent;border-radius:50%;transform:rotate(35deg)}
+#game .arena .v26-impact-magic{animation:v26-impact-enter .8s ease-out both}
+#game .arena .v26-impact-magic::before{inset:10%;border:5px solid #a5ebff;border-radius:50%;box-shadow:0 0 12px #79def4,0 0 35px #ac7ff6,inset 0 0 18px #c7eeff;background:radial-gradient(circle,#fffbd977 0%,#85d9ff66 40%,transparent 70%);animation:v26-spell-burst .8s ease-out both}
+#game .arena .v26-impact-magic::after{inset:-10%;border:3px dashed #ffdb9c;border-radius:50%;animation:v26-magic-orbit .8s ease-out both}
+#game .arena .v26-impact-smash{animation:v26-impact-enter .55s ease-out both}
+#game .arena .v26-impact-smash::before{inset:25%;background:radial-gradient(circle,#fff8ce,#fac267 35%,#8b4a3866 65%,transparent 76%);box-shadow:0 0 25px #ed7f35;animation:v26-smash-shock .55s ease-out both}
+#game .arena .v26-impact-smash::after{inset:4%;border:6px solid #f3b673;border-radius:50%;border-top-color:transparent;animation:v26-smash-shock .55s ease-out both}
+@keyframes v26-impact-enter{0%{opacity:0;transform:translate(-50%,-50%) scale(.3)}20%{opacity:1;transform:translate(-50%,-50%) scale(1)}72%{opacity:.92}100%{opacity:0;transform:translate(-50%,-50%) scale(1.55)}}
+@keyframes v26-slash-sweep{from{transform:translate(-40px,40px) rotate(-48deg) scaleX(.3)}to{transform:translate(20px,-25px) rotate(-48deg) scaleX(1.7)}}
+@keyframes v26-spell-burst{from{transform:scale(.15)}60%{transform:scale(1.1)}to{transform:scale(1.8)}}
+@keyframes v26-magic-orbit{from{transform:rotate(0) scale(.3)}to{transform:rotate(360deg) scale(1.5)}}
+@keyframes v26-smash-shock{from{transform:scale(.2)}to{transform:scale(1.8)}}
+@media(prefers-reduced-motion:reduce){#game .arena .v26-impact{display:none!important}}
