@@ -80,4 +80,6 @@ test("menu hides finale boss, logo does not split, hero lobby grows, and side ta
  assert.doesNotMatch(ui,/createElement\("button"\);scrim/);
  assert.match(html,/reward-float-v0411\.js/);
  assert.match(read("public/game.js"),/SoulboundRewardV411\?\.show\(last,s,myId\)/);
+ assert.match(read("public/adventure-index-v035.js"),/toolbar\.appendChild\(btn\)/);
+ assert.match(css,/#game \.roomline \.v041-toolbar #v035Open\.v035-open/);
 });
