@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "private": true,
-  "description": "SOULBOUND Online v0.16 - matched under-character vitals, compact potions and lobby",
+  "description": "SOULBOUND Online v0.17 - asymmetrical fantasy MMORPG HUD and visible inventory",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
