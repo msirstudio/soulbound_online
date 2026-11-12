@@ -547,3 +547,72 @@ body:has(#game:not([hidden])) .site-header{display:none}
  #game .equipment-panel.is-open:not(:has(+ .inventory-panel.is-open)){right:0}
 }
 @media (max-width:999px),(max-height:649px){#game .loadout-tools{margin:5px 0}#game .equipment-panel,#game .inventory-panel{display:block}}
+
+/* v0.15 — Compact combat HUD based on glanceable RPG interface hierarchy */
+#game .actions button[data-tooltip]::after,#game .actions button[data-tooltip]::before,
+#game [data-tooltip]::after,#game [data-tooltip]::before{display:none!important}
+#v15Tooltip{position:fixed;z-index:100000;box-sizing:border-box;pointer-events:none;white-space:pre-line;line-height:1.35;font:17px 'VT323',monospace;color:#fff1d3;background:#181522f5;border:1px solid #d4a45f;border-radius:5px;padding:10px 14px;box-shadow:0 8px 22px #000b;overflow-wrap:anywhere}
+#v15Tooltip[hidden]{display:none!important}
+#game .race-card{display:flex!important;align-items:center;justify-content:space-between;gap:5px;min-height:0}
+#game .race-card .race-points{flex-shrink:0}
+#game .race-card .race-points button{font-size:8px;padding:7px 5px;max-width:140px}
+#game .race-card small{font-size:12px}
+#game .hero-panel .my-stats{display:block!important}
+#game .hero-panel .hero-meta{font-size:14px;line-height:1.3}
+#game .hero-panel .hero-hud-top strong{font-size:clamp(14px,1vw,19px)}
+#game .hero-panel .hero-bar-label{font-size:15px}
+#game .hero-panel .hero-bar{height:11px}
+#game .figure-vitals{width:clamp(100px,11vw,170px);background:#111724d9;border:1px solid #b49a6b88;border-radius:4px;padding:4px 7px;margin:0 auto 5px;color:#f8ebd0;font:13px 'VT323',monospace;text-shadow:0 1px #000}
+#game .figure-vitals strong{display:block;font-size:14px;line-height:1.1}
+#game .figure-vitals small{display:block;font-size:11px;line-height:1.1}
+#game .figure-meter{height:7px;margin:3px 0 1px;background:#160d1b;border:1px solid #e6c7a344;border-radius:2px;overflow:hidden}
+#game .figure-meter i{display:block;height:100%;transition:width .2s}
+#game .hp-meter i{background:linear-gradient(90deg,#a62d49,#ef5772)}
+#game .mp-meter i{background:linear-gradient(90deg,#2163ac,#5aaef5)}
+#game .hero-figure{display:flex;flex-direction:column;align-items:center}
+#game .hero-figure>small{display:none}
+#game .potion-panel .potion-note{display:none}
+#game .potion-panel .potion-group{margin:0}
+#game .potion-panel .potion-group>strong{font-size:10px;margin:2px 0}
+#game .potion-panel .potion-actions{gap:4px}
+#game .potion-panel .potion-actions button{min-height:30px!important;padding:4px 3px!important;font-size:9px}
+#game .potion-panel .potion-actions button:disabled{opacity:.45}
+#game .progression-panel .stat-title{font-size:11px}
+#game .progression-panel #statPoints{font-size:15px;color:#e9c88e}
+#game .progression-panel #statValues{font-size:16px;line-height:1.3}
+#game .progression-panel .stat-buttons button{font-size:9px}
+#game .game-side-column .player{padding:5px}
+#game .game-side-column .player-bars{font-size:13px}
+@media (min-width:1000px) and (min-height:650px){
+ #game .arena{flex:0 0 clamp(215px,34dvh,450px);height:clamp(215px,34dvh,450px)}
+ #game .monster-img{height:clamp(115px,20dvh,240px);width:clamp(125px,16vw,280px)}
+ #game .sprite-img{height:clamp(70px,13dvh,150px);width:clamp(60px,6vw,110px)}
+ #game .battlefield{gap:12px}
+ #game .game-layout{grid-template-columns:minmax(0,1fr) minmax(255px,24%);gap:7px}
+ #game .game-main-column{grid-template-columns:minmax(255px,34%) minmax(0,1fr);grid-template-rows:minmax(0,1.15fr) minmax(0,.85fr);gap:6px}
+ #game .hero-panel{grid-column:1;grid-row:1;overflow:auto}
+ #game .progression-panel{grid-column:1;grid-row:2;overflow:auto}
+ #game .skills-panel{grid-column:2;grid-row:1;overflow:auto}
+ #game .potion-panel{grid-column:2;grid-row:2;overflow:auto;padding-bottom:42px}
+ #game .race-card{display:flex!important;padding:5px!important}
+ #game .hero-panel .my-stats{display:block!important}
+ #game .game-side-column{grid-template-rows:minmax(0,1fr) minmax(145px,.9fr)}
+ #game .game-side-column .log{height:clamp(90px,14vh,170px);font-size:14px}
+ #game .game-side-column .chat-messages{height:clamp(40px,6vh,75px)}
+ #game .skill-actions{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #game .actions button{min-height:38px;font-size:10px}
+ #game .potion-panel .potion-actions button{min-height:30px!important}
+ #game .potion-panel .potion-group{margin:0 0 5px}
+ #game .stage-actions{max-height:38px}
+}
+@media (min-width:1000px) and (min-height:650px) and (max-height:760px){
+ #game .arena{flex-basis:31dvh;height:31dvh}
+ #game .monster-img{height:17dvh}
+ #game .sprite-img{height:11dvh}
+ #game .figure-vitals{padding:2px 5px}
+ #game .race-card{display:flex!important}
+}
+@media (max-width:999px),(max-height:649px){
+ #game .figure-vitals{width:100px}
+ #game .potion-panel{padding-bottom:8px}
+}
