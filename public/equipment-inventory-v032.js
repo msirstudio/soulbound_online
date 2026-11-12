@@ -49,17 +49,25 @@ function init(){
   if(e.target.closest("[data-v032-close],#v032Close,#v032Done")){close();return}
   const cell=e.target.closest("[data-v032-slot]");if(cell){onSlot(cell.dataset.v032Slot);return}
   const item=e.target.closest("[data-v032-item]");if(item){
-    selected=item.dataset.v032Item;modal.querySelectorAll(".v032-item").forEach(n=>n.classList.toggle("selected",n.dataset.v032Item===selected));
-    notify("Selected "+(selectedItem(selected)?.name||"item")+". Click a matching slot to equip.");
+    selected=selected===item.dataset.v032Item?null:item.dataset.v032Item;modal.querySelectorAll(".v032-item").forEach(n=>n.classList.toggle("selected",n.dataset.v032Item===selected));
+    notify(selected?"Selected "+(selectedItem(selected)?.name||"item")+". Click a matching slot to equip.":"Selection cleared. Click a worn slot to unequip.");
   }
  });
  modal.addEventListener("dragstart",e=>{
+  const worn=e.target.closest("[data-v032-slot]");
+  if(worn){
+    const key=worn.dataset.v032Slot;
+    const wornGear=(me?.inventory||[]).find(it=>it.equippedSlot===key);
+    if(wornGear){e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain","unequip:"+key);return}
+  }
   const item=e.target.closest("[data-v032-item]");if(!item)return;
   selected=item.dataset.v032Item;
   e.dataTransfer.effectAllowed="move";
   e.dataTransfer.setData("text/plain",selected);
  });
  modal.addEventListener("dragover",e=>{
+  const bag=e.target.closest("#v032Bag");
+  if(bag){if(e.dataTransfer.types.includes("text/plain"))e.preventDefault();return}
   const slot=e.target.closest("[data-v032-slot]");
   if(!slot)return;
   const item=selectedItem(selected);
@@ -69,9 +77,16 @@ function init(){
   const cell=e.target.closest("[data-v032-slot]");if(cell&&!cell.contains(e.relatedTarget))cell.classList.remove("v032-over");
  });
  modal.addEventListener("drop",e=>{
+  const bag=e.target.closest("#v032Bag");
+  if(bag){
+    const data=e.dataTransfer.getData("text/plain");
+    if(data.startsWith("unequip:")){e.preventDefault();selected=null;onSlot(data.slice(8),null)}
+    return;
+  }
   const cell=e.target.closest("[data-v032-slot]");if(!cell)return;
   e.preventDefault();modal.querySelectorAll(".v032-over").forEach(n=>n.classList.remove("v032-over"));
   const key=e.dataTransfer.getData("text/plain")||selected;
+  if(key.startsWith("unequip:"))return notify("Drop equipped items into the bag to remove them, or click an empty selection.",true);
   onSlot(cell.dataset.v032Slot,key);
  });
  document.addEventListener("keydown",e=>{
@@ -124,7 +139,7 @@ function onSlot(slot,itemId=selected){
 }
 function slotMarkup(key,emoji,label,item,active){
  const name=item?.name||"EMPTY";
- return '<button type="button" class="v032-slot '+(item?"filled":"")+'" data-v032-slot="'+key+'" aria-label="'+esc(label+": "+name)+'">'+
+ return '<button type="button" draggable="'+(item?"true":"false")+'" class="v032-slot '+(item?"filled":"")+'" data-v032-slot="'+key+'" aria-label="'+esc(label+": "+name)+'">'+
  '<span class="v032-slot-icon">'+emoji+'</span><strong>'+esc(label)+'</strong><small title="'+esc(name)+'">'+esc(name)+'</small></button>';
 }
 function draw(){
