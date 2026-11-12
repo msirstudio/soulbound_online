@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "private": true,
-  "description": "SOULBOUND Online v0.17 - asymmetrical fantasy MMORPG HUD and visible inventory",
+  "description": "SOULBOUND Online v0.18 - staggered panels, visible main menu, no potion scrolling and wide masthead",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
