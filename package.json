@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.38.0",
+  "version": "0.39.0",
   "private": true,
-  "description": "SOULBOUND v0.38 — Thai/English bilingual game interface, translated Wiki and gameplay notices",
+  "description": "SOULBOUND v0.39 — eight 2-state boss pixel sprites with damage hit-pose and SVG fallback",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
