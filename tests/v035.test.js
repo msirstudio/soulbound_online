@@ -10,7 +10,7 @@ function catalog(){
  class Server{on(){}to(){return{emit(){}}}}
  const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:
   name==="path"?{join:()=>""}:name==="socket.io"?{Server}:
-  name==="node:crypto"?require("node:crypto"):name==="./loot-v034"?loot:require(name);
+  name==="node:crypto"?require("node:crypto"):name==="./loot-v034"?loot:name==="./world-v040"?require("../world-v040"):require(name);
  new Function("require","process","console","__dirname",src+";")(
   deps,{env:{}},{log(){}},path.join(__dirname,".."));
  const handler=routes.get("/api/index");
@@ -19,16 +19,16 @@ function catalog(){
  handler({}, {set(){return this},json(payload){output=payload}});
  return output;
 }
-test("index serves exact scaled values for 24 stages and all eight bosses",()=>{
+test("index serves exact scaled values for 40 stages and all eight bosses",()=>{
  const data=catalog();
- assert.equal(data.version,"0.37.0");
- assert.equal(data.monsters.length,24);
+ assert.equal(data.version,"0.40.0");
+ assert.equal(data.monsters.length,40);
  assert.equal(data.monsters.filter(x=>x.boss).length,8);
- assert.equal(data.monsters.filter(x=>!x.boss).length,16);
- const stage3=data.monsters.find(x=>x.stage===3);
+ assert.equal(data.monsters.filter(x=>!x.boss).length,32);
+ const stage3=data.monsters.find(x=>x.stage===5);
  assert.deepEqual([stage3.hp,stage3.atk,stage3.def],[260,22,7]);
- const stage24=data.monsters.find(x=>x.stage===24);
- const scale=1+Math.floor((24-1)/3)*.23;
+ const stage24=data.monsters.find(x=>x.stage===40);
+ const scale=1+7*.23;
  assert.deepEqual([stage24.hp,stage24.atk,stage24.def],[Math.round(1500*scale),Math.round(72*scale),Math.round(29*scale)]);
 });
 test("wiki lists only 16 curated boss items, shop gear and food",()=>{
@@ -38,7 +38,7 @@ test("wiki lists only 16 curated boss items, shop gear and food",()=>{
  assert.ok(data.items.some(x=>x.category==="armor"&&x.price!=null));
  assert.equal(data.items.filter(x=>x.category==="food").length,3);
  assert.equal(data.items.filter(x=>x.category==="consumables").length,6);
- assert.equal(data.zones.length,6);
+ assert.equal(data.zones.length,8);
 });
 test("every boss rarity/item record matches the canonical loot factory",()=>{
  const data=catalog();
@@ -48,7 +48,7 @@ test("every boss rarity/item record matches the canonical loot factory",()=>{
   assert.equal(it.name,item.name);
   assert.deepEqual([it.value,it.defense,it.maxHp,it.maxMp],[item.value,item.defense,item.maxHp,item.maxMp]);
  }
- assert.equal(data.bossDropTables[3].length,2);assert.deepEqual(data.bossDropTables[3].map(x=>[x.slot,x.rarity,x.chance]),[["main","rare",12],["ring_left","uncommon",38]]);
+ assert.equal(data.bossDropTables[5].length,2);assert.deepEqual(data.bossDropTables[3].map(x=>[x.slot,x.rarity,x.chance]),[["main","rare",12],["ring_left","uncommon",38]]);
 });
 test("each normal monster reports no equipment drop, bosses show loot",()=>{
  const data=catalog();
