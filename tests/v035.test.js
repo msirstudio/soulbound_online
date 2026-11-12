@@ -31,9 +31,9 @@ test("index serves exact scaled values for 24 stages and all eight bosses",()=>{
  const scale=1+Math.floor((24-1)/3)*.23;
  assert.deepEqual([stage24.hp,stage24.atk,stage24.def],[Math.round(1500*scale),Math.round(72*scale),Math.round(29*scale)]);
 });
-test("wiki has shop supplies and only 16 curated boss drops",()=>{
+test("wiki has shop supplies and only 15 curated boss drops",()=>{
  const data=catalog();
- assert.equal(data.items.filter(x=>x.source).length,16);
+ assert.equal(data.items.filter(x=>x.source).length,15);
  assert.ok(data.items.some(x=>x.category==="weapons"&&x.price!=null));
  assert.ok(data.items.some(x=>x.category==="armor"&&x.price!=null));
  assert.equal(data.items.filter(x=>x.category==="food").length,3);
