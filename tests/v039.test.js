@@ -31,13 +31,13 @@ function harness({missing=false}={}){
 }
 const monster=(hp=260)=>({boss:true,name:"The Briarfang Alpha",sprite:"boss-briarfang",hp});
 test("all eight boss stages are registered",()=>{
- const app=harness();for(const stage of [3,6,9,12,15,18,21,24])assert.ok(app.api.imagesFor(stage));
+ const app=harness();for(const stage of [5,10,15,20,25,30,35,40])assert.ok(app.api.imagesFor(stage));
  assert.equal(app.api.status().bosses,8);
 });
 test("normal -> hit -> normal on HP decrease, but not on healing",async()=>{
- const app=harness();app.api.render(monster(260),3);await app.settle();
+ const app=harness();app.api.render(monster(260),5);await app.settle();
  assert.equal(app.target.attrs.src,"/assets/bosses/v039/briarfang_alpha_normal.png");
- app.api.render(monster(230),3);
+ app.api.render(monster(230),5);
  assert.equal(app.target.attrs.src,"/assets/bosses/v039/briarfang_alpha_hit.png");
  app.tick(600);
  assert.equal(app.target.attrs.src,"/assets/bosses/v039/briarfang_alpha_normal.png");
