@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.41.0",
+  "version": "0.41.1",
   "private": true,
-  "description": "SOULBOUND v0.41 UI Foundation — new main menu, login/hero lobby flow, compact city/battle HUD, responsive Party Chat Log drawers and shared design tokens",
+  "description": "SOULBOUND v0.41.1 UI Fix Pass — persistent non-modal Party Chat Log dock, spoiler-free world title, robust responsive typography, and victory loot floats",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
