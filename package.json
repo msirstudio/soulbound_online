@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.37.0",
+  "version": "0.38.0",
   "private": true,
-  "description": "SOULBOUND v0.37 — curated fixed-rarity boss loot with exact drop odds, linked Wiki and compact HUD",
+  "description": "SOULBOUND v0.38 — Thai/English bilingual game interface, translated Wiki and gameplay notices",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
