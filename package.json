@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "private": true,
-  "description": "SOULBOUND v0.22 - viewport-safe restructured HUD, fixed action dock and animated layered wilderness",
+  "description": "SOULBOUND Online v0.23 - six four-stage biome artworks, merchant overlay and AI background hooks",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
