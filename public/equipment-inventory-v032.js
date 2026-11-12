@@ -3,10 +3,12 @@
 (function(){
 "use strict";
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+/* Left column: armor, right column: weapons and jewelry. */
 const slots=[
- ["head","🪖","HELMET"],["neck","💎","NECKLACE"],["chest","🛡","CHEST ARMOR"],
- ["pants","👖","PANTS"],["boots","🥾","BOOTS"],["main","⚔","MAIN WEAPON"],
- ["offhand","🗡","OFF-HAND"],["ring_left","💍","LEFT RING"],["ring_right","💍","RIGHT RING"]
+ ["head","🪖","HELMET"],["chest","🛡","CHEST ARMOR"],
+ ["pants","👖","PANTS"],["boots","🥾","BOOTS"],
+ ["main","⚔","MAIN WEAPON"],["offhand","🗡","OFF-HAND"],
+ ["neck","💎","NECKLACE"],["ring_left","💍","LEFT RING"],["ring_right","💍","RIGHT RING"]
 ];
 let modal,openButton,closeButton,me=null,room=null,equipAction=null,selected=null,busy=false,previousFocus=null;
 const aliases={weapon:"main",mainhand:"main",main_weapon:"main",armor:"chest",chest_armor:"chest",helmet:"head",hat:"head",head:"head",necklace:"neck",neck:"neck",legs:"pants",pants:"pants",shoes:"boots",boots:"boots",offhand:"offhand",off_hand:"offhand",shield:"offhand",ring:"ring_left",ring_left:"ring_left",ring_right:"ring_right"};
@@ -18,12 +20,12 @@ function notify(message,err=false){
 }
 function init(){
  if(document.getElementById("v032Modal"))return;
- const el=document.createElement("div");el.id="v032Modal";el.className="v032-overlay";el.hidden=true;
+ const el=document.createElement("div");el.id="v032Modal";el.className="v032-overlay v033-overlay";el.hidden=true;
  el.setAttribute("role","presentation");
  el.innerHTML='<div class="v032-scrim" data-v032-close></div><section class="v032-window" role="dialog" aria-modal="true" aria-labelledby="v032Title" tabindex="-1">'+
  '<header class="v032-head"><div><small>✦ SOULBOUND ONLINE · HERO LOADOUT</small><h2 id="v032Title">⚔ EQUIPMENT & INVENTORY</h2></div><button id="v032Close" type="button" aria-label="Close equipment and inventory">✕</button></header>'+
  '<div class="v032-content"><section class="v032-gear"><div class="v032-section-title">✦ EQUIPMENT · DRAG GEAR INTO A SLOT ✦</div>'+
- '<div class="v032-paperdoll"><div id="v032Slots" class="v032-slots"></div><div class="v032-hero"><div id="v032HeroArt" class="v032-hero-art"></div><strong id="v032HeroName">HERO</strong><small id="v032HeroStats"></small></div></div>'+
+ '<div class="v032-paperdoll"><div class="v033-group-titles"><span>ARMOR</span><span>WEAPONS & ACCESSORIES</span></div><div id="v032Slots" class="v032-slots"></div><div class="v032-hero"><div id="v032HeroArt" class="v032-hero-art"></div><strong id="v032HeroName">HERO</strong><small id="v032HeroStats"></small></div></div>'+
  '<div class="v032-note" id="v032EquipStatus"></div></section>'+
  '<section class="v032-bag"><div class="v032-bag-top"><div class="v032-section-title">✦ INVENTORY ✦</div><span id="v032BagCount">0 ITEMS</span></div>'+
  '<div id="v032Bag" class="v032-bag-grid"></div><div class="v032-quick-help">Drag an item onto a matching slot, or select an item and then click its slot.</div></section></div>'+
@@ -33,7 +35,7 @@ function init(){
  closeButton=document.getElementById("v032Close");
  const second=document.getElementById("toggleInventory");
  if(openButton){
-  openButton.textContent="⚔ EQUIPMENT & BAG";
+  openButton.textContent="🎒 EQUIPMENT & BAG";
   openButton.setAttribute("aria-haspopup","dialog");
   openButton.addEventListener("click",e=>{e.preventDefault();e.stopImmediatePropagation();toggle()},true);
  }
