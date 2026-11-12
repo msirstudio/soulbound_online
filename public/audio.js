@@ -63,7 +63,7 @@
  function hit(){noise(.11,.06,240);tone(134,.21,"sawtooth",.065,0,"fx",55)}
  function ui(){tone(780,.065,"sine",.018);tone(1040,.085,"sine",.01,.055)}
  function win(){[392,523.25,659.25,784,1046.5].forEach((n,i)=>tone(n,.4,"triangle",.04,i*.12))}
- function lose(){[392,330,261.63,196,130.81].forEach((n,i)=>tone(n,.41,"triangle",.037,i*.17)}
+ function lose(){[392,330,261.63,196,130.81].forEach((n,i)=>tone(n,.41,"triangle",.037,i*.17))}
  function boss(){tone(66,.85,"sawtooth",.055);tone(98,.75,"triangle",.035,.18);noise(.35,.025,120,.1)}
  function sfx(name,details={}){
   try{
