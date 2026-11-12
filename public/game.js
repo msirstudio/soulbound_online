@@ -73,3 +73,17 @@ $("foodInventory").innerHTML='<div class="food-title">CAMP FOOD · ACTIVE BUFFS<
 document.querySelectorAll("[data-equip]").forEach(b=>b.onclick=async()=>{const r=await call("equipItem",{itemId:b.dataset.equip});if(!r.ok)alert(r.error)});
 $("status").textContent=s.status==="waiting"?"Waiting for party leader to start.":s.status==="battle"?(active?.id===myId?"YOUR TURN — choose an action!":(active?.name||"Another hero")+" is taking their turn..."):s.status==="victory"?(s.stage%4===0?"VICTORY! The merchant will arrive.":"VICTORY! Prepare for the next stage."):s.status==="shop"?"MERCHANT CAMP · Buy supplies before moving on.":s.status==="complete"?"THE KINGDOM IS FREE!":"The party has fallen.";$("log").innerHTML=s.log.slice().reverse().map(x=>"<div>› "+esc(x)+"</div>").join("")}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+
+/* v0.14 loadout drawer controls: no backend changes */
+(function initLoadoutDrawers(){
+ const buttons=[["toggleEquipment",".equipment-panel"],["toggleInventory",".inventory-panel"]];
+ buttons.forEach(([id,selector])=>{
+  const button=document.getElementById(id),panel=document.querySelector("#game "+selector);
+  if(!button||!panel)return;
+  button.addEventListener("click",()=>{
+   const open=panel.classList.toggle("is-open");
+   button.setAttribute("aria-expanded",String(open));
+   button.textContent=(selector===".equipment-panel"?"⚔ EQUIPMENT":"🎒 INVENTORY")+(open?" ✕":"");
+  });
+ });
+})();
