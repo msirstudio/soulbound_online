@@ -56,7 +56,6 @@ function closeDrawer(){
  const game=$("game");game?.classList.remove("v041-drawer-open");
  const side=game?.querySelector(".game-side-column");
  if(side){side.dataset.v041Tab="party";side.setAttribute("aria-hidden","true")}
- const scrim=$("v041DrawerScrim");if(scrim)scrim.hidden=true;
  for(const id of ["v041PartyOpen","v041ChatOpen","v041LogOpen"])$(id)?.setAttribute("aria-expanded","false");
 }
 function openDrawer(tab){
@@ -67,7 +66,6 @@ function openDrawer(tab){
  game.classList.add("v041-drawer-open");
  side.dataset.v041Tab=tab;side.setAttribute("aria-hidden","false");
  const title=$("v041DrawerTitle");if(title)title.textContent=({party:"PARTY MEMBERS",chat:"PARTY CHAT",log:"BATTLE LOG"})[tab];
- const scrim=$("v041DrawerScrim");if(scrim)scrim.hidden=false;
  const ids={party:"v041PartyOpen",chat:"v041ChatOpen",log:"v041LogOpen"};
  for(const key of Object.keys(ids))$(ids[key])?.setAttribute("aria-expanded",String(tab===key));
  if(tab==="chat")$("chatInput")?.focus();
@@ -90,14 +88,12 @@ function setupDrawer(){
  const top=document.createElement("div");top.className="v041-drawer-head";
  top.innerHTML='<strong id="v041DrawerTitle">PARTY MEMBERS</strong><button type="button" id="v041DrawerClose" aria-label="Close panel">✕ CLOSE</button>';
  side.prepend(top);side.dataset.v041Tab="party";side.setAttribute("aria-hidden","true");
- const scrim=document.createElement("button");scrim.type="button";scrim.hidden=true;
- scrim.id="v041DrawerScrim";scrim.className="v041-drawer-scrim";scrim.setAttribute("aria-label","Close game panel");
- game.appendChild(scrim);scrim.addEventListener("click",closeDrawer);
  $("v041DrawerClose").addEventListener("click",closeDrawer);
  for(const [id,tab] of [["v041PartyOpen","party"],["v041ChatOpen","chat"],["v041LogOpen","log"]]){
   const b=$(id);if(b){b.setAttribute("aria-controls","v041GameDrawer");b.setAttribute("aria-expanded","false");b.onclick=()=>openDrawer(tab)}
  }
  side.id="v041GameDrawer";
+ // Side panel remains part of the layout, not a backdrop or a modal.
  // Side data updates still run while closed. Only presentation is hidden.
 }
 function setup(){
