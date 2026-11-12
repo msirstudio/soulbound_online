@@ -75,3 +75,11 @@
  #game #shopPanel .shop-items{grid-template-columns:1fr!important}
  #game #shopPanel .shop-categories button{font-size:8px!important}
 }
+
+/* Keep merchant under the universal gear/backdrop overlays but above regular HUD. */
+#game #shopPanel:not([hidden]){z-index:150!important}
+#game .arena.ruins .v22-scene-layers{display:block!important}
+#game .arena.ruins .v22-scene-layers .v22-layer{display:none!important}
+#game .arena.ruins .v22-scene-layers .v22-water{display:block!important;opacity:.45!important}
+#game .arena.ruins .v22-scene-layers .v22-petals{display:block!important;opacity:.55!important}
+@media(prefers-reduced-motion:reduce){#game .arena.ruins .v22-scene-layers .v22-water,#game .arena.ruins .v22-scene-layers .v22-petals{animation:none!important}}
