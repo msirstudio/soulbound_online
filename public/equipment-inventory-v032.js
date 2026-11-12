@@ -33,6 +33,16 @@ function init(){
  '<div id="v032Bag" class="v032-bag-grid"></div><div class="v032-quick-help">Drag an item onto a matching slot, or select an item and then click its slot.</div></section></div>'+
  '<footer class="v032-foot"><span id="v032Hint" role="status" aria-live="polite">Gear may only be changed between battles.</span><div class="v034-foot-buttons"><button id="v034Discard" type="button" title="Permanently discard the selected unequipped item">🗑 DISCARD SELECTED</button><button id="v032Done" type="button">CLOSE</button></div></footer></section>';
  document.body.appendChild(el);modal=el;
+ // Food is a usable inventory item, not a permanently visible HUD section.
+ // Rehome the original live-rendered food controls inside the unified bag.
+ const foods=document.getElementById("foodInventory");
+ const bag=modal.querySelector(".v032-bag");
+ if(foods&&bag){
+  const heading=document.createElement("div");
+  heading.className="v036-food-heading";heading.textContent="🍖 CAMP FOOD · ACTIVE BUFFS";
+  bag.appendChild(heading);bag.appendChild(foods);
+  foods.removeAttribute("hidden");foods.style.display="";
+ }
  openButton=document.getElementById("toggleEquipment");
  closeButton=document.getElementById("v032Close");
  const second=document.getElementById("toggleInventory");
