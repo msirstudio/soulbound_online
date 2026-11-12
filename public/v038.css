@@ -1,0 +1,32 @@
+/* SOULBOUND v0.38 — compact language switch and readable bilingual UI. */
+.header-controls .v038-language-toggle,
+.site-header .v038-language-toggle{
+ color:#ffdda6!important;background:linear-gradient(135deg,#2e2435,#513b26)!important;
+ border:1px solid #cda761!important;border-radius:5px!important;
+ padding:5px 9px!important;min-height:29px!important;
+ font-family:Tahoma,"Noto Sans Thai",Arial,sans-serif!important;
+ font-size:11px!important;font-weight:700!important;line-height:1.3!important;
+ white-space:nowrap!important;cursor:pointer;letter-spacing:0!important
+}
+.header-controls .v038-language-toggle:hover{background:#5d442c!important;filter:brightness(1.15)}
+html[lang="th"] #game,
+html[lang="th"] #account,
+html[lang="th"] #lobby,
+html[lang="th"] #v035Index,
+html[lang="th"] #v032Modal{
+ font-family:Tahoma,"Noto Sans Thai",Arial,sans-serif;
+}
+html[lang="th"] .pixel-title,
+html[lang="th"] #v035Index .v035-tab,
+html[lang="th"] #v032Modal .v032-slot,
+html[lang="th"] .v22-command-dock button{
+ letter-spacing:0!important;
+ line-height:1.35!important
+}
+html[lang="th"] #game .loadout-tools button{font-size:11px!important}
+html[lang="th"] #v035Index .v035-entry-text strong{line-height:1.45}
+html[lang="th"] #v032Modal .v032-slot strong{white-space:normal!important;line-height:1.2}
+html[lang="th"] .v035-detail-info p{line-height:1.6}
+@media(max-width:700px){
+ .header-controls .v038-language-toggle{font-size:10px!important;padding:4px 6px!important}
+}
