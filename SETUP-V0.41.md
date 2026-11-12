@@ -1,7 +1,7 @@
 # SOULBOUND v0.41 — UI Foundation
 
-**Branch:** \`v0.41-ui-foundation\`  
-**Base:** \`v0.40-a-new-world\`  
+**Branch:** `v0.41-ui-foundation`  
+**Base:** `v0.40-a-new-world`  
 **Scope:** visual layout and navigation only; no changes to combat, Supabase schema, items, loot percentages, level gates or Socket.IO game rules.
 
 ## New Main Menu
@@ -37,18 +37,18 @@
 
 ## Design architecture
 
-- \`public/v041.css\` is loaded **after** earlier style sheets. It defines shared design tokens and carefully scoped view/layout overrides, plus reduced-motion and keyboard focus styles.
-- \`public/ui-foundation-v041.js\` owns only screen navigation, Settings view, and Party/Chat/Log drawer visibility.
-- \`public/game.js\` has small optional calls into this presentation layer, following the existing auth, game-entry and render flow.
-- \`public/index.html\` organizes menus and layout while **retaining all older element IDs** to preserve game event handlers.
-- \`public/i18n-v038.js\` includes translations for the new labels.
+- `public/v041.css` is loaded **after** earlier style sheets. It defines shared design tokens and carefully scoped view/layout overrides, plus reduced-motion and keyboard focus styles.
+- `public/ui-foundation-v041.js` owns only screen navigation, Settings view, and Party/Chat/Log drawer visibility.
+- `public/game.js` has small optional calls into this presentation layer, following the existing auth, game-entry and render flow.
+- `public/index.html` organizes menus and layout while **retaining all older element IDs** to preserve game event handlers.
+- `public/i18n-v038.js` includes translations for the new labels.
 
 **Important:** v0.41 is a *first transition layer*, **not** an aggressive deletion of the old 20+ CSS files. Deleting those now would risk regressions in battle popups and inventory. Consolidation should happen in a dedicated cleanup pass after browser screenshots and device QA.
 
 ## How to try
 
-1. Keep \`main\` untouched and use a test deployment of \`v0.41-ui-foundation\` (or temporarily switch Render to this branch when ready to test).
-2. If v0.40 cloud progress migration hasn't already been run, use \`supabase-migration-v0.40.sql\` in Supabase SQL Editor. **v0.41 requires no additional SQL.**
+1. Keep `main` untouched and use a test deployment of `v0.41-ui-foundation` (or temporarily switch Render to this branch when ready to test).
+2. If v0.40 cloud progress migration hasn't already been run, use `supabase-migration-v0.40.sql` in Supabase SQL Editor. **v0.41 requires no additional SQL.**
 3. Hard refresh the page with Ctrl+F5.
 4. Check the menu, Account login, Guest mode, Hero & Party, Continue and New Game.
 5. Create or join a room. The Central City should appear.
@@ -66,12 +66,12 @@
 
 ## Files
 
-- \`public/ui-foundation-v041.js\` — screen navigation, Settings, Party/Chat/Log drawer.
-- \`public/v041.css\` — tokens, Main Menu, Account/Hero, City/World, responsive battle and drawer.
-- \`public/index.html\` — new sections and toolbar.
-- \`public/game.js\` — optional UI hooks on authentication, loaded character, room join and state changes.
-- \`public/i18n-v038.js\` — language labels.
-- \`tests/v041.test.js\` — navigation, interaction and integration invariants.
+- `public/ui-foundation-v041.js` — screen navigation, Settings, Party/Chat/Log drawer.
+- `public/v041.css` — tokens, Main Menu, Account/Hero, City/World, responsive battle and drawer.
+- `public/index.html` — new sections and toolbar.
+- `public/game.js` — optional UI hooks on authentication, loaded character, room join and state changes.
+- `public/i18n-v038.js` — language labels.
+- `tests/v041.test.js` — navigation, interaction and integration invariants.
 
 ## Known limits / future updates
 
