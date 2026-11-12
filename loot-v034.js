@@ -17,7 +17,7 @@ const FACTORS={common:1,uncommon:1.35,rare:1.8,epic:2.45,legendary:3.4};
 const BOSS_DROPS=[
  [{slot:"main",rarity:"rare",chance:20,name:"Briarfang Saber"},{slot:"ring_left",rarity:"uncommon",chance:35,name:"Alpha Fang Ring"}],
  [{slot:"chest",rarity:"rare",chance:30,name:"Dreadforge Plate"},{slot:"offhand",rarity:"rare",chance:20,name:"Forgeguard Shield"}],
- [{slot:"main",rarity:"epic",chance:20,name:"Emberweave Staff",class:"mage"},{slot:"boots",rarity:"rare",chance:30,name:"Ashwalker Boots"}],
+ [{slot:"main",rarity:"epic",chance:20,name:"Emberweave Staff",class:"mage"}],
  [{slot:"neck",rarity:"epic",chance:28,name:"Oracle's Eye Pendant"},{slot:"pants",rarity:"rare",chance:25,name:"Diviner's Leggings"}],
  [{slot:"head",rarity:"epic",chance:30,name:"Glacier Crown"},{slot:"ring_left",rarity:"epic",chance:20,name:"Frozen Oath Ring"}],
  [{slot:"chest",rarity:"legendary",chance:12,name:"World-Eater Carapace"},{slot:"offhand",rarity:"epic",chance:32,name:"Ancient Stoneguard"}],
