@@ -54,7 +54,14 @@ function factory(id,rarity){
 function canonical(saved,shopItems){
  if(!saved||typeof saved!=="object")return null;
  const id=String(saved.id||"");let item;
- if(validLootId(id)){item=factory(id,String(saved.rarity||"common").toLowerCase());}
+ if(validLootId(id)){
+  item=factory(id,String(saved.rarity||"common").toLowerCase());
+  // Never mutate a v0.34 owned item into a new v0.36 exclusive drop (or
+  // retroactively impose a Mage-only restriction on an old generic sword).
+  const match=validLootId(id);
+  const oldName=TITLES[Number(match[1])-1]+" "+BASE_NAMES[match[2]]+" ["+item.rarity.toUpperCase()+"]";
+  if(saved.name===oldName){item.name=oldName;delete item.class}
+ }
  else{const itemFromShop=shopItems.find(x=>x.id===id&&["weapon","armor"].includes(x.slot));if(itemFromShop)item={...itemFromShop};}
  if(!item)return null;
  item.uid=typeof saved.uid==="string"&&/^[a-zA-Z0-9_-]{8,80}$/.test(saved.uid)?saved.uid:randomUUID();
