@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "private": true,
-  "description": "SOULBOUND Online v0.13 - responsive viewport, hidden in-game account and separated merchant tabs",
+  "description": "SOULBOUND Online v0.14 - battle-first responsive interface concept",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
