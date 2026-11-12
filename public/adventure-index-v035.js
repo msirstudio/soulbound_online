@@ -19,6 +19,8 @@ let data=null,category="bosses",search="",rarity="all",selectedId="",lastFocus=n
 const labels={value:"ATK",defense:"DEF",maxHp:"HP",maxMp:"MP"};
 function init(){
  if($("v035Index"))return;
+ // Food buff controls stay usable even though the duplicate Hero Inventory HUD is hidden.
+ const food=$("foodInventory"),potions=document.querySelector("#game .potion-panel");if(food&&potions)potions.appendChild(food);
  const btn=document.createElement("button");btn.type="button";btn.id="v035Open";btn.className="v035-open";btn.textContent="📖 ADVENTURE INDEX";btn.setAttribute("aria-haspopup","dialog");
  const game=document.getElementById("game");
  if(game)game.appendChild(btn);
