@@ -1,0 +1,91 @@
+/* SOULBOUND v0.40 — Central City and interactive World Atlas.
+   All CSS scoped: avoids changing the older combat interface. */
+#game .v040-city[hidden],#v040WorldOverlay[hidden]{display:none!important}
+#game .v040-city{
+ position:relative;isolation:isolate;overflow:hidden;width:100%;min-height:245px;
+ display:flex;align-items:center;justify-content:center;margin:6px 0;
+ border:2px solid #c09b62;border-radius:12px;background:
+ radial-gradient(ellipse at 50% 90%,#c39c613d,transparent 44%),
+ linear-gradient(180deg,#151b37 0%,#303352 47%,#674931 77%,#1f1d27 100%);
+ box-shadow:inset 0 0 50px #0608169c,0 6px 18px #0007
+}
+#game .v040-town-scene{position:absolute;inset:auto 0 0;display:flex;align-items:end;justify-content:space-around;
+ height:76%;color:#101c28a8;overflow:hidden;pointer-events:none;font:bold clamp(84px,16vw,240px) Georgia,serif;letter-spacing:-30px;
+ text-shadow:1px 0 #d9b87b44;z-index:-1}
+#game .v040-city-inner{padding:18px 20px;max-width:860px;text-align:center;background:#151422c9;
+ border:1px solid #c9a9758f;border-radius:12px;box-shadow:0 4px 22px #0008;margin:14px}
+#game .v040-kicker{font:800 11px Georgia,serif;letter-spacing:2px;color:#e8d1a3}
+#game .v040-city h2{font:800 clamp(19px,2.2vw,31px) Georgia,serif;color:#ffe9ba;margin:5px 0}
+#game .v040-city p{color:#e4d5be;margin:7px 0}
+#game .v040-city-actions{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;margin:14px 0}
+#game .v040-city-actions button{min-height:39px;padding:8px 12px;font:bold 12px Georgia,serif;letter-spacing:.3px}
+#game #v040PartyNote{display:block;color:#c8b7a5;font-size:11px;line-height:1.4}
+#game.v040-hub #campaignTrack{display:none!important}
+#game.v040-hub .campaign{display:none!important}
+#game.v040-hub #start{display:none!important}
+#game.v040-hub .arena[hidden]{display:none!important}
+#game #v040QuickCity{font-size:11px;padding:8px}
+#v040WorldOverlay{position:fixed;inset:0;z-index:25000;background:#030710e0;
+ display:grid;place-items:center;padding:10px;backdrop-filter:blur(5px)}
+#v040WorldOverlay .v040-atlas{width:min(1050px,100%);max-height:min(94dvh,950px);
+ display:flex;flex-direction:column;background:#171a29;border:2px solid #c8a36b;border-radius:12px;
+ box-shadow:0 25px 100px #000b;color:#ecdbba;overflow:hidden}
+#v040WorldOverlay .v040-atlas-head{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;
+ background:linear-gradient(90deg,#342534,#2b2c3a);border-bottom:1px solid #a8885c}
+#v040WorldOverlay .v040-atlas-head small{font:700 10px Georgia,serif;color:#d4be94;letter-spacing:2px}
+#v040WorldOverlay .v040-atlas-head h2{margin:3px 0;color:#ffe3aa;font:800 23px Georgia,serif}
+#v040WorldOverlay .v040-atlas-head button{min-width:40px;min-height:38px;background:#3c2a32;border:1px solid #a58c6e;border-radius:6px;color:#fff;cursor:pointer}
+#v040WorldOverlay .v040-atlas-grid{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(285px,.9fr);
+ gap:0;min-height:0;overflow:auto}
+#v040WorldOverlay .v040-map-canvas{position:relative;min-height:350px;overflow:hidden;
+ border-right:1px solid #886847;background:#152d3b}
+#v040WorldOverlay .v040-land{width:100%;height:100%;position:absolute;inset:0}
+#v040WorldOverlay .v040-map-pins{position:absolute;inset:0}
+#v040WorldOverlay .v040-pin{position:absolute;transform:translate(-50%,-50%);display:flex;gap:2px;flex-direction:column;
+ align-items:center;justify-content:center;width:49px;height:48px;border:2px solid #edcd83;border-radius:50%;
+ background:#222038ee;color:#fff1b3;box-shadow:0 2px 12px #0008;cursor:pointer;padding:2px;z-index:2}
+#v040WorldOverlay .v040-pin span{font-size:22px;line-height:24px}
+#v040WorldOverlay .v040-pin b{font:bold 10px Georgia,serif}
+#v040WorldOverlay .v040-pin.locked{filter:grayscale(.6);border-color:#736f78;color:#b6acaf}
+#v040WorldOverlay .v040-pin:hover,#v040WorldOverlay .v040-pin.selected{
+ border-color:#ffda72;box-shadow:0 0 0 4px #f1cb7449,0 0 18px #e0a85c8a;
+ background:#62412f;z-index:3}
+#v040WorldOverlay .v040-map-detail{display:flex;flex-direction:column;min-width:0;overflow-y:auto;background:#201c29}
+#v040WorldOverlay .v040-region-art{position:relative;display:flex;align-items:center;justify-content:center;
+ height:155px;min-height:155px;overflow:hidden;border-bottom:2px solid #92704b;
+ background:radial-gradient(circle at 48% 41%,#acd09255,transparent 34%),linear-gradient(#364c42,#253329)}
+#v040WorldOverlay .v040-region-art.v040-region-ruins{background:radial-gradient(circle at 35% 35%,#ef99704d,transparent 40%),linear-gradient(#4a3135,#29232e)}
+#v040WorldOverlay .v040-region-art.v040-region-cavern{background:radial-gradient(circle at 50% 72%,#fc661798,transparent 35%),linear-gradient(#512927,#191b26)}
+#v040WorldOverlay .v040-region-art.v040-region-frost{background:radial-gradient(circle at 49% 36%,#e0faff99,transparent 36%),linear-gradient(#537998,#213c5d)}
+#v040WorldOverlay .v040-region-art.v040-region-abyss{background:radial-gradient(circle at 65% 49%,#a75af185,transparent 42%),linear-gradient(#241a4c,#18152f)}
+#v040WorldOverlay .v040-region-art.v040-region-castle{background:radial-gradient(circle at 54% 31%,#efa442a8,transparent 32%),linear-gradient(#4b293e,#18152a)}
+#v040WorldOverlay .v040-region-art .v040-art-landmark{font-size:84px;z-index:1;
+ filter:drop-shadow(0 7px 8px #080a18);text-shadow:0 0 30px #f9eac26b}
+#v040WorldOverlay .v040-art-cloud{position:absolute;inset:14px auto auto 5%;color:#fff9b59c;letter-spacing:22px;font-size:18px}
+#v040WorldOverlay .v040-art-ridges{position:absolute;bottom:-38px;left:-10%;width:120%;display:flex;align-items:end;justify-content:space-evenly}
+#v040WorldOverlay .v040-art-ridges i{display:block;transform:rotate(45deg);width:95px;height:95px;background:#0b1427a1;border-top:2px solid #c9ba7a88;border-left:2px solid #c9ba7a88}
+#v040WorldOverlay .v040-region-info{padding:14px 18px;display:flex;flex-direction:column;gap:7px}
+#v040WorldOverlay .v040-region-info>small{font:800 10px Georgia,serif;letter-spacing:2px;color:#d5b878}
+#v040WorldOverlay .v040-region-info h3{font:800 clamp(18px,2vw,25px) Georgia,serif;color:#ffdfae;margin:0}
+#v040WorldOverlay .v040-region-info p{font-size:12px;color:#d7c8b5;line-height:1.45;margin:0}
+#v040WorldOverlay .v040-stats{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+#v040WorldOverlay .v040-stats span{display:flex;flex-direction:column;padding:6px 8px;background:#2b2937;
+ border:1px solid #685b5e;border-radius:5px;font-size:10px;color:#c5b5a2;gap:2px}
+#v040WorldOverlay .v040-stats b{font-size:13px;color:#fff2c6}
+#v040WorldOverlay .v040-foe{font:700 11px Georgia,serif;background:#282331;border-left:3px solid #b0875f;padding:7px 10px}
+#v040WorldOverlay .v040-gate{font-weight:700;color:#e4bc78!important}
+#v040WorldOverlay #v040Travel{width:100%;min-height:38px;border-radius:6px;font-weight:800;cursor:pointer}
+#v040WorldOverlay #v040Travel:disabled{filter:grayscale(.9);opacity:.5;cursor:not-allowed}
+#v040WorldOverlay .v040-atlas-foot{font-size:11px;padding:7px 13px;border-top:1px solid #665b61;text-align:center;color:#b5a897}
+@media(max-width:770px){
+ #v040WorldOverlay .v040-atlas-grid{display:block;overflow:auto}
+ #v040WorldOverlay .v040-map-canvas{height:260px;min-height:260px;border-right:0;border-bottom:1px solid #886847}
+ #v040WorldOverlay .v040-region-art{min-height:100px;height:100px}
+ #v040WorldOverlay .v040-region-info{padding:10px;gap:5px}
+ #v040WorldOverlay .v040-region-art .v040-art-landmark{font-size:60px}
+ #v040WorldOverlay .v040-pin{width:42px;height:42px}
+ #v040WorldOverlay .v040-pin span{font-size:18px}
+ #v040WorldOverlay .v040-atlas-head h2{font-size:17px}
+ #game .v040-city-inner{padding:10px}
+ #game .v040-city h2{font-size:20px}
+}
