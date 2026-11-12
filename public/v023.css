@@ -1,0 +1,77 @@
+
+/* SOULBOUND v0.23 — six distinct biomes, ImageGen-ready backdrops, accessible merchant */
+#game .arena{background-size:cover!important;background-position:center!important;background-repeat:no-repeat!important}
+#game .arena.wilds{
+  /* The SVG remains an intentional fallback until ai-wilds.webp is uploaded. */
+  background-image:url("assets/scenes/ai-wilds.webp"),url("assets/scenes/living-wilds.svg")!important;
+  background-size:cover,cover!important;background-position:center,center!important;
+}
+#game .arena.ruins{background-image:url("assets/scenes/ai-ruins.webp"),url("assets/scenes/v23-ruins.svg")!important}
+#game .arena.cavern{background-image:url("assets/scenes/ai-cavern.webp"),url("assets/scenes/v23-cavern.svg")!important}
+#game .arena.frost{background-image:url("assets/scenes/ai-frost.webp"),url("assets/scenes/v23-frost.svg")!important}
+#game .arena.abyss{background-image:url("assets/scenes/ai-abyss.webp"),url("assets/scenes/v23-abyss.svg")!important}
+#game .arena.castle{background-image:url("assets/scenes/ai-castle.webp"),url("assets/scenes/v23-castle.svg")!important}
+
+/* Transparent art layers preserve independently moving leaves, water and clouds.
+   They no longer hide the more detailed art layer beneath them. */
+#game .arena.wilds .v22-scene-layers{display:block!important}
+#game .arena.wilds .v22-sky,#game .arena.wilds .v22-mid{opacity:0!important}
+#game .arena.wilds .v22-trunk,#game .arena.wilds .v22-foliage{opacity:.14!important}
+#game .arena.wilds .v22-water{opacity:.55!important}
+#game .arena.wilds .v22-clouds{opacity:.1!important}
+#game .arena.wilds .v22-petals{opacity:.85!important}
+#game .arena:not(.wilds) .v22-scene-layers{display:none!important}
+#game .arena.ruins:after,#game .arena.cavern:after,#game .arena.frost:after,#game .arena.abyss:after,#game .arena.castle:after{
+  content:"";display:block!important;position:absolute;inset:0;z-index:2!important;
+  pointer-events:none;opacity:.6;background-size:220px 180px,310px 280px;
+  background-image:radial-gradient(circle at 35% 22%,#f5d7aa 0 2px,transparent 3px),radial-gradient(circle at 75% 55%,#d8e2e8 0 1px,transparent 3px);
+  animation:v23-particles 19s linear infinite;
+}
+#game .arena.cavern:after{background-image:radial-gradient(circle,#ffac4d 0 2px,transparent 4px),radial-gradient(circle,#ff6b3c 0 1px,transparent 3px);opacity:.7}
+#game .arena.frost:after{background-image:radial-gradient(circle,#fff 0 2px,transparent 4px),radial-gradient(circle,#e5f4ff 0 1px,transparent 3px);opacity:.85}
+#game .arena.abyss:after{background-image:radial-gradient(circle,#a1b1f0 0 2px,transparent 4px),radial-gradient(circle,#77e3df 0 2px,transparent 3px);opacity:.7}
+#game .arena.castle:after{background-image:radial-gradient(circle,#e2ae6c 0 2px,transparent 4px),radial-gradient(circle,#c95c5e 0 2px,transparent 3px);opacity:.5}
+@keyframes v23-particles{from{background-position:0 0,120px -80px}to{background-position:120px 460px,-90px 380px}}
+#game .arena .scene-label,#game .arena .scene-hint,#game .arena .battlefield,#game .arena .status{position:relative;z-index:4!important}
+@media(prefers-reduced-motion:reduce){#game .arena:not(.wilds):after{animation:none!important}}
+
+/* Merchant occupies its own floating shop window, not a tiny block under party chat.
+   Keep its purchase and category controls inside their existing DOM node. */
+#game #shopPanel:not([hidden]){
+  position:fixed!important;inset:auto!important;
+  top:clamp(56px,8dvh,120px)!important;
+  right:max(14px,calc((100vw - 1640px)/2 + 15px))!important;
+  width:min(510px,calc(100vw - 28px))!important;
+  height:auto!important;max-height:min(78dvh,740px)!important;
+  box-sizing:border-box!important;
+  z-index:500!important;display:flex!important;flex-direction:column!important;
+  overflow-y:auto!important;overscroll-behavior:contain;
+  margin:0!important;padding:12px 15px 15px!important;
+  background:linear-gradient(150deg,#302320,#16141e)!important;
+  border:3px double #e4b96a!important;border-radius:12px!important;
+  box-shadow:0 18px 45px #000f,0 0 0 2px #1c1418,inset 0 0 26px #633d2422!important;
+}
+#game #shopPanel[hidden]{display:none!important}
+#game .v23-shop-titlebar{position:sticky;top:-12px;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0 8px;margin-bottom:4px;background:#2c221e;border-bottom:2px solid #b68b50;color:#f7d9a2;font:700 15px 'Cinzel',serif}
+#game #v23ShopClose{flex:none;min-height:32px;padding:4px 11px;color:#fff1d1;background:linear-gradient(#764639,#3e2727);border:1px solid #dfac7e;border-radius:6px;cursor:pointer}
+#game #shopPanel .shop-categories{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px!important;margin:9px 0!important;flex:none}
+#game #shopPanel .shop-categories button{min-height:34px!important;padding:5px!important;font-size:10px!important;white-space:nowrap}
+#game #shopPanel .shop-items{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;max-height:none!important;min-height:0!important;gap:7px!important;overflow:visible!important;align-content:start!important}
+#game #shopPanel .shop-item{display:flex!important;flex-direction:column;align-items:stretch!important;gap:7px;padding:9px!important;border:1px solid #8d6b46!important;border-radius:7px!important;min-width:0}
+#game #shopPanel .shop-item strong{font-size:12px!important;color:#f3dcba}
+#game #shopPanel .shop-item small{font-size:11px!important;line-height:1.35;overflow-wrap:anywhere}
+#game #shopPanel .shop-item button{min-height:30px!important;margin-top:auto;align-self:stretch}
+#game .v22-command-dock .loadout-tools #v23ShopToggle[hidden]{display:none!important}
+#game .v22-command-dock .loadout-tools #v23ShopToggle:not([hidden]){
+  display:inline-flex!important;color:#f5deb4!important;background:linear-gradient(#79542b,#352419)!important;
+  border:1px solid #e3b16b!important;box-shadow:0 0 10px #eab16033;cursor:pointer;
+}
+#game .v22-command-dock .loadout-tools #v23ShopToggle[aria-expanded="true"]{filter:brightness(1.19)}
+
+/* During merchant visits, make the dock buttons visible and readable. */
+#game .v22-command-dock{z-index:160!important}
+@media(max-width:800px){
+ #game #shopPanel:not([hidden]){left:10px!important;right:10px!important;top:64px!important;width:auto!important;max-height:calc(100dvh - 84px)!important}
+ #game #shopPanel .shop-items{grid-template-columns:1fr!important}
+ #game #shopPanel .shop-categories button{font-size:8px!important}
+}
