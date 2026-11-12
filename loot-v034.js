@@ -61,8 +61,7 @@ function dropBossLoot(player,stage,logger=()=>{}){
  if(stage%3!==0)return null;
  player.inventory=Array.isArray(player.inventory)?player.inventory:[];
  if(player.inventory.length>=40){logger(player.name+"'s bag is full (40/40): boss loot was not collected.");return null}
- // Every eligible living or fallen party member gets an independent 80% roll.
- if(Math.random()>=.80){logger(player.name+" found no equipment from this boss.");return null}
+ // Every party member (including fallen members) receives exactly one independently rolled equipment item per boss victory.
  const boss=Math.max(1,Math.min(8,Math.round(stage/3)));
  const slot=SLOTS[Math.floor(Math.random()*SLOTS.length)];
  const rarity=rarityFromRoll();
