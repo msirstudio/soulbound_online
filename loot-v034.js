@@ -125,4 +125,4 @@ function unequip(p,slot){
  if(slot==="chest"){p.armorItem=null;p.armor=p.classId==="mage"?"Novice Robe":p.classId==="tank"?"Guardian Armor":"Traveler Armor"}
  return{ok:true,slot};
 }
-module.exports={SLOTS,RARITIES,canonical,normalizeInventory,dropBossLoot,equip,unequip,equipped,slotOf,bagUsed};
+module.exports={SLOTS,RARITIES,canonical,normalizeInventory,dropBossLoot,equip,unequip,equipped,slotOf,bagUsed,factory};
