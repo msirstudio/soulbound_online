@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.18.0",
+  "version": "0.19.0",
   "private": true,
-  "description": "SOULBOUND Online v0.18 - staggered panels, visible main menu, no potion scrolling and wide masthead",
+  "description": "SOULBOUND Online v0.19 - compact connected HUD, subtle panel overhang and accessible start button",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
