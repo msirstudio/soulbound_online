@@ -51,7 +51,7 @@ function encounter(stage,normal,bosses){
  else if(m.type==="mini"){
   const base=bosses[i];
   b={name:m.region.miniName,sprite:normal[(i+3)%normal.length].sprite,icon:"💀",
-   hp:Math.round(base.hp*.63),atk:Math.round(base.atk*.82),def:Math.max(1,base.def-2),
+   hp:Math.round(base.hp*.84),atk:Math.round(base.atk*.97),def:Math.max(1,base.def-1),
    xp:Math.round(base.xp*.65),gold:Math.round(base.gold*.65),miniBoss:true};
  }else{
   const old=normal[(i*3+slot-1)%normal.length];
@@ -61,7 +61,7 @@ function encounter(stage,normal,bosses){
  }
  const hp=Math.round(b.hp*scale);
  return {...b,hp,maxHp:hp,atk:Math.round(b.atk*scale),def:Math.round(b.def*scale),
-  xp:Math.round(b.xp*(1+i*.32)),gold:Math.round(b.gold*(1+i*.24)),
+  xp:Math.round(b.xp*(1+i*.32)*4),gold:Math.round(b.gold*(1+i*.24)),
   boss:m.type==="boss",miniBoss:m.type==="mini",regionId:m.region.id,stageInRegion:slot};
 }
 module.exports={regions,totalStages,byId,regionForStage,meta,canEnter,normalizeProgress,markBossClear,encounter};
