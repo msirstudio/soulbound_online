@@ -1,0 +1,30 @@
+/* SOULBOUND v0.33: explicit equipment columns. Do not rely on alternating nth-child slots. */
+#game #toggleInventory{display:none!important}
+#game .loadout-tools{display:flex!important;align-items:center;justify-content:flex-end!important;gap:6px!important}
+#game .loadout-tools #toggleEquipment{display:inline-flex!important;align-items:center;justify-content:center;min-width:170px;flex:0 0 auto!important;white-space:nowrap}
+.v033-overlay .v032-head h2{font-size:clamp(18px,2.1vw,25px)}
+.v033-overlay .v032-paperdoll{padding-top:25px}
+.v033-overlay .v033-group-titles{
+ display:grid;grid-template-columns:1fr 1fr;column-gap:clamp(120px,33%,215px);
+ width:100%;position:absolute;top:0;left:0;right:0;z-index:3;pointer-events:none;
+ color:#d7b46a;font-weight:700;font-size:10px;text-align:center;letter-spacing:.6px;
+}
+.v033-overlay #v032Slots{top:28px!important;bottom:8px!important;grid-template-rows:repeat(5,minmax(42px,1fr))!important}
+.v033-overlay #v032Slots>.v032-slot{grid-column:auto!important;grid-row:auto!important}
+.v033-overlay #v032Slots>[data-v032-slot="head"]{grid-column:1!important;grid-row:1!important}
+.v033-overlay #v032Slots>[data-v032-slot="chest"]{grid-column:1!important;grid-row:2!important}
+.v033-overlay #v032Slots>[data-v032-slot="pants"]{grid-column:1!important;grid-row:3!important}
+.v033-overlay #v032Slots>[data-v032-slot="boots"]{grid-column:1!important;grid-row:4!important}
+.v033-overlay #v032Slots>[data-v032-slot="main"]{grid-column:2!important;grid-row:1!important}
+.v033-overlay #v032Slots>[data-v032-slot="offhand"]{grid-column:2!important;grid-row:2!important}
+.v033-overlay #v032Slots>[data-v032-slot="neck"]{grid-column:2!important;grid-row:3!important}
+.v033-overlay #v032Slots>[data-v032-slot="ring_left"]{grid-column:2!important;grid-row:4!important}
+.v033-overlay #v032Slots>[data-v032-slot="ring_right"]{grid-column:2!important;grid-row:5!important}
+.v033-overlay .v032-slot{min-height:0!important;gap:1px!important}
+.v033-overlay .v032-slot-icon{font-size:17px}
+.v033-overlay .v032-hero{align-self:center;padding-top:12px;box-sizing:border-box}
+@media(max-width:460px){
+ .v033-overlay .v033-group-titles{column-gap:105px;font-size:8px}
+ .v033-overlay .v032-slot-icon{font-size:14px}
+ .v033-overlay .v032-slot{padding:3px 2px!important}
+}
