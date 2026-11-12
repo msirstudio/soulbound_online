@@ -30,7 +30,7 @@ Each of the eight regions has 3 normal encounters, 1 Mini Boss, 1 Main Boss:
 | Abyssal Rift | 31–35 | 34 | 35 | LV 61–70 / LV 60 |
 | Eclipse Throne | 36–40 | 39 | 40 | LV 71–80 / LV 70 |
 
-New enemy and Mini Boss names and gameplay stats exist for all regions. For now Mini Bosses reuse existing normal enemy SVG artwork. These are **not yet custom Mini Boss pixel sprites or special ability systems**. Future updates can replace them without changing IDs.
+EXP rewards are multiplied over the old per-stage scale to reduce excessive grinding between ten-level region bands (further balance may be needed). New enemy and Mini Boss names and gameplay stats exist for all regions. For now Mini Bosses reuse existing normal enemy SVG artwork. These are **not yet custom Mini Boss pixel sprites or special ability systems**. Future updates can replace them without changing IDs.
 
 ### Farm and replay
 - Main Boss victory ends the region run and marks the region as cleared.
@@ -74,8 +74,8 @@ Do not share the Supabase service role secret. No database content was deleted d
 
 ## Notes / not done
 - No deployment, merge into `main`, or direct Supabase SQL execution has been performed by the assistant.
-- Browser/Render end-to-end test and `npm test` have not yet been run in the connected production environment. Pure JS simulation verified core server logic, eight regions, entry gates, all five encounters, replay and boss progress without failures.
-- Version v0.39's 16 custom boss PNGs **still require image upload** in the `public/assets/bosses/v039` directory; missing images fall back to original SVG.
+- Browser/Render end-to-end test and `npm test` have not yet been run in the connected production environment. A 27-check JS/Socket.IO mock simulation verified syntax, eight regions, level gates, full five-encounter runs, per-player progress, replay, correct PNG paths and the catalog without failures.
+- All 16 v0.39 boss PNG files **were verified present on this v0.40 branch** (8 Normal + 8 Hit, expected names). Boss image mapping now matches stages 5, 10, 15, 20, 25, 30, 35 and 40; missing files still fall back to SVG.
 - New Mini Boss sprites, open-world movement, detailed quests, localizations of every new text string and balance beyond basic scaling are later work.
 
 ## Main files
