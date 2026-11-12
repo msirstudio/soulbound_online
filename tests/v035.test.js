@@ -21,7 +21,7 @@ function catalog(){
 }
 test("index serves exact scaled values for 24 stages and all eight bosses",()=>{
  const data=catalog();
- assert.equal(data.version,"0.35.0");
+ assert.equal(data.version,"0.37.0");
  assert.equal(data.monsters.length,24);
  assert.equal(data.monsters.filter(x=>x.boss).length,8);
  assert.equal(data.monsters.filter(x=>!x.boss).length,16);
@@ -31,9 +31,9 @@ test("index serves exact scaled values for 24 stages and all eight bosses",()=>{
  const scale=1+Math.floor((24-1)/3)*.23;
  assert.deepEqual([stage24.hp,stage24.atk,stage24.def],[Math.round(1500*scale),Math.round(72*scale),Math.round(29*scale)]);
 });
-test("wiki has shop weapons, armor, food, consumables and all 360 boss templates",()=>{
+test("wiki lists only 16 curated boss items, shop gear and food",()=>{
  const data=catalog();
- assert.equal(data.items.filter(x=>x.source).length,8*9*5);
+ assert.equal(data.items.filter(x=>x.source).length,16);
  assert.ok(data.items.some(x=>x.category==="weapons"&&x.price!=null));
  assert.ok(data.items.some(x=>x.category==="armor"&&x.price!=null));
  assert.equal(data.items.filter(x=>x.category==="food").length,3);
@@ -48,12 +48,12 @@ test("every boss rarity/item record matches the canonical loot factory",()=>{
   assert.equal(it.name,item.name);
   assert.deepEqual([it.value,it.defense,it.maxHp,it.maxMp],[item.value,item.defense,item.maxHp,item.maxMp]);
  }
- assert.deepEqual(data.rarityOdds,{common:50,uncommon:28,rare:16,epic:5,legendary:1});
+ assert.equal(data.bossDropTables[3].length,2);assert.deepEqual(data.bossDropTables[3].map(x=>[x.slot,x.rarity,x.chance]),[["main","rare",12],["ring_left","uncommon",38]]);
 });
 test("each normal monster reports no equipment drop, bosses show loot",()=>{
  const data=catalog();
  for(const monster of data.monsters){
-  if(monster.boss)assert.match(monster.loot,/boss gear/);
+  if(monster.boss){assert.match(monster.loot,/independently/);assert.ok(monster.drops.length<=2)}
   else assert.match(monster.loot,/No random equipment/);
  }
 });
