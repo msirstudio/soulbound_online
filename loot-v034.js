@@ -57,10 +57,11 @@ function normalizeInventory(raw,shopItems){
  const seen=new Set();for(const it of result){if(it.equippedSlot){if(seen.has(it.equippedSlot))delete it.equippedSlot;else seen.add(it.equippedSlot)}}
  return result;
 }
+function bagUsed(player){return (player.inventory||[]).filter(it=>!it.equippedSlot).length}
 function dropBossLoot(player,stage,logger=()=>{}){
  if(stage%3!==0)return null;
  player.inventory=Array.isArray(player.inventory)?player.inventory:[];
- if(player.inventory.length>=40){logger(player.name+"'s bag is full (40/40): boss loot was not collected.");return null}
+ if(bagUsed(player)>=40){logger(player.name+"'s bag is full (40/40): boss loot was not collected.");return null}
  // Every party member (including fallen members) receives exactly one independently rolled equipment item per boss victory.
  const boss=Math.max(1,Math.min(8,Math.round(stage/3)));
  const slot=SLOTS[Math.floor(Math.random()*SLOTS.length)];
@@ -94,6 +95,8 @@ function equip(p,rawId,targetSlot,shopItems){
  if(p.level<(item.level||1))return{ok:false,error:"You must reach level "+item.level+"."};
  if(item.equippedSlot===targetSlot)return{ok:true};
  const old=equipped(p,targetSlot);
+ // Moving a worn item onto an occupied slot releases that item into the bag.
+ if(item.equippedSlot&&old&&bagUsed(p)>=40)return{ok:false,error:"Bag full (40/40). Free a slot before swapping equipped items."};
  if(old)delete old.equippedSlot;
  // For legacy saves, original weaponItem/armorItem can be present without a marked inventory item.
  const prev=old|| (targetSlot==="main"?p.weaponItem:targetSlot==="chest"?p.armorItem:null);
@@ -112,6 +115,7 @@ function equip(p,rawId,targetSlot,shopItems){
 function unequip(p,slot){
  if(!SLOTS.includes(slot))return{ok:false,error:"Invalid equipment slot."};
  const old=equipped(p,slot);
+ if(old&&bagUsed(p)>=40)return{ok:false,error:"Bag full (40/40). Free a slot before unequipping."};
  if(!old){
   const legacy=slot==="main"?p.weaponItem:slot==="chest"?p.armorItem:null;
   if(!legacy)return{ok:false,error:"This slot is already empty."};
@@ -121,4 +125,4 @@ function unequip(p,slot){
  if(slot==="chest"){p.armorItem=null;p.armor=p.classId==="mage"?"Novice Robe":p.classId==="tank"?"Guardian Armor":"Traveler Armor"}
  return{ok:true,slot};
 }
-module.exports={SLOTS,RARITIES,canonical,normalizeInventory,dropBossLoot,equip,unequip,equipped,slotOf};
+module.exports={SLOTS,RARITIES,canonical,normalizeInventory,dropBossLoot,equip,unequip,equipped,slotOf,bagUsed};
