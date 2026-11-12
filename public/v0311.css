@@ -1,0 +1,44 @@
+/* SOULBOUND v0.31.1 — true sprite-sheet frames, 192×256 source cells.
+   Source image rows: Idle 6 cells / Attack 8 cells.
+   The old SVG remains visible automatically until both PNGs for this gender load. */
+#game .v311-hero{
+ display:inline-block;position:relative;
+ height:clamp(118px,16dvh,192px);
+ width:auto;aspect-ratio:192/256;
+ vertical-align:bottom;
+ flex:0 0 auto;isolation:isolate;
+}
+#game .v311-hero .v311-sheet{
+ position:absolute;display:none;inset:0;pointer-events:none;
+ background-repeat:no-repeat;
+ background-size:600% 100%;background-position:0% 0%;
+ image-rendering:pixelated;
+ filter:drop-shadow(0 5px 5px #000b);
+}
+#game .v311-hero .v311-fallback{
+ width:100%!important;height:100%!important;max-height:none!important;
+ object-fit:contain;display:block;
+}
+#game .v311-hero.v311-ready .v311-sheet{display:block!important}
+#game .v311-hero.v311-ready .v311-fallback{display:none!important}
+#game .v311-hero.v311-ready, #game .v311-hero.v311-attacking{
+ transform:none!important;animation:none!important
+}
+#game .v311-hero .v311-sheet{animation:none!important;transform:none!important}
+#game .v311-hero.v311-attacking .v311-sheet{filter:drop-shadow(1px 3px 7px #ffd68d80) drop-shadow(0 5px 5px #0008)}
+#lobby .v30-preview.v311-preview-ready #v30HeroPreview{display:none!important}
+#lobby .v311-preview-sprite{
+ display:none;width:155px;height:208px;flex:0 0 155px;
+ background-size:600% 100%;background-position:0% 0%;
+ background-repeat:no-repeat;image-rendering:pixelated;
+ filter:drop-shadow(0 8px 8px #0008);
+}
+#lobby .v30-preview.v311-preview-ready #v311PreviewSprite{display:block!important}
+@media(min-width:1050px) and (min-height:820px){
+ #game .v311-hero{height:clamp(150px,17.5dvh,218px)}
+}
+@media(max-width:699px){
+ #game .v311-hero{height:clamp(105px,14dvh,155px)}
+ #lobby .v311-preview-sprite{width:130px;height:174px;flex-basis:130px}
+}
+@media(prefers-reduced-motion:reduce){#game .v311-hero .v311-sheet{animation:none!important}}
