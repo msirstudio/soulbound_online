@@ -1,0 +1,19 @@
+/* SOULBOUND v0.34 — deterministic rarity coloring, capacity and drag feedback */
+.v032-bag-grid .v032-item{position:relative}
+.v032-bag-grid .v032-item.v034-rarity-common{border-color:#8e8e9c}
+.v032-bag-grid .v032-item.v034-rarity-uncommon{border-color:#64a876}
+.v032-bag-grid .v032-item.v034-rarity-rare{border-color:#609ada}
+.v032-bag-grid .v032-item.v034-rarity-epic{border-color:#b77bd7}
+.v032-bag-grid .v032-item.v034-rarity-legendary{border-color:#e8ae4e;box-shadow:0 0 12px #c48b3840,inset 0 0 10px #eab34818}
+.v032-bag-grid .v032-item.selected{outline:2px solid #f3db83;outline-offset:1px}
+.v034-rarity-name{font:bold 9px Georgia,serif;letter-spacing:1px}
+.v034-rarity-common .v034-rarity-name{color:#b3b3bb}
+.v034-rarity-uncommon .v034-rarity-name{color:#83d594}
+.v034-rarity-rare .v034-rarity-name{color:#7cb4f7}
+.v034-rarity-epic .v034-rarity-name{color:#df9afa}
+.v034-rarity-legendary .v034-rarity-name{color:#ffe199}
+.v032-slot[draggable="true"]{cursor:grab}
+.v032-slot.v032-over{outline:2px solid #f6d375!important;box-shadow:0 0 15px #dba74180!important}
+#v032Bag{border-radius:8px}
+#v032Bag:has(.v032-item){min-height:120px}
+.v032-note{color:#d2b987!important}
