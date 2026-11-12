@@ -19,9 +19,9 @@
  };
  const sounds={
   sword:[RPG+"knifeSlice.ogg",RPG+"knifeSlice2.ogg"],
-  heavy:[RPG+"chop.ogg",IMP+"impactMetal_heavy_000.ogg"],
-  staff:[IMP+"impactGlass_medium_000.ogg",RPG+"drawKnife1.ogg"],
-  skill:[RPG+"knifeSlice2.ogg",IMP+"impactMetal_heavy_001.ogg"],
+  heavy:[RPG+"chop.ogg"],
+  staff:[IMP+"impactGlass_medium_000.ogg"],
+  skill:[RPG+"knifeSlice2.ogg"],
   hit:[IMP+"impactPlate_medium_000.ogg",IMP+"impactGeneric_light_001.ogg"],
   guard:[IMP+"impactMetal_medium_000.ogg"],
   heal:[RPG+"handleSmallLeather.ogg"],
@@ -88,24 +88,55 @@
  }
  function setVolume(v){musicVolume=clamp(v);applyMusicVolume();return musicVolume}
  function setSfxVolume(v){sfxVolume=clamp(v);return sfxVolume}
+ /* Preloaded recordings reduce the delay between clicking an action and hearing it. */
+ const cache=new Map();
+ function preload(url){
+  if(cache.has(url))return cache.get(url);
+  const a=new Audio();
+  a.preload="auto";a.src=url;
+  if(cache.size<100)cache.set(url,a);
+  return a;
+ }
+ function playSample(uri,volume=1,delay=0){
+  const play=()=>{
+   if(concurrency>=10)return;
+   const template=preload(uri),a=template.cloneNode(true);
+   a.volume=clamp(sfxVolume*.85*volume);
+   a.playbackRate=1;
+   concurrency++;
+   let done=false;
+   const release=()=>{if(done)return;done=true;concurrency=Math.max(0,concurrency-1);a.pause();a.removeAttribute("src")};
+   a.addEventListener("ended",release,{once:true});
+   a.addEventListener("error",release,{once:true});
+   a.play().catch(release);
+   setTimeout(release,2600);
+  };
+  if(delay>0)setTimeout(play,delay);else play();
+ }
  function sfx(type,details={}){
   if(sfxVolume<=.005)return;
   const name=audioPath(type,details);
   const now=performance.now(),prev=lastPlay.get(name)||0;
-  if(now-prev<65||concurrency>9)return;
-  lastPlay.set(name,now);
-  const sources=sounds[name]||sounds.menu;
-  const uri=sources[Math.floor(Math.random()*sources.length)];
-  const a=new Audio(uri);a.preload="auto";a.volume=clamp(sfxVolume*.9);
-  a.playbackRate=0.96+Math.random()*.09;
-  concurrency++;
-  let released=false;
-  const release=()=>{if(released)return;released=true;concurrency=Math.max(0,concurrency-1)};
-  a.addEventListener("ended",release,{once:true});
-  a.addEventListener("error",release,{once:true});
-  a.play().catch(release);
-  setTimeout(release,3500);
+  if(now-prev<95)return;lastPlay.set(name,now);
+  if(name==="sword"){
+   playSample(RPG+"knifeSlice.ogg",.92);
+   // The swish is distinct from the *optional* impact; don't randomly play a clang for every swing.
+  }else if(name==="heavy"){
+   playSample(RPG+"chop.ogg",.95);
+  }else if(name==="staff"){
+   playSample(IMP+"impactGlass_medium_000.ogg",.77);
+  }else if(name==="hit"){
+   playSample(IMP+"impactGeneric_light_001.ogg",.8);
+  }else{
+   const sources=sounds[name]||sounds.menu;
+   playSample(sources[Math.floor(Math.random()*sources.length)],name==="menu"?.68:.86);
+  }
  }
+ // Warm the most common effects after a real input gesture, without starting playback.
+ function warmAudio(){
+  [RPG+"knifeSlice.ogg",RPG+"chop.ogg",IMP+"impactGlass_medium_000.ogg",IMP+"impactGeneric_light_001.ogg"].forEach(preload);
+ }
+ window.addEventListener("pointerdown",warmAudio,{once:true,passive:true});
  window.SoulboundAudio={
   sfx,setMusic,setVolume,setSfxVolume,setScene,setCombatMood,
   get musicOn(){return musicOn},
