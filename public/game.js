@@ -175,39 +175,7 @@ document.querySelectorAll("[data-equip]").forEach(b=>b.onclick=async()=>{const r
 $("status").textContent=s.status==="waiting"?"Waiting for party leader to start.":s.status==="battle"?(active?.id===myId?"YOUR TURN — choose an action!":(active?.name||"Another hero")+" is taking their turn..."):s.status==="victory"?(s.stage%4===0?"VICTORY! The merchant will arrive.":"VICTORY! Prepare for the next stage."):s.status==="shop"?"MERCHANT CAMP · Buy supplies before moving on.":s.status==="complete"?"THE KINGDOM IS FREE!":"The party has fallen.";$("log").innerHTML=s.log.slice().reverse().map(x=>"<div>› "+esc(x)+"</div>").join("")}
 function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 
-/* v0.26.1: inline equipment/inventory spotlight — no dark modal backdrop.
-   All existing equip-item buttons and rendering stay in their original panels. */
-(function initV261LoadoutPanels(){
- const entries=[["toggleEquipment",".equipment-panel","⚔ EQUIPMENT"],["toggleInventory",".inventory-panel","🎒 INVENTORY"]];
- const backdrop=document.getElementById("v22PanelBackdrop");
- if(backdrop){backdrop.hidden=true;backdrop.style.display="none";backdrop.setAttribute("aria-hidden","true")}
- const getPanel=(selector)=>document.querySelector("#game "+selector);
- const reset=()=>{
-  entries.forEach(([id,selector,label])=>{
-   const button=$(id),panel=getPanel(selector);
-   if(panel){panel.classList.remove("is-open","v261-focused");panel.removeAttribute("tabindex")}
-   if(button){button.textContent=label;button.setAttribute("aria-expanded","false")}
-  });
-  if(backdrop)backdrop.hidden=true;
- };
- entries.forEach(([id,selector,label])=>{
-  const button=$(id),panel=getPanel(selector);
-  if(!button||!panel)return;
-  button.addEventListener("click",()=>{
-   const closing=panel.classList.contains("v261-focused");
-   reset();
-   if(!closing){
-    panel.classList.add("v261-focused");
-    panel.setAttribute("tabindex","-1");
-    button.textContent=label+" ✓";
-    button.setAttribute("aria-expanded","true");
-    panel.scrollIntoView({behavior:window.matchMedia?.("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"nearest",inline:"nearest"});
-    window.SoulboundAudio?.sfx("menu");
-   }
-  });
- });
- document.addEventListener("keydown",e=>{if(e.key==="Escape")reset()});
-})();
+/* v0.33: old inline equipment/inventory spotlight removed; the unified Equipment & Bag dialog handles the single button. */
 /* v0.15 contextual tooltips: fixed to viewport, no clipped popups */
 (function setupV15Tooltips(){
  const tip=document.createElement("div");tip.id="v15Tooltip";tip.setAttribute("role","tooltip");tip.hidden=true;document.body.appendChild(tip);
