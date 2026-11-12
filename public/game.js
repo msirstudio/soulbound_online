@@ -57,7 +57,7 @@ function v25SetGachaPhase(phase,rarity=""){
  if(modal){modal.dataset.phase=phase;modal.dataset.rarity=rarityClass(rarity||"common")}
  if(stage){stage.dataset.phase=phase;stage.dataset.rarity=rarityClass(rarity||"common")}
 }
-function openGacha(){
+function openGacha(){window.SoulboundAudio?.sfx("gacha");
  const me=gameState?.players.find(p=>p.id===myId);
  if(!me||me.racePoints<1)return notice("You need 1 Race Point. Defeat a boss to earn one.",true);
  clearInterval(gachaTimer);clearTimeout(gachaTimeout);
@@ -120,14 +120,30 @@ document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{
 document.querySelectorAll("[data-stat]").forEach(b=>b.onclick=async()=>{const r=await call("allocateStat",{stat:b.dataset.stat});if(!r.ok)notice(r.error,true)});
 $("shopCategories")?.querySelectorAll("[data-shop-category]").forEach(b=>b.onclick=()=>{activeShopCategory=b.dataset.shopCategory;$("shopCategories").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));if(gameState)render()});$("chatSend").onclick=sendChat;$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat()});function sendChat(){const input=$("chatInput"),message=input.value.trim();if(!message)return;call("partyChat",{message}).then(r=>{if(!r.ok)notice(r.error,true);else input.value=""})};
 socket.on("connect",()=>{myId=socket.id});socket.on("disconnect",()=>{$("status").textContent="Connection lost. Refresh to reconnect."});
-socket.on("state",s=>{gameState=s;render();if(restoreComplete){const p=s.players.find(x=>x.id===myId);if(p){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProfile(p),500)}}});
+let v26LastBattleLog="";
+socket.on("state",s=>{
+ const latest=s.log?.[s.log.length-1]||"",previous=v26LastBattleLog;
+ gameState=s;render();
+ if(previous&&latest&&latest!==previous&&s.status==="battle"){
+  const actor=s.players.find(p=>latest.startsWith(p.name+" "));
+  if(!actor&&(/ hits | damage to |strikes /i.test(latest))){
+   window.SoulboundAudio?.sfx("hit",{volume:.7});
+   const hero=document.querySelector('.hero-figure[data-player-id="'+CSS.escape(myId||"")+'"]');
+   if(hero&&typeof hero.animate==="function"&&!matchMedia("(prefers-reduced-motion: reduce)").matches)
+    hero.animate([{filter:"brightness(1)"},{filter:"brightness(2) saturate(.3)",transform:"translateX(-7px)"},{filter:"brightness(1)"}],{duration:370,easing:"ease-out"});
+  }else if(actor&&actor.id!==myId){
+   window.SoulboundAudio?.sfx(actor.classId==="mage"?"attack_staff":actor.classId==="tank"?"attack_hammer":"attack_sword",{volume:.6});
+  }
+ }
+ v26LastBattleLog=latest;
+ if(restoreComplete){const p=s.players.find(x=>x.id===myId);if(p){clearTimeout(saveTimer);saveTimer=setTimeout(()=>saveProfile(p),500)}}});
 async function restoreSession(){if(!supabaseClient)return;const {data:{session}}=await supabaseClient.auth.getSession();if(session?.user){showAccount(session.user);await prepare()}else showAccount(null);supabaseClient.auth.onAuthStateChange((ev,session)=>{if(ev==="SIGNED_OUT"){currentUser=null;savedCharacter=null;showAccount(null)}})}restoreSession();
 function v26GearIcon(name,slot){
  const src=window.SoulboundSprite?.itemIcon(name,slot);return src?'<img class="v26-item-icon" src="'+src+'" alt="" aria-hidden="true">':'';
 }
 function render(){const s=gameState;if(!s)return;window.SoulboundAudio?.setScene(s.scene?.css||"wilds",s.status,!!s.monster?.boss&&s.status==="battle");
 if(s.status==="shop"&&!v23ShopWasActive)v23ShopCollapsed=false;
-v23ShopWasActive=s.status==="shop";if(previousStatus!==s.status){if(s.status==="victory"||s.status==="complete")window.SoulboundAudio?.sfx("victory");else if(s.status==="defeat")window.SoulboundAudio?.sfx("defeat");else if(s.status==="battle"&&s.monster?.boss)window.SoulboundAudio?.sfx("boss");previousStatus=s.status;}const me=s.players.find(p=>p.id===myId),active=s.players[s.turnIndex];$("code").textContent=s.code;$("stageBadge").textContent="STAGE "+s.stage+" / 24";
+v23ShopWasActive=s.status==="shop";if(previousStatus!==s.status){if(s.status==="victory"||s.status==="complete")window.SoulboundAudio?.sfx("victory");else if(s.status==="defeat")window.SoulboundAudio?.sfx("defeat");else if(s.status==="battle"&&s.monster?.boss)window.SoulboundAudio?.sfx("boss");else if(s.status==="shop")window.SoulboundAudio?.sfx("buy");previousStatus=s.status;}const me=s.players.find(p=>p.id===myId),active=s.players[s.turnIndex];$("code").textContent=s.code;$("stageBadge").textContent="STAGE "+s.stage+" / 24";
 $("campaignTrack").innerHTML=Array.from({length:24},(_,i)=>{const n=i+1;return '<span class="'+(n<s.stage?"done ":n===s.stage?"current ":"")+(n%3===0?"boss-node ":"")+(n%4===0?"shop-node":"")+'">'+n+"</span>"}).join("");
 $("arena").className="arena panel "+(s.scene?.css||"wilds");$("sceneName").textContent="✦ "+(s.scene?.name||"THE CURSED WILDS")+" ✦";$("sceneHint").textContent=s.scene?.hint||"";$("monsterSprite").src=s.monster?.boss?"assets/bosses/"+(s.monster.sprite||"boss-eclipse-sovereign")+".svg":"assets/monsters/"+(s.monster?.sprite||"mossfang-wolf")+".svg";$("monsterSprite").alt=s.monster?.name||"Monster";$("monsterName").textContent=(s.monster?.name||"WAITING").toUpperCase();$("bossTag").hidden=!s.monster?.boss;const mh=s.monster?.hp||0,mm=s.monster?.maxHp||1;$("monsterHp").style.width=(mh/mm*100)+"%";$("monsterHpText").textContent=mh+" / "+mm+" HP";
 $("partySprites").innerHTML=s.players.map(p=>'<div class="hero-figure" data-player-id="'+esc(p.id)+'" data-class="'+esc(p.classId)+'" data-gender="'+(p.gender==="female"?"female":"male")+'"><div class="v17-nameplate">'+esc(p.name)+(p.id===myId?" · YOU":"")+'</div><img class="sprite-img" title="'+esc(p.name)+'" alt="'+(p.classId==="mage"?"Mage":p.classId==="tank"?"Tank":"Swordsman")+'" src="'+heroArt(p)+'"><div class="figure-vitals"><strong>'+esc(p.name)+(p.id===myId?" · YOU":"")+'</strong><div class="figure-meter hp-meter"><i style="width:'+Math.max(0,Math.min(100,100*p.hp/Math.max(1,p.maxHp)))+'%"></i></div><small>'+p.hp+' / '+p.maxHp+' HP</small><div class="figure-meter mp-meter"><i style="width:'+Math.max(0,Math.min(100,100*p.mp/Math.max(1,p.maxMp)))+'%"></i></div><small>'+p.mp+' / '+p.maxMp+' MP</small></div></div>').join("");$("players").innerHTML=s.players.map(p=>'<div class="player"><div class="player-head"><strong>'+esc(p.name)+" · "+p.className+(p.id===myId?" (YOU)":"")+(p.hp<=0?" · DOWN":"")+'</strong><span>LV '+p.level+'</span></div><div class="player-bars">HP '+p.hp+"/"+p.maxHp+" · MP "+p.mp+"/"+p.maxMp+"<br>ATK "+p.atk+" · DEF "+p.def+" · 🧪 "+(p.smallHealth||p.potions||0)+"/"+(p.mediumHealth||0)+"/"+(p.largeHealth||0)+" · 🔷 "+(p.smallMana||p.manaPotions||0)+"/"+(p.mediumMana||0)+"/"+(p.largeMana||0)+" · 🪙 "+p.gold+"<br>⚔ "+esc(p.weapon)+" · 🛡 "+esc(p.armor)+"</div></div>").join("");
