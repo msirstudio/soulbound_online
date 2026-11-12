@@ -105,6 +105,13 @@ function startGachaAnimation(){
  gachaTimeout=setTimeout(()=>{v25SetGachaPhase("converging");gachaTimeout=setTimeout(revealGacha,550)},2700);
 }
 $("openGacha").onclick=openGacha;$("skipGacha").onclick=revealGacha;$("closeGacha").onclick=()=>{$("gachaModal").hidden=true;v25SetGachaPhase("idle");gachaOutcome=null;gachaRevealed=false};
+function v26TriggerImpact(type){
+ const fx=$("v26ImpactFx");if(!fx)return;
+ const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+ if(reduced)return;
+ fx.className="v26-impact";void fx.offsetWidth;
+ fx.className="v26-impact "+(type==="mage"?"v26-impact-magic":type==="tank"?"v26-impact-smash":"v26-impact-slash");
+}
 document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{
  const type=b.dataset.action,r=await call("action",{type});
  if(!r.ok){notice(r.error,true);window.SoulboundAudio?.sfx("ui");return}
@@ -113,8 +120,15 @@ document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{
  const sound=type==="attack"?weapon:type==="guard"?"shield":type.startsWith("heal")?"heal":type.startsWith("mana")?"mana":"skill";
  window.SoulboundAudio?.sfx(sound);
  const hero=document.querySelector('.hero-figure[data-player-id="'+CSS.escape(myId||"")+'"]');
+ const cls=own?.classId||"swordsman";
+ const attacks=type==="attack"||type.startsWith("skill");
+ if(attacks)v26TriggerImpact(cls);
  if(hero&&typeof hero.animate==="function"&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
-  hero.animate(type==="guard"?[{filter:"brightness(1)"},{filter:"brightness(1.8)"},{filter:"brightness(1)"}]:[{transform:"translateX(0)"},{transform:"translateX(26px) translateY(-7px)"},{transform:"translateX(0)"}],{duration:type==="attack"?360:560,easing:"ease-out"});
+  const frames=type==="guard"?[{filter:"brightness(1)"},{filter:"brightness(1.85)"},{filter:"brightness(1)"}]:
+    cls==="mage"?[{transform:"translateY(0) scale(1)",filter:"brightness(1)"},{transform:"translateY(-10px) scale(1.07)",filter:"drop-shadow(0 0 14px #90deff)"},{transform:"translateY(0) scale(1)",filter:"brightness(1)"}]:
+    cls==="tank"?[{transform:"translateX(0)"},{transform:"translateX(14px) rotate(-5deg)"},{transform:"translateX(0)"}]:
+    [{transform:"translateX(0)"},{transform:"translateX(26px) translateY(-7px) rotate(4deg)"},{transform:"translateX(0)"}];
+  hero.animate(frames,{duration:cls==="tank"?510:type==="attack"?390:590,easing:"ease-out"});
  }
 });
 document.querySelectorAll("[data-stat]").forEach(b=>b.onclick=async()=>{const r=await call("allocateStat",{stat:b.dataset.stat});if(!r.ok)notice(r.error,true)});
