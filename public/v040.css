@@ -89,3 +89,12 @@
  #game .v040-city-inner{padding:10px}
  #game .v040-city h2{font-size:20px}
 }
+/* Eight distinct map preview color palettes (not merely six repeated arena CSS scenes). */
+#v040WorldOverlay [data-v040-theme="cursed_wilds"]{background:radial-gradient(circle at 32% 25%,#d4dc8066,transparent 31%),linear-gradient(140deg,#254938,#122b32 65%,#413e30)}
+#v040WorldOverlay [data-v040-theme="dreadforge_bastion"]{background:radial-gradient(circle at 56% 70%,#fd873b98,transparent 35%),linear-gradient(125deg,#373642,#413132 62%,#201d2f)}
+#v040WorldOverlay [data-v040-theme="ember_caverns"]{background:radial-gradient(circle at 45% 75%,#ff501ca9,transparent 43%),linear-gradient(105deg,#421a21,#161723 64%,#743525)}
+#v040WorldOverlay [data-v040-theme="hollow_sanctum"]{background:radial-gradient(circle at 45% 38%,#9c76df96,transparent 39%),linear-gradient(100deg,#4e395b,#1f2135 65%,#302744)}
+#v040WorldOverlay [data-v040-theme="frostbound_peaks"]{background:radial-gradient(circle at 56% 22%,#dcfdffbe,transparent 35%),linear-gradient(130deg,#8babba,#355876 64%,#1e344d)}
+#v040WorldOverlay [data-v040-theme="titanfall_ruins"]{background:radial-gradient(circle at 55% 41%,#f0c28383,transparent 35%),linear-gradient(120deg,#66544c,#3b3748 60%,#232535)}
+#v040WorldOverlay [data-v040-theme="abyssal_rift"]{background:radial-gradient(circle at 56% 45%,#ae56ffb8,transparent 35%),linear-gradient(130deg,#271b48,#0e1730 63%,#312044)}
+#v040WorldOverlay [data-v040-theme="eclipse_throne"]{background:radial-gradient(circle at 58% 31%,#ffe0a6a1,transparent 31%),linear-gradient(125deg,#432b48,#222138 63%,#5e3339)}
