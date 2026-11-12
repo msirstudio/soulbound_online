@@ -51,7 +51,7 @@ function init(){
    const item=selectedItem(selected);
    if(!item)return notify("Select an unequipped item before discarding.",true);
    if(item.equippedSlot)return notify("Unequip this item before discarding it.",true);
-   if(!["waiting","shop","victory"].includes(room?.status))return notify("You cannot discard gear during battle.",true);
+   if(!["city","shop","victory","regionClear"].includes(room?.status))return notify("You cannot discard gear during battle.",true);
    if(!confirm("Permanently discard "+item.name+"? This cannot be undone."))return;
    if(busy)return;busy=true;
    Promise.resolve(discardAction?.(itemKey(item))).then(result=>{
@@ -128,7 +128,7 @@ function close(){
 function toggle(){if(!modal)init();modal.hidden?open():close()}
 function onSlot(slot,itemId=selected){
  if(!itemId){
-  if(!["waiting","shop","victory"].includes(room?.status))return notify("Gear can only be changed between battles.",true);
+  if(!["city","shop","victory","regionClear"].includes(room?.status))return notify("Gear can only be changed between battles.",true);
   const currentlyWorn=(me?.inventory||[]).some(it=>it.equippedSlot===slot)||(slot==="main"&&!!me?.weaponItem)||(slot==="chest"&&!!me?.armorItem);
   if(!currentlyWorn)return notify("This slot is already empty. Select a piece of gear to equip.",true);
   if(busy)return;
@@ -142,7 +142,7 @@ function onSlot(slot,itemId=selected){
  const item=selectedItem(itemId);
  if(!item)return notify("This item is no longer in your inventory.",true);
  if(!validDrop(item,slot))return notify(item.name+" cannot be placed in the "+slots.find(s=>s[0]===slot)?.[2]+" slot.",true);
- if(!["waiting","shop","victory"].includes(room?.status))return notify("Gear can only be changed before or between battles.",true);
+ if(!["city","shop","victory","regionClear"].includes(room?.status))return notify("Gear can only be changed before or between battles.",true);
  if(busy)return;
  busy=true;notify("Equipping "+item.name+"...");
  Promise.resolve(equipAction?.(itemKey(item),slot)).then(result=>{
@@ -190,7 +190,7 @@ function draw(){
  });
  modal.querySelector("#v032Bag").innerHTML=safe.join("")||'<div class="v032-empty">Your inventory is empty. Weapons and armor purchased from the merchant will appear here.</div>';
  modal.querySelector("#v032EquipStatus").textContent="9 gear slots enabled · Select a worn slot without an item selected to unequip. Bosses are the only source of random loot.";
- if(!["waiting","shop","victory"].includes(room?.status))notify("Viewing gear during battle · equipment changes are locked.",false);
+ if(!["city","shop","victory","regionClear"].includes(room?.status))notify("Viewing gear during battle · equipment changes are locked.",false);
  else if(!busy)notify("Drag gear to a matching slot, or tap an item and then a slot.");
 }
 window.SoulboundV32={
