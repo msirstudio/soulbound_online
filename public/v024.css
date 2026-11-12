@@ -1,0 +1,139 @@
+/* SOULBOUND Online v0.24: ornate, functional game HUD, not a screenshot.
+   Loaded LAST, preserving all combat/save/party event handlers. */
+:root{--v24-gold:#daa95c;--v24-gold-light:#f6df9a;--v24-dusk:#11101c}
+body:has(#game:not([hidden])){
+ background:radial-gradient(ellipse at 50% 9%,#2c2b45 0%,#141421 45%,#0a0c15 85%)!important;
+ background-attachment:fixed!important;
+}
+body:has(#game:not([hidden])) .shell{position:relative;isolation:isolate}
+#game:not([hidden]){position:relative;isolation:isolate;box-sizing:border-box;padding:5px 12px 16px!important}
+#game:not([hidden])::before{
+ content:"";position:absolute;inset:-8px 0 -6px;z-index:-1;pointer-events:none;
+ background:linear-gradient(90deg,#0b1020aa,#17111a38 13%,transparent 30%,transparent 70%,#17111a38 87%,#0b1020aa),
+ radial-gradient(circle at 50% 55%,#252c4555,transparent 68%);
+ border:1px solid #67472399;border-radius:14px;
+}
+#game:not([hidden])::after{
+ content:"";position:absolute;inset:-5px 0 -4px;z-index:45;pointer-events:none;
+ background:url("assets/ui/v24-filigree.svg") center center / 100% 100% no-repeat;
+ filter:drop-shadow(0 1px 2px #000);
+}
+#game .roomline.panel{border:1px solid #e3ae60!important;border-radius:9px!important;background:linear-gradient(180deg,#1e1b27,#15121b)!important;box-shadow:0 0 0 2px #2b1b16,inset 0 1px #fbe6ae44,0 3px 12px #0008!important}
+#game .v16-game-brand strong{font-size:clamp(18px,1.9vw,30px)!important;color:#ffe3a2!important;text-shadow:0 2px 3px #000,0 0 14px #ecab5955!important;letter-spacing:.07em!important}
+#game .v16-game-brand small{font-size:11px!important;color:#d7ad70!important}
+#game .campaign{border:1px solid #77572f!important;border-radius:4px!important;background:#0a1020!important}
+#game .campaign-track span{border-color:#9e754599!important}
+#game .arena.panel{
+ position:relative;border:3px solid #c99a51!important;border-radius:14px!important;
+ box-shadow:0 0 0 2px #25160f,0 0 0 4px #765128,0 10px 20px #0009,inset 0 0 0 2px #f5ca7755!important;
+ overflow:hidden!important;isolation:isolate;
+}
+/* Increase the viewing aperture without forcing image distortion.
+   Background remains cover to preserve its proportions; if source is panoramic,
+   edges may crop rather than stretch. */
+#game .arena.wilds{background-position:50% 55%,50% 55%!important}
+#game .arena.ruins,#game .arena.cavern,#game .arena.frost,#game .arena.abyss,#game .arena.castle{background-position:50% 55%,50% 55%!important}
+#game .arena .v24-ornate-corner{position:absolute;z-index:12;pointer-events:none;font-family:Georgia,serif;font-size:37px;line-height:1;color:#f7cb72;text-shadow:0 1px 4px #000,0 0 13px #f0ae5880}
+#game .arena .v24-tl{left:8px;top:6px;transform:rotate(-45deg)}
+#game .arena .v24-tr{right:8px;top:6px;transform:scaleX(-1) rotate(-45deg)}
+#game .arena .v24-bl{left:8px;bottom:6px;transform:rotate(45deg)}
+#game .arena .v24-br{right:8px;bottom:6px;transform:scaleX(-1) rotate(45deg)}
+#game .arena .scene-label{color:#fff0bb!important;font-size:clamp(12px,.95vw,17px)!important;letter-spacing:.12em!important;text-shadow:0 2px 6px #000,0 0 8px #1b1d28!important}
+#game .arena .scene-hint{color:#fff4d3!important;text-shadow:0 2px 5px #000!important}
+#game .arena .status{background:linear-gradient(110deg,#15121bdc,#241b24e6)!important;color:#ffe3a1!important;border:1px solid #b58b4f!important;box-shadow:0 2px 8px #0008!important}
+#game .game-layout{gap:8px!important}
+#game .v22-hud-grid,#game .v22-hud-stack,#game .game-side-column{gap:8px!important}
+#game .v22-hud-stack>.panel,#game .game-side-column>.panel{
+ background:linear-gradient(160deg,#241b21 0%,#111321 80%)!important;
+ border:1px solid #c49a56!important;border-radius:11px!important;
+ box-shadow:0 0 0 2px #24171c,inset 0 0 0 1px #e6b36333,0 5px 14px #0008!important;
+}
+#game .v22-hud-stack>.panel .pixel-title,#game .game-side-column>.panel .pixel-title{
+ position:relative;color:#f7d994!important;border-bottom:1px solid #997345!important;
+ font:700 clamp(10px,.77vw,13px) 'Cinzel',serif!important;letter-spacing:.07em!important;
+ padding-left:14px!important;
+}
+#game .v22-hud-stack>.panel .pixel-title::before,#game .game-side-column>.panel .pixel-title::before{
+ content:"✦";position:absolute;left:0;top:0;color:#d0a052;font-size:12px;
+}
+#game .hero-panel{border-left:3px solid #efbd67!important}
+#game .skills-panel{border-top:3px solid #d9a35a!important}
+#game .equipment-panel{border-left:3px solid #a0b5bc!important}
+#game .inventory-panel{border-right:3px solid #dab36c!important}
+#game .party-panel{border-top:3px solid #7ba4ad!important}
+#game .merchant-log-panel{border-bottom:3px solid #d3a461!important}
+#game .hero-bar,#game .figure-meter{box-shadow:inset 0 1px 3px #000a}
+#game .skill-actions button:not(:disabled),#game .potion-actions button:not(:disabled){
+ border:1px solid #b38c56!important;border-radius:6px!important;
+ background:linear-gradient(180deg,#5d4331,#211b23)!important;color:#f9e5ba!important;
+ box-shadow:inset 0 1px #f6d89a44,0 2px 3px #0005!important;
+}
+#game .skill-actions button:hover:not(:disabled),#game .potion-actions button:hover:not(:disabled){
+ filter:brightness(1.24);transform:translateY(-1px);
+}
+#game .gear-slot,#game .inventory-row,#game .player{border:1px solid #8e6b4288!important;border-radius:5px!important;background:#0d111d66!important}
+#game .v22-command-dock{border:2px solid #f1bf6c!important;border-radius:10px!important;box-shadow:0 0 0 2px #251711,0 3px 10px #0009,inset 0 1px #ffe5b677!important}
+#game .v22-command-dock .stage-actions button:not(:disabled){background:linear-gradient(#f0c474,#875026)!important;color:#24150b!important;text-shadow:0 1px #fce0a7!important;font-weight:800!important}
+#game .v22-command-dock .loadout-tools button:not(:disabled){border:1px solid #e6b769!important;color:#ffe5b6!important;background:linear-gradient(#6b452f,#261a20)!important}
+#game .v22-command-dock .loadout-tools button:hover:not(:disabled){filter:brightness(1.2)}
+/* The previous shop was nested in a transformed, lower-z-index sidebar.
+   It is now a DIRECT CHILD of #game, so the sticky dock cannot paint over it. */
+#game #shopPanel:not([hidden]){
+ position:fixed!important;z-index:1000!important;
+ top:clamp(62px,7dvh,110px)!important;
+ right:max(12px,calc((100vw - min(97vw,1660px))/2 + 8px))!important;
+ left:auto!important;bottom:auto!important;
+ width:clamp(340px,27.5vw,465px)!important;
+ height:auto!important;max-height:calc(100dvh - 90px)!important;
+ overflow-y:auto!important;overflow-x:hidden!important;overscroll-behavior:contain!important;
+ padding:12px!important;margin:0!important;box-sizing:border-box!important;
+ border:3px solid #e3b66b!important;border-radius:13px!important;
+ background:linear-gradient(175deg,#332520,#121421 90%)!important;
+ box-shadow:0 0 0 2px #23161b,0 22px 55px #000e,inset 0 0 0 2px #6f4d3170!important;
+ color:#f4ddac!important;
+}
+#game #shopPanel[hidden]{display:none!important}
+#game #shopPanel .v23-shop-titlebar{
+ position:sticky!important;top:-12px!important;z-index:3!important;
+ background:linear-gradient(180deg,#422d20,#2a2021)!important;
+ border-bottom:2px solid #ddb267!important;padding:12px 7px!important;margin:-3px -3px 10px!important;
+}
+#game #shopPanel .v23-shop-titlebar span{font:700 clamp(13px,1.1vw,19px) 'Cinzel',serif;color:#f5cf89}
+#game #shopPanel .pixel-title.log-title{display:none}
+#game #shopPanel .shop-categories{position:sticky;top:44px;z-index:2;padding:5px 0;background:#251d1e!important}
+#game #shopPanel .shop-categories button{border:1px solid #ab834b!important;border-radius:6px!important;font-size:10px!important}
+#game #shopPanel .shop-categories button.active{background:linear-gradient(#d3a964,#825025)!important;color:#1b1314!important}
+#game #shopPanel .shop-items{grid-template-columns:1fr!important;gap:5px!important}
+#game #shopPanel .shop-item{display:grid!important;grid-template-columns:minmax(0,1fr) 76px;gap:7px!important;align-items:center!important;min-height:57px;background:linear-gradient(95deg,#1e1c29,#292025)!important;border:1px solid #b1885088!important;border-radius:7px!important}
+#game #shopPanel .shop-item button{align-self:center!important;min-height:33px!important;min-width:0!important;margin:0!important;background:linear-gradient(#ad8a55,#694626)!important;color:#ffe4ad!important;border:1px solid #e3b36a!important}
+#game #shopPanel .shop-item small{display:block;overflow-wrap:anywhere}
+#game #v23ShopClose{min-height:33px!important;background:linear-gradient(#9c5841,#502b2d)!important;flex-shrink:0!important}
+@media(min-width:1050px){
+ #game:not([hidden]){width:100%!important;max-width:100%!important}
+ #game .arena{height:clamp(278px,38dvh,410px)!important;flex:0 0 clamp(278px,38dvh,410px)!important}
+ #game .sprite-img{height:clamp(86px,14dvh,155px)!important}
+ #game .monster-img{height:clamp(135px,21dvh,245px)!important}
+ #game .v22-hud-stack>.panel{padding:10px!important}
+ #game .game-side-column .log{height:115px!important;max-height:115px!important}
+}
+@media(min-width:1050px) and (max-height:780px){
+ #game .arena{height:clamp(238px,33dvh,310px)!important;flex-basis:clamp(238px,33dvh,310px)!important}
+ #game .sprite-img{height:clamp(65px,11dvh,125px)!important}
+ #game .monster-img{height:clamp(110px,17dvh,180px)!important}
+ #game .v22-hud-stack>.panel{padding:7px!important}
+}
+@media(max-width:1049px){
+ #game #shopPanel:not([hidden]){top:58px!important;right:12px!important;left:12px!important;width:auto!important;max-height:calc(100dvh - 76px)!important}
+ #game:not([hidden]){padding:4px 9px 18px!important}
+ #game:not([hidden])::after{background-size:100% 100%}
+ #game .arena{height:clamp(290px,43dvh,420px)!important;flex:0 0 auto!important}
+}
+@media(max-width:650px){
+ #game #shopPanel:not([hidden]){top:42px!important;right:6px!important;left:6px!important;max-height:calc(100dvh - 54px)!important}
+ #game .v22-command-dock{z-index:160!important}
+ #game .arena .v24-ornate-corner{font-size:22px!important}
+ #game .v16-game-brand strong{font-size:16px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #game .skill-actions button,#game .potion-actions button{transition:none!important;transform:none!important}
+}
