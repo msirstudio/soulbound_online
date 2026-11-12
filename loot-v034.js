@@ -27,7 +27,7 @@ function factory(id,rarity){
  if(slot==="offhand")stats.value=Math.round(power*.2);
  if(slot==="neck")stats.value=Math.round(power*.45);
  if(slot.startsWith("ring"))stats.value=Math.round(power*.3);
- return {id,templateId:id,name:TITLES[boss-1]+" "+BASE_NAMES[slot]+" ["+rarity.toUpperCase()+"]",icon:ICONS[slot],slot,rarity,level:1,bossStage:boss*3,
+ return {id,templateId:id,name:TITLES[boss-1]+" "+(slot==="main"&&(boss===3||boss===6)?"Staff":BASE_NAMES[slot])+" ["+rarity.toUpperCase()+"]",icon:ICONS[slot],slot,rarity,level:1,bossStage:boss*3,
   value:stats.value,defense:stats.defense,maxHp:stats.maxHp,maxMp:stats.maxMp,
   description:Object.entries(stats).filter(([,n])=>n>0).map(([k,n])=>"+"+n+" "+({value:"ATK",defense:"DEF",maxHp:"HP",maxMp:"MP"}[k])).join(" · ")};
 }
