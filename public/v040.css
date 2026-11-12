@@ -98,3 +98,18 @@
 #v040WorldOverlay [data-v040-theme="titanfall_ruins"]{background:radial-gradient(circle at 55% 41%,#f0c28383,transparent 35%),linear-gradient(120deg,#66544c,#3b3748 60%,#232535)}
 #v040WorldOverlay [data-v040-theme="abyssal_rift"]{background:radial-gradient(circle at 56% 45%,#ae56ffb8,transparent 35%),linear-gradient(130deg,#271b48,#0e1730 63%,#312044)}
 #v040WorldOverlay [data-v040-theme="eclipse_throne"]{background:radial-gradient(circle at 58% 31%,#ffe0a6a1,transparent 31%),linear-gradient(125deg,#432b48,#222138 63%,#5e3339)}
+
+/* Region-specific arena atmosphere, keeping the original six reusable scene
+   layers and avoiding new image dependencies. The three ruin regions do not
+   look identical in combat. */
+#game .arena[data-v040-region="cursed_wilds"] .v22-scene-layers{filter:saturate(1.14) hue-rotate(-8deg)}
+#game .arena[data-v040-region="dreadforge_bastion"] .v22-scene-layers{filter:sepia(.4) saturate(1.2) hue-rotate(-24deg) brightness(.77)}
+#game .arena[data-v040-region="ember_caverns"] .v22-scene-layers{filter:saturate(1.35) contrast(1.12)}
+#game .arena[data-v040-region="hollow_sanctum"] .v22-scene-layers{filter:hue-rotate(170deg) saturate(1.25) brightness(.85)}
+#game .arena[data-v040-region="frostbound_peaks"] .v22-scene-layers{filter:saturate(.85) brightness(1.12)}
+#game .arena[data-v040-region="titanfall_ruins"] .v22-scene-layers{filter:sepia(.65) saturate(1.25) brightness(1.08)}
+#game .arena[data-v040-region="abyssal_rift"] .v22-scene-layers{filter:hue-rotate(25deg) saturate(1.7) contrast(1.17)}
+#game .arena[data-v040-region="eclipse_throne"] .v22-scene-layers{filter:sepia(.18) saturate(1.25) brightness(.8)}
+#game .arena[data-v040-region="dreadforge_bastion"] .scene-label{color:#ffcf99}
+#game .arena[data-v040-region="hollow_sanctum"] .scene-label{color:#d8bfff}
+#game .arena[data-v040-region="titanfall_ruins"] .scene-label{color:#f7dcac}
