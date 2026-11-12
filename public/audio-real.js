@@ -50,7 +50,7 @@
  const musicKey=()=>combat&&scene==="castle"?"castle":scene;
  function applyMusicVolume(){if(bgm)bgm.volume=clamp(musicVolume*.8)}
  function releaseMusic(){if(bgm){bgm.pause();bgm.removeAttribute("src");bgm.load();bgm=null}}
- function report(status){musicStatus=status;window.dispatchEvent(new CustomEvent("soulbound:audio-status",{detail:{status}}))}
+ function report(status){musicStatus=status;const label=document.getElementById("audioStatus");if(label)label.textContent=status;window.dispatchEvent(new CustomEvent("soulbound:audio-status",{detail:{status}}))}
  function tryTrack(key,index=0){
   if(!musicOn)return;
   const list=tracks[key]||tracks.wilds;
