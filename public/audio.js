@@ -114,7 +114,7 @@
  function setMusic(on){
   musicOn=!!on;
   if(loop){clearTimeout(loop);loop=null}
-  if(musicOn){const c=engine();if(c&&musicBus)musicBus.gain.setTargetAtTime(.8,c.currentTime,.13);step=0;tick()}
+  if(musicOn){const c=engine();if(c&&musicBus)musicBus.gain.setTargetAtTime(.32,c.currentTime,.13);step=0;tick()}
   else if(ctx&&musicBus)musicBus.gain.setTargetAtTime(.00001,ctx.currentTime,.08);
   return musicOn;
  }
