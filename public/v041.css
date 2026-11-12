@@ -338,3 +338,39 @@ body:not(:has(#game:not([hidden]))) #lobby:not([hidden]){
  #game .game-layout .v22-hud-right{grid-column:1!important;grid-row:3!important}
  #game .game-layout .v22-hud-stack .skills-panel .skill-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 }
+
+/* City and atlas share the UI foundation palette but preserve all v0.40
+   travel, party-level validation and map-specific visual previews. */
+#game .v040-city{border-color:var(--v041-border)!important;border-radius:var(--v041-radius)!important;
+ background:radial-gradient(circle at 48% 18%,#ffcb8f36,transparent 30%),
+ linear-gradient(180deg,#283751,#35364b 47%,#514236 74%,#111724)!important}
+#game .v040-town-scene{opacity:.76;filter:drop-shadow(0 5px 9px #06070c)}
+#game .v040-city-inner{box-sizing:border-box;min-width:min(560px,92%);max-width:min(850px,95%);
+ background:linear-gradient(145deg,#1b2033ee,#191a27eb)!important;
+ border:1px solid #d1ae77!important;border-radius:12px!important;
+ padding:clamp(16px,2.5vw,29px)!important;box-shadow:0 14px 45px #000b!important}
+#game .v040-city-inner h2{font-family:'Cinzel',Georgia,serif!important;letter-spacing:1.5px}
+#game .v040-city-inner .v040-city-actions{display:flex!important;flex-wrap:wrap!important;gap:9px!important}
+#game .v040-city-inner .v040-city-actions button{min-height:44px!important;
+ border-radius:7px!important;border-color:#b79b6e!important}
+#game .v040-city-inner .v040-city-actions button:focus-visible{outline:2px solid var(--v041-teal);outline-offset:2px}
+#v040WorldOverlay .v040-atlas{border-radius:14px!important;border-color:#d4af72!important;
+ background:var(--v041-bg)!important;box-shadow:var(--v041-shadow)!important}
+#v040WorldOverlay .v040-atlas-head{background:linear-gradient(100deg,#292a44,#171e2e)!important;
+ border-color:#a58961!important}
+#v040WorldOverlay .v040-atlas-head h2{font-family:'Cinzel',Georgia,serif!important;letter-spacing:1px}
+#v040WorldOverlay .v040-map-canvas{border-color:#ba996a!important}
+#v040WorldOverlay .v040-pin{transition:box-shadow .13s ease,transform .13s ease}
+#v040WorldOverlay .v040-pin.selected{transform:translate(-50%,-50%) scale(1.11)!important}
+#v040WorldOverlay .v040-map-detail{background:linear-gradient(160deg,#242637,#151826)!important}
+#v040WorldOverlay .v040-region-art{border-color:#c2a26d!important}
+#v040WorldOverlay .v040-region-info{gap:9px!important}
+#v040WorldOverlay .v040-stats span{border-color:#92754d!important;background:#1e2133!important}
+#v040WorldOverlay .v040-foe{background:#1c1f30!important}
+#v040WorldOverlay #v040Travel{min-height:43px!important}
+#v040WorldOverlay #v040Travel:focus-visible,#v040WorldOverlay .v040-pin:focus-visible{
+ outline:2px solid var(--v041-teal)!important;outline-offset:3px!important}
+@media(max-width:720px){
+ #game .v040-city-inner{min-width:0;width:95%!important;max-width:95%!important;padding:14px!important}
+ #v040WorldOverlay .v040-atlas-head{padding:8px 10px!important}
+}
