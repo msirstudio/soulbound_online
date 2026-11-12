@@ -114,8 +114,10 @@ function render(){
  renderSelection();
 }
 function enemyDetail(e){
- const img=e.boss?"/assets/bosses/"+e.sprite+".svg":"/assets/monsters/"+e.sprite+".svg";
- return '<div class="v035-enemy-art"><img alt="'+esc(e.name)+'" src="'+esc(img)+'" loading="lazy" onerror="this.style.display=\'none\'"></div>'+
+ const fallback=e.boss?"/assets/bosses/"+e.sprite+".svg":"/assets/monsters/"+e.sprite+".svg";
+ const staged=e.boss?window.SoulboundBossSpritesV39?.imagesFor(e.stage):null;
+ const img=staged?.normal||fallback;
+ return '<div class="v035-enemy-art"><img alt="'+esc(e.name)+'" src="'+esc(img)+'" loading="lazy" data-v039-fallback="'+esc(fallback)+'" onerror="if(this.dataset.v039Fallback && this.src.indexOf(this.dataset.v039Fallback)===-1){this.src=this.dataset.v039Fallback}else{this.style.display=\'none\'}"></div>'+
  '<div class="v035-stats"><span>❤️ HP <b>'+e.hp+'</b></span><span>⚔ ATK <b>'+e.atk+'</b></span><span>🛡 DEF <b>'+e.def+'</b></span><span>✧ EXP <b>'+e.xp+'</b></span><span>🪙 GOLD <b>'+e.gold+'</b></span><span>🗺 STAGE <b>'+e.stage+'</b></span></div>'+
  '<div class="v035-detail-info"><strong>LOCATION</strong><p>'+esc(e.zone)+'</p><strong>REWARDS</strong><p>'+esc(e.loot)+'</p>'+
  (e.boss?'<strong>EXCLUSIVE BOSS DROPS</strong><div class="v037-boss-loot">'+(e.drops||[]).map(it=>'<button type="button" data-v037-item="'+esc(it.id)+'" data-v037-rarity="'+esc(it.rarity)+'" class="v037-loot-entry" title="View this item"><span>'+esc(it.icon||"✦")+'</span><span>'+esc(it.name)+'</span><b>'+it.chance+'%</b></button>').join("")+'</div><p>Each percentage is the chance per boss victory for that specific item. Only one roll is made per player, so at most one item drops; no item is also possible.</p>':'<p>Regular encounters do not drop equipment.</p>')+'</div>';
