@@ -7,10 +7,9 @@ const loot=require("../loot-v034");
 const shop=[{id:"iron_sword",name:"Iron Sword",slot:"weapon",value:8,level:1,class:"swordsman"},{id:"iron_armor",name:"Iron Armor",slot:"armor",defense:5,maxHp:20,level:1}];
 function hero(){return{name:"Tester",classId:"swordsman",level:20,atk:25,def:10,maxHp:100,maxMp:40,hp:100,mp:40,weapon:"Training Sword",armor:"Traveler Armor",weaponItem:null,armorItem:null,inventory:[]}}
 function gear(slot,rarity="rare",boss=3){return loot.canonical({id:"boss"+boss+"_"+slot,rarity},shop)}
-test("one guaranteed random item per boss victory, none on normal waves",()=>{
+test("boss-only drops are curated, with no-drop chance",()=>{
  const p=hero();assert.equal(loot.dropBossLoot(p,1),null);assert.equal(p.inventory.length,0);
- const item=loot.dropBossLoot(p,3);assert.ok(item&&item.uid&&item.rarity);assert.equal(p.inventory.length,1);
- const other=hero(),otherItem=loot.dropBossLoot(other,3);assert.ok(otherItem&&otherItem.uid!==item.uid);
+ const original=Math.random;try{Math.random=()=>0;const item=loot.dropBossLoot(p,3);assert.ok(item&&item.uid&&item.rarity==="rare");assert.equal(p.inventory.length,1);const other=hero();Math.random=()=>.99;assert.equal(loot.dropBossLoot(other,3),null);assert.equal(other.inventory.length,0);}finally{Math.random=original}
 });
 test("all five rarity tiers and all nine slots are canonical and deterministic",()=>{
  for(const slot of loot.SLOTS)for(const rarity of loot.RARITIES){
@@ -71,5 +70,5 @@ test("fallen turn is skipped, and fallen allies revive when party wins",()=>{
  const r={players:new Map([["a",a],["b",b]]),turnIndex:0,status:"battle",stage:3,monster:{boss:true,hp:1,maxHp:1,atk:1000,def:0,name:"Boss",xp:20,gold:10,vulnerableTurns:0},log:[]};
  sim.monsterStrike(r);assert.equal(a.hp,0);assert.equal(r.status,"battle");sim.skipFallenTurn(r);assert.equal(sim.current(r).id,"b");
  sim.finish(r);assert.equal(a.hp,30);assert.equal(a.mp,8);assert.equal(r.status,"victory");
- assert.equal(a.inventory.length,1);assert.equal(b.inventory.length,1);
+ assert.ok(a.inventory.length<=1);assert.ok(b.inventory.length<=1);
 });
