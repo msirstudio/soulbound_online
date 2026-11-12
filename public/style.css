@@ -905,3 +905,38 @@ body:not(:has(#game:not([hidden]))) #account,body:not(:has(#game:not([hidden])))
  #game .game-main-column{grid-template-columns:minmax(195px,32%) minmax(0,1fr) minmax(170px,23%)!important}
  #game .hero-panel,#game .progression-panel{font-size:11px!important}
 }
+
+/* SOULBOUND v0.21 — living wilderness, carved fantasy HUD and action dock */
+#game .arena.wilds{background-image:url("assets/scenes/living-wilds.svg")!important;background-position:center 52%!important;background-size:cover!important}
+#game .arena{isolation:isolate;border:4px ridge #c4a15f!important;border-radius:12px!important;box-shadow:0 0 0 2px #21150d,0 12px 32px #0009,inset 0 0 0 3px #251b18!important}
+#game .arena:before{z-index:0!important;background:linear-gradient(180deg,#080f1a20 0%,transparent 40%,#08130d55 100%)!important;pointer-events:none}
+#game .arena:after{pointer-events:none;z-index:0!important}
+#game .arena .scene-label,#game .arena .scene-hint,#game .arena .battlefield,#game .arena .status{position:relative;z-index:2}
+#game .arena.wilds{animation:sb21-landscape 28s ease-in-out infinite alternate}
+#game .arena.wilds:after{content:"";position:absolute;inset:0;display:block;z-index:1!important;background-image:radial-gradient(ellipse at 18% 36%,#f6b6d6cc 0 2px,transparent 3px),radial-gradient(ellipse at 46% 22%,#f3d4b0dd 0 2px,transparent 3px),radial-gradient(ellipse at 72% 70%,#f5b9d0aa 0 2px,transparent 3px);background-size:180px 110px,260px 170px,210px 160px;animation:sb21-petals 12s linear infinite;opacity:.7}
+@keyframes sb21-landscape{from{background-position:49% 52%}to{background-position:52% 50%}}
+@keyframes sb21-petals{from{background-position:0 -60px,70px -90px,30px -20px}to{background-position:140px 430px,-80px 390px,180px 450px}}
+#game .panel{background:linear-gradient(145deg,#2b211f 0%,#17141c 64%,#10131b 100%)!important;border:2px solid #a7824d!important;border-radius:10px!important;box-shadow:inset 0 0 0 2px #1b1312,0 4px 13px #0007!important}
+#game .pixel-title{color:#f3d49a!important;border-bottom:1px solid #99774e!important;letter-spacing:.065em;text-shadow:0 1px 2px #000}
+#game .skills-panel{background:radial-gradient(ellipse at 50% 80%,#4b2b2428,transparent 70%),linear-gradient(155deg,#30211e,#12131a)!important}
+#game .skills-panel .skill-actions button{border:1px solid #9d754a!important;border-radius:6px!important;background:linear-gradient(#57402f,#241e21)!important;color:#f5dbab!important;box-shadow:inset 0 1px #b8916266,0 3px #0c0a0d!important;transition:filter .18s,transform .18s}
+#game .skills-panel .skill-actions button:hover:not(:disabled){filter:brightness(1.25);transform:translateY(-2px)}
+#game .stage-actions{background:linear-gradient(90deg,#291a20,#4d2a26 40%,#291a20)!important;border:2px solid #c69b56!important;border-radius:10px!important;box-shadow:0 4px 0 #0d0b10,0 0 18px #a46a2844!important;overflow:visible!important}
+#game .stage-actions button{background:linear-gradient(#bb8e4e,#6b4325)!important;color:#fff0c3!important;border:1px solid #e5bb6a!important;border-radius:6px!important;text-shadow:0 1px 2px #24130c!important;box-shadow:inset 0 1px #ffde9866!important}
+#game .stage-actions button:hover:not(:disabled){filter:brightness(1.18)}
+#game .loadout-tools{position:static!important;transform:none!important;display:flex!important;justify-content:flex-start!important;gap:6px!important;grid-column:1/4!important;grid-row:4!important;z-index:5!important}
+#game .loadout-tools button{border:1px solid #a88651!important;background:linear-gradient(#4d3728,#241e1e)!important;color:#e7c58b!important;border-radius:6px!important;padding:6px 12px!important}
+@media(min-width:1000px) and (min-height:650px){
+ #game .game-main-column{grid-template-rows:auto auto 52px auto!important}
+ #game .stage-actions{grid-column:1/4!important;grid-row:3!important;min-height:52px!important;height:52px!important;padding:5px!important;margin-top:4px!important;z-index:10!important}
+ #game .stage-actions button{min-height:39px!important;max-height:42px!important;font-size:12px!important}
+ #game .loadout-tools{grid-column:3!important;grid-row:4!important;justify-content:flex-end!important;margin-top:1px!important}
+ #game .equipment-panel.is-open{top:calc(100% + 8px)!important;right:0!important}
+ #game .game-layout{padding-bottom:28px!important}
+ #game .arena{height:clamp(280px,39dvh,410px)!important;flex-basis:clamp(280px,39dvh,410px)!important}
+}
+@media(max-width:999px),(max-height:649px){
+ #game .loadout-tools{display:flex!important;flex-wrap:wrap!important;margin:8px 0!important}
+ #game .stage-actions{position:relative!important;transform:none!important;margin:8px 0!important;min-height:48px!important}
+}
+@media(prefers-reduced-motion:reduce){#game .arena.wilds,#game .arena.wilds:after{animation:none!important}#game .skills-panel .skill-actions button{transition:none!important}}
