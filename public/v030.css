@@ -1,0 +1,49 @@
+/* v0.30 — Character Creator / visual hero system */
+#lobby{max-width:min(1060px,95vw)!important;width:min(1060px,95vw)!important;box-sizing:border-box;margin-left:auto!important;margin-right:auto!important}
+#lobby .v30-creator{position:relative;padding:14px 17px 12px;margin:13px 0 20px;border:2px solid #d6a45d;border-radius:13px;
+ background:radial-gradient(ellipse at 82% 10%,#37496788,transparent 43%),linear-gradient(145deg,#25283b,#15111e 80%);
+ box-shadow:inset 0 0 0 1px #fff2c735,0 8px 26px #0008}
+#lobby .v30-creator-heading{font:800 clamp(17px,2.1vw,30px) Georgia,serif;text-align:center;color:#ffe2a6;letter-spacing:.12em;text-shadow:0 0 17px #dd9a4969}
+#lobby .v30-creator-heading small{display:block;margin:4px 0 12px;font:700 10px Georgia,serif;letter-spacing:.3em;color:#be9c6a}
+#lobby .v30-class-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+#lobby .v30-class-choice{display:flex;flex-direction:column;align-items:center;gap:5px;min-height:92px;padding:14px 6px;color:#e9cf9e;
+ border:1px solid #80603d;border-radius:10px;background:linear-gradient(165deg,#28283e,#191622);cursor:pointer;
+ box-shadow:inset 0 1px #fff5cb25}
+#lobby .v30-class-choice span{font-size:22px}
+#lobby .v30-class-choice b{font:800 clamp(11px,1.2vw,17px) Georgia,serif}
+#lobby .v30-class-choice small{font-size:11px;color:#cbbbaa}
+#lobby .v30-class-choice.selected{border:2px solid #ffe3a8;background:linear-gradient(155deg,#4c3441,#242234);
+ box-shadow:0 0 18px #d8a75a68,inset 0 1px #fff0d36e;color:#fff4d1}
+#lobby .v30-gender{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:9px;border:0;padding:13px 0 6px;margin:0}
+#lobby .v30-gender legend{width:100%;float:none;text-align:center;font:700 12px Georgia,serif;letter-spacing:.1em;color:#e4bb77}
+#lobby .v30-gender label{display:inline-flex;align-items:center;gap:7px;min-width:120px;min-height:35px;justify-content:center;
+ border:1px solid #936c43;border-radius:6px;background:#151725;color:#ffe1a4;cursor:pointer;padding:4px 10px}
+#lobby .v30-gender label:has(input:checked){background:linear-gradient(#7d5436,#402b32);border-color:#ffda89;box-shadow:0 0 10px #d79c525f}
+#lobby .v30-gender input{accent-color:#f0c272;width:16px;height:16px}
+#lobby .v30-preview{display:flex;align-items:center;justify-content:center;gap:23px;min-height:216px;
+ background:radial-gradient(ellipse at 30% 90%,#8f583933,transparent 47%),linear-gradient(140deg,#0d1729,#1c1b2d);
+ border:1px solid #88643e;border-radius:10px;margin:13px auto 0;padding:8px 18px;max-width:600px}
+#lobby .v30-preview img{width:155px;height:210px;image-rendering:pixelated;object-fit:contain;
+ filter:drop-shadow(0 9px 6px #0008);animation:v30-idle 2.4s ease-in-out infinite}
+#lobby .v30-preview-info{max-width:270px}
+#lobby .v30-preview-info strong{font:800 20px Georgia,serif;color:#ffe0a1}
+#lobby .v30-preview-info p{font-size:13px;line-height:1.45;color:#e1d5cd}
+#lobby .v30-preview-info span{color:#c9a768;font-size:10px;letter-spacing:.05em}
+#game .sprite-img{image-rendering:pixelated!important;filter:drop-shadow(0 4px 4px #0007)}
+#game .hero-figure .sprite-img{animation:v30-idle 2.3s ease-in-out infinite;transform-origin:50% 86%}
+#game .hero-figure .sprite-img.v30-attacking{animation:v30-attack .48s cubic-bezier(.23,.9,.45,1) both}
+#game .hero-figure .sprite-img:hover{filter:drop-shadow(0 0 9px #fad18e88)}
+@keyframes v30-idle{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-3px) scale(1.012,.995)}}
+@keyframes v30-attack{0%{transform:translateX(0) rotate(0)}22%{transform:translateX(-8px) rotate(-8deg)}50%{transform:translateX(20px) rotate(11deg)}80%{transform:translateX(5px) rotate(-3deg)}100%{transform:translateX(0) rotate(0)}}
+@media(max-width:650px){
+ #lobby{width:96vw!important}
+ #lobby .v30-creator{padding:10px!important}
+ #lobby .v30-class-choices{gap:4px}
+ #lobby .v30-class-choice{min-height:95px;padding:7px 3px;font-size:9px}
+ #lobby .v30-class-choice small{font-size:9px}
+ #lobby .v30-preview{flex-direction:column;gap:4px;text-align:center}
+ #lobby .v30-preview img{width:132px;height:168px}
+}
+@media(prefers-reduced-motion:reduce){
+ #lobby .v30-preview img,#game .hero-figure .sprite-img,#game .hero-figure .sprite-img.v30-attacking{animation:none!important}
+}
