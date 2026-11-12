@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.25.0",
+  "version": "0.26.1",
   "private": true,
-  "description": "SOULBOUND Online v0.25 - exterior gold vine border, visible character stats and cinematic race summoning",
+  "description": "SOULBOUND Online v0.26.1 - biome procedural audio, combat SFX and equipment/inventory overlay fix",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
