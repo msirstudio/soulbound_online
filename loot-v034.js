@@ -31,6 +31,19 @@ function factory(id,rarity){
   value:stats.value,defense:stats.defense,maxHp:stats.maxHp,maxMp:stats.maxMp,
   description:Object.entries(stats).filter(([,n])=>n>0).map(([k,n])=>"+"+n+" "+({value:"ATK",defense:"DEF",maxHp:"HP",maxMp:"MP"}[k])).join(" · ")};
 }
+// Curated per-boss rewards. chance is the unconditional per-player drop probability.
+// One roll per boss victory; at most one item. No rerolls into other rarities.
+const BOSS_DROPS={
+  1:[{slot:"main",rarity:"rare",chance:12},{slot:"ring_left",rarity:"uncommon",chance:38}],
+  2:[{slot:"chest",rarity:"uncommon",chance:35},{slot:"boots",rarity:"rare",chance:20}],
+  3:[{slot:"main",rarity:"epic",chance:12},{slot:"neck",rarity:"rare",chance:32}],
+  4:[{slot:"head",rarity:"rare",chance:35},{slot:"offhand",rarity:"epic",chance:18}],
+  5:[{slot:"pants",rarity:"epic",chance:25},{slot:"ring_left",rarity:"rare",chance:38}],
+  6:[{slot:"main",rarity:"epic",chance:30},{slot:"neck",rarity:"legendary",chance:7}],
+  7:[{slot:"chest",rarity:"legendary",chance:12},{slot:"boots",rarity:"epic",chance:32}],
+  8:[{slot:"main",rarity:"legendary",chance:18},{slot:"ring_left",rarity:"legendary",chance:12}]
+};
+function bossDrops(boss){return(BOSS_DROPS[boss]||[]).map(row=>({...factory("boss"+boss+"_"+row.slot,row.rarity),chance:row.chance}));}
 function canonical(saved,shopItems){
  if(!saved||typeof saved!=="object")return null;
  const id=String(saved.id||"");let item;
@@ -62,14 +75,15 @@ function dropBossLoot(player,stage,logger=()=>{}){
  if(stage%3!==0)return null;
  player.inventory=Array.isArray(player.inventory)?player.inventory:[];
  if(bagUsed(player)>=40){logger(player.name+"'s bag is full (40/40): boss loot was not collected.");return null}
- // Every party member (including fallen members) receives exactly one independently rolled equipment item per boss victory.
+ // Each player rolls once against a fixed per-boss drop table. A failed roll gives no item.
  const boss=Math.max(1,Math.min(8,Math.round(stage/3)));
- const slot=SLOTS[Math.floor(Math.random()*SLOTS.length)];
- const rarity=rarityFromRoll();
- const it=factory("boss"+boss+"_"+slot,rarity);
+ const roll=Math.random()*100;let sum=0,chosen=null;
+ for(const entry of BOSS_DROPS[boss]){sum+=entry.chance;if(roll<sum){chosen=entry;break}}
+ if(!chosen){logger(player.name+" received no boss equipment this time.");return null}
+ const it=factory("boss"+boss+"_"+chosen.slot,chosen.rarity);
  it.uid=randomUUID();
  player.inventory.push(it);
- logger(player.name+" received "+rarity.toUpperCase()+" boss loot: "+it.name+"!");
+ logger(player.name+" received "+chosen.rarity.toUpperCase()+" boss loot: "+it.name+"!");
  return it;
 }
 function bonuses(it){return{atk:clamp(it?.value,0,10000),def:clamp(it?.defense,0,10000),maxHp:clamp(it?.maxHp,0,100000),maxMp:clamp(it?.maxMp,0,100000)}}
@@ -125,4 +139,4 @@ function unequip(p,slot){
  if(slot==="chest"){p.armorItem=null;p.armor=p.classId==="mage"?"Novice Robe":p.classId==="tank"?"Guardian Armor":"Traveler Armor"}
  return{ok:true,slot};
 }
-module.exports={SLOTS,RARITIES,canonical,normalizeInventory,dropBossLoot,equip,unequip,equipped,slotOf,bagUsed,factory};
+module.exports={SLOTS,RARITIES,canonical,normalizeInventory,dropBossLoot,equip,unequip,equipped,slotOf,bagUsed,factory,BOSS_DROPS,bossDrops};
