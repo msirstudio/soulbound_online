@@ -616,3 +616,74 @@ body:has(#game:not([hidden])) .site-header{display:none}
  #game .figure-vitals{width:100px}
  #game .potion-panel{padding-bottom:8px}
 }
+
+/* v0.16: matching character/enemy under-sprite vitals */
+#game .hero-figure{display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:3px;min-width:0}
+#game .figure-vitals,#game .monster-vitals{box-sizing:border-box;order:2;width:clamp(115px,13vw,190px);max-width:100%;margin:3px auto 0;padding:4px 8px;background:#0e1520d9;border:1px solid #b49a6b99;border-radius:5px;color:#f8ebd0;font:13px 'VT323',monospace;text-align:center;text-shadow:0 1px #000}
+#game .figure-vitals strong{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:14px}
+#game .figure-vitals small,#game .monster-vitals small{display:block;font-size:12px;line-height:1.1}
+#game .monster-vitals .figure-meter,#game .figure-vitals .figure-meter{height:8px;margin:3px 0 2px}
+#game .monster-side{justify-content:flex-end}
+#game .monster-side .monster-vitals{order:3}
+#game .monster-side #monsterName{order:2;margin:2px auto}
+#game .monster-side #bossTag{order:4}
+#game .monster-side .monster-img{order:1}
+#game .monster-vitals #monsterHp{display:block;height:100%;background:linear-gradient(90deg,#a62d49,#ef5772)}
+#game .roomline .v16-game-brand{display:flex;align-items:center;gap:6px;color:#f3dca7;white-space:nowrap;letter-spacing:.5px;font-family:'Cinzel',serif;font-size:clamp(11px,.95vw,16px)}
+#game .v16-game-brand span{font-size:18px;color:#d7a65d}
+#game .v16-game-brand small{font:10px 'VT323',monospace;color:#c4a478}
+#game .v16-leave{background:linear-gradient(180deg,#713d3b,#3c2027)!important;border:1px solid #e6a18c!important;color:#ffe9d8!important;font-size:12px!important;font-weight:700!important;letter-spacing:.5px;min-height:35px!important}
+#game .v16-leave:hover{filter:brightness(1.2)}
+#game .potion-panel{box-sizing:border-box;overflow:auto}
+#game .potion-panel .pixel-title{margin:0 0 3px}
+#game .potion-panel .potion-group{display:flex;align-items:center;gap:4px;margin:3px 0}
+#game .potion-panel .potion-group>strong{width:40px;flex:0 0 40px;font-size:9px;line-height:1.1}
+#game .potion-panel .potion-actions{flex:1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:3px}
+#game .potion-panel .potion-actions button{min-height:27px!important;padding:3px 2px!important;font-size:8px!important}
+#game .stage-actions{overflow:visible}
+#game .stage-actions .v16-leave{min-width:135px}
+@media (min-width:1000px) and (min-height:650px){
+ #game .game-layout{grid-template-columns:minmax(0,1fr) minmax(265px,24%);gap:7px}
+ #game .game-main-column{display:grid;grid-template-columns:minmax(255px,34%) minmax(0,1fr) minmax(155px,18%);grid-template-rows:minmax(0,1fr);gap:7px}
+ #game .hero-panel{grid-column:1;grid-row:1;overflow:auto}
+ #game .progression-panel{grid-column:1;grid-row:1;align-self:end;max-height:38%;z-index:1;overflow:auto;background:#1a171b}
+ #game .hero-panel{padding-bottom:clamp(105px,19vh,190px)}
+ #game .skills-panel{grid-column:2;grid-row:1;overflow:auto}
+ #game .potion-panel{grid-column:3;grid-row:1;align-self:start;max-height:190px;overflow:auto!important;padding:7px!important}
+ #game .potion-panel .potion-group{display:block}
+ #game .potion-panel .potion-group>strong{display:block;width:auto;margin:4px 0}
+ #game .stage-actions{grid-column:2 / 4;grid-row:1;align-self:end;justify-self:stretch;max-height:46px;overflow:visible}
+ #game .skills-panel{padding-bottom:45px}
+ #game .monster-img{height:clamp(105px,19dvh,220px)}
+ #game .sprite-img{height:clamp(65px,12dvh,145px)}
+ #game .battlefield{align-items:end;padding-bottom:5px}
+ #game .figure-vitals,#game .monster-vitals{width:clamp(110px,11vw,180px)}
+ #game .game-side-column{grid-template-rows:minmax(0,1fr) minmax(150px,.9fr)}
+ #game .roomline{display:flex;align-items:center;justify-content:space-between;gap:8px}
+ #game .roomline .v16-game-brand{margin-right:auto}
+}
+@media (max-width:999px),(max-height:649px){
+ #game .game-main-column{display:flex;flex-direction:column}
+ #game .potion-panel{max-height:130px}
+ #game .stage-actions{display:flex;flex-wrap:wrap;gap:5px}
+ #game .stage-actions .v16-leave{min-width:140px}
+ #game .figure-vitals,#game .monster-vitals{width:115px}
+ #game .roomline .v16-game-brand{font-size:11px}
+}
+/* v0.16 compact pre-game lobby at normal browser zoom */
+body:not(:has(#game:not([hidden]))) .shell{max-width:1100px;margin:0 auto;padding:10px 16px 22px;min-height:0}
+body:not(:has(#game:not([hidden]))) .site-header{box-sizing:border-box;max-width:680px;margin:0 auto 10px;padding:12px 15px;min-height:0}
+body:not(:has(#game:not([hidden]))) .brand-seal{width:35px;height:42px;margin:0 auto 2px}
+body:not(:has(#game:not([hidden]))) .brand{font-size:clamp(26px,3.4vw,43px);line-height:1.1}
+body:not(:has(#game:not([hidden]))) .subtitle{font-size:clamp(9px,1.1vw,13px);margin:3px auto}
+body:not(:has(#game:not([hidden]))) .tagline{font-size:9px;margin:2px auto}
+body:not(:has(#game:not([hidden]))) .header-controls{margin:5px auto 0}
+body:not(:has(#game:not([hidden]))) .version{font-size:9px;margin-top:4px}
+body:not(:has(#game:not([hidden]))) main{display:flex;flex-direction:column;align-items:center;gap:7px}
+body:not(:has(#game:not([hidden]))) #account,body:not(:has(#game:not([hidden]))) #lobby{box-sizing:border-box;width:min(100%,680px);max-width:680px;margin:0 auto;padding:13px 17px}
+body:not(:has(#game:not([hidden]))) #account .pixel-title,body:not(:has(#game:not([hidden]))) #lobby .pixel-title{margin:5px 0;padding:4px 0}
+body:not(:has(#game:not([hidden]))) #account label,body:not(:has(#game:not([hidden]))) #lobby label{margin:4px 0}
+body:not(:has(#game:not([hidden]))) #account input,body:not(:has(#game:not([hidden]))) #lobby input,body:not(:has(#game:not([hidden]))) #lobby select{padding:8px;min-height:34px}
+body:not(:has(#game:not([hidden]))) #account button,body:not(:has(#game:not([hidden]))) #lobby button{min-height:33px;padding:6px 10px}
+body:not(:has(#game:not([hidden]))) #account p,body:not(:has(#game:not([hidden]))) #lobby p{margin:5px 0}
+@media(max-width:680px){body:not(:has(#game:not([hidden]))) .shell{padding:6px 8px}body:not(:has(#game:not([hidden]))) #account,body:not(:has(#game:not([hidden]))) #lobby{padding:10px}}
