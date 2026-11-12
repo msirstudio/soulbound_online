@@ -451,3 +451,86 @@ body:has(#game:not([hidden])) .site-header{display:none}
   #game .stage-actions{grid-column:2;grid-row:4}
   #game .game-main-column{grid-template-rows:auto repeat(3,minmax(0,1fr))}
 }
+
+/* SOULBOUND v0.14 — battle-first visual direction.
+   Preserve existing game DOM and controls; responsive layout only. */
+#game .arena{position:relative;isolation:isolate;overflow:hidden;border-color:#9d7948;background-color:#161c2a;box-shadow:inset 0 0 65px #080b14,0 4px 18px #0008}
+#game .arena:before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 50% 90%,#e2a55a22,transparent 48%),linear-gradient(110deg,#080e1a55,transparent 42%,#080e1a66);animation:soulboundMist 14s ease-in-out infinite alternate}
+#game .arena:after{content:"";position:absolute;inset:auto -10% 0;height:24%;z-index:-1;pointer-events:none;background:linear-gradient(transparent,#0b101b99);transform:skewY(-1deg)}
+@keyframes soulboundMist{from{transform:translateX(-2%);opacity:.6}to{transform:translateX(2%);opacity:1}}
+#game .battlefield{position:relative;align-items:center;justify-content:space-around}
+#game .party-side,#game .monster-side{position:relative;z-index:1}
+#game .monster-img,#game .sprite-img{object-fit:contain;filter:drop-shadow(0 8px 7px #000a);transition:filter .2s ease,transform .2s ease}
+#game .monster-img:hover,#game .sprite-img:hover{filter:drop-shadow(0 12px 12px #000d) brightness(1.13);transform:translateY(-3px)}
+#game .monster-side .hpbar{width:min(100%,260px);height:13px;border:1px solid #f1b8a088;background:#300d15}
+#game .monster-side .hpbar i{background:linear-gradient(90deg,#9e2032,#ed5b65)}
+#game .monster-side #monsterHpText{font-size:16px;color:#fff0e6;text-shadow:1px 2px #000}
+#game .hero-bar{border:1px solid #ffffff38;overflow:hidden}
+#game .hp-hero{background:#2c111a}
+#game .mp-hero{background:#0b223c}
+#game .hero-bar-label{font-weight:bold}
+#game .status{background:#090c17a8;border:1px solid #c29a5b66;border-radius:3px;max-width:720px;margin:0 auto;padding:5px 10px}
+#game .scene-label{color:#ffe2a3;text-shadow:0 2px 4px #000}
+#game .versus{opacity:.55;filter:drop-shadow(0 2px 4px #000)}
+#game .panel{border-radius:5px}
+#game .skills-panel{border-color:#a87b44}
+#game .skills-panel [data-action="attack"]{background:#644026;border-color:#d9a75e}
+#game .skills-panel button:not(:disabled):hover{transform:translateY(-1px)}
+#game .roomline{background:linear-gradient(90deg,#241b23,#151927)}
+#game .campaign{opacity:.8}
+#game .party-panel{border-color:#52677c}
+#game .merchant-log-panel{border-color:#6b5c49}
+@media (prefers-reduced-motion:reduce){#game .arena:before{animation:none}#game .monster-img,#game .sprite-img,#game .skills-panel button{transition:none}}
+@media (min-width:1000px) and (min-height:650px){
+  body:has(#game:not([hidden])) .shell{padding:4px 9px 6px}
+  #game:not([hidden]){gap:5px}
+  #game .roomline{flex:0 0 34px;min-height:34px}
+  #game .campaign{flex:0 0 16px;height:16px;min-height:16px}
+  #game .campaign-track{height:16px}
+  #game .campaign-track span{font-size:9px;padding:0}
+  #game .arena{flex:0 0 clamp(245px,43dvh,570px);height:clamp(245px,43dvh,570px);min-height:0;padding:9px 18px;display:flex;flex-direction:column;justify-content:space-between}
+  #game .scene-label{font-size:clamp(10px,.8vw,14px)}
+  #game .scene-hint{font-size:clamp(13px,1vw,18px)}
+  #game .battlefield{flex:1 1 auto;height:auto;min-height:0;gap:clamp(15px,3vw,65px)}
+  #game .party-side{flex:1 1 48%;max-width:48%}
+  #game .monster-side{flex:1 1 42%;max-width:42%;display:flex;flex-direction:column;align-items:center}
+  #game .sprites{justify-content:center}
+  #game .sprite-img{width:clamp(58px,6vw,115px);height:clamp(85px,18dvh,205px)}
+  #game .sprite{font-size:clamp(42px,5vw,85px)}
+  #game .monster-img{width:clamp(170px,21vw,380px);height:clamp(150px,27dvh,330px)}
+  #game .caption{font-size:clamp(10px,.75vw,14px);margin:4px 0}
+  #game .monster-side .hpbar{height:13px;margin:4px auto}
+  #game .status{flex:0 0 auto;font-size:clamp(14px,1vw,19px);line-height:1.1}
+  #game .game-layout{grid-template-columns:minmax(0,1fr) minmax(250px,25%);gap:7px}
+  #game .game-main-column{grid-template-columns:minmax(205px,27%) minmax(0,1fr);grid-template-rows:minmax(0,1fr) minmax(0,1fr);gap:6px}
+  #game .character-panels,#game .combat-panels{display:contents}
+  #game .hero-panel{grid-column:1;grid-row:1;overflow:auto}
+  #game .skills-panel{grid-column:2;grid-row:1;overflow:auto}
+  #game .progression-panel{grid-column:1;grid-row:2;overflow:auto}
+  #game .potion-panel{grid-column:2;grid-row:2;overflow:auto}
+  #game .equipment-panel,#game .inventory-panel{display:none}
+  #game .stage-actions{grid-column:2;grid-row:2;align-self:end;justify-self:stretch;display:flex;flex-direction:row;gap:4px;z-index:1;background:#15121e;padding:3px;border:1px solid #6b5338;border-radius:4px;max-height:44px;overflow:hidden}
+  #game .stage-actions .wide{flex:1 1 auto;min-width:0;min-height:30px;padding:4px 5px;font-size:clamp(7px,.6vw,10px)}
+  #game .potion-panel{padding-bottom:50px}
+  #game .game-side-column{grid-template-rows:minmax(0,1.25fr) minmax(0,.75fr)}
+  #game .hero-panel .race-card{display:none}
+  #game .hero-panel .my-stats{display:none}
+  #game .hero-panel .hero-bar{height:10px}
+  #game .hero-panel .hero-bar-label{font-size:13px}
+  #game .actions button{min-height:clamp(34px,5vh,50px);font-size:clamp(8px,.65vw,10px)}
+  #game .skill-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  #game .potion-actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  #game .log{max-height:100%}
+  #game .pixel-title{font-size:clamp(8px,.7vw,11px)}
+}
+@media (min-width:1000px) and (min-height:650px) and (max-height:760px){
+  #game .arena{flex-basis:39dvh;height:39dvh}
+  #game .monster-img{height:23dvh}
+  #game .sprite-img{height:15dvh}
+}
+@media (max-width:999px),(max-height:649px){
+  #game .arena{min-height:340px;padding:12px 8px}
+  #game .battlefield{min-height:230px}
+  #game .monster-img{width:min(32vw,220px);height:190px}
+  #game .sprite-img{width:clamp(45px,9vw,78px);height:90px}
+}
