@@ -687,3 +687,66 @@ body:not(:has(#game:not([hidden]))) #account input,body:not(:has(#game:not([hidd
 body:not(:has(#game:not([hidden]))) #account button,body:not(:has(#game:not([hidden]))) #lobby button{min-height:33px;padding:6px 10px}
 body:not(:has(#game:not([hidden]))) #account p,body:not(:has(#game:not([hidden]))) #lobby p{margin:5px 0}
 @media(max-width:680px){body:not(:has(#game:not([hidden]))) .shell{padding:6px 8px}body:not(:has(#game:not([hidden]))) #account,body:not(:has(#game:not([hidden]))) #lobby{padding:10px}}
+
+/* v0.17 asymmetrical fantasy MMORPG HUD */
+#game .v16-game-brand strong{font-size:clamp(16px,1.55vw,27px);letter-spacing:2px;color:#f8dc9c;text-shadow:0 2px 6px #000}
+#game .v16-game-brand span{font-size:24px}
+#game .v16-game-brand small{font-size:12px}
+#game .v17-nameplate{order:0;display:block;max-width:100%;font:700 clamp(12px,.9vw,17px) 'Cinzel',serif;color:#ffe5aa;text-shadow:0 2px 4px #000,0 0 7px #000;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0 auto 3px}
+#game .hero-figure .sprite-img{order:1}
+#game .hero-figure .figure-vitals{order:2}
+#game .hero-figure .figure-vitals strong{display:none}
+#game .monster-side #monsterName{font:700 clamp(12px,.9vw,17px) 'Cinzel',serif;color:#ffe5aa;text-shadow:0 2px 5px #000}
+#game .panel{background:linear-gradient(160deg,#27201b 0%,#1a1719 72%,#15151c 100%);border:1px solid #82613e;box-shadow:inset 0 1px #e7b97922,0 3px 9px #0007}
+#game .arena{border:2px solid #a17b48;border-radius:10px 10px 5px 5px;box-shadow:inset 0 0 30px #070a13,0 5px 18px #0009}
+#game .hero-panel{border-radius:12px 5px 12px 5px;border-left:3px solid #d5a45c}
+#game .progression-panel{border-radius:5px 5px 12px 12px;border-left:3px solid #9a80b2}
+#game .skills-panel{border-radius:7px 14px 7px 14px;border-top:3px solid #d4a45d}
+#game .potion-panel{border-radius:12px 5px 5px 12px;border-left:3px solid #bf6a74}
+#game .inventory-panel{border-radius:5px 12px 12px 5px;border-right:3px solid #b99758}
+#game .equipment-panel{border-radius:10px;border:2px solid #bb945b}
+#game .party-panel{border-radius:12px 12px 5px 5px;border-top:3px solid #6b9aa3}
+#game .merchant-log-panel{border-radius:5px 5px 12px 12px;border-bottom:3px solid #a98555}
+#game .pixel-title{letter-spacing:1px;color:#edc68a}
+#game .skill-actions{align-content:start}
+#game .skill-actions button{border-radius:7px 3px 7px 3px}
+#game .inventory-panel .inventory-summary{font-size:12px;color:#e6c18c}
+#game .inventory-panel .inventory-items{overflow:auto;min-height:0;max-height:100%}
+#game .inventory-panel .inventory-row{padding:5px;border-bottom:1px solid #7b644c66}
+#game .inventory-panel .inventory-row strong{font-size:12px}
+#game .inventory-panel .inventory-row button{font-size:9px;padding:5px}
+#game .inventory-panel .food-inventory{font-size:11px}
+#game .inventory-panel .food-actions{display:flex;flex-wrap:wrap;gap:3px}
+#game .inventory-panel .food-actions button{font-size:9px;padding:5px}
+@media (min-width:1000px) and (min-height:650px){
+ body:has(#game:not([hidden])) .shell{max-width:1660px;width:min(97vw,1660px);margin:0 auto;padding:7px 0 10px}
+ #game:not([hidden]){max-width:100%;gap:7px}
+ #game .roomline{border-radius:8px;padding:4px 10px;min-height:40px;flex-basis:40px}
+ #game .campaign{margin:1px 0 4px}
+ #game .arena{flex:0 0 clamp(235px,37dvh,460px);height:clamp(235px,37dvh,460px);margin-bottom:5px}
+ #game .game-layout{grid-template-columns:minmax(0,1fr) minmax(230px,23%);gap:10px;align-items:stretch}
+ #game .game-main-column{display:grid;grid-template-columns:minmax(220px,31%) minmax(0,1fr) minmax(195px,23%);grid-template-rows:minmax(0,1fr);gap:9px}
+ #game .hero-panel{grid-column:1;grid-row:1;align-self:start;height:62%;max-height:62%;padding:10px!important;overflow:auto}
+ #game .progression-panel{grid-column:1;grid-row:1;align-self:end;height:34%;max-height:34%;overflow:auto;padding:9px}
+ #game .skills-panel{grid-column:2;grid-row:1;align-self:start;height:calc(100% - 53px);max-height:calc(100% - 53px);overflow:auto;padding:10px}
+ #game .potion-panel{grid-column:3;grid-row:1;align-self:start;height:auto;max-height:150px;padding:8px!important;overflow:auto!important}
+ #game .inventory-panel{display:flex!important;flex-direction:column;grid-column:3;grid-row:1;align-self:stretch;margin-top:159px;margin-bottom:52px;padding:9px;overflow:auto!important;position:relative!important;inset:auto!important;width:auto!important;height:auto!important;box-shadow:inset 0 1px #e7b97922,0 3px 9px #0007!important}
+ #game .inventory-panel.is-open{position:relative!important;inset:auto!important;width:auto!important}
+ #game .equipment-panel.is-open{right:0!important;top:0!important;bottom:50px!important;width:min(380px,70%)!important;z-index:20}
+ #game .stage-actions{grid-column:2/4;grid-row:1;align-self:end;justify-self:stretch;max-height:45px;z-index:5}
+ #game .stage-actions button{border-radius:6px;min-height:33px}
+ #game .loadout-tools{position:absolute;right:8px;top:0;transform:translateY(-115%);z-index:9}
+ #game #toggleInventory{display:none}
+ #game .game-side-column{grid-template-rows:minmax(0,1fr) minmax(155px,.75fr);gap:10px}
+ #game .party-panel{padding:10px}
+ #game .merchant-log-panel{padding:10px}
+ #game .monster-img{height:clamp(110px,20dvh,240px)}
+ #game .sprite-img{height:clamp(70px,13dvh,155px)}
+ #game .hero-figure{gap:2px}
+ #game .figure-vitals{padding:3px 6px}
+}
+@media (max-width:999px),(max-height:649px){
+ #game .inventory-panel{display:block!important;position:relative!important;inset:auto!important;width:auto!important;max-height:280px;overflow:auto!important}
+ #game .loadout-tools #toggleInventory{display:none}
+ #game .hero-panel,#game .skills-panel,#game .potion-panel,#game .inventory-panel{height:auto;max-height:none}
+}
