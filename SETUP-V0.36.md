@@ -5,7 +5,7 @@ Base: `v0.35-adventure-index-wiki`
 
 ## Fixed — The boss item explosion
 
-Previous v0.35 Wiki listed 360 dynamically generated boss item permutations (8 bosses × 9 slots × 5 rarity levels). This was misleading: now **every boss has exactly 2 unique, fixed-rarity possible equipment drops** (15 items across the whole campaign), each with a published chance. A boss performs **one independent percentage roll for each hero**, yielding either *one* of its 2 specific items or **no equipment**. Normal enemies drop no equipment.
+Previous v0.35 Wiki listed 360 dynamically generated boss item permutations (8 bosses × 9 slots × 5 rarity levels). This was misleading: now **each boss has 1–2 unique, fixed-rarity possible equipment drops** (15 items across the whole campaign), each with a published chance. A boss performs **one independent percentage roll for each hero**, yielding either *one* of its listed specific items or **no equipment**. Normal enemies drop no equipment.
 
 | Boss / Stage | Drop A | Chance | Drop B | Chance | No drop |
 |---|---|---:|---|---:|---:|
