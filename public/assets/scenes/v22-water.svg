@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 500" preserveAspectRatio="xMidYMid slice"><defs><clipPath id="lake"><path d="M715 307q85-20 173 1t169-4L980 500H527q52-111 188-193z"/></clipPath></defs>
+<g clip-path="url(#lake)" fill="none" stroke-linecap="round">
+<path d="M500 347h350m-180 30h490m-510 27h340m-400 37h460m-340 33h300" stroke="#c4f2ee" stroke-width="5" stroke-dasharray="84 62" opacity=".72"><animate attributeName="stroke-dashoffset" values="0;-292" dur="5s" repeatCount="indefinite"/></path>
+<path d="M600 363h400m-310 47h390m-450 45h420" stroke="#2a6f9b" stroke-width="7" stroke-dasharray="122 76" opacity=".6"><animate attributeName="stroke-dashoffset" values="0;396" dur="7s" repeatCount="indefinite"/></path>
+<path d="M710 328h280m-440 161h530" stroke="#e6fff2" stroke-width="3" stroke-dasharray="25 60" opacity=".95"><animate attributeName="stroke-dashoffset" values="0;-170" dur="3.5s" repeatCount="indefinite"/></path>
+</g></svg>
