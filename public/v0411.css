@@ -282,3 +282,25 @@ body:not(:has(#game:not([hidden]))) #lobby:not([hidden]){
  #game .v0411-reward{animation:v0411-reward-fade 2.65s linear both!important}
  @keyframes v0411-reward-fade{0%{opacity:0}10%,75%{opacity:1}100%{opacity:0}}
 }
+
+/* Screenshot: Adventure Index was stranded outside the game at the far left.
+   It now sits in the same header toolbar as the persistent Party/Chat/Log tabs. */
+#game .roomline .v041-toolbar #v035Open.v035-open{
+ box-sizing:border-box!important;position:static!important;
+ inset:auto!important;left:auto!important;right:auto!important;
+ top:auto!important;bottom:auto!important;transform:none!important;
+ z-index:auto!important;min-width:0!important;min-height:32px!important;
+ max-height:none!important;padding:6px 10px!important;margin:0!important;
+ white-space:nowrap!important;font:800 10px Georgia,serif!important;
+ border:1px solid #a48961!important;border-radius:5px!important;
+ background:#282a38!important;box-shadow:none!important;color:#f1dbb6!important;
+}
+#game .roomline .v041-toolbar #v035Open.v035-open:hover,
+#game .roomline .v041-toolbar #v035Open.v035-open:focus-visible{
+ background:#62482e!important;border-color:#f0cf8c!important;outline-offset:2px!important;
+}
+@media(max-width:720px){
+ #game .roomline .v041-toolbar #v035Open.v035-open{
+  font-size:9px!important;padding:5px 6px!important;min-height:30px!important;
+ }
+}
