@@ -10,6 +10,25 @@ const ICONS={head:"🪖",chest:"🛡️",pants:"👖",boots:"🥾",main:"⚔️"
 const BASE_NAMES={head:"Helm",chest:"Armor",pants:"Greaves",boots:"Boots",main:"Blade",offhand:"Guard",neck:"Amulet",ring_left:"Ring",ring_right:"Ring"};
 const TITLES=["Briarfang","Dreadforge","Ember","Hollow","Glacier","World-Eater","Void","Eclipse"];
 const FACTORS={common:1,uncommon:1.35,rare:1.8,epic:2.45,legendary:3.4};
+/* v0.36: curated boss-specific drops. Each roll is exclusive: at most one
+ * piece of gear per boss victory per player, with the remainder being no-drop.
+ * Existing legacy loot remains valid when restored from saves.
+ */
+const BOSS_DROPS=[
+ [{slot:"main",rarity:"rare",chance:20,name:"Briarfang Saber"},{slot:"ring_left",rarity:"uncommon",chance:35,name:"Alpha Fang Ring"}],
+ [{slot:"chest",rarity:"rare",chance:30,name:"Dreadforge Plate"},{slot:"offhand",rarity:"rare",chance:20,name:"Forgeguard Shield"}],
+ [{slot:"main",rarity:"epic",chance:20,name:"Emberweave Staff",class:"mage"},{slot:"boots",rarity:"rare",chance:30,name:"Ashwalker Boots"}],
+ [{slot:"neck",rarity:"epic",chance:28,name:"Oracle's Eye Pendant"},{slot:"pants",rarity:"rare",chance:25,name:"Diviner's Leggings"}],
+ [{slot:"head",rarity:"epic",chance:30,name:"Glacier Crown"},{slot:"ring_left",rarity:"epic",chance:20,name:"Frozen Oath Ring"}],
+ [{slot:"chest",rarity:"legendary",chance:12,name:"World-Eater Carapace"},{slot:"offhand",rarity:"epic",chance:32,name:"Ancient Stoneguard"}],
+ [{slot:"main",rarity:"legendary",chance:15,name:"Voidreaper Scythe"},{slot:"neck",rarity:"epic",chance:28,name:"Voidbound Amulet"}],
+ [{slot:"main",rarity:"legendary",chance:20,name:"Sovereign's Eclipse Blade"},{slot:"ring_left",rarity:"legendary",chance:12,name:"Eclipse Royal Signet"}]
+];
+function curatedDrops(stage){
+ const i=Math.floor(Number(stage)/3)-1;
+ if(!Number.isInteger(stage)||stage%3!==0||i<0||i>=8)return [];
+ return BOSS_DROPS[i].map(def=>({...def,id:"boss"+(i+1)+"_"+def.slot,bossStage:stage}));
+}
 const SLOT_ALIASES={weapon:"main",armor:"chest",helmet:"head",necklace:"neck",ring:"ring_left",shield:"offhand"};
 const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,Math.trunc(Number(v)||0)));
 function slotOf(item){return SLOT_ALIASES[item?.slot]||item?.slot||null}
@@ -27,7 +46,8 @@ function factory(id,rarity){
  if(slot==="offhand")stats.value=Math.round(power*.2);
  if(slot==="neck")stats.value=Math.round(power*.45);
  if(slot.startsWith("ring"))stats.value=Math.round(power*.3);
- return {id,templateId:id,name:TITLES[boss-1]+" "+BASE_NAMES[slot]+" ["+rarity.toUpperCase()+"]",icon:ICONS[slot],slot,rarity,level:1,bossStage:boss*3,
+ const curated=BOSS_DROPS[boss-1].find(d=>d.slot===slot&&d.rarity===rarity);
+ return {id,templateId:id,name:curated?.name||(TITLES[boss-1]+" "+BASE_NAMES[slot]+" ["+rarity.toUpperCase()+"]"),icon:ICONS[slot],slot,rarity,level:1,bossStage:boss*3,...(curated?.class?{class:curated.class}:{}),
   value:stats.value,defense:stats.defense,maxHp:stats.maxHp,maxMp:stats.maxMp,
   description:Object.entries(stats).filter(([,n])=>n>0).map(([k,n])=>"+"+n+" "+({value:"ATK",defense:"DEF",maxHp:"HP",maxMp:"MP"}[k])).join(" · ")};
 }
@@ -62,14 +82,14 @@ function dropBossLoot(player,stage,logger=()=>{}){
  if(stage%3!==0)return null;
  player.inventory=Array.isArray(player.inventory)?player.inventory:[];
  if(bagUsed(player)>=40){logger(player.name+"'s bag is full (40/40): boss loot was not collected.");return null}
- // Every party member (including fallen members) receives exactly one independently rolled equipment item per boss victory.
- const boss=Math.max(1,Math.min(8,Math.round(stage/3)));
- const slot=SLOTS[Math.floor(Math.random()*SLOTS.length)];
- const rarity=rarityFromRoll();
- const it=factory("boss"+boss+"_"+slot,rarity);
- it.uid=randomUUID();
- player.inventory.push(it);
- logger(player.name+" received "+rarity.toUpperCase()+" boss loot: "+it.name+"!");
+ const options=curatedDrops(stage);
+ const roll=Math.random()*100;
+ let cumulative=0,chosen=null;
+ for(const option of options){cumulative+=option.chance;if(roll<cumulative){chosen=option;break}}
+ if(!chosen){logger(player.name+" found no equipment from "+TITLES[Math.round(stage/3)-1]+".");return null}
+ const it=factory(chosen.id,chosen.rarity);
+ it.uid=randomUUID();player.inventory.push(it);
+ logger(player.name+" received "+it.rarity.toUpperCase()+" boss loot: "+it.name+"!");
  return it;
 }
 function bonuses(it){return{atk:clamp(it?.value,0,10000),def:clamp(it?.defense,0,10000),maxHp:clamp(it?.maxHp,0,100000),maxMp:clamp(it?.maxMp,0,100000)}}
@@ -125,4 +145,4 @@ function unequip(p,slot){
  if(slot==="chest"){p.armorItem=null;p.armor=p.classId==="mage"?"Novice Robe":p.classId==="tank"?"Guardian Armor":"Traveler Armor"}
  return{ok:true,slot};
 }
-module.exports={SLOTS,RARITIES,canonical,normalizeInventory,dropBossLoot,equip,unequip,equipped,slotOf,bagUsed,factory};
+module.exports={SLOTS,RARITIES,canonical,normalizeInventory,dropBossLoot,equip,unequip,equipped,slotOf,bagUsed,factory,curatedDrops,BOSS_DROPS};
