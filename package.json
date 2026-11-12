@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "private": true,
-  "description": "SOULBOUND Online v0.24 - ornate fantasy HUD, larger battle viewport and accessible merchant",
+  "description": "SOULBOUND Online v0.25 - exterior gold vine border, visible character stats and cinematic race summoning",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
