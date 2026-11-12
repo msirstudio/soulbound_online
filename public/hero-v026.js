@@ -25,12 +25,16 @@ function weaponMarkup(weapon,kind,c){
  const staff=s.includes("staff")||kind==="mage";
  const hammer=s.includes("maul")||s.includes("hammer")||s.includes("mace")||kind==="tank";
  const great=s.includes("great")||s.includes("knight");
+ const ember=s.includes("ember")||s.includes("dragon"),tide=s.includes("tide"),star=s.includes("star"),warden=s.includes("warden");
+ const gemColor=ember?"#ff874b":tide?"#70eaff":star?"#fff0ac":c.gem;
  if(staff){
   const crystal=s.includes("crystal")||s.includes("star")||s.includes("rift")||s.includes("celestial");
   return '<g class="sb-weapon sb-staff">'+
   rect(132,44,8,168,"#342a3a")+rect(132,48,4,160,"#af7751")+rect(136,80,4,126,"#c18e59")+
   rect(128,35,16,8,c.trim)+rect(136,24,8,12,c.trim)+rect(124,44,8,8,c.trim)+
-  poly(crystal?"136,8 152,24 144,48 128,36 124,24":"136,14 148,29 140,46 124,39 120,26",c.gem,c.trim,4)+
+  poly(crystal?"136,8 152,24 144,48 128,36 124,24":"136,14 148,29 140,46 124,39 120,26",gemColor,c.trim,4)+
+  (tide?'<path d="M114 36L100 22 110 11M149 27L158 14" stroke="#9af8ff" stroke-width="5" fill="none"/>':
+    star?'<path d="M128 7l12-7 12 7-7 8-12-2z" fill="#fff3a9"/>':"")+
   rect(136,22,4,12,"#e6ffff")+rect(140,36,4,8,"#ecffff")+
   rect(130,68,12,8,c.trim)+rect(131,162,10,8,c.trim)+
   '</g>';
@@ -43,13 +47,17 @@ function weaponMarkup(weapon,kind,c){
     rect(112,24,8,22,c.trim)+rect(147,24,8,22,c.trim)+rect(122,22,24,6,"#ebecda")+
     rect(126,32,16,10,c.gem)+
     (heavy?rect(114,12,40,10,c.dark)+rect(118,8,32,8,c.trim):"")+
+    (warden?rect(122,10,24,8,"#7ed5f3")+rect(127,27,15,8,"#b0f4ee"):"")+
     rect(132,71,8,9,c.trim)+rect(132,160,8,8,c.trim)+'</g>';
  }
  return '<g class="sb-weapon sb-sword">'+
+  (ember?'<path d="M125 28l-8 17 9-3-5 24 13-20 11-14" fill="#f06a38" stroke="#ffca76" stroke-width="3"/>':"")+
   rect(136,53,8,154,"#392e37")+rect(136,70,4,132,"#ba8957")+
   poly(great?"128,9 141,0 151,15 152,90 142,104 131,91":"133,23 142,9 149,24 148,92 140,102 132,90","#d8e9ee","#657387",4)+
   rect(139,great?12:29,4,68,"#fff5e2")+rect(131,84,22,8,c.trim)+
-  rect(124,88,34,8,c.dark)+rect(135,95,12,12,c.trim)+rect(135,116,12,8,c.gem)+
+  rect(124,88,34,8,c.dark)+rect(135,95,12,12,c.trim)+rect(135,116,12,8,ember?"#ff7746":c.gem)+
+  (s.includes("steel")?rect(133,34,3,35,"#a1cbeb"):"")+
+  (ember?rect(139,30,8,14,"#f8c157"):"")+
   '</g>';
 }
 function make(p={}){
