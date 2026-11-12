@@ -20,8 +20,8 @@ const labels={value:"ATK",defense:"DEF",maxHp:"HP",maxMp:"MP"};
 function init(){
  if($("v035Index"))return;
  const btn=document.createElement("button");btn.type="button";btn.id="v035Open";btn.className="v035-open";btn.textContent="📖 ADVENTURE INDEX";btn.setAttribute("aria-haspopup","dialog");
- const dock=document.querySelector("#game .loadout-tools"),menu=document.querySelector("#game .roomline");
- if(dock)dock.appendChild(btn);else menu?.appendChild(btn);
+ const game=document.getElementById("game");
+ if(game)game.appendChild(btn);
  const node=document.createElement("div");node.id="v035Index";node.className="v035-overlay";node.hidden=true;
  node.innerHTML='<div class="v035-scrim" data-v035-dismiss></div><section class="v035-window" role="dialog" aria-modal="true" aria-labelledby="v035Heading" tabindex="-1">'+
  '<header class="v035-title"><div><small>THE FORGOTTEN KINGDOM · FIELD ARCHIVE</small><h2 id="v035Heading">📖 ADVENTURE INDEX</h2><span class="v035-subtitle">Monsters · Bosses · Equipment · Supplies · The World</span></div><button type="button" id="v035Exit" aria-label="Close index">✕</button></header>'+
@@ -34,6 +34,8 @@ function init(){
  node.addEventListener("click",event=>{
   if(event.target.closest("[data-v035-dismiss],#v035Exit,#v035Close")){close();return}
   const tab=event.target.closest("[data-v035-tab]");if(tab){category=tab.dataset.v035Tab;selectedId="";render();return}
+  const jump=event.target.closest("[data-v037-boss]");
+  if(jump){category="bosses";search="";rarity="all";$("v035Search").value="";$("v035Rarity").value="all";selectedId="stage-"+jump.dataset.v037Boss;render();$("v035Details").scrollTop=0;return}
   const card=event.target.closest("[data-v035-entry]");if(card){selectedId=card.dataset.v035Entry;renderSelection();return}
  });
  $("v035Search").addEventListener("input",event=>{search=event.target.value.trim().toLowerCase();selectedId="";render()});
@@ -112,7 +114,7 @@ function enemyDetail(e){
  return '<div class="v035-enemy-art"><img alt="'+esc(e.name)+'" src="'+esc(img)+'" loading="lazy" onerror="this.style.display=\'none\'"></div>'+
  '<div class="v035-stats"><span>❤️ HP <b>'+e.hp+'</b></span><span>⚔ ATK <b>'+e.atk+'</b></span><span>🛡 DEF <b>'+e.def+'</b></span><span>✧ EXP <b>'+e.xp+'</b></span><span>🪙 GOLD <b>'+e.gold+'</b></span><span>🗺 STAGE <b>'+e.stage+'</b></span></div>'+
  '<div class="v035-detail-info"><strong>LOCATION</strong><p>'+esc(e.zone)+'</p><strong>REWARDS</strong><p>'+esc(e.loot)+'</p>'+
- (e.boss?'<strong>BOSS DROP RARITY</strong><p>Common 50% · Uncommon 28% · Rare 16% · Epic 5% · Legendary 1%. Gear type is random.</p>':'<p>Regular encounters do not drop equipment.</p>')+'</div>';
+ (e.boss?'<strong>EXCLUSIVE BOSS DROPS</strong><div class="v037-boss-loot">'+(e.drops||[]).map(it=>'<button type="button" data-v035-entry="'+esc([it.id,it.rarity,it.source||"",0].join("::"))+'" class="v037-loot-entry" title="View this item"><span>'+esc(it.icon||"✦")+'</span><span>'+esc(it.name)+'</span><b>'+it.chance+'%</b></button>').join("")+'</div><p>Each percentage is an independent chance for this item on a single roll. At most one drop per victory; a roll can give no item.</p>':'<p>Regular encounters do not drop equipment.</p>')+'</div>';
 }
 function itemDetail(e){
  const bonuses=Object.entries(labels).filter(([k])=>Number(e[k])>0).map(([key,l])=>'<span>'+l+' <b>+'+e[key]+'</b></span>').join("");
@@ -120,7 +122,7 @@ function itemDetail(e){
  '<div class="v035-stats">'+(bonuses||'<span>Utility item</span>')+'</div>'+
  '<div class="v035-detail-info"><strong>ITEM TYPE</strong><p>'+esc(e.slot||e.category||"Supplies")+'</p>'+
  (e.rarity?'<strong>RARITY</strong><p>'+esc(e.rarity.toUpperCase())+'</p>':'')+
- (e.source?'<strong>ACQUIRED FROM</strong><p>'+esc(e.source)+' · Boss Stage '+esc(e.bossStage)+'</p>':'')+
+ (e.source?'<strong>ACQUIRED FROM</strong><p><button type="button" class="v037-source-link" data-v037-boss="'+esc(e.sourceStage||e.bossStage)+'">👑 '+esc(e.source)+' · Stage '+esc(e.sourceStage||e.bossStage)+' →</button></p><strong>DROP CHANCE</strong><p>'+esc(e.chance)+'% per boss victory</p>':'')+
  (e.price!=null?'<strong>MERCHANT PRICE</strong><p>'+esc(e.price)+' gold</p>':'')+
  '<strong>DESCRIPTION</strong><p>'+esc(e.description||"Equipment with fixed stats.")+'</p></div>';
 }
