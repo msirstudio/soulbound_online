@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.20.0",
+  "version": "0.21.0",
   "private": true,
-  "description": "SOULBOUND Online v0.20 - balanced responsive HUD, no clipped panels or character stat scrollbars",
+  "description": "SOULBOUND Online v0.21 living wilderness scenery and fantasy HUD redesign",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
