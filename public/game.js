@@ -17,13 +17,13 @@ $("newGame").onclick=async()=>{$("classId").disabled=false;if(!guestMode&&(!curr
 $("classId").onchange=()=>{classInfo()};$("guestPlay").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));guestMode=true;currentUser=null;showAccount({email:"Guest Player"});$("accountEmail").textContent="GUEST · LOCAL SAVE";$("signup").hidden=true;$("signin").hidden=true;$("email").hidden=true;$("password").hidden=true;$("guestPlay").hidden=true;await prepare();authNotice("Guest mode ready. Friends can join your room with its code.")};
 $("create").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("createRoom",{name:$("name").value,classId:$("classId").value});if(r.ok){$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;await afterJoin()}else notice(r.error,true)};
 $("join").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value,classId:$("classId").value});if(r.ok){$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;await afterJoin()}else notice(r.error,true)};
-function syncMusicUI(on){["musicToggle","musicQuick"].forEach(id=>{const b=$(id);if(!b)return;b.textContent="♫ MUSIC · "+(on?"ON":"OFF");b.classList.toggle("music-on",on);b.setAttribute("aria-pressed",String(on))})}function toggleMusic(){const on=window.SoulboundAudio.setMusic(!window.SoulboundAudio.musicOn);syncMusicUI(on)}$("musicToggle").onclick=toggleMusic;$("musicQuick").onclick=toggleMusic;$("musicVolume").oninput=e=>window.SoulboundAudio.setVolume(Number(e.target.value)/100);
+function syncMusicUI(on){["musicToggle","musicQuick"].forEach(id=>{const b=$(id);if(!b)return;b.textContent="♫ MUSIC · "+(on?"ON":"OFF");b.classList.toggle("music-on",on);b.setAttribute("aria-pressed",String(on))})}function toggleMusic(){const on=window.SoulboundAudio.setMusic(!window.SoulboundAudio.musicOn);syncMusicUI(on)}$("musicToggle").onclick=toggleMusic;$("musicQuick").onclick=toggleMusic;$("musicVolume").oninput=e=>{window.SoulboundAudio.setVolume(Number(e.target.value)/100);if($("gameMusicVolume"))$("gameMusicVolume").value=e.target.value};
 const sfxSlider=$("sfxVolume");
-if(sfxSlider)sfxSlider.oninput=e=>window.SoulboundAudio.setSfxVolume(Number(e.target.value)/100);
+if(sfxSlider)sfxSlider.oninput=e=>{window.SoulboundAudio.setSfxVolume(Number(e.target.value)/100);if($("gameSfxVolume"))$("gameSfxVolume").value=e.target.value};
 const sfxQuick=$("sfxQuick");
 if(sfxQuick)sfxQuick.onclick=()=>{
  const audio=window.SoulboundAudio,muted=audio.sfxVolume>0.01;
- audio.setSfxVolume(muted?0:.76);if(sfxSlider)sfxSlider.value=muted?0:76;
+ audio.setSfxVolume(muted?0:1);if(sfxSlider)sfxSlider.value=muted?0:100;if($("gameSfxVolume"))$("gameSfxVolume").value=muted?0:100;
  sfxQuick.textContent=muted?"🔇 SFX OFF":"🔊 SFX ON";sfxQuick.setAttribute("aria-pressed",String(!muted));
  if(!muted)audio.sfx("menu");
 };
