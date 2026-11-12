@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 920" preserveAspectRatio="none">
+<defs><linearGradient id="gold"><stop stop-color="#76532b"/><stop offset=".3" stop-color="#f2d388"/><stop offset=".6" stop-color="#aa7434"/><stop offset="1" stop-color="#d8b363"/></linearGradient><g id="corner" fill="none" stroke="url(#gold)" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+<path d="M18 180V58Q18 18 59 18H190M31 145V71Q31 31 74 31H151"/>
+<path d="M18 20q44 58 86 21 12-27-11-33-15-3-23 21 14 24 39 13"/>
+<path d="M20 122Q49 46 135 14M22 161q34-78 92-96"/>
+<path d="M49 76q-16-22-18-41 28 3 40 22-1 19-22 19zM79 51q3-29 25-38 5 35-17 50zM37 110q-16-18-17-37 26 4 35 21-4 16-18 16z"/>
+<path d="M67 38q36 6 37 42M38 66q30 8 43 48"/>
+<path d="M145 20l14-10 14 10-14 10zM20 145l10 14-10 14-10-14z" fill="#b18a43"/>
+</g></defs>
+<use href="#corner"/><use href="#corner" transform="translate(1600 0) scale(-1 1)"/><use href="#corner" transform="translate(0 920) scale(1 -1)"/><use href="#corner" transform="translate(1600 920) scale(-1 -1)"/>
+<path d="M215 18H690l16-7 16 7h147l16-7 16 7h465M215 902H690l16 7 16-7h147l16 7 16-7h465" stroke="url(#gold)" stroke-width="2" fill="none"/>
+<g fill="#b99551"><path d="M800 8l10 10-10 10-10-10zM800 892l10 10-10 10-10-10z"/><circle cx="800" cy="18" r="3" fill="#f7e1a6"/><circle cx="800" cy="902" r="3" fill="#f7e1a6"/></g>
+<path d="M18 200v510m1564-510v510" stroke="#84613e" stroke-width="2" opacity=".75"/>
+</svg>
