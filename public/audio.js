@@ -134,7 +134,7 @@ function sfx(name,opt={}){
    noise(t,.15,V(.18),2300,130);voice(116,t,.22,{amp:V(.09),wave:"sawtooth",pitch:.43});
   }else if(kind==="guard"||kind==="shield"){
    noise(t,.18,V(.11),3400,1200);
-   chord(t,[53,60,65],V(.048),"triangle",.36);
+   [53,60,65].forEach((n,i)=>voice(hz(n),t+i*.013,.32,{amp:V(.029),wave:"triangle"}));
   }else if(kind==="heal"||kind==="mana"){
    [0,4,7,12].forEach((n,i)=>voice(hz(65+n+(kind==="mana"?2:0)),t+.09*i,.34,{amp:V(.045),wave:"sine",pitch:1.08}));
    noise(t+.1,.28,V(.026),1600,5400,{type:"highpass"});
