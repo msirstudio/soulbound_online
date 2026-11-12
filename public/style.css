@@ -534,3 +534,16 @@ body:has(#game:not([hidden])) .site-header{display:none}
   #game .monster-img{width:min(32vw,220px);height:190px}
   #game .sprite-img{width:clamp(45px,9vw,78px);height:90px}
 }
+
+/* v0.14 accessible loadout drawers — keep equipment and inventory usable */
+#game .loadout-tools{display:flex;gap:5px;align-items:center}
+#game .loadout-tools button{padding:8px 10px;font-size:9px;flex:1}
+@media (min-width:1000px) and (min-height:650px){
+ #game .game-main-column{position:relative}
+ #game .loadout-tools{position:absolute;z-index:5;top:0;right:0;transform:translateY(-110%);background:#171622ed;border:1px solid #8e7049;padding:3px;border-radius:4px}
+ #game .loadout-tools button{font-size:8px;padding:6px}
+ #game .equipment-panel.is-open,#game .inventory-panel.is-open{display:block!important;position:absolute;z-index:10;right:0;top:0;bottom:0;width:min(420px,78%);overflow:auto!important;background:#211e2d;box-shadow:-12px 0 30px #000b;border:2px solid #c49c62}
+ #game .equipment-panel.is-open{right:min(420px,78%);width:min(340px,55%)}
+ #game .equipment-panel.is-open:not(:has(+ .inventory-panel.is-open)){right:0}
+}
+@media (max-width:999px),(max-height:649px){#game .loadout-tools{margin:5px 0}#game .equipment-panel,#game .inventory-panel{display:block}}
