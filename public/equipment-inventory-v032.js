@@ -10,10 +10,12 @@ const slots=[
  ["main","⚔","MAIN WEAPON"],["offhand","🗡","OFF-HAND"],
  ["neck","💎","NECKLACE"],["ring_left","💍","LEFT RING"],["ring_right","💍","RIGHT RING"]
 ];
-let modal,openButton,closeButton,me=null,room=null,equipAction=null,selected=null,busy=false,previousFocus=null;
+let modal,openButton,closeButton,me=null,room=null,equipAction=null,unequipAction=null,selected=null,busy=false,previousFocus=null;
 const aliases={weapon:"main",mainhand:"main",main_weapon:"main",armor:"chest",chest_armor:"chest",helmet:"head",hat:"head",head:"head",necklace:"neck",neck:"neck",legs:"pants",pants:"pants",shoes:"boots",boots:"boots",offhand:"offhand",off_hand:"offhand",shield:"offhand",ring:"ring_left",ring_left:"ring_left",ring_right:"ring_right"};
 const displaySlot=item=>aliases[String(item?.slot||"").toLowerCase()]||"unknown";
 const validDrop=(item,slot)=>{const kind=displaySlot(item);return kind===slot||(kind==="ring_left"&&slot==="ring_right");};
+const itemKey=item=>String(item?.uid||item?.id||"");
+const selectedItem=id=>(me?.inventory||[]).find(it=>itemKey(it)===String(id));
 function notify(message,err=false){
  const line=modal?.querySelector("#v032Hint");if(!line)return;
  line.textContent=message;line.dataset.error=String(err);
@@ -48,7 +50,7 @@ function init(){
   const cell=e.target.closest("[data-v032-slot]");if(cell){onSlot(cell.dataset.v032Slot);return}
   const item=e.target.closest("[data-v032-item]");if(item){
     selected=item.dataset.v032Item;modal.querySelectorAll(".v032-item").forEach(n=>n.classList.toggle("selected",n.dataset.v032Item===selected));
-    notify("Selected "+(me?.inventory||[]).find(x=>String(x.id)===selected)?.name+". Click a matching slot to equip.");
+    notify("Selected "+(selectedItem(selected)?.name||"item")+". Click a matching slot to equip.");
   }
  });
  modal.addEventListener("dragstart",e=>{
@@ -60,7 +62,7 @@ function init(){
  modal.addEventListener("dragover",e=>{
   const slot=e.target.closest("[data-v032-slot]");
   if(!slot)return;
-  const item=(me?.inventory||[]).find(x=>String(x.id)===selected);
+  const item=selectedItem(selected);
   if(item&&validDrop(item,slot.dataset.v032Slot)){e.preventDefault();e.dataTransfer.dropEffect="move";slot.classList.add("v032-over")}
  });
  modal.addEventListener("dragleave",e=>{
@@ -97,15 +99,25 @@ function close(){
 }
 function toggle(){if(!modal)init();modal.hidden?open():close()}
 function onSlot(slot,itemId=selected){
- if(!itemId)return notify("Select an item from the inventory first.",true);
- const item=(me?.inventory||[]).find(it=>String(it.id)===String(itemId));
+ if(!itemId){
+  if(!["waiting","shop","victory"].includes(room?.status))return notify("Gear can only be changed between battles.",true);
+  const currentlyWorn=(me?.inventory||[]).some(it=>it.equippedSlot===slot)||(slot==="main"&&!!me?.weaponItem)||(slot==="chest"&&!!me?.armorItem);
+  if(!currentlyWorn)return notify("This slot is already empty. Select a piece of gear to equip.",true);
+  if(busy)return;
+  busy=true;notify("Unequipping "+slot+"...");
+  Promise.resolve(unequipAction?.(slot)).then(result=>{
+   if(!result?.ok)notify(result?.error||"Unequip failed.",true);
+   else notify("Equipment removed from "+slot+".");
+  }).catch(err=>notify(err?.message||"Unequip failed.",true)).finally(()=>{busy=false});
+  return;
+ }
+ const item=selectedItem(itemId);
  if(!item)return notify("This item is no longer in your inventory.",true);
  if(!validDrop(item,slot))return notify(item.name+" cannot be placed in the "+slots.find(s=>s[0]===slot)?.[2]+" slot.",true);
- if(!["main","chest"].includes(slot))return notify("This slot is reserved for future equipment. The current game offers weapons and body armor only.",true);
  if(!["waiting","shop","victory"].includes(room?.status))return notify("Gear can only be changed before or between battles.",true);
  if(busy)return;
  busy=true;notify("Equipping "+item.name+"...");
- Promise.resolve(equipAction?.(item.id,slot)).then(result=>{
+ Promise.resolve(equipAction?.(itemKey(item),slot)).then(result=>{
   if(!result?.ok)notify(result?.error||"Equipment change failed.",true);
   else{selected=null;notify(item.name+" equipped successfully.");}
  }).catch(e=>notify(e?.message||"Equipment change failed.",true)).finally(()=>{busy=false});
@@ -122,7 +134,7 @@ function draw(){
   main:{name:me.weapon||"Training Sword"},
   chest:{name:me.armor||"Traveler Armor"}
  };
- // Future slots are visible but are not treated as equipped until server support exists.
+ for(const item of inventory)if(item.equippedSlot)equipped[item.equippedSlot]=item;
  const slotGrid=modal.querySelector("#v032Slots");
  slotGrid.innerHTML=slots.map(([key,emoji,label])=>slotMarkup(key,emoji,label,equipped[key],key==="main"||key==="chest")).join("");
  const art=modal.querySelector("#v032HeroArt");
@@ -139,20 +151,22 @@ function draw(){
  }
  modal.querySelector("#v032HeroName").textContent=(me.name||"HERO").toUpperCase()+" · "+(me.className||me.classId||"");
  modal.querySelector("#v032HeroStats").textContent="LEVEL "+(me.level||1)+" · ATK "+(me.atk||0)+" · DEF "+(me.def||0);
- modal.querySelector("#v032BagCount").textContent=inventory.length+" GEAR ITEMS · "+(me.gold||0)+" GOLD";
+ modal.querySelector("#v032BagCount").textContent=inventory.length+" / 40 SLOTS · "+(me.gold||0)+" GOLD";
  const safe=inventory.map((it,i)=>{
-  const key=displaySlot(it),icon=key==="main"?"⚔":key==="chest"?"🛡":key.includes("ring")?"💍":key==="boots"?"🥾":"✦";
-  const stat=key==="main"?"+"+(it.value||0)+" ATK":key==="chest"?"+"+(it.defense||0)+" DEF":(it.slot||"Gear");
-  const equippedNow=(key==="main"&&me.weapon===it.name)||(key==="chest"&&me.armor===it.name);
-  return '<button type="button" draggable="true" class="v032-item '+(String(it.id)===selected?"selected ":"")+(equippedNow?"equipped":"")+'" data-v032-item="'+esc(it.id)+'" title="'+esc(it.name)+' · '+esc(stat)+'"><span class="v032-item-icon">'+icon+'</span><strong>'+esc(it.name)+'</strong><small>'+esc(stat)+'</small>'+(equippedNow?'<em>WORN</em>':'')+'</button>';
+  const key=displaySlot(it),icon=it.icon||(key==="main"?"⚔":key==="chest"?"🛡":key.includes("ring")?"💍":key==="boots"?"🥾":"✦");
+  const stats=["value","defense","maxHp","maxMp"].map((k,j)=>Number(it[k])>0?"+"+it[k]+" "+["ATK","DEF","HP","MP"][j]:"").filter(Boolean).join(" · ")||key.toUpperCase();
+  const equippedNow=!!it.equippedSlot||(key==="main"&&me.weapon===it.name)||(key==="chest"&&me.armor===it.name);
+  const id=itemKey(it),rarity=["common","uncommon","rare","epic","legendary"].includes(it.rarity)?it.rarity:"common";
+  return '<button type="button" draggable="true" class="v032-item v034-rarity-'+rarity+' '+(id===selected?"selected ":"")+(equippedNow?"equipped":"")+'" data-v032-item="'+esc(id)+'" title="'+esc(it.name)+' · '+esc(stats)+'">'+
+   '<span class="v032-item-icon">'+esc(icon)+'</span><strong>'+esc(it.name)+'</strong><small>'+esc(stats)+'</small><span class="v034-rarity-name">'+rarity.toUpperCase()+'</span>'+(equippedNow?'<em>WORN</em>':'')+'</button>';
  });
  modal.querySelector("#v032Bag").innerHTML=safe.join("")||'<div class="v032-empty">Your inventory is empty. Weapons and armor purchased from the merchant will appear here.</div>';
- modal.querySelector("#v032EquipStatus").textContent="Current game equipment: main weapon and chest armor. Other slots are prepared for later item types.";
+ modal.querySelector("#v032EquipStatus").textContent="9 gear slots enabled · Select a worn slot without an item selected to unequip. Bosses are the only source of random loot.";
  if(!["waiting","shop","victory"].includes(room?.status))notify("Viewing gear during battle · equipment changes are locked.",false);
  else if(!busy)notify("Drag gear to a matching slot, or tap an item and then a slot.");
 }
 window.SoulboundV32={
- render(player,state,handler){me=player||null;room=state||null;equipAction=handler;if(modal&&!modal.hidden)draw()},
+ render(player,state,handler,unequip){me=player||null;room=state||null;equipAction=handler;unequipAction=unequip;if(modal&&!modal.hidden)draw()},
  open,close,
  isOpen:()=>!!modal&&!modal.hidden
 };
