@@ -1,0 +1,24 @@
+/* SOULBOUND v0.37: independent Wiki launcher, uncluttered HUD, curated loot links. */
+#game .inventory-panel{display:none!important}
+#game #v035Open.v035-open{
+ position:fixed!important;z-index:900;left:12px;top:82px;
+ min-width:116px;min-height:42px;padding:8px 12px;
+ background:linear-gradient(145deg,#3e2e20,#151827)!important;
+ border:2px solid #c9a35d!important;border-radius:8px;
+ color:#ffe4ae!important;font:bold 12px Georgia,serif;
+ box-shadow:0 5px 20px #000a;cursor:pointer
+}
+#game #v035Open.v035-open:hover{filter:brightness(1.2)}
+#game[hidden] #v035Open{display:none!important}
+.v037-source-link,.v037-loot-entry{
+ background:#282233;border:1px solid #8f724b;border-radius:5px;
+ color:#f0d4a3;padding:8px;cursor:pointer;font:12px Georgia,serif;text-align:left
+}
+.v037-source-link:hover,.v037-loot-entry:hover{background:#44314a;border-color:#f2c16c}
+.v037-boss-loot{display:grid;gap:7px;margin:8px 0 12px}
+.v037-loot-entry{display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:7px;width:100%}
+.v037-loot-entry b{color:#ffe0a1}
+#game .potion-panel #foodInventory{display:block!important;margin-top:8px;padding-top:8px;border-top:1px solid #5c4732}
+#game .potion-panel #foodInventory .food-actions{display:flex;gap:4px;flex-wrap:wrap}
+#game .potion-panel #foodInventory .food-actions button{flex:1;min-width:52px}
+@media(max-width:760px){#game #v035Open.v035-open{left:8px;top:auto;bottom:10px;min-height:38px;min-width:100px;font-size:10px}}
