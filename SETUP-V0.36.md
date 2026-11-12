@@ -5,13 +5,13 @@ Base: `v0.35-adventure-index-wiki`
 
 ## Fixed — The boss item explosion
 
-Previous v0.35 Wiki listed 360 dynamically generated boss item permutations (8 bosses × 9 slots × 5 rarity levels). This was misleading: now **every boss has exactly 2 unique, fixed-rarity possible equipment drops** (16 items across the whole campaign), each with a published chance. A boss performs **one independent percentage roll for each hero**, yielding either *one* of its 2 specific items or **no equipment**. Normal enemies drop no equipment.
+Previous v0.35 Wiki listed 360 dynamically generated boss item permutations (8 bosses × 9 slots × 5 rarity levels). This was misleading: now **every boss has exactly 2 unique, fixed-rarity possible equipment drops** (15 items across the whole campaign), each with a published chance. A boss performs **one independent percentage roll for each hero**, yielding either *one* of its 2 specific items or **no equipment**. Normal enemies drop no equipment.
 
 | Boss / Stage | Drop A | Chance | Drop B | Chance | No drop |
 |---|---|---:|---|---:|---:|
 | Briarfang Alpha (3) | Briarfang Saber · Rare | 20% | Alpha Fang Ring · Uncommon | 35% | 45% |
 | Dreadforge Champion (6) | Dreadforge Plate · Rare | 30% | Forgeguard Shield · Rare | 20% | 50% |
-| Ember Tyrant (9) | Emberweave Staff · Epic (Mage) | 20% | Ashwalker Boots · Rare | 30% | 50% |
+| Ember Tyrant (9) | Emberweave Staff · Epic (Mage) | 20% | — | — | 80% |
 | Hollow Oracle (12) | Oracle's Eye Pendant · Epic | 28% | Diviner's Leggings · Rare | 25% | 47% |
 | Glacier Warden (15) | Glacier Crown · Epic | 30% | Frozen Oath Ring · Epic | 20% | 50% |
 | Ancient World-Eater (18) | World-Eater Carapace · Legendary | 12% | Ancient Stoneguard · Epic | 32% | 56% |
@@ -21,9 +21,9 @@ Previous v0.35 Wiki listed 360 dynamically generated boss item permutations (8 b
 All item stats are fixed by boss, equipment type and rarity. No item is generated at multiple rarity levels **as a new drop**. More difficult bosses offer rarer gear.
 
 ## Wiki and HUD improvements
-- Wiki list now contains only the 16 actual boss-exclusive items, plus the existing **shop gear, foods and potions**. Old legacy loot varieties are not falsely advertised as still droppable.
+- Wiki list now contains only the 15 actual boss-exclusive items, plus the existing **shop gear, foods and potions**. Old legacy loot varieties are not falsely advertised as still droppable.
 - Each item detail states **drop percentage and source boss**, with a clickable **VIEW BOSS** button that opens the corresponding entry in the Bosses tab.
-- Each boss detail lists **its exact two item drops and percentages**, each clickable to the item details; shows total no-drop chance.
+- Each boss detail lists **its one or two exact item drops and percentages**, each clickable to the item details; shows total no-drop chance.
 - Index launch button is now a standalone full-width **📖 ADVENTURE INDEX** button immediately above **CHARACTER STATUS** in the left HUD column. It is no longer next to the Equipment & Bag button.
 - The obsolete visible **EQUIPMENT · LOADOUT** and **HERO INVENTORY** HUD sections are **removed from the HTML**, not merely hidden by CSS.
 - All bag and gear features are still accessed via **EQUIPMENT & BAG**. Camp Food controls have moved *inside* that same inventory dialog.
