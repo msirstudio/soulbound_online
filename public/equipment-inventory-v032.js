@@ -10,7 +10,7 @@ const slots=[
  ["main","⚔","MAIN WEAPON"],["offhand","🗡","OFF-HAND"],
  ["neck","💎","NECKLACE"],["ring_left","💍","LEFT RING"],["ring_right","💍","RIGHT RING"]
 ];
-let modal,openButton,closeButton,me=null,room=null,equipAction=null,unequipAction=null,selected=null,busy=false,previousFocus=null;
+let modal,openButton,closeButton,me=null,room=null,equipAction=null,unequipAction=null,discardAction=null,selected=null,busy=false,previousFocus=null;
 const aliases={weapon:"main",mainhand:"main",main_weapon:"main",armor:"chest",chest_armor:"chest",helmet:"head",hat:"head",head:"head",necklace:"neck",neck:"neck",legs:"pants",pants:"pants",shoes:"boots",boots:"boots",offhand:"offhand",off_hand:"offhand",shield:"offhand",ring:"ring_left",ring_left:"ring_left",ring_right:"ring_right"};
 const displaySlot=item=>aliases[String(item?.slot||"").toLowerCase()]||"unknown";
 const validDrop=(item,slot)=>{const kind=displaySlot(item);return kind===slot||(kind==="ring_left"&&slot==="ring_right");};
@@ -31,7 +31,7 @@ function init(){
  '<div class="v032-note" id="v032EquipStatus"></div></section>'+
  '<section class="v032-bag"><div class="v032-bag-top"><div class="v032-section-title">✦ INVENTORY ✦</div><span id="v032BagCount">0 ITEMS</span></div>'+
  '<div id="v032Bag" class="v032-bag-grid"></div><div class="v032-quick-help">Drag an item onto a matching slot, or select an item and then click its slot.</div></section></div>'+
- '<footer class="v032-foot"><span id="v032Hint" role="status" aria-live="polite">Gear may only be changed between battles.</span><button id="v032Done" type="button">CLOSE</button></footer></section>';
+ '<footer class="v032-foot"><span id="v032Hint" role="status" aria-live="polite">Gear may only be changed between battles.</span><div class="v034-foot-buttons"><button id="v034Discard" type="button" title="Permanently discard the selected unequipped item">🗑 DISCARD SELECTED</button><button id="v032Done" type="button">CLOSE</button></div></footer></section>';
  document.body.appendChild(el);modal=el;
  openButton=document.getElementById("toggleEquipment");
  closeButton=document.getElementById("v032Close");
@@ -47,6 +47,19 @@ function init(){
  }
  modal.addEventListener("click",e=>{
   if(e.target.closest("[data-v032-close],#v032Close,#v032Done")){close();return}
+  if(e.target.closest("#v034Discard")){
+   const item=selectedItem(selected);
+   if(!item)return notify("Select an unequipped item before discarding.",true);
+   if(item.equippedSlot)return notify("Unequip this item before discarding it.",true);
+   if(!["waiting","shop","victory"].includes(room?.status))return notify("You cannot discard gear during battle.",true);
+   if(!confirm("Permanently discard "+item.name+"? This cannot be undone."))return;
+   if(busy)return;busy=true;
+   Promise.resolve(discardAction?.(itemKey(item))).then(result=>{
+     if(result?.ok){selected=null;notify(item.name+" discarded.")}
+     else notify(result?.error||"Cannot discard item.",true);
+   }).catch(err=>notify(err?.message||"Discard failed.",true)).finally(()=>{busy=false});
+   return;
+  }
   const cell=e.target.closest("[data-v032-slot]");if(cell){onSlot(cell.dataset.v032Slot);return}
   const item=e.target.closest("[data-v032-item]");if(item){
     selected=selected===item.dataset.v032Item?null:item.dataset.v032Item;modal.querySelectorAll(".v032-item").forEach(n=>n.classList.toggle("selected",n.dataset.v032Item===selected));
@@ -166,7 +179,7 @@ function draw(){
  }
  modal.querySelector("#v032HeroName").textContent=(me.name||"HERO").toUpperCase()+" · "+(me.className||me.classId||"");
  modal.querySelector("#v032HeroStats").textContent="LEVEL "+(me.level||1)+" · ATK "+(me.atk||0)+" · DEF "+(me.def||0);
- modal.querySelector("#v032BagCount").textContent=inventory.length+" / 40 SLOTS · "+(me.gold||0)+" GOLD";
+ modal.querySelector("#v032BagCount").textContent=inventory.filter(it=>!it.equippedSlot).length+" / 40 BAG SLOTS · "+(me.gold||0)+" GOLD";
  const safe=inventory.map((it,i)=>{
   const key=displaySlot(it),icon=it.icon||(key==="main"?"⚔":key==="chest"?"🛡":key.includes("ring")?"💍":key==="boots"?"🥾":"✦");
   const stats=["value","defense","maxHp","maxMp"].map((k,j)=>Number(it[k])>0?"+"+it[k]+" "+["ATK","DEF","HP","MP"][j]:"").filter(Boolean).join(" · ")||key.toUpperCase();
@@ -181,7 +194,7 @@ function draw(){
  else if(!busy)notify("Drag gear to a matching slot, or tap an item and then a slot.");
 }
 window.SoulboundV32={
- render(player,state,handler,unequip){me=player||null;room=state||null;equipAction=handler;unequipAction=unequip;if(modal&&!modal.hidden)draw()},
+ render(player,state,handler,unequip,discard){me=player||null;room=state||null;equipAction=handler;unequipAction=unequip;discardAction=discard;if(modal&&!modal.hidden)draw()},
  open,close,
  isOpen:()=>!!modal&&!modal.hidden
 };
