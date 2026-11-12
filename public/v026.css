@@ -1,0 +1,109 @@
+/* SOULBOUND v0.26 — cinematic playfield, responsive audible combat & non-modal inventory */
+#lobby .v26-hero-options{display:grid;grid-template-columns:minmax(130px,.7fr) minmax(0,1fr);gap:12px;align-items:center;margin:12px 0}
+#lobby .v26-hero-options>label{margin:0}
+#lobby .v26-hero-options select{width:100%;padding:10px;border:1px solid #c1a063;background:#191722;color:#ffe2aa;border-radius:6px}
+#lobby .v26-hero-preview{display:flex;align-items:center;gap:14px;min-height:132px;background:radial-gradient(ellipse at 65% 70%,#50788644,transparent 65%),linear-gradient(135deg,#262038,#171727);border:1px solid #be935b;border-radius:9px;padding:9px 14px}
+#lobby .v26-hero-preview img{width:100px;height:128px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 7px 5px #0008)}
+#lobby .v26-hero-preview span{font:700 12px 'Cinzel',serif;color:#f3d9a4;letter-spacing:.04em}
+#game .v26-sfx-control{display:flex;align-items:center;gap:5px;flex:0 0 auto;color:#efd4a0;font:700 9px 'Cinzel',serif;white-space:nowrap;margin:0 2px}
+#game .v26-sfx-control input{width:65px;accent-color:#d8aa63;cursor:pointer}
+#game .roomline .v26-focus-button{flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;min-width:70px!important;padding:5px 9px!important;border:1px solid #cba15f!important;background:linear-gradient(#564130,#211b24)!important;border-radius:6px!important;color:#ffe4ac!important;font:700 9px 'Cinzel',serif!important}
+#game .roomline .v26-focus-button[aria-pressed="true"]{background:linear-gradient(#ab793b,#412721)!important;border-color:#f0c67c!important}
+#game .arena .hero-figure{position:relative!important;max-width:210px!important;min-width:0!important;gap:2px!important;transform:translateZ(0)}
+#game .arena .hero-figure .sprite-img{display:block;object-fit:contain!important;image-rendering:pixelated!important;transform-origin:50% 86%;will-change:transform;animation:v26-hero-idle 2.5s ease-in-out infinite alternate;filter:drop-shadow(0 7px 4px #111b2e99) drop-shadow(1px 0 1px #29304a)}
+#game .arena .hero-figure:nth-child(even) .sprite-img{animation-delay:-1.2s}
+#game .arena .hero-figure[data-class="mage"] .sprite-img{filter:drop-shadow(0 2px 7px #9a95ff88) drop-shadow(0 6px 4px #111b2e88)}
+#game .arena .hero-figure[data-class="tank"] .sprite-img{filter:drop-shadow(0 3px 3px #101b28aa) drop-shadow(0 7px 4px #111b2e99)}
+#game .arena .hero-figure .v17-nameplate{color:#ffde91!important;font:800 clamp(12px,1.05vw,18px) 'Cinzel',serif!important;text-shadow:0 2px 5px #000,0 0 10px #1a2539!important}
+#game .arena .hero-figure .figure-vitals{min-width:115px;max-width:178px}
+#game .arena .monster-img{object-fit:contain!important;image-rendering:pixelated}
+#game .arena .monster-side{align-items:center}
+#game .arena .v22-scene-layers{pointer-events:none!important}
+#game .arena .battlefield{overflow:visible!important}
+#game .arena{border-radius:12px!important;background-position:center 55%!important}
+#game .arena .scene-label{font-size:clamp(13px,.97vw,18px)!important}
+#game .v22-command-dock{margin-top:2px!important}
+#game .game-layout{padding-bottom:4px!important}
+/* Existing equipment & inventory already show full item lists in the HUD.
+   Buttons focus/highlight those real panels instead of spawning a fullscreen modal. */
+#game .v22-panel-backdrop{display:none!important;opacity:0!important;backdrop-filter:none!important}
+#game .v22-hud-center .equipment-panel,#game .v22-hud-center .equipment-panel.is-open,
+#game .v22-hud-right .inventory-panel,#game .v22-hud-right .inventory-panel.is-open{
+ position:relative!important;inset:auto!important;top:auto!important;right:auto!important;left:auto!important;bottom:auto!important;
+ width:100%!important;min-height:0!important;max-width:100%!important;max-height:none!important;
+ margin:0!important;padding:10px!important;overflow:visible!important;
+ transform:none!important;box-shadow:inset 0 0 0 1px #dab37233,0 3px 11px #0009!important;
+}
+#game .v22-hud-center .equipment-panel.is-open,#game .v22-hud-right .inventory-panel.is-open{
+ outline:3px solid #e2bd70!important;outline-offset:1px!important;
+ box-shadow:0 0 22px #f6c86c44,0 5px 16px #000c!important;
+ animation:v26-panel-highlight .38s ease-out both!important;
+}
+#game .v22-hud-right .inventory-panel.is-open .inventory-items{max-height:none!important;overflow:visible!important}
+#game .v22-hud-center .equipment-panel .gear-slots{min-height:0!important}
+#game .v22-command-dock{z-index:50!important}
+#game .v22-command-dock .loadout-tools #toggleEquipment,#game .v22-command-dock .loadout-tools #toggleInventory{
+ min-width:92px!important;white-space:nowrap!important;
+}
+#game .v22-command-dock .loadout-tools button[aria-expanded="true"]{background:linear-gradient(#b78f50,#59402a)!important;color:#fff4d7!important}
+#game .v26-merchant-intro{display:grid;grid-template-columns:98px minmax(0,1fr);gap:10px;align-items:start;margin:7px 0 10px;background:linear-gradient(135deg,#35291d,#1d1e29);border:1px solid #af8a5c;border-radius:8px;padding:8px}
+#game .v26-merchant-intro img{display:block;width:96px;height:96px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 3px 5px #0009)}
+#game .v26-merchant-intro strong{color:#ffe4ac;font:700 13px 'Cinzel',serif}
+#game .v26-merchant-intro p{margin:6px 0 0!important;font-size:12px!important;line-height:1.4}
+#game .v26-item-icon{width:32px;height:34px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;flex:none}
+#game .v26-equipped{display:flex;align-items:center;gap:9px}
+#game .v26-equipped .v26-item-icon{width:38px;height:42px}
+#game .inventory-row .v26-item-line{display:flex;align-items:center;gap:6px;min-width:0}
+#game .inventory-row .v26-item-line>div{min-width:0}
+#game .v26-equipped strong,#game .inventory-row strong{overflow-wrap:anywhere}
+#game .v22-hud-stack>.panel .pixel-title{font-size:clamp(10px,.78vw,13px)!important}
+@keyframes v26-hero-idle{0%{transform:translateY(0) scaleY(1)}45%{transform:translateY(-2px) scaleY(1.008)}100%{transform:translateY(-5px) scaleY(.995)}}
+@keyframes v26-panel-highlight{from{filter:brightness(1.35)}to{filter:brightness(1)}}
+@media(min-width:1050px) and (min-height:800px){
+ body:has(#game:not([hidden])) .shell{width:min(96vw,1680px)!important;max-width:1680px!important}
+ #game:not([hidden]){padding-inline:9px!important;padding-bottom:10px!important}
+ #game .arena{height:clamp(315px,40dvh,455px)!important;flex-basis:clamp(315px,40dvh,455px)!important}
+ #game .arena .sprite-img{height:clamp(145px,22dvh,200px)!important;width:clamp(98px,10vw,150px)!important}
+ #game .arena .monster-img{height:clamp(165px,26dvh,275px)!important;width:clamp(165px,22vw,315px)!important}
+ #game .v22-hud-stack,#game .game-side-column{gap:5px!important}
+ #game .v22-hud-stack>.panel,#game .game-side-column>.panel{padding:7px!important}
+ #game .hero-panel .race-card{padding:4px 6px!important;margin:4px 0!important}
+ #game .hero-panel .race-card small{font-size:11px!important;line-height:1.1!important}
+ #game .hero-panel .my-stats{font-size:10px!important;line-height:1.1!important}
+ #game .hero-panel .class-path-status{padding:3px 5px!important;font-size:10px!important;line-height:1.13!important}
+ #game .hero-panel .hero-bar{height:8px!important}
+ #game .hero-panel .hero-bar-label{font-size:12px!important}
+ #game .v22-hud-left .progression-panel{padding:7px!important}
+ #game .game-side-column .chat-messages{height:46px!important}
+ #game .game-side-column .log{height:85px!important;max-height:85px!important}
+}
+@media(min-width:1050px) and (max-height:799px){
+ #game .arena{height:clamp(220px,34dvh,330px)!important;flex-basis:clamp(220px,34dvh,330px)!important}
+ #game .arena .sprite-img{height:clamp(90px,15dvh,135px)!important;width:clamp(74px,8vw,112px)!important}
+ #game .arena .monster-img{height:clamp(120px,19dvh,185px)!important}
+ #game .v22-hud-stack>.panel,#game .game-side-column>.panel{padding:6px!important}
+ #game .game-side-column .log{height:75px!important;max-height:75px!important}
+}
+#game.v26-focus .arena{height:clamp(370px,58dvh,690px)!important;flex-basis:clamp(370px,58dvh,690px)!important}
+#game.v26-focus .arena .sprite-img{height:clamp(165px,29dvh,270px)!important;width:clamp(110px,14vw,195px)!important}
+#game.v26-focus .arena .monster-img{height:clamp(190px,37dvh,355px)!important;width:clamp(190px,23vw,365px)!important}
+@media(max-width:1049px){
+ #game .arena{height:clamp(285px,40dvh,420px)!important;flex-basis:clamp(285px,40dvh,420px)!important}
+ #game .arena .sprite-img{height:clamp(100px,18dvh,170px)!important;width:clamp(70px,11vw,130px)!important}
+ #game .arena .monster-img{height:clamp(140px,25dvh,240px)!important}
+ #game .v26-sfx-control input{width:55px}
+ #lobby .v26-hero-options{grid-template-columns:1fr}
+}
+@media(max-width:650px){
+ #game .v26-sfx-control{font-size:8px!important}
+ #game .v26-sfx-control input{width:42px}
+ #game .v26-merchant-intro{grid-template-columns:75px 1fr}
+ #game .v26-merchant-intro img{width:73px;height:76px}
+ #game .roomline .v26-focus-button{font-size:8px!important;min-width:55px!important}
+ #lobby .v26-hero-preview{gap:8px}
+ #lobby .v26-hero-preview img{width:78px;height:110px}
+}
+@media(prefers-reduced-motion:reduce){
+ #game .arena .hero-figure .sprite-img{animation:none!important;will-change:auto!important}
+ #game .v22-hud-center .equipment-panel.is-open,#game .v22-hud-right .inventory-panel.is-open{animation:none!important}
+}
