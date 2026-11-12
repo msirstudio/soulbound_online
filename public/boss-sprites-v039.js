@@ -5,14 +5,14 @@
 (()=>{
 "use strict";
 const map=Object.freeze({
- 3:"briarfang_alpha",
- 6:"dreadforge_champion",
- 9:"ember_tyrant",
- 12:"hollow_oracle",
+ 5:"briarfang_alpha",
+ 10:"dreadforge_champion",
+ 25:"ember_tyrant",
+ 20:"hollow_oracle",
  15:"glacier_warden",
- 18:"ancient_world_eater",
- 21:"void_reaper",
- 24:"eclipse_sovereign"
+ 30:"ancient_world_eater",
+ 35:"void_reaper",
+ 40:"eclipse_sovereign"
 });
 const base="/assets/bosses/v039/";
 const assets=new Map();
