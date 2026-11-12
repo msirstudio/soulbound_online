@@ -1,0 +1,59 @@
+/* SOULBOUND v0.26.1b — In-game audio mixer & Level 5 class popup. */
+#game .roomline{position:relative}
+#game .audio-settings-toggle{
+ padding:5px 9px;min-height:27px;white-space:nowrap;cursor:pointer;
+ border:1px solid #c9a26b;border-radius:5px;background:linear-gradient(#4d3c31,#1b1a26);
+ color:#f3d59b;font:700 10px Georgia,serif
+}
+#game .audio-settings-toggle:hover,#game .audio-settings-toggle[aria-expanded=true]{filter:brightness(1.15);border-color:#f9dd9e}
+#game .audio-settings-pop{
+ position:absolute!important;z-index:1200!important;top:calc(100% + 8px);right:120px;
+ width:245px;box-sizing:border-box;padding:14px 13px;border:2px solid #dfb46e;border-radius:9px;
+ background:linear-gradient(155deg,#342720,#151727);box-shadow:0 12px 35px #000c,0 0 0 2px #251c1c;
+}
+#game .audio-settings-pop[hidden]{display:none!important}
+#game .audio-settings-pop label{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:9px 0;color:#f8dfad;font:700 12px Georgia,serif}
+#game .audio-settings-pop input{width:115px;min-width:0;accent-color:#d7aa67}
+#game .audio-settings-pop button{width:100%;min-height:34px;background:linear-gradient(#755538,#32252c);border:1px solid #d9ad65;color:#f7e2b7;border-radius:6px;cursor:pointer}
+#game .spec-open{display:block;width:100%;min-height:31px;margin:5px 0 0;border:1px solid #deb66f;border-radius:6px;background:linear-gradient(90deg,#8e623b,#3d2930);color:#fff0c2;font-weight:800;cursor:pointer}
+#game .spec-open[hidden]{display:none!important}
+#game .spec-backdrop{position:fixed!important;inset:0;z-index:1900!important;background:#05050bb8!important;backdrop-filter:blur(2px);pointer-events:auto}
+#game .spec-backdrop[hidden]{display:none!important}
+#game .spec-dialog{
+ position:fixed!important;z-index:1901!important;box-sizing:border-box;
+ top:50%;left:50%;right:auto;bottom:auto;transform:translate(-50%,-50%)!important;
+ width:min(640px,calc(100vw - 30px))!important;max-height:calc(100dvh - 30px)!important;
+ min-height:0!important;height:auto!important;margin:0!important;padding:23px!important;
+ overflow-y:auto!important;overflow-x:hidden!important;
+ border:3px solid #e9bd71!important;border-radius:16px!important;
+ background:radial-gradient(ellipse at top,#4b3442,#221b2a 52%,#101523 100%)!important;
+ box-shadow:0 0 0 3px #27171c,0 28px 85px #000e,inset 0 1px #fff2b65c!important;
+ text-align:center
+}
+#game .spec-dialog[hidden]{display:none!important}
+#game .spec-head{display:flex;justify-content:space-between;align-items:center;gap:10px;
+ color:#f9db9c;font:700 12px Georgia,serif;letter-spacing:.12em}
+#game .spec-head button{flex:none;min-height:32px;padding:5px 10px;color:#ffdbb4;
+ background:linear-gradient(#794839,#3c2930);border:1px solid #c69460;border-radius:6px;cursor:pointer}
+#game .spec-title{font:800 clamp(22px,3vw,35px) Georgia,serif;color:#ffe2a3;
+ text-shadow:0 0 17px #f2a44a6a;margin:21px 0 13px;letter-spacing:.045em}
+#game .spec-dialog #classPathDescription{font-size:14px;line-height:1.6;color:#e3d0ba}
+#game .spec-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:23px 0 16px}
+#game .spec-choices button{min-width:0;min-height:130px;padding:16px 10px;border:2px solid #c29b66;border-radius:12px;
+ background:linear-gradient(155deg,#59413c,#191927);color:#ffe4b5;font:700 19px Georgia,serif;
+ text-shadow:0 1px 3px #000;box-shadow:inset 0 1px #ffe2b54d,0 6px 15px #0008;
+ cursor:pointer;transition:transform .18s ease,box-shadow .18s ease}
+#game .spec-choices button:hover:not(:disabled){transform:translateY(-3px);border-color:#ffe4a0;box-shadow:0 0 22px #e6ad6773}
+#game .spec-choices button:focus-visible{outline:3px solid #a9e0fb;outline-offset:2px}
+#game .spec-choices button small{display:block;margin-top:10px;font-size:12px;color:#d3bd98;line-height:1.4;white-space:normal}
+#game .spec-footnote{font-size:12px;color:#d8bb95;font-style:italic}
+#game .progression-panel{height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important}
+#game .progression-panel .stat-panel{height:auto!important;overflow:visible!important}
+@media(max-width:650px){
+ #game .audio-settings-pop{right:6px;top:calc(100% + 5px);width:min(245px,calc(100vw - 16px))}
+ #game .spec-dialog{padding:16px!important}
+ #game .spec-choices{grid-template-columns:1fr;gap:8px}
+ #game .spec-choices button{min-height:80px;font-size:16px}
+ #game .spec-title{margin-top:12px;font-size:23px}
+}
+@media(prefers-reduced-motion:reduce){#game .spec-choices button{transition:none!important}}
