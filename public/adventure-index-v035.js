@@ -20,8 +20,8 @@ const labels={value:"ATK",defense:"DEF",maxHp:"HP",maxMp:"MP"};
 function init(){
  if($("v035Index"))return;
  const btn=document.createElement("button");btn.type="button";btn.id="v035Open";btn.className="v035-open";btn.textContent="📖 ADVENTURE INDEX";btn.setAttribute("aria-haspopup","dialog");
- const dock=document.querySelector("#game .loadout-tools"),menu=document.querySelector("#game .roomline");
- if(dock)dock.appendChild(btn);else menu?.appendChild(btn);
+ const statusColumn=document.querySelector("#game .v22-hud-left"),menu=document.querySelector("#game .roomline");
+ if(statusColumn)statusColumn.prepend(btn);else menu?.appendChild(btn);
  const node=document.createElement("div");node.id="v035Index";node.className="v035-overlay";node.hidden=true;
  node.innerHTML='<div class="v035-scrim" data-v035-dismiss></div><section class="v035-window" role="dialog" aria-modal="true" aria-labelledby="v035Heading" tabindex="-1">'+
  '<header class="v035-title"><div><small>THE FORGOTTEN KINGDOM · FIELD ARCHIVE</small><h2 id="v035Heading">📖 ADVENTURE INDEX</h2><span class="v035-subtitle">Monsters · Bosses · Equipment · Supplies · The World</span></div><button type="button" id="v035Exit" aria-label="Close index">✕</button></header>'+
@@ -34,6 +34,22 @@ function init(){
  node.addEventListener("click",event=>{
   if(event.target.closest("[data-v035-dismiss],#v035Exit,#v035Close")){close();return}
   const tab=event.target.closest("[data-v035-tab]");if(tab){category=tab.dataset.v035Tab;selectedId="";render();return}
+  const bossLink=event.target.closest("[data-v036-boss-stage]");
+  if(bossLink){
+   category="bosses";search="";rarity="all";
+   $("v035Search").value="";$("v035Rarity").value="all";
+   selectedId="stage-"+bossLink.dataset.v036BossStage;
+   render();return;
+  }
+  const itemLink=event.target.closest("[data-v036-item-id]");
+  if(itemLink){const record=(data?.items||[]).find(x=>x.id===itemLink.dataset.v036ItemId&&x.source);if(record){
+    category=record.category;search="";rarity="all";
+    $("v035Search").value="";$("v035Rarity").value="all";
+    selectedId=[record.id,record.rarity,record.source,(data.items||[]).filter(i=>i.category===record.category).indexOf(record)].join("::");
+    render();
+    const entry=entries().find(i=>i.id===record.id&&i.rarity===record.rarity);
+    if(entry){selectedId=uid(entry);renderSelection()}return;
+   }}
   const card=event.target.closest("[data-v035-entry]");if(card){selectedId=card.dataset.v035Entry;renderSelection();return}
  });
  $("v035Search").addEventListener("input",event=>{search=event.target.value.trim().toLowerCase();selectedId="";render()});
@@ -86,7 +102,7 @@ function entries(){
 function uid(it){return String(it.recordId||it.id)}
 function entryMarkup(item){
  const isEnemy=item.kind==="enemy",isZone=item.kind==="zone";
- const sub=isEnemy?"STAGE "+item.stage+" · "+esc(item.zone):isZone?"STAGES "+esc(item.stages):item.source?"DROP · "+esc(item.source):item.price!=null?"MERCHANT · "+item.price+" GOLD":"ITEM";
+ const sub=isEnemy?"STAGE "+item.stage+" · "+esc(item.zone):isZone?"STAGES "+esc(item.stages):item.source?"DROP "+item.chance+"% · "+esc(item.source):item.price!=null?"MERCHANT · "+item.price+" GOLD":"ITEM";
  const stat=isEnemy?"HP "+item.hp+" · ATK "+item.atk+" · DEF "+item.def:!isZone&&item.description?esc(item.description):"";
  const rarityTag=item.rarity?'<span class="v035-rarity v035-'+esc(item.rarity)+'">'+esc(item.rarity.toUpperCase())+'</span>':"";
  return '<button type="button" data-v035-entry="'+esc(uid(item))+'" class="v035-entry '+(uid(item)===selectedId?"active":"")+'">'+
@@ -112,7 +128,7 @@ function enemyDetail(e){
  return '<div class="v035-enemy-art"><img alt="'+esc(e.name)+'" src="'+esc(img)+'" loading="lazy" onerror="this.style.display=\'none\'"></div>'+
  '<div class="v035-stats"><span>❤️ HP <b>'+e.hp+'</b></span><span>⚔ ATK <b>'+e.atk+'</b></span><span>🛡 DEF <b>'+e.def+'</b></span><span>✧ EXP <b>'+e.xp+'</b></span><span>🪙 GOLD <b>'+e.gold+'</b></span><span>🗺 STAGE <b>'+e.stage+'</b></span></div>'+
  '<div class="v035-detail-info"><strong>LOCATION</strong><p>'+esc(e.zone)+'</p><strong>REWARDS</strong><p>'+esc(e.loot)+'</p>'+
- (e.boss?'<strong>BOSS DROP RARITY</strong><p>Common 50% · Uncommon 28% · Rare 16% · Epic 5% · Legendary 1%. Gear type is random.</p>':'<p>Regular encounters do not drop equipment.</p>')+'</div>';
+ (e.boss?'<strong>EXCLUSIVE BOSS DROPS</strong><div class="v036-drop-list">'+(data?.bossDrops?.[e.stage]||[]).map(it=>'<button type="button" data-v036-item-id="'+esc(it.id)+'"><span>'+esc(it.icon||"✦")+' '+esc(it.name)+'</span><strong>'+it.chance+'%</strong></button>').join("")+'</div><p>Each party member rolls independently. No-drop chance: '+Math.max(0,100-(data?.bossDrops?.[e.stage]||[]).reduce((n,x)=>n+x.chance,0))+'%.</p>':'<p>Regular encounters do not drop equipment.</p>')+'</div>';
 }
 function itemDetail(e){
  const bonuses=Object.entries(labels).filter(([k])=>Number(e[k])>0).map(([key,l])=>'<span>'+l+' <b>+'+e[key]+'</b></span>').join("");
@@ -120,7 +136,7 @@ function itemDetail(e){
  '<div class="v035-stats">'+(bonuses||'<span>Utility item</span>')+'</div>'+
  '<div class="v035-detail-info"><strong>ITEM TYPE</strong><p>'+esc(e.slot||e.category||"Supplies")+'</p>'+
  (e.rarity?'<strong>RARITY</strong><p>'+esc(e.rarity.toUpperCase())+'</p>':'')+
- (e.source?'<strong>ACQUIRED FROM</strong><p>'+esc(e.source)+' · Boss Stage '+esc(e.bossStage)+'</p>':'')+
+ (e.source?'<strong>DROP CHANCE</strong><p>'+e.chance+'% per boss victory, independent for each hero</p><strong>DROPPED BY</strong><p><button class="v036-source-link" type="button" data-v036-boss-stage="'+esc(e.bossStage)+'">👑 '+esc(e.source)+' · STAGE '+esc(e.bossStage)+' → VIEW BOSS</button></p>':'')+
  (e.price!=null?'<strong>MERCHANT PRICE</strong><p>'+esc(e.price)+' gold</p>':'')+
  '<strong>DESCRIPTION</strong><p>'+esc(e.description||"Equipment with fixed stats.")+'</p></div>';
 }
