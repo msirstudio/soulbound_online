@@ -123,6 +123,14 @@ document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{
  const cls=own?.classId||"swordsman";
  const attacks=type==="attack"||type.startsWith("skill");
  if(attacks)v26TriggerImpact(cls);
+ if(attacks&&hero&&own&&window.SoulboundSprite){
+  const img=hero.querySelector(".sprite-img");
+  if(img){
+   const rest=window.SoulboundSprite.url({...own,pose:"idle"});
+   img.src=window.SoulboundSprite.url({...own,pose:cls==="mage"?"cast":"attack"});
+   setTimeout(()=>{if(img.isConnected)img.src=rest},430);
+  }
+ }
  if(hero&&typeof hero.animate==="function"&&!window.matchMedia("(prefers-reduced-motion: reduce)").matches){
   const frames=type==="guard"?[{filter:"brightness(1)"},{filter:"brightness(1.85)"},{filter:"brightness(1)"}]:
     cls==="mage"?[{transform:"translateY(0) scale(1)",filter:"brightness(1)"},{transform:"translateY(-10px) scale(1.07)",filter:"drop-shadow(0 0 14px #90deff)"},{transform:"translateY(0) scale(1)",filter:"brightness(1)"}]:
