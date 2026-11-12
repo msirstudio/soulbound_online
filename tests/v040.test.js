@@ -64,3 +64,49 @@ test("city world UI, world map assets and additive cloud migration exist",()=>{
  assert.match(sql,/ADD COLUMN IF NOT EXISTS world_progress jsonb/);
  assert.doesNotMatch(sql,/\bDROP TABLE\b|\bTRUNCATE\b|\bDELETE FROM\b/);
 });
+
+
+function mockLiveServer(){
+ const code=fs.readFileSync(path.join(__dirname,"../server.js"),"utf8"),routes=new Map();
+ const app={use(){},get(p,fn){routes.set(p,fn)}},express=()=>app;express.static=()=>()=>{};
+ let onConnect=null;const emitted=[];
+ class Server{on(type,fn){if(type==="connection")onConnect=fn}to(code){return{emit:(event,state)=>emitted.push({code,event,state})}}}
+ const loot=require("../loot-v034");
+ const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:
+  name==="path"?path:name==="socket.io"?{Server}:
+  name==="./loot-v034"?loot:name==="./world-v040"?world:require(name);
+ new Function("require","process","console","__dirname",code)(deps,{env:{}},{log(){}},path.join(__dirname,".."));
+ const connect=id=>{const events={};onConnect({id,join(){},on:(ev,fn)=>events[ev]=fn});
+  return{call(ev,payload={}){let response=null;events[ev](payload,answer=>{response=answer});return response}}};
+ return{connect,emitted,last:()=>emitted.at(-1)?.state};
+}
+test("real socket handlers block party travel when even one member is underleveled",()=>{
+ const game=mockLiveServer(),leader=game.connect("host"),guest=game.connect("guest");
+ const {code}=leader.call("createRoom",{name:"Leader",classId:"swordsman"});
+ assert.equal(guest.call("joinRoom",{code,name:"Guest",classId:"tank"}).ok,true);
+ assert.equal(leader.call("restoreCharacter",{level:10}).ok,true);
+ assert.equal(guest.call("restoreCharacter",{level:1}).ok,true);
+ assert.equal(leader.call("travelRegion",{regionIndex:1}).ok,false);
+ assert.equal(guest.call("restoreCharacter",{level:10}).ok,true);
+ assert.equal(leader.call("travelRegion",{regionIndex:2}).ok,false);
+ assert.equal(leader.call("travelRegion",{regionIndex:1}).ok,true);
+ assert.equal(game.last().stage,6);assert.equal(game.last().status,"battle");
+ assert.equal(leader.call("returnCity").ok,false);
+});
+test("socket-driven farm run clears, returns to city and increments boss kills on replay",()=>{
+ const game=mockLiveServer(),hero=game.connect("hero");
+ assert.equal(hero.call("createRoom",{name:"Hero",classId:"swordsman"}).ok,true);
+ assert.equal(hero.call("restoreCharacter",{level:30,attack:999999}).ok,true);
+ for(let run=1;run<=2;run++){
+  assert.equal(hero.call("travelRegion",{regionIndex:0}).ok,true);
+  for(let stage=1;stage<=5;stage++){
+   assert.equal(hero.call("action",{type:"attack"}).ok,true);
+   assert.equal(game.last().stage,stage);
+   assert.equal(game.last().status,stage===5?"regionClear":"victory");
+   if(stage<5)assert.equal(hero.call("nextStage").ok,true);
+  }
+  assert.equal(game.last().players[0].worldProgress.bossDefeats.cursed_wilds,run);
+  assert.equal(hero.call("returnCity").ok,true);
+  assert.equal(game.last().status,"city");
+ }
+});
