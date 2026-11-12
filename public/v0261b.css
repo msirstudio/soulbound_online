@@ -1,5 +1,5 @@
 /* SOULBOUND v0.26.1b — In-game audio mixer & Level 5 class popup. */
-#game .roomline{position:relative}
+#game .roomline{position:relative;overflow:visible!important;z-index:1300!important}
 #game .audio-settings-toggle{
  padding:5px 9px;min-height:27px;white-space:nowrap;cursor:pointer;
  border:1px solid #c9a26b;border-radius:5px;background:linear-gradient(#4d3c31,#1b1a26);
