@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.40.0",
+  "version": "0.41.0",
   "private": true,
-  "description": "SOULBOUND v0.40 A New World — Central City, 8 interactive region maps, 40 stages, mini-bosses, replay farming, level gates and persistent region clears",
+  "description": "SOULBOUND v0.41 UI Foundation — new main menu, login/hero lobby flow, compact city/battle HUD, responsive Party Chat Log drawers and shared design tokens",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
