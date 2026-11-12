@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" shape-rendering="crispEdges">
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#3d3252"/><stop offset=".55" stop-color="#20283e"/><stop offset="1" stop-color="#18212b"/></linearGradient></defs>
+<rect x="2" y="2" width="236" height="236" rx="9" fill="url(#bg)" stroke="#deb577" stroke-width="4"/>
+<path d="M12 185q55-32 105 0t112-12v60H12z" fill="#353f33"/>
+<path d="M5 45l32-32 13 19-20 30zM208 18l24 23v36l-23-11z" fill="#97704d" stroke="#251d27" stroke-width="5"/>
+<path d="M36 194l17-84 63-24 64 17 23 96-16 29H51z" fill="#75573c" stroke="#211b25" stroke-width="7"/>
+<path d="M51 114l-21 72 38 15 24-65zM167 118l30 75-38 13-25-60z" fill="#56434c" stroke="#221b28" stroke-width="7"/>
+<path d="M66 112l62-11 50 11 7 93-135 6z" fill="#42655e" stroke="#1e2637" stroke-width="7"/>
+<path d="M64 151h118v14H64zM75 175h102v11H75z" fill="#c9a063"/>
+<path d="M100 99l-22-31 14-38 48-9 26 37-17 48z" fill="#cf9471" stroke="#251e28" stroke-width="7"/>
+<rect x="102" y="75" width="17" height="7" fill="#291c25"/><rect x="139" y="75" width="17" height="7" fill="#291c25"/><rect x="107" y="77" width="6" height="6" fill="#f4e6bc"/><rect x="143" y="77" width="6" height="6" fill="#f4e6bc"/>
+<rect x="120" y="98" width="24" height="5" fill="#794c43"/>
+<path d="M81 53l9-35 49-10 37 22 8 38-25-15-6-17-55 3z" fill="#765b3b" stroke="#261d29" stroke-width="8"/>
+<path d="M68 58l-22-9 39-40 81 0 37 44-25 12-35-31-44 3z" fill="#4d4d64" stroke="#262334" stroke-width="7"/>
+<rect x="109" y="15" width="38" height="8" fill="#d9ac60"/><rect x="120" y="16" width="12" height="9" fill="#86e6ce"/>
+<path d="M76 56l-9 42 16 18 17-14-10-37zM159 51l19 44-19 19-16-19z" fill="#6e4f4b" stroke="#221b24" stroke-width="6"/>
+<rect x="105" y="120" width="46" height="30" fill="#403b47" stroke="#241a23" stroke-width="5"/>
+<path d="M112 125h31l-5 18h-21z" fill="#dcb76e"/><rect x="122" y="130" width="12" height="9" fill="#74dec4"/>
+<path d="M177 90l10-7 5 105-13 3z" fill="#b28b57" stroke="#2c2531" stroke-width="4"/>
+<path d="M168 86l17-27 21 18-5 29-25 1z" fill="#eebd69" stroke="#4a3a41" stroke-width="5"/>
+<path d="M175 79l10-14 13 10-4 24-18-4z" fill="#c7f0bc"/>
+<rect x="180" y="120" width="19" height="16" fill="#d5b26c"/><rect x="184" y="124" width="11" height="8" fill="#9debd8"/>
+<g id="glitter" fill="#ffe9a6"><rect x="206" y="41" width="4" height="12"/><rect x="201" y="45" width="14" height="4"/><rect x="45" y="96" width="4" height="12"/><rect x="40" y="100" width="14" height="4"/></g>
+<style>#glitter{animation:glow 1.9s ease-in-out infinite alternate}@keyframes glow{from{opacity:.15}to{opacity:1}}</style>
+</svg>
