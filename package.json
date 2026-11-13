@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.54.0",
+  "version": "0.55.0",
   "private": true,
-  "description": "SOULBOUND v0.54 Full Combat Expansion — Elemental AI, Team Guards and Final Boss Phases",
+  "description": "SOULBOUND v0.55 Hardcore Combat and Comprehensive Adventure Codex",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
