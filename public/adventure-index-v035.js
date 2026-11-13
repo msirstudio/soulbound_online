@@ -134,7 +134,7 @@ function enemyDetail(e){
  return '<div class="v035-enemy-art"><img alt="'+esc(e.name)+'" src="'+esc(img)+'" loading="lazy" data-v039-fallback="'+esc(fallback)+'" onerror="if(this.dataset.v039Fallback && this.src.indexOf(this.dataset.v039Fallback)===-1){this.src=this.dataset.v039Fallback}else{this.style.display=\'none\'}"></div>'+
  '<div class="v035-stats"><span>❤️ HP <b>'+e.hp+'</b></span><span>⚔ ATK <b>'+e.atk+'</b></span><span>🛡 DEF <b>'+e.def+'</b></span><span>✧ EXP <b>'+e.xp+'</b></span><span>🪙 GOLD <b>'+e.gold+'</b></span><span>🗺 STAGE <b>'+e.stage+'</b></span></div>'+
  '<div class="v035-detail-info"><strong>LOCATION</strong><p>'+esc(e.zone)+'</p><strong>REWARDS</strong><p>'+esc(e.loot)+'</p>'+
- (e.boss||e.miniBoss?'<strong>'+ (e.miniBoss?"MINI-BOSS":"BOSS")+' POTENTIAL DROPS</strong><div class="v037-boss-loot">'+(e.drops||[]).map(it=>'<button type="button" data-v037-item="'+esc(it.id)+'" data-v037-rarity="'+esc(it.rarity)+'" class="v037-loot-entry '+(acquired({...it,kind:"item"})?"v044-discovered":"")+'" title="View this item"><span>'+esc(it.icon||"✦")+'</span><span>'+esc(it.name)+'</span><b>'+it.chance+'%</b>'+(acquired({...it,kind:"item"})?'<em>✓</em>':"")+'</button>').join("")+'</div><p>Each probability is per player and per victory. One roll can drop at most one item; nothing may drop.</p>':'<p>Regular encounters do not drop equipment.</p>')+'</div>';
+ (e.boss||e.miniBoss?'<strong>'+ (e.miniBoss?"MINI-BOSS":"BOSS")+' POTENTIAL DROPS</strong><div class="v037-boss-loot">'+(e.drops||[]).map(it=>'<button type="button" data-v037-item="'+esc(it.id)+'" data-v037-rarity="'+esc(it.rarity)+'" class="v037-loot-entry '+(acquired({...it,kind:"item"})?"v044-discovered":"")+'" title="View this item"><span>'+esc(it.icon||"✦")+'</span><span>'+esc(it.name)+'</span><b>'+it.chance+'%</b>'+(acquired({...it,kind:"item"})?'<em>✓</em>':"")+'</button>').join("")+'</div><p>Each item rolls independently per player and per victory. Multiple items can drop together.</p>':'<p>Regular encounters do not drop equipment.</p>')+'</div>';
 }
 function raceDetail(r){
  const got=acquired(r);
@@ -150,7 +150,7 @@ function itemDetail(e){
  '<div class="v035-stats">'+(bonuses||'<span>Utility item</span>')+'</div>'+
  '<div class="v035-detail-info">'+(acquired({...e,kind:"item"})?'<p class="v044-owned-note">✓ ALREADY DISCOVERED</p>':'')+'<strong>ITEM TYPE</strong><p>'+esc(e.slot||e.category||"Supplies")+'</p>'+
  (e.rarity?'<strong>RARITY</strong><p>'+esc(e.rarity.toUpperCase())+'</p>':'')+
- (e.source?'<strong>ACQUIRED FROM</strong><p><button type="button" class="v037-source-link" data-v037-boss="'+esc(e.sourceStage||e.bossStage)+'">👑 '+esc(e.source)+' · Stage '+esc(e.sourceStage||e.bossStage)+' →</button></p><strong>DROP CHANCE</strong><p>'+esc(e.chance)+'% per boss victory</p>':'')+
+ (e.source?'<strong>ACQUIRED FROM</strong><p><button type="button" class="v037-source-link" data-v037-boss="'+esc(e.sourceStage||e.bossStage)+'">👑 '+esc(e.source)+' · Stage '+esc(e.sourceStage||e.bossStage)+' →</button></p><strong>DROP CHANCE</strong><p>'+esc(e.chance)+'% per victory (independent item roll)</p>':'')+
  (e.price!=null?'<strong>MERCHANT PRICE</strong><p>'+esc(e.price)+' gold</p>':'')+
  '<strong>DESCRIPTION</strong><p>'+esc(e.description||"Equipment with fixed stats.")+'</p></div>';
 }
