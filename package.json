@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.48.5",
+  "version": "0.54.0",
   "private": true,
-  "description": "SOULBOUND v0.48.1 HUD Restoration and Merchant Close Fix",
+  "description": "SOULBOUND v0.54 Full Combat Expansion — Elemental AI, Team Guards and Final Boss Phases",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

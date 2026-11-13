@@ -1,0 +1,26 @@
+name: SOULBOUND v0.54 Full Combat Expansion
+on:
+  push:
+    branches: [v0.54-full-combat-expansion]
+  pull_request:
+    branches: [v0.48.5-boss-rewards-character-overview]
+permissions:
+  contents: read
+jobs:
+  combat-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Validate JavaScript
+        run: |
+          node --check server.js
+          node --check combat-v054.js
+          node --check public/game.js
+          node --check public/update-log-v045.js
+      - name: Test combat systems, saves and previous features
+        run: npm test
