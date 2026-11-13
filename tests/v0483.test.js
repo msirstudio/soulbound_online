@@ -40,9 +40,9 @@ test("Battle Log inner scroll view fills available drawer height",()=>{
  assert.ok(html.includes('href="v0483-camp-log.css"'));
  assert.ok(read("server.js").includes("log:r.log.slice(-40)"),"Battle Log must send the retained history, not only 14 events");
 });
-test("title version and release notes reflect v0.48.4",()=>{
+test("title version and release notes reflect v0.48.5",()=>{
  const html=read("public/index.html"),pkg=require("../package.json"),log=read("public/update-log-v045.js");
- assert.equal(pkg.version,"0.48.4");
- assert.ok(html.includes("VERSION 0.48.4 · AUDIO & MINI BOSS"));
+ assert.equal(pkg.version,"0.48.5");
+ assert.ok(html.includes("VERSION 0.48.5 · BOSS REWARDS"));
  assert.ok(log.includes('version:"0.48.3"'));
 });
