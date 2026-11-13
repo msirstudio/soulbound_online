@@ -10,11 +10,11 @@ test("World Atlas uses the actual generated raster WebP, and its 8 overlay pins 
  assert.equal(art.toString("ascii",8,12),"WEBP");
  assert.ok(art.length>200000, "Map should contain the full high-resolution rendered image.");
  const ui=read("public/world-ui-v040.js");
- assert.match(ui,/world-map-v046\\.webp/);
+ assert.ok(ui.includes("world-map-v046.webp"));
  assert.match(ui,/v046CityPin/);
- assert.match(ui,/positions=\\[\\[18,67\\]/);
+ assert.ok(ui.includes("positions=[[18,67]"));
  assert.match(ui,/data-v040-region/);
- assert.doesNotMatch(ui,/forgotten-kingdom-v046\\.svg/);
+ assert.ok(!ui.includes("forgotten-kingdom-v046.svg"));
 });
 test("Eight region previews use the corresponding existing arena images",()=>{
  const css=read("public/v046-atlas.css");
