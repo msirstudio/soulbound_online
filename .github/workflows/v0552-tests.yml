@@ -1,0 +1,29 @@
+name: SOULBOUND v0.55.2 Elemental Rules and Water-Lightning
+on:
+  push:
+    branches: [v0.55.2-elemental-chart-water-lightning]
+  pull_request:
+    branches: [v0.55.1-index-status-boss-ui-fix]
+permissions:
+  contents: read
+jobs:
+  elemental-and-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check code syntax
+        run: |
+          node --check server.js
+          node --check combat-v054.js
+          node --check combat-v055.js
+          node --check elemental-v0552.js
+          node --check public/game.js
+          node --check public/adventure-index-v0552.js
+          node --check tests/v0552.test.js
+      - name: Run all old and new regression tests
+        run: npm test
