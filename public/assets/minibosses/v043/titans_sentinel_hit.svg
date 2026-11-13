@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="320" viewBox="0 0 280 320" role="img" aria-label="Titan's Sentinel hit pixel-art sprite">
+<g shape-rendering="crispEdges" transform="translate(9 12) rotate(7 140 170)"><ellipse cx="140" cy="294" rx="71" ry="10" fill="#080b18" opacity=".36"/>
+<polygon points="92,224 118,224 113,288 81,290" fill="#505a51" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/><polygon points="162,222 192,219 200,287 165,290" fill="#505a51" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<polygon points="83,122 111,92 172,92 205,132 191,230 87,230" fill="#8c8e82" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<polygon points="86,123 53,137 39,209 77,225 104,173" fill="#505a51" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/><polygon points="194,123 224,139 239,218 202,225 178,169" fill="#505a51" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<polygon points="98,105 116,76 164,76 185,110 178,166 103,166" fill="#8c8e82" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<polygon points="106,143 123,133 128,146 113,156" fill="#e2c88b" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/><polygon points="151,144 166,132 174,147 158,157" fill="#e2c88b" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<polygon points="109,224 129,237 153,232 184,221 172,251 100,251" fill="#505a51" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<polygon points="94,86 121,61 151,75 175,60 195,91 169,121 111,119" fill="#e2c88b" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/><rect x="103" y="146" width="19" height="12" fill="#e2c88b" /><rect x="158" y="146" width="19" height="12" fill="#e2c88b" /><polygon points="112,193 145,186 163,198 150,222 120,218" fill="#505a51" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<rect x="61" y="198" width="16" height="18" fill="#8c8e82" /><rect x="210" y="198" width="16" height="18" fill="#8c8e82" />
+</g><path d="M40 65 L100 118 L79 130 L119 167" stroke="#fff8d1" stroke-width="13" stroke-linecap="square" fill="none"/><path d="M209 101 L172 132 L208 151" stroke="#e2c88b" stroke-width="11" fill="none"/><g fill="#ffedf7"><rect x="34" y="163" width="12" height="12" fill="#fff5da" /><rect x="220" y="194" width="14" height="14" fill="#fff5da" /><rect x="184" y="50" width="9" height="9" fill="#fff5da" /></g>
+</svg>

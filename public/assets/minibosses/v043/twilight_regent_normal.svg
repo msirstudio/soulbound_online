@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="280" height="320" viewBox="0 0 280 320" role="img" aria-label="Twilight Regent idle pixel-art sprite">
+<g shape-rendering="crispEdges" ><ellipse cx="140" cy="294" rx="71" ry="10" fill="#080b18" opacity=".36"/>
+<polygon points="92,224 118,224 113,288 81,290" fill="#24283b" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/><polygon points="162,222 192,219 200,287 165,290" fill="#24283b" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<polygon points="83,122 111,92 172,92 205,132 191,230 87,230" fill="#765c99" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<polygon points="86,123 53,137 39,209 77,225 104,173" fill="#24283b" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/><polygon points="194,123 224,139 239,218 202,225 178,169" fill="#24283b" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<polygon points="98,105 116,76 164,76 185,110 178,166 103,166" fill="#765c99" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<polygon points="106,143 123,133 128,146 113,156" fill="#f0c7e9" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/><polygon points="151,144 166,132 174,147 158,157" fill="#f0c7e9" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<polygon points="109,224 129,237 153,232 184,221 172,251 100,251" fill="#24283b" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<polygon points="97,100 84,53 116,77 138,39 161,76 193,52 182,104" fill="#f0c7e9" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/><rect x="105" y="145" width="20" height="10" fill="#f7d1e4" /><rect x="157" y="145" width="20" height="10" fill="#f7d1e4" /><polygon points="120,190 145,180 164,194 143,231" fill="#f0c7e9" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/><polygon points="81,227 44,295 105,281 137,293 177,274 218,300 190,219" fill="#24283b" stroke="#16182d" stroke-width="5" stroke-linejoin="miter"/>
+<rect x="61" y="198" width="16" height="18" fill="#765c99" /><rect x="210" y="198" width="16" height="18" fill="#765c99" />
+</g>
+</svg>
