@@ -76,9 +76,16 @@ function beforeAction(r,p,say){
  if(p.hp<=0){skip=true;say(r,p.name+" falls to a status effect.");}
  return {skip};
 }
+// Two regional bonus attacks make the new elements visible in enemy combat too.
+const SECONDARY_MOVES=Object.freeze({
+ cursed_wilds:{name:"Monsoon Surge",scope:"all",element:"water",power:.62,effect:"weaken",chance:.35,charge:true},
+ dreadforge_bastion:{name:"Stormhammer",scope:"single",element:"lightning",power:1.06,effect:"stun",chance:.20,charge:true}
+});
 function moveFor(m,r){
  const original=base.moveFor(m);
  if(!m?.boss||original.name!=="Strike"||m.queuedMove)return original;
+ if(SECONDARY_MOVES[m.regionId]&&m.combatTurn>0&&m.combatTurn%7===2)
+  return SECONDARY_MOVES[m.regionId];
  const pct=m.hp/Math.max(1,m.maxHp);
  const elem=profileFor(m).element;
  if(pct<.4&&m.combatTurn>0&&m.combatTurn%4===0)
@@ -220,6 +227,8 @@ function enemyCodex(m){
   ...(m.boss||m.miniBoss?[{...original,charge:!mini,description:mini?"Reduced-strength signature move.":"Signature attack with one warning/charge turn."}]:[])
  ];
  if(m.boss){
+  if(SECONDARY_MOVES[m.regionId])
+   moves.push({...SECONDARY_MOVES[m.regionId],description:"Regional elemental attack used during the boss's attack rotation."});
   moves.push({name:"Frenzied Sweep",scope:"all",element:affinity.element,power:.64,effect:null,chance:0,charge:false,description:"Adaptive group attack when HP drops below 40%."});
   moves.push({name:"Crowd Breaker",scope:"all",element:affinity.element,power:.56,effect:null,chance:0,charge:false,description:"Adaptive attack against parties of at least 3 players."});
  }
@@ -257,7 +266,7 @@ function codexData(){
  };
 }
 module.exports={
- ...base,ELEMENTS,AFFINITIES,elementalChart:elemental.STRONG_VS,STATUS_CODEX,SKILL_COSTS,profileFor,
+ ...base,ELEMENTS,AFFINITIES,SECONDARY_MOVES,elementalChart:elemental.STRONG_VS,STATUS_CODEX,SKILL_COSTS,profileFor,
  heroElementResistance,elementMultiplier,statusResistance,applyStatus,beforeAction,
  moveFor,beginEncounter,checkPhase:phaseChange,staggerThreshold,addStagger,
  guard,cleanse,monsterStrike,applyDefeatPenalty,validateAction,skillElement,
