@@ -7,9 +7,9 @@ const loot=require("../loot-v034");const world=require("../world-v040");
 const shop=[{id:"iron_sword",name:"Iron Sword",slot:"weapon",value:8,level:1,class:"swordsman"},{id:"iron_armor",name:"Iron Armor",slot:"armor",defense:5,maxHp:20,level:1}];
 function hero(){return{name:"Tester",classId:"swordsman",level:20,atk:25,def:10,maxHp:100,maxMp:40,hp:100,mp:40,weapon:"Training Sword",armor:"Traveler Armor",weaponItem:null,armorItem:null,inventory:[]}}
 function gear(slot,rarity="rare",boss=3){return loot.canonical({id:"boss"+boss+"_"+slot,rarity},shop)}
-test("boss-only drops are curated, with no-drop chance",()=>{
+test("boss rewards are curated and include a no-drop chance",()=>{
  const p=hero();assert.equal(loot.dropBossLoot(p,1),null);assert.equal(p.inventory.length,0);
- const original=Math.random;try{Math.random=()=>0;const item=loot.dropBossLoot(p,3);assert.ok(item&&item.uid&&item.rarity==="rare");assert.equal(p.inventory.length,1);const other=hero();Math.random=()=>.99;assert.equal(loot.dropBossLoot(other,3),null);assert.equal(other.inventory.length,0);}finally{Math.random=original}
+ const original=Math.random;try{Math.random=()=>0;const item=loot.dropBossLoot(p,5);assert.ok(item&&item.uid&&item.rarity==="rare");assert.equal(p.inventory.length,1);const other=hero();Math.random=()=>.99;assert.equal(loot.dropBossLoot(other,5),null);assert.equal(other.inventory.length,0);}finally{Math.random=original}
 });
 test("all five rarity tiers and all nine slots are canonical and deterministic",()=>{
  for(const slot of loot.SLOTS)for(const rarity of loot.RARITIES){

@@ -17,9 +17,9 @@ test("interface translates while HP, MP, ATK and DEF remain in English",()=>{
  const {api}=loadTranslator();
  for(const [english,expected] of [
  ["CHARACTER STATUS","สถานะตัวละคร"],["BATTLE SKILLS","สกิลต่อสู้"],
- ["PARTY MEMBERS","สมาชิก Party"],["QUICK POTIONS","ยาใช้งานด่วน"],
+ ["PARTY MEMBERS","สมาชิกปาร์ตี้"],["QUICK POTIONS","ยาใช้งานด่วน"],
  ["START ADVENTURE","เริ่มผจญภัย"],["NEXT STAGE →","ไปด่านต่อไป →"],
- ["⚔ EQUIPMENT & BAG","⚔ อุปกรณ์ & กระเป๋า"],
+ ["⚔ EQUIPMENT & BAG","⚔ อุปกรณ์และกระเป๋า"],
  ["📖 ADVENTURE INDEX","📖 สารานุกรมผจญภัย"],
  ["❤️ HEALTH","❤️ HP"],["🔷 MANA","🔷 MP"],
  ["ATK","ATK"],["DEF","DEF"],["HP","HP"],["MP","MP"]
