@@ -100,3 +100,22 @@ test("Socket: all players receive server AI and status snapshots, phase 2 only o
  assert.equal(guest.call("action",{type:"attack"}).ok,true);
  assert.equal(g.last().status,"battle");
 });
+
+
+test("Socket: four-person AOE wipe applies one capped Gold loss independently to every hero",()=>{
+ const g=harness(),members=["a","b","c","d"].map(id=>g.connect(id));
+ const {code}=members[0].call("createRoom",{name:"A",classId:"tank"});
+ for(let i=1;i<4;i++)assert.equal(members[i].call("joinRoom",{code,name:"P"+i,classId:i===1?"mage":"swordsman"}).ok,true);
+ for(const m of members)assert.equal(m.call("restoreCharacter",{level:70,gold:800,speed:100}).ok,true);
+ const r=g.live.rooms.get(code);
+ g.live.start(r);
+ r.monster.atk=100000;
+ r.monster.intent={name:"War Cry",scope:"all",element:"physical",power:1,charge:false};
+ for(const m of members)assert.equal(m.call("action",{type:"guard"}).ok,true);
+ assert.equal(r.status,"defeat");
+ assert.equal(r.players.size,4);
+ for(const p of r.players.values())assert.equal(p.gold,736);
+ assert.deepEqual(g.last().players.map(p=>p.gold),[736,736,736,736]);
+ g.live.applyDefeat(r);
+ for(const p of r.players.values())assert.equal(p.gold,736);
+});
