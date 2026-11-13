@@ -1,11 +1,11 @@
 "use strict";
 const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path");
 const read=p=>fs.readFileSync(path.join(__dirname,"..",p),"utf8");
-test("v0.46 is displayed in header, title screen, server health, and package",()=>{
+test("v0.47 is displayed in header, title screen, server health, and package",()=>{
  const html=read("public/index.html"),server=read("server.js"),pkg=require("../package.json");
- assert.equal(pkg.version,"0.46.0");
- assert.match(html,/VERSION 0\.46 · WORLD ATLAS/);
- assert.match(html,/ONLINE RPG · v0\.46 WORLD ATLAS/);
+ assert.equal(pkg.version,"0.47.0");
+ assert.match(html,/VERSION 0\.47 · INTERACTIVE CITY/);
+ assert.match(html,/ONLINE RPG · v0\.47 INTERACTIVE CITY/);
  assert.match(server,/version:"0\.46\.0"/);
 });
 test("Update Log opens from main menu and is loaded once",()=>{
