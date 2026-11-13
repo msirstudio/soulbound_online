@@ -1,0 +1,22 @@
+/* SOULBOUND v0.45 · release-history panel */
+#v045Changelog[hidden]{display:none!important}
+.v045-changelog{position:fixed;inset:0;z-index:130000;display:grid;place-items:center;padding:15px;font-family:Georgia,"Times New Roman",serif;color:#f3dfb6}
+.v045-backdrop{position:absolute;inset:0;background:#03040bdc;backdrop-filter:blur(4px)}
+.v045-dialog{position:relative;display:flex;flex-direction:column;width:min(740px,96vw);max-height:min(770px,94dvh);overflow:hidden;border:2px solid #b99b63;border-radius:11px;background:linear-gradient(150deg,#232030,#121523);box-shadow:0 20px 65px #000c}
+.v045-dialog>header{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:15px 20px;background:linear-gradient(90deg,#222032,#352621);border-bottom:1px solid #a6874b}
+.v045-dialog>header small{font-size:10px;color:#af9368;letter-spacing:1px}
+.v045-dialog h2{font:bold 24px Georgia;margin:5px 0 0}
+#v045ChangelogClose{color:#ffe4b2;border:1px solid #b58b4d;background:#47311e;border-radius:5px;padding:9px 13px;cursor:pointer;white-space:nowrap}
+.v045-releases{overflow-y:auto;min-height:0;padding:18px 20px;scrollbar-width:thin}
+.v045-release{padding:14px 15px;margin-bottom:13px;border:1px solid #5f513d;border-radius:7px;background:#101725}
+.v045-release:first-child{border-color:#bca05e;background:#242032}
+.v045-release-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.v045-release-head strong{font-size:15px;color:#f8dfa1}
+.v045-release-head time{font-size:11px;color:#b3aba3;margin-left:auto}
+.v045-release-head b{font-size:10px;color:#a8efb8;border:1px solid #4b9365;border-radius:4px;padding:3px 5px}
+.v045-release ul{padding-left:20px;margin:12px 0 0}
+.v045-release li{font-size:12px;line-height:1.6;color:#e4d7be;margin:5px 0}
+.v045-dialog>footer{border-top:1px solid #66543c;padding:10px 16px;color:#b7a489;font-size:10px}
+#v041Front #v045ChangelogOpen{border-color:#bb9b6c}
+body.v045-log-open{overflow:hidden!important}
+@media(max-width:490px){.v045-dialog h2{font-size:19px}.v045-dialog>header{padding:12px}.v045-releases{padding:12px}.v045-release{padding:10px}.v045-release-head strong{font-size:13px}}

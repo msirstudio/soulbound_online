@@ -1,6 +1,6 @@
 const express=require("express"),http=require("http"),path=require("path");
 const {Server}=require("socket.io");const loot=require("./loot-v034");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
-app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.44.0"}));
+app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.45.0"}));
 const world=require("./world-v040");const rooms=new Map();
 const normal=[{name:"Mossfang Wolf",sprite:"mossfang-wolf",icon:"🐺",hp:90,atk:12,def:2,xp:35,gold:18},{name:"Goblin Raider",sprite:"goblin-raider",icon:"👺",hp:115,atk:15,def:4,xp:45,gold:24},{name:"Grave Beetle",sprite:"grave-beetle",icon:"🪲",hp:140,atk:17,def:5,xp:55,gold:30},{name:"Cursed Knight",sprite:"cursed-knight",icon:"💀",hp:165,atk:19,def:7,xp:65,gold:36},{name:"Wisp Stalker",sprite:"wisp-stalker",icon:"👻",hp:185,atk:21,def:8,xp:75,gold:42}];
 const bosses=[{name:"The Briarfang Alpha",sprite:"boss-briarfang",icon:"🐺",hp:260,atk:22,def:7,xp:130,gold:90},{name:"Dreadforge Champion",sprite:"boss-dreadforge",icon:"🛡️",hp:390,atk:29,def:10,xp:180,gold:125},{name:"Ember Tyrant",sprite:"boss-ember-tyrant",icon:"🐉",hp:540,atk:36,def:13,xp:240,gold:165},{name:"The Hollow Oracle",sprite:"boss-hollow-oracle",icon:"🔮",hp:690,atk:42,def:16,xp:300,gold:210},{name:"Glacier Warden",sprite:"boss-glacier-warden",icon:"🧊",hp:850,atk:48,def:19,xp:370,gold:260},{name:"Ancient World-Eater",sprite:"boss-world-eater",icon:"🗿",hp:1030,atk:55,def:22,xp:450,gold:320},{name:"The Void Reaper",sprite:"boss-void-reaper",icon:"☠️",hp:1240,atk:62,def:25,xp:540,gold:390},{name:"Eclipse Sovereign",sprite:"boss-eclipse-sovereign",icon:"👑",hp:1500,atk:72,def:29,xp:700,gold:500}];
@@ -30,7 +30,7 @@ app.get("/api/index",(_,res)=>{
   const stage=index+1,foe=encounter(stage),zone=sceneFor(stage);
   return {id:"stage-"+stage,stage,name:foe.name,icon:foe.icon||"⚔",
    sprite:foe.sprite,boss:!!foe.boss,miniBoss:!!foe.miniBoss,regionId:foe.regionId,zone:zone.name,hp:foe.maxHp,atk:foe.atk,def:foe.def,
-   xp:foe.xp,gold:foe.gold,loot:foe.boss||foe.miniBoss?"One independent loot roll per hero; at most one item, usually none.":"No random equipment drops"};
+   xp:foe.xp,gold:foe.gold,loot:foe.boss||foe.miniBoss?"Each possible item rolls separately by rarity; multiple drops can be won together.":"No random equipment drops"};
  });
  const goods=shopItems.map(it=>({...it,category:it.category==="food"?"food":it.slot==="weapon"?"weapons":it.slot==="armor"?"armor":"consumables"}));
  const drops=[],bossDropTables={},miniDropTables={};
@@ -48,12 +48,12 @@ app.get("/api/index",(_,res)=>{
  }
  enemies.forEach(enemy=>{
   if(enemy.boss||enemy.miniBoss){enemy.drops=(enemy.boss?bossDropTables:miniDropTables)[enemy.stage]||[];
-   enemy.loot="Every hero has one independent roll. Listed rates are unconditional probabilities; at most one item drops per victory.";}
+   enemy.loot="Each listed item is rolled independently for each player. Several items may drop on the same victory; bag capacity still applies.";}
  });
  res.set("Cache-Control","public,max-age=60");
- res.json({version:"0.44.0",title:"SOULBOUND ADVENTURE INDEX",stageCount:world.totalStages,
+ res.json({version:"0.45.0",title:"SOULBOUND ADVENTURE INDEX",stageCount:world.totalStages,
   categories:["bosses","monsters","races","weapons","armor","accessories","food","consumables"],
-  bossDropTables,miniDropTables,lootRule:"Boss and mini-boss rewards: one roll per hero, at most one item; a failed roll grants no equipment.",
+  bossDropTables,miniDropTables,lootRule:"Each possible item has its own independent drop roll based on rarity. Multiple items may drop; inventory remains limited to 40 unequipped pieces.",
   races:races.map(({id,name,rarity,icon,weight,passive,buffs})=>({id,name,rarity:rarity==="legend"?"legendary":rarity,icon,chance:weight,passive,buffs})),
   monsters:enemies,items:[...goods,...drops],zones:world.regions.map(r=>({name:r.name,css:r.css,hint:r.hint,stages:r.firstStage+"–"+r.bossStage}))});
 });

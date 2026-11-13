@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.44.0",
+  "version": "0.45.0",
   "private": true,
-  "description": "SOULBOUND v0.44 Rare Loot, Collection Index, Party Difficulty and Inventory UX",
+  "description": "SOULBOUND v0.45 Independent Rarity Loot, Multi-drop & Update Log",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

@@ -33,29 +33,32 @@ function factory(id,rarity){
   value:stats.value,defense:stats.defense,maxHp:stats.maxHp,maxMp:stats.maxMp,
   description:Object.entries(stats).filter(([,n])=>n>0).map(([k,n])=>"+"+n+" "+({value:"ATK",defense:"DEF",maxHp:"HP",maxMp:"MP"}[k])).join(" · ")};
 }
-// v0.44 curated per-encounter tables. Entries are POSSIBLE rewards, not a
-// guaranteed number of items. Their chances sum to under 25%; one roll per
-// player per victory can award at most one item. Each boss has 1-4 possible
-// drops, each mini boss has 1-2 possible drops.
+// v0.45: EVERY listed gear piece rolls independently. Chances are by RARITY
+// and are NOT a boss/mini-boss-wide combined chance. Duplicate pieces in
+// different regions are fine, but there is one unique slot per encounter.
+// Once a bag reaches 40 free slots, additional successes are logged as missed.
+const CHANCE_BANDS=Object.freeze({
+ common:[30,40],uncommon:[20,30],rare:[10,20],epic:[6,10],legendary:[1,5]
+});
 const BOSS_DROPS={
- 1:[{slot:"main",rarity:"rare",chance:4},{slot:"ring_left",rarity:"uncommon",chance:6}],
- 2:[{slot:"chest",rarity:"uncommon",chance:4},{slot:"boots",rarity:"rare",chance:3},{slot:"offhand",rarity:"rare",chance:3}],
- 3:[{slot:"main",rarity:"epic",chance:2},{slot:"neck",rarity:"rare",chance:4},{slot:"pants",rarity:"uncommon",chance:5},{slot:"ring_left",rarity:"rare",chance:3}],
- 4:[{slot:"head",rarity:"rare",chance:5},{slot:"offhand",rarity:"epic",chance:3}],
- 5:[{slot:"pants",rarity:"epic",chance:4},{slot:"ring_left",rarity:"rare",chance:5},{slot:"boots",rarity:"uncommon",chance:4}],
- 6:[{slot:"main",rarity:"epic",chance:3},{slot:"neck",rarity:"legendary",chance:1},{slot:"offhand",rarity:"rare",chance:4},{slot:"head",rarity:"epic",chance:2}],
- 7:[{slot:"chest",rarity:"legendary",chance:3},{slot:"boots",rarity:"epic",chance:2},{slot:"ring_right",rarity:"rare",chance:4}],
- 8:[{slot:"main",rarity:"legendary",chance:1.5},{slot:"ring_left",rarity:"legendary",chance:1},{slot:"neck",rarity:"epic",chance:2.5},{slot:"chest",rarity:"legendary",chance:1}]
+ 1:[{slot:"head",rarity:"common",chance:38},{slot:"boots",rarity:"uncommon",chance:26},{slot:"main",rarity:"rare",chance:15},{slot:"ring_left",rarity:"epic",chance:8},{slot:"neck",rarity:"legendary",chance:2}],
+ 2:[{slot:"pants",rarity:"common",chance:36},{slot:"chest",rarity:"uncommon",chance:23},{slot:"boots",rarity:"rare",chance:14},{slot:"offhand",rarity:"epic",chance:7},{slot:"ring_left",rarity:"legendary",chance:2}],
+ 3:[{slot:"boots",rarity:"common",chance:39},{slot:"pants",rarity:"uncommon",chance:28},{slot:"neck",rarity:"rare",chance:16},{slot:"main",rarity:"epic",chance:8},{slot:"ring_left",rarity:"legendary",chance:3}],
+ 4:[{slot:"pants",rarity:"common",chance:35},{slot:"neck",rarity:"uncommon",chance:25},{slot:"head",rarity:"rare",chance:13},{slot:"offhand",rarity:"epic",chance:9},{slot:"ring_right",rarity:"legendary",chance:2}],
+ 5:[{slot:"head",rarity:"common",chance:37},{slot:"boots",rarity:"uncommon",chance:24},{slot:"ring_left",rarity:"rare",chance:15},{slot:"pants",rarity:"epic",chance:8},{slot:"neck",rarity:"legendary",chance:2}],
+ 6:[{slot:"chest",rarity:"common",chance:34},{slot:"offhand",rarity:"uncommon",chance:26},{slot:"ring_left",rarity:"rare",chance:14},{slot:"main",rarity:"epic",chance:7},{slot:"neck",rarity:"legendary",chance:2}],
+ 7:[{slot:"head",rarity:"common",chance:36},{slot:"ring_left",rarity:"uncommon",chance:27},{slot:"ring_right",rarity:"rare",chance:12},{slot:"boots",rarity:"epic",chance:9},{slot:"chest",rarity:"legendary",chance:3}],
+ 8:[{slot:"pants",rarity:"common",chance:35},{slot:"boots",rarity:"uncommon",chance:22},{slot:"offhand",rarity:"rare",chance:14},{slot:"neck",rarity:"epic",chance:8},{slot:"main",rarity:"legendary",chance:2},{slot:"ring_left",rarity:"legendary",chance:1}]
 };
 const MINI_DROPS={
- 1:[{slot:"head",rarity:"uncommon",chance:7}],
- 2:[{slot:"offhand",rarity:"rare",chance:4},{slot:"boots",rarity:"uncommon",chance:4}],
- 3:[{slot:"chest",rarity:"rare",chance:7}],
- 4:[{slot:"neck",rarity:"rare",chance:4},{slot:"ring_left",rarity:"uncommon",chance:4}],
- 5:[{slot:"boots",rarity:"rare",chance:6}],
- 6:[{slot:"pants",rarity:"epic",chance:3},{slot:"head",rarity:"rare",chance:4}],
- 7:[{slot:"main",rarity:"epic",chance:3}],
- 8:[{slot:"neck",rarity:"epic",chance:3},{slot:"ring_left",rarity:"rare",chance:3}]
+ 1:[{slot:"pants",rarity:"common",chance:34},{slot:"head",rarity:"uncommon",chance:24},{slot:"ring_left",rarity:"rare",chance:12}],
+ 2:[{slot:"pants",rarity:"common",chance:37},{slot:"boots",rarity:"uncommon",chance:23},{slot:"offhand",rarity:"rare",chance:14},{slot:"ring_left",rarity:"epic",chance:6}],
+ 3:[{slot:"head",rarity:"common",chance:38},{slot:"chest",rarity:"rare",chance:11},{slot:"neck",rarity:"epic",chance:6}],
+ 4:[{slot:"boots",rarity:"common",chance:33},{slot:"ring_left",rarity:"uncommon",chance:25},{slot:"neck",rarity:"rare",chance:17}],
+ 5:[{slot:"head",rarity:"common",chance:36},{slot:"boots",rarity:"rare",chance:15},{slot:"neck",rarity:"epic",chance:7}],
+ 6:[{slot:"chest",rarity:"common",chance:32},{slot:"head",rarity:"rare",chance:12},{slot:"pants",rarity:"epic",chance:8},{slot:"ring_left",rarity:"legendary",chance:1}],
+ 7:[{slot:"boots",rarity:"common",chance:38},{slot:"ring_left",rarity:"uncommon",chance:24},{slot:"main",rarity:"epic",chance:7}],
+ 8:[{slot:"pants",rarity:"common",chance:35},{slot:"ring_left",rarity:"rare",chance:13},{slot:"neck",rarity:"epic",chance:8},{slot:"ring_right",rarity:"legendary",chance:1}]
 };
 function lootRows(region,isMini=false){
  const num=Math.round(Number(region)),set=isMini?MINI_DROPS:BOSS_DROPS;
@@ -95,25 +98,34 @@ function normalizeInventory(raw,shopItems){
 }
 function bagUsed(player){return (player.inventory||[]).filter(it=>!it.equippedSlot).length}
 function dropEncounterLoot(player,stage,logger=()=>{},explicitRegion,explicitMini){
- const n=Math.round(Number(stage)),region=explicitRegion?Math.round(Number(explicitRegion)):Math.ceil(n/5);
+ const n=Math.round(Number(stage));
+ const region=explicitRegion?Math.round(Number(explicitRegion)):Math.ceil(n/5);
  const isMini=explicitMini===undefined?n%5===4:!!explicitMini;
- const table=isMini?MINI_DROPS[region]:BOSS_DROPS[region];
- if(!table||(!explicitRegion&&!isMini&&n%5!==0))return null;
+ // Never reward ordinary monsters; explicit data is used only for the two
+ // boss encounter types, including the legacy index-based boss helper.
+ if(!Number.isInteger(n)||n<1||(!explicitRegion&&n%5!==(isMini?4:0)))return [];
+ const table=(isMini?MINI_DROPS:BOSS_DROPS)[region];
+ if(!table)return [];
  player.inventory=Array.isArray(player.inventory)?player.inventory:[];
- if(bagUsed(player)>=40){logger(player.name+"'s bag is full (40/40): loot was not collected.");return null}
- const roll=Math.random()*100;let sum=0,chosen=null;
- for(const entry of table){sum+=entry.chance;if(roll<sum){chosen=entry;break}}
- if(!chosen){logger(player.name+" received no equipment this time.");return null}
- const item=factory((isMini?"mini":"boss")+region+"_"+chosen.slot,chosen.rarity);
- if(!item)return null;
- item.uid=randomUUID();player.inventory.push(item);
- const old=Array.isArray(player.worldProgress?.lootSeen)?player.worldProgress.lootSeen:[];
- const key=item.id+":"+item.rarity;
- player.worldProgress={...(player.worldProgress||{}),lootSeen:[...new Set([...old,key])].slice(-300)};
- logger(player.name+" found "+chosen.rarity.toUpperCase()+" "+(isMini?"mini-boss":"boss")+" loot: "+item.name+"!");
- return item;
+ const won=[],missed=[];
+ // Independent checks: no weighted sum, no one-item limit.
+ for(const entry of table){
+  if(Math.random()*100>=entry.chance)continue;
+  const item=factory((isMini?"mini":"boss")+region+"_"+entry.slot,entry.rarity);
+  if(!item)continue;
+  if(bagUsed(player)>=40){missed.push(item.name);continue}
+  item.uid=randomUUID();player.inventory.push(item);won.push(item);
+ }
+ if(won.length){
+  const old=Array.isArray(player.worldProgress?.lootSeen)?player.worldProgress.lootSeen:[];
+  player.worldProgress={...(player.worldProgress||{}),
+   lootSeen:[...new Set([...old,...won.map(item=>item.id+":"+item.rarity)])].slice(-300)};
+  for(const item of won)logger(player.name+" found "+item.rarity.toUpperCase()+" "+(isMini?"mini-boss":"boss")+" loot: "+item.name+"!");
+ }else logger(player.name+" received no equipment this time.");
+ if(missed.length)logger(player.name+"'s bag is full (40/40); could not collect: "+missed.join(", ")+".");
+ return won;
 }
-// Keep old export compatible with v0.34 callers/tests.
+// Legacy interface retained; v0.45 returns an array of 0..N item instances.
 function dropBossLoot(player,stage,logger=()=>{},explicitBossIndex){
  return dropEncounterLoot(player,stage,logger,explicitBossIndex,false);
 }
@@ -170,4 +182,4 @@ function unequip(p,slot){
  if(slot==="chest"){p.armorItem=null;p.armor=p.classId==="mage"?"Novice Robe":p.classId==="tank"?"Guardian Armor":"Traveler Armor"}
  return{ok:true,slot};
 }
-module.exports={SLOTS,RARITIES,canonical,normalizeInventory,dropBossLoot,dropEncounterLoot,encounterDrops,miniDrops,equip,unequip,equipped,slotOf,bagUsed,factory,BOSS_DROPS,MINI_DROPS,bossDrops};
+module.exports={SLOTS,RARITIES,CHANCE_BANDS,canonical,normalizeInventory,dropBossLoot,dropEncounterLoot,encounterDrops,miniDrops,equip,unequip,equipped,slotOf,bagUsed,factory,BOSS_DROPS,MINI_DROPS,bossDrops};
