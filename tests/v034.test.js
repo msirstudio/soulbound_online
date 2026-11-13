@@ -3,7 +3,7 @@ const test=require("node:test");
 const assert=require("node:assert/strict");
 const fs=require("node:fs");
 const path=require("node:path");
-const loot=require("../loot-v034");const world=require("../world-v040");
+const loot=require("../loot-v034");const world=require("../world-v040");const combat=require("../combat-v054");
 const shop=[{id:"iron_sword",name:"Iron Sword",slot:"weapon",value:8,level:1,class:"swordsman"},{id:"iron_armor",name:"Iron Armor",slot:"armor",defense:5,maxHp:20,level:1}];
 function hero(){return{name:"Tester",classId:"swordsman",level:20,atk:25,def:10,maxHp:100,maxMp:40,hp:100,mp:40,weapon:"Training Sword",armor:"Traveler Armor",weaponItem:null,armorItem:null,inventory:[]}}
 function gear(slot,rarity="rare",boss=3){return loot.canonical({id:"boss"+boss+"_"+slot,rarity},shop)}
@@ -63,8 +63,8 @@ test("fallen turn is skipped, and fallen allies revive when party wins",()=>{
  const other=server.slice(server.indexOf("function monsterStrike(r)"),server.indexOf("function valid(s,r)"));
  assert.ok(first.includes("function alive")&&other.includes("function finish"));
  const math=Object.create(Math);math.random=()=>0;
- const sim=new Function("raceById","encounter","say","loot","Math","world",first+other+";return {monsterStrike,skipFallenTurn,finish,current,nextTurn}")(
-   ()=>({reduce:0}),()=>({boss:true,hp:1,maxHp:1,atk:1000,speed:1}),()=>{},loot,math,world);
+ const sim=new Function("raceById","encounter","say","loot","Math","world","combat",first+other+";return {monsterStrike,skipFallenTurn,finish,current,nextTurn}")(
+   ()=>({reduce:0}),()=>({boss:true,hp:1,maxHp:1,atk:1000,speed:1}),()=>{},loot,math,world,combat);
  const a={...hero(),id:"a",name:"A",level:1,xp:0,gold:0,statPoints:0,hp:50,speed:10,cooldowns:{},raceId:"human",racePoints:0,foodBuffs:{def:0}};
  const b={...hero(),id:"b",name:"B",level:1,xp:0,gold:0,statPoints:0,hp:90,speed:10,cooldowns:{},raceId:"human",racePoints:0,foodBuffs:{def:0}};
  const r={players:new Map([["a",a],["b",b]]),turnIndex:0,status:"battle",stage:3,monster:{boss:true,hp:1,maxHp:1,atk:1000,def:0,name:"Boss",xp:20,gold:10,vulnerableTurns:0},log:[]};
