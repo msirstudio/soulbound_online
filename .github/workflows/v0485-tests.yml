@@ -1,0 +1,26 @@
+name: SOULBOUND v0.48.5 Boss Drops and Inventory
+on:
+  push:
+    branches: [v0.48.5-boss-rewards-character-overview]
+  pull_request:
+    branches: [v0.48.4-audio-mini-camp-boss-tags]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Validate JavaScript
+        run: |
+          node --check server.js
+          node --check public/equipment-inventory-v032.js
+          node --check public/reward-float-v0411.js
+          node --check public/game.js
+      - name: Run all regression tests
+        run: npm test
