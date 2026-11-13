@@ -66,8 +66,8 @@ test("log scroll box is stretched to the bottom edge of its panel",()=>{
 });
 test("v0.54 resources and release log are linked",()=>{
  const html=read("public/index.html"),pkg=require("../package.json"),log=read("public/update-log-v045.js");
- assert.equal(pkg.version,"0.54.0");
+ assert.equal(pkg.version,"0.55.0");
  assert.ok(html.includes('href="v0484-audio-boss-log.css"'));
- assert.ok(html.includes('VERSION 0.54 · FULL COMBAT'));
+ assert.ok(html.includes('VERSION 0.55 · HARDCORE COMBAT'));
  assert.ok(log.includes('version:"0.48.4"'));
 });
