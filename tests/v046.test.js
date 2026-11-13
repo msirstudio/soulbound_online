@@ -2,16 +2,19 @@
 const test=require("node:test"),assert=require("node:assert/strict");
 const fs=require("node:fs"),path=require("node:path");
 const root=path.join(__dirname,".."),read=p=>fs.readFileSync(path.join(root,p),"utf8");
-test("Atlas uses one organic continental image, eight numbered pins and central safe city",()=>{
- const art=read("public/assets/world/forgotten-kingdom-v046.svg");
+test("World Atlas uses the actual generated PNG, and its 8 overlay pins match the scene",()=>{
+ const artPath=path.join(root,"public/assets/world/world-map-v046.png");
+ assert.ok(fs.existsSync(artPath),"Generated Pixel Art PNG missing. Upload world-map-v046.png before deployment.");
+ const art=fs.readFileSync(artPath);
+ assert.equal(art.subarray(0,8).toString("hex"),"89504e470d0a1a0a");
+ assert.equal(art.readUInt32BE(16),1448);
+ assert.equal(art.readUInt32BE(20),1086);
  const ui=read("public/world-ui-v040.js");
- assert.match(art,/<svg/);assert.match(art,/viewBox="0 0 1024 656"/);
- assert.match(art,/id="landclip"/);assert.match(art,/Central safe city/);
- assert.match(ui,/forgotten-kingdom-v046\.svg/);
+ assert.match(ui,/world-map-v046\\.png/);
  assert.match(ui,/v046CityPin/);
- assert.match(ui,/positions=\[\[21,54\]/);
+ assert.match(ui,/positions=\\[\\[18,67\\]/);
  assert.match(ui,/data-v040-region/);
- assert.ok(!ui.includes('<svg class="v040-land"'),"Old hard-coded map should be replaced");
+ assert.doesNotMatch(ui,/forgotten-kingdom-v046\\.svg/);
 });
 test("Eight region previews use the corresponding existing arena images",()=>{
  const css=read("public/v046-atlas.css");
