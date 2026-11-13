@@ -53,20 +53,36 @@ function closeSettings(){settings(false)}
 function openSettings(){settings(true)}
 function closeDrawer(){
  drawerTab=null;
- const game=$("game");game?.classList.remove("v041-drawer-open");
+ const game=$("game");game?.classList.remove("v041-drawer-open","v044-drawer-in-scene");
  const side=game?.querySelector(".game-side-column");
  if(side){side.dataset.v041Tab="party";side.setAttribute("aria-hidden","true")}
  for(const id of ["v041PartyOpen","v041ChatOpen","v041LogOpen"])$(id)?.setAttribute("aria-expanded","false");
 }
 function placeDrawer(){
  const side=$("v041GameDrawer"),game=$("game");if(!side||!game)return;
- const rect=game.getBoundingClientRect(),width=310,gap=10;
+ const rect=game.getBoundingClientRect(),width=Math.min(310,window.innerWidth-24),gap=10;
  const roomRight=window.innerWidth-rect.right,roomLeft=rect.left;
- side.style.setProperty("--v042-panel-left",roomRight>=width+gap?Math.round(rect.right+gap)+"px":roomLeft>=width+gap?Math.round(rect.left-width-gap)+"px":"auto");
- side.style.setProperty("--v042-panel-right",roomRight>=width+gap||roomLeft>=width+gap?"auto":"12px");
- const top=Math.max(12,Math.min(window.innerHeight-260,rect.top+24));
+ const external=roomRight>=width+gap||roomLeft>=width+gap;
+ game.classList.toggle("v044-drawer-in-scene",!external);
+ let left,top,height;
+ if(external){
+  left=roomRight>=width+gap?rect.right+gap:rect.left-width-gap;
+  top=Math.max(12,rect.top+20);height=Math.max(200,window.innerHeight-top-12);
+ }else{
+  // No exterior gutter: confine the dock to the upper battle scene,
+  // never extend into the lower skill/potion HUD.
+  let scene=$("arena");
+  if(!scene||scene.hidden||scene.getBoundingClientRect().height<100)scene=$("v040City")||game;
+  const area=scene.getBoundingClientRect();
+  height=Math.min(420,Math.max(175,area.height-20),Math.max(175,window.innerHeight-55));
+  top=Math.min(Math.max(54,area.top+9),Math.max(12,window.innerHeight-height-8));
+  left=Math.max(8,Math.min(window.innerWidth-width-8,area.right-width-12));
+ }
+ side.style.setProperty("--v042-panel-left",Math.round(left)+"px");
+ side.style.setProperty("--v042-panel-right","auto");
  side.style.setProperty("--v042-panel-top",Math.round(top)+"px");
- side.style.setProperty("--v042-panel-height",Math.round(Math.max(240,window.innerHeight-top-12))+"px");
+ side.style.setProperty("--v042-panel-height",Math.round(height)+"px");
+ side.style.setProperty("--v044-panel-width",Math.round(width)+"px");
 }
 function openDrawer(tab){
  if(!["party","chat","log"].includes(tab)||$("game")?.hidden)return;
