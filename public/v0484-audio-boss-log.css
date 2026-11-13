@@ -1,0 +1,102 @@
+/* SOULBOUND v0.48.4 — single AUDIO menu, readable LOG, elite encounter labels. */
+/* Keep the Audio menu above the battlefield and below global dialogs. */
+#game .roomline{position:relative!important;z-index:1800!important;overflow:visible!important}
+#game .roomline .v0484-audio-anchor{
+ position:relative;display:inline-flex;align-items:center;flex:0 0 auto;
+ min-width:0;isolation:isolate;
+}
+#game .roomline .v0484-audio-anchor > #audioSettingsToggle{
+ display:inline-flex;align-items:center;justify-content:center;
+ min-height:30px!important;white-space:nowrap;
+ border:1px solid #b99661!important;color:#ffe5ad!important;
+ background:linear-gradient(#493a37,#2a2330)!important;
+}
+#game #audioSettings.audio-settings-pop:not([hidden]){
+ position:absolute!important;
+ top:calc(100% + 8px)!important;left:0!important;right:auto!important;bottom:auto!important;
+ display:flex!important;flex-direction:column!important;gap:11px!important;
+ box-sizing:border-box!important;
+ width:min(305px,calc(100vw - 22px))!important;
+ padding:14px!important;
+ z-index:2000!important;
+ border:2px solid #d9b77c!important;border-radius:9px!important;
+ background:linear-gradient(155deg,#29213b,#101929)!important;
+ box-shadow:0 12px 30px #000c!important;
+}
+#game #audioSettings .v0484-audio-switches{
+ display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;
+}
+#game #audioSettings .v0484-audio-switches button{
+ width:100%!important;min-height:36px!important;padding:8px 4px!important;
+ font:700 11px Georgia,serif!important;
+ white-space:nowrap;cursor:pointer;
+ border:1px solid #a78a57!important;border-radius:5px;
+ background:linear-gradient(#493c32,#2b2530)!important;color:#ffebbf!important;
+}
+#game #audioSettings .v0484-audio-switches button[aria-pressed="true"]{
+ border-color:#f2cf7a!important;box-shadow:inset 0 0 0 1px #e7ce7444;
+}
+#game #audioSettings > label{
+ width:100%!important;min-width:0!important;
+ display:grid!important;grid-template-columns:65px minmax(0,1fr);
+ gap:8px;align-items:center;
+ color:#f5e3c5;font:700 11px Georgia,serif;
+}
+#game #audioSettings input[type=range]{width:100%!important;min-width:0!important}
+#game #audioSettings[hidden]{display:none!important}
+#game .arena .monster-side{position:relative!important}
+#game .arena .monster-side .v0484-elite-tag:not([hidden]){
+ display:block!important;position:absolute!important;
+ top:clamp(-24px,-2dvh,-9px)!important;left:50%!important;
+ transform:translateX(-50%)!important;
+ z-index:12!important;pointer-events:none!important;
+ margin:0!important;padding:9px 15px!important;
+ min-width:128px!important;max-width:min(240px,90%)!important;
+ box-sizing:border-box;text-align:center!important;white-space:nowrap;
+ border:2px solid #f5c36c!important;border-radius:7px!important;
+ color:#fff1c8!important;background:linear-gradient(110deg,#7b3032,#351b29)!important;
+ box-shadow:0 5px 15px #000b,0 0 14px #eeac6555!important;
+ text-shadow:0 2px 3px #000;
+ font:900 clamp(12px,1vw,17px)/1.1 Georgia,serif!important;
+ letter-spacing:1.2px!important;
+}
+#game .arena .monster-side .v0484-elite-tag.v0484-mini:not([hidden]){
+ color:#e7e9ff!important;border-color:#b9a7ff!important;
+ background:linear-gradient(115deg,#543e8a,#211b3e)!important;
+ box-shadow:0 5px 15px #000b,0 0 15px #9a72ee99!important;
+}
+#game .arena .monster-side .v0484-elite-tag.v0484-boss:not([hidden]){
+ color:#fff0bb!important;border-color:#f0ba64!important;
+ background:linear-gradient(115deg,#8f392b,#361622)!important;
+ box-shadow:0 5px 15px #000b,0 0 16px #f2a94999!important;
+}
+#game .arena .monster-side .v0484-elite-tag[hidden]{display:none!important}
+/* Make the dark log itself fill the framed panel instead of occupying only the upper third. */
+#game .game-side-column[data-v041-tab="log"] .merchant-log-panel{
+ position:relative!important;display:block!important;
+ min-height:0!important;height:100%!important;
+ padding:9px 8px!important;overflow:hidden!important;
+}
+#game .game-side-column[data-v041-tab="log"] .merchant-log-panel > .pixel-title{
+ position:relative!important;z-index:2!important;
+ margin:0 0 8px!important;padding-bottom:8px!important;
+}
+#game .game-side-column[data-v041-tab="log"] .merchant-log-panel #log{
+ position:absolute!important;
+ inset:45px 8px 8px 8px!important;
+ top:45px!important;left:8px!important;right:8px!important;bottom:8px!important;
+ box-sizing:border-box!important;
+ width:auto!important;height:auto!important;min-height:0!important;
+ max-height:none!important;
+ display:block!important;overflow-y:auto!important;
+ padding:10px 10px 12px!important;
+ border:1px solid #a2865b!important;border-radius:5px!important;
+ background:#0a1019f2!important;
+}
+@media(max-width:750px){
+ #game .arena .monster-side .v0484-elite-tag:not([hidden]){
+ top:-14px!important;min-width:105px!important;
+ font-size:11px!important;padding:6px 9px!important;
+ }
+ #game #audioSettings.audio-settings-pop:not([hidden]){left:-65px!important}
+}
