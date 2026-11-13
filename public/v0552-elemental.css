@@ -15,3 +15,24 @@
  #v035Index .v0552-element-advantage strong{font-size:10px}
  #v035Index .v0552-element-advantage p{font-size:11px}
 }
+/* v0.55.3 · Pixel icons scoped to Adventure Index (display-only). */
+#v035Index .v056-pixel-icon{width:28px;height:28px;object-fit:contain;vertical-align:middle;flex:0 0 auto;image-rendering:pixelated;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
+#v035Index .v035-entry-icon .v056-pixel-icon{width:32px;height:32px}
+#v035Index .v035-tab .v056-pixel-icon{width:22px;height:22px}
+#v035Index .v035-item-art .v056-pixel-icon{width:92px;height:92px;max-width:80%;max-height:100%}
+#v035Index .v0551-boss-affinity>span{min-width:0;align-items:center}
+#v035Index .v056-affinity-label{display:flex;align-items:center;justify-content:center;gap:3px;font:700 10px Georgia,serif;color:#f1d39c}
+#v035Index .v056-affinity-label .v056-pixel-icon{width:16px;height:16px}
+#v035Index .v056-affinity-values{display:flex;align-items:center;justify-content:center;gap:3px;flex-wrap:wrap;min-height:32px;font-size:11px;line-height:1}
+#v035Index .v056-affinity-values .v056-pixel-icon{width:26px;height:26px}
+#v035Index .v0552-element-advantage strong{display:flex;align-items:center;gap:5px}
+#v035Index .v0552-element-advantage strong .v056-pixel-icon{width:19px;height:19px}
+#v035Index .v0552-element-advantage p{display:flex;gap:5px;flex-wrap:wrap;align-items:flex-start}
+#v035Index .v056-element-chip{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:50px;padding:3px;border:1px solid #4e5369;border-radius:4px;background:#131928}
+#v035Index .v056-element-chip small{font:10px Georgia,serif;color:#e8d8b5}
+#v035Index .v056-none{font:12px Georgia,serif;color:#a9b3c1}
+@media(max-width:650px){
+ #v035Index .v056-affinity-label{font-size:9px}
+ #v035Index .v056-affinity-values .v056-pixel-icon{width:22px;height:22px}
+ #v035Index .v035-item-art .v056-pixel-icon{width:70px;height:70px}
+}
