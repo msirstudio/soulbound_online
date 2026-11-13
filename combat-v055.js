@@ -235,7 +235,7 @@ function enemyCodex(m){
  const original=mini?{...signature,name:"Lesser "+signature.name,power:Math.min(.8,signature.power),chance:signature.chance*.65}:signature;
  const moves=[
   {name:"Strike",scope:"single",element:"physical",power:1,effect:null,chance:0,charge:false,description:"Basic physical strike."},
-  {...original,charge:!mini,description:mini?"Reduced-strength signature move.":"Signature attack with one warning/charge turn."}
+  ...(m.boss||m.miniBoss?[{...original,charge:!mini,description:mini?"Reduced-strength signature move.":"Signature attack with one warning/charge turn."}]:[])
  ];
  if(m.boss){
   moves.push({name:"Frenzied Sweep",scope:"all",element:affinity.element,power:.64,effect:null,chance:0,charge:false,description:"Adaptive group attack when HP drops below 40%."});
