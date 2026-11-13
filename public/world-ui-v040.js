@@ -28,7 +28,7 @@ function install(){
  const overlay=document.createElement("div");overlay.id="v040WorldOverlay";overlay.className="v040-overlay";overlay.hidden=true;
  overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");overlay.setAttribute("aria-label","World Map");
  overlay.innerHTML='<div class="v040-atlas"><header class="v040-atlas-head"><div><small>SOULBOUND · A NEW WORLD</small><h2>🗺 WORLD ATLAS</h2></div><button id="v040WorldClose" type="button" aria-label="Close world map">✕</button></header>'+
- '<div class="v040-atlas-grid"><div class="v040-map-canvas" id="v040MapCanvas"><img class="v040-land v046-world-art" src="assets/world/world-map-v046.png" alt="SOULBOUND pixel-art continent with eight interconnected regions" draggable="false"><div class="v040-map-pins" id="v040MapPins"></div></div>'+
+ '<div class="v040-atlas-grid"><div class="v040-map-canvas" id="v040MapCanvas"><img class="v040-land v046-world-art" src="assets/world/world-map-v046.webp" alt="SOULBOUND pixel-art continent with eight interconnected regions" draggable="false"><div class="v040-map-pins" id="v040MapPins"></div></div>'+
  '<section class="v040-map-detail" id="v040MapDetail" aria-live="polite"></section></div>'+
  '<footer class="v040-atlas-foot">Select a map pin to inspect the area. The leader may start a run if every party member meets the minimum level.</footer></div>';
  document.body.appendChild(overlay);
