@@ -25,3 +25,12 @@
 #game .arena[data-v040-region="titanfall_ruins"] .v22-scene-layers,
 #game .arena[data-v040-region="abyssal_rift"] .v22-scene-layers,
 #game .arena[data-v040-region="eclipse_throne"] .v22-scene-layers{display:none!important;}
+
+/* Dreadforge Bastion: force its own iron-fortress artwork instead of sharing ruins with Hollow Sanctum. */
+#game .arena[data-v040-region="dreadforge_bastion"]{
+ background-image:url("assets/scenes/ai-ruins.webp")!important;
+ background-size:cover!important;
+ background-position:center center!important;
+ background-repeat:no-repeat!important;
+}
+#game .arena[data-v040-region="dreadforge_bastion"] .v22-scene-layers{display:none!important}
