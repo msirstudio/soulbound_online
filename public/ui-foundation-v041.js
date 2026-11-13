@@ -58,12 +58,22 @@ function closeDrawer(){
  if(side){side.dataset.v041Tab="party";side.setAttribute("aria-hidden","true")}
  for(const id of ["v041PartyOpen","v041ChatOpen","v041LogOpen"])$(id)?.setAttribute("aria-expanded","false");
 }
+function placeDrawer(){
+ const side=$("v041GameDrawer"),game=$("game");if(!side||!game)return;
+ const rect=game.getBoundingClientRect(),width=310,gap=10;
+ const roomRight=window.innerWidth-rect.right,roomLeft=rect.left;
+ side.style.setProperty("--v042-panel-left",roomRight>=width+gap?Math.round(rect.right+gap)+"px":roomLeft>=width+gap?Math.round(rect.left-width-gap)+"px":"auto");
+ side.style.setProperty("--v042-panel-right",roomRight>=width+gap||roomLeft>=width+gap?"auto":"12px");
+ const top=Math.max(12,Math.min(window.innerHeight-260,rect.top+24));
+ side.style.setProperty("--v042-panel-top",Math.round(top)+"px");
+ side.style.setProperty("--v042-panel-height",Math.round(Math.max(240,window.innerHeight-top-12))+"px");
+}
 function openDrawer(tab){
  if(!["party","chat","log"].includes(tab)||$("game")?.hidden)return;
  if(drawerTab===tab){closeDrawer();return}
  drawerTab=tab;
  const game=$("game"),side=game?.querySelector(".game-side-column");if(!side)return;
- game.classList.add("v041-drawer-open");
+ game.classList.add("v041-drawer-open");placeDrawer();
  side.dataset.v041Tab=tab;side.setAttribute("aria-hidden","false");
  const title=$("v041DrawerTitle");if(title)title.textContent=({party:"PARTY MEMBERS",chat:"PARTY CHAT",log:"BATTLE LOG"})[tab];
  const ids={party:"v041PartyOpen",chat:"v041ChatOpen",log:"v041LogOpen"};
@@ -100,6 +110,7 @@ function setup(){
  if(initialized||!$("v041Front")||!$("account")||!$("lobby"))return;
  initialized=true;
  setupDrawer();
+ window.addEventListener("resize",()=>{if(drawerTab)placeDrawer()});
  selectView("menu");
  $("v041Play").addEventListener("click",openHero);
  $("v041NewHero").addEventListener("click",openHero);
