@@ -112,7 +112,7 @@ test("phase-two signature differs for Void Reaper and Eclipse Sovereign",()=>{
 });
 test("server socket workflow delegates to combat and resets encounter-only state without save changes",()=>{
  const s=src("server.js"),game=src("public/game.js"),html=src("public/index.html");
- assert.ok(s.includes('require("./combat-v054")'));
+ assert.ok(s.includes('require("./combat-v055")'));
  assert.ok(s.includes("combat.beginEncounter(r.monster)"));
  assert.ok(s.includes("combat.checkPhase(r,say)"));
  assert.ok(s.includes("combat.beforeAction(r,p,say)"));
