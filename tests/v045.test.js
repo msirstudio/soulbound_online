@@ -1,12 +1,12 @@
 "use strict";
 const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path");
 const read=p=>fs.readFileSync(path.join(__dirname,"..",p),"utf8");
-test("v0.48.4 is displayed in header, title screen, server health, and package",()=>{
+test("v0.48.5 is displayed in header, title screen, server health, and package",()=>{
  const html=read("public/index.html"),server=read("server.js"),pkg=require("../package.json");
- assert.equal(pkg.version,"0.48.4");
- assert.match(html,/VERSION 0\.48\.4 · AUDIO & MINI BOSS/);
- assert.match(html,/ONLINE RPG · v0\.48\.4 AUDIO & MINI BOSS/);
- assert.match(server,/version:"0\.48\.4"/);
+ assert.equal(pkg.version,"0.48.5");
+ assert.match(html,/VERSION 0\.48\.5 · BOSS REWARDS/);
+ assert.match(html,/ONLINE RPG · v0\.48\.5 BOSS REWARDS/);
+ assert.match(server,/version:"0\.48\.5"/);
 });
 test("Update Log opens from main menu and is loaded once",()=>{
  const html=read("public/index.html"),js=read("public/update-log-v045.js"),css=read("public/v045.css");
