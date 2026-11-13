@@ -49,7 +49,7 @@ function draw(entry,status){
   host.appendChild(el);
  }
  target.appendChild(host);
- fadeTimer=setTimeout(()=>{if(host?.parentNode)host.remove();host=null;fadeTimer=null},3300);
+ fadeTimer=setTimeout(()=>{if(host?.parentNode)host.remove();host=null;fadeTimer=null},entry.boss?6500:3800);
 }
 function show(previous,next,playerId){
  const reward=rewardFrom(previous,next,playerId);
