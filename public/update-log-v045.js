@@ -2,6 +2,13 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.48.4",date:"2026-11-13",title:"Unified Audio, Mini-Boss Merchants & Log Layout",notes:[
+  "Moved Music ON/OFF and SFX ON/OFF into the Audio popup, retaining independent volume sliders and sound test.",
+  "The roadside Traveling Merchant appears only after defeating each region's mini-boss on local stage 4: global stages 4, 9, 14, 19, 24, 29, 34, and 39.",
+  "Normal stages and main bosses no longer open the roadside merchant; capital weapon, armor, and supplies stores are unchanged.",
+  "Expanded Battle Log's inner dark scroll area to fill its containing panel.",
+  "Added prominent MINI BOSS and MAIN BOSS markers above monster sprites."
+ ]},
  {version:"0.48.3",date:"2026-11-13",title:"Separate Roadside Merchant & Larger Log",notes:[
   "Removed the floating BAG button from the capital, leaving the existing Equipment & Bag button in the lower HUD.",
   "Added a distinct roadside traveling merchant available after stage victories, including a main-boss clear. It uses the battle backdrop, not the city.",
