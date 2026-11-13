@@ -94,7 +94,7 @@ test("Socket rejects insufficient MP before DOT ticks; Break interrupts and Clea
 test("actual Socket Mage Meteor exploits boss Fire weakness and Codex reports the same multiplier",()=>{
  function run(regionId){
   const g=harness(),a=g.connect("mage"),{code}=a.call("createRoom",{name:"Mage",classId:"mage"});
-  a.call("restoreCharacter",{level:80,attack:220,speed:80,max_hp:3000});
+  a.call("restoreCharacter",{class_id:"mage",level:80,attack:220,speed:80,max_hp:3000});
   const r=g.runtime.rooms.get(code);r.stage=25;r.regionIndex=4;g.runtime.start(r);
   r.monster.regionId=regionId;
   r.monster.hp=10000;r.monster.maxHp=10000;
