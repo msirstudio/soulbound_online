@@ -170,7 +170,7 @@ test("phase 2 remains restricted to stages 35 and 40, without touching saved use
  assert.ok(s.includes('advanced.resetEncounter(r)'));
  assert.ok(s.includes('advanced.damageMultiplier(m,advanced.playerSkillElement(p,type))'));
  assert.ok(s.includes('p.battleDefenseBonus=Math.max'));
- assert.ok(!s.includes('p.def+=3'));
+ assert.ok(!s.slice(s.indexOf(' s.on("action"'),s.indexOf(' s.on("openShop"')).includes('p.def+=3'),"battle Shield Breaker must not permanently alter DEF");
  assert.ok(html.includes('id="v055Stagger"'));
  assert.ok(html.includes('data-action="cleanse"'));
  assert.ok(html.includes('data-action="interrupt"'));
