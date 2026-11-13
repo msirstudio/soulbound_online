@@ -23,8 +23,8 @@ function init(){
  const food=$("foodInventory"),potions=document.querySelector("#game .potion-panel");if(food&&potions)potions.appendChild(food);
  const btn=document.createElement("button");btn.type="button";btn.id="v035Open";btn.className="v035-open";btn.textContent="📖 ADVENTURE INDEX";btn.setAttribute("aria-haspopup","dialog");
  const game=document.getElementById("game");
- const toolbar=game?.querySelector?.(".v041-toolbar");
- if(toolbar){btn.textContent="📖 INDEX";btn.setAttribute("aria-label","Adventure Index");btn.title="Adventure Index";toolbar.appendChild(btn)}
+ const dock=game?.querySelector?.(".v22-command-dock");
+ if(dock){const spot=document.createElement("div");spot.className="v042-index-spot";dock.appendChild(spot);btn.textContent="📖 INDEX";btn.setAttribute("aria-label","Adventure Index");btn.title="Adventure Index";spot.appendChild(btn)}
  else if(game)game.appendChild(btn);
  const node=document.createElement("div");node.id="v035Index";node.className="v035-overlay";node.hidden=true;
  node.innerHTML='<div class="v035-scrim" data-v035-dismiss></div><section class="v035-window" role="dialog" aria-modal="true" aria-labelledby="v035Heading" tabindex="-1">'+
