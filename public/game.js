@@ -1,10 +1,10 @@
 const socket=io(),$=id=>document.getElementById(id);let gameState=null,myId=null,currentUser=null,supabaseClient=null,savedCharacter=null,restoreComplete=false,saveTimer=null,previousStatus=null,selectedGameMode=null,guestMode=false,activeShopCategory="weapon",v23ShopCollapsed=false,v23ShopWasActive=false,specDismissedFor="",specLastEligible="",specModalOpen=false;
 // City storefronts all reuse the existing authoritative merchant and purchase logic.
+let cityShopScope=null;
 window.SoulboundCityShopV47={
  selectCategory(category){
-  activeShopCategory=["weapon","armor","potion","food"].includes(category)?category:"potion";
-  document.querySelectorAll("#shopCategories [data-shop-category]").forEach(b=>b.classList.toggle("active",b.dataset.shopCategory===activeShopCategory));
-  // render() will re-render available items when shop mode becomes active.
+  cityShopScope=category==="potion"?["potion","food"]:["weapon","armor","food"].includes(category)?[category]:["potion","food"];
+  activeShopCategory=cityShopScope[0];
   if(gameState?.status==="shop")render();
  },
  show(){
@@ -140,7 +140,7 @@ function startGachaAnimation(){
 $("openGacha").onclick=openGacha;$("skipGacha").onclick=revealGacha;$("closeGacha").onclick=()=>{$("gachaModal").hidden=true;v25SetGachaPhase("idle");gachaOutcome=null;gachaRevealed=false};
 document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{const r=await call("action",{type:b.dataset.action});if(!r.ok)alert(r.error);else{const a=b.dataset.action;const hero=gameState?.players?.find(p=>p.id===myId);const sound=({attack:"attack",skill:"skill",skill2:"skill",skill3:"skill",skill4:"skill",skill5:"skill",heal:"heal",healSmall:"heal",healMedium:"heal",healLarge:"heal",mana:"mana",manaSmall:"mana",manaMedium:"mana",manaLarge:"mana",guard:"guard"})[a]||"attack";window.SoulboundAudio?.sfx(sound,{weapon:hero?.weapon||"",classId:hero?.classId||""});if(["attack","skill","skill2","skill3","skill4","skill5"].includes(a)){if(window.SoulboundSprite?.canDraw(hero)){window.SoulboundSprite.attack(myId)}else requestAnimationFrame(()=>{const figure=Array.from(document.querySelectorAll("#partySprites .hero-figure")).find(el=>el.querySelector(".v17-nameplate")?.textContent.includes(" · YOU"))?.querySelector(".sprite-img");if(figure){figure.classList.remove("v30-attacking");void figure.offsetWidth;figure.classList.add("v30-attacking");setTimeout(()=>figure.classList.remove("v30-attacking"),500)}})}}});
 document.querySelectorAll("[data-stat]").forEach(b=>b.onclick=async()=>{const r=await call("allocateStat",{stat:b.dataset.stat});if(!r.ok)notice(r.error,true)});
-$("shopCategories")?.querySelectorAll("[data-shop-category]").forEach(b=>b.onclick=()=>{activeShopCategory=b.dataset.shopCategory;$("shopCategories").querySelectorAll("button").forEach(x=>x.classList.toggle("active",x===b));if(gameState)render()});$("chatSend").onclick=sendChat;$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat()});function sendChat(){const input=$("chatInput"),message=input.value.trim();if(!message)return;call("partyChat",{message}).then(r=>{if(!r.ok)notice(r.error,true);else input.value=""})};
+$("shopCategories")?.querySelectorAll("[data-shop-category]").forEach(b=>b.onclick=()=>{if(cityShopScope&&!cityShopScope.includes(b.dataset.shopCategory))return;activeShopCategory=b.dataset.shopCategory;if(gameState)render()});$("chatSend").onclick=sendChat;$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat()});function sendChat(){const input=$("chatInput"),message=input.value.trim();if(!message)return;call("partyChat",{message}).then(r=>{if(!r.ok)notice(r.error,true);else input.value=""})};
 socket.on("connect",()=>{myId=socket.id});socket.on("disconnect",()=>{$("status").textContent="Connection lost. Refresh to reconnect."});
 socket.on("state",s=>{const last=gameState;gameState=s;render();window.SoulboundRewardV411?.show(last,s,myId);if(restoreComplete){
  const p=s.players.find(x=>x.id===myId);if(p){clearTimeout(saveTimer);
@@ -149,13 +149,18 @@ socket.on("state",s=>{const last=gameState;gameState=s;render();window.Soulbound
  }}});
 async function restoreSession(){if(!supabaseClient)return;const {data:{session}}=await supabaseClient.auth.getSession();if(session?.user){showAccount(session.user);await prepare()}else showAccount(null);supabaseClient.auth.onAuthStateChange((ev,session)=>{if(ev==="SIGNED_OUT"){currentUser=null;savedCharacter=null;showAccount(null)}})}restoreSession();
 function render(){const s=gameState;if(!s)return;
+ // Server chooses the shared shop for the whole party; individual purchases remain personal.
+ if(s.status==="shop"){
+  cityShopScope=s.shopCategory==="potion"?["potion","food"]:["weapon","armor"].includes(s.shopCategory)?[s.shopCategory]:["potion","food"];
+  if(!cityShopScope.includes(activeShopCategory))activeShopCategory=cityShopScope[0];
+ }else if(s.status==="city")cityShopScope=null;
 const v040Me=s.players.find(p=>p.id===myId);
 window.SoulboundIndex?.updateHero(v040Me);
 window.SoulboundUIV41?.updateGame(s,v040Me);
 window.SoulboundWorldV40?.render(s,v040Me,s.players[0]?.id===myId,{
  travel:async regionIndex=>call("travelRegion",{regionIndex}),
  returnCity:async()=>{const r=await call("returnCity");if(!r.ok)alert(r.error);return r},
- openShop:async()=>{const r=await call("openShop");if(!r.ok)alert(r.error);return r}
+ openShop:async(category)=>{const r=await call("openShop",{category:category||"potion"});if(!r.ok)alert(r.error);return r}
 });
 window.SoulboundAudio?.setScene(s.scene?.css||"wilds");
 window.SoulboundAudio?.setCombatMood(s.status==="battle");
@@ -210,7 +215,21 @@ $("start").hidden=s.status!=="city";$("start").disabled=s.players[0]?.id!==myId;
 $("v23ShopToggle").hidden=s.status!=="shop";
 $("v23ShopToggle").setAttribute("aria-expanded",String(s.status==="shop"&&!v23ShopCollapsed));
 
-const visibleItems=s.shopItems.filter(it=>it.category===activeShopCategory);
+// A storefront is not an all-purpose merchant: only show its inventory.
+
+if(cityShopScope&&!cityShopScope.includes(activeShopCategory))activeShopCategory=cityShopScope[0];
+const categories=$("shopCategories");
+if(categories)categories.querySelectorAll("[data-shop-category]").forEach(b=>{
+ b.hidden=!!cityShopScope&&!cityShopScope.includes(b.dataset.shopCategory);
+ b.disabled=!!cityShopScope&&!cityShopScope.includes(b.dataset.shopCategory);
+ b.classList.toggle("active",b.dataset.shopCategory===activeShopCategory);
+});
+const shopTitle=cityShopScope?.length===2?"POTIONS & FOOD":cityShopScope?.[0]==="weapon"?"WEAPON SHOP":cityShopScope?.[0]==="armor"?"ARMOR SHOP":"TRAVELING MERCHANT";
+const titleBar=$("shopPanel")?.querySelector(".v23-shop-titlebar span");
+const titleBody=$("shopPanel")?.querySelector(".pixel-title.log-title");
+if(titleBar)titleBar.textContent="🏪 "+shopTitle;
+if(titleBody)titleBody.textContent=shopTitle;
+const visibleItems=s.shopItems.filter(it=>(!cityShopScope||cityShopScope.includes(it.category))&&it.category===activeShopCategory);
 $("shopItems").innerHTML=visibleItems.map(it=>'<div class="shop-item" data-category="'+it.category+'"><div><strong>'+it.icon+" "+it.name+'</strong><small>'+it.description+" · "+it.price+' G</small></div><button data-buy="'+it.id+'" '+((it.class&&it.class!==me?.classId)||!me||me.gold<it.price||me.level<(it.level||1)?"disabled":"")+">BUY</button></div>").join("")||'<p class="small">No items in this category.</p>';
 document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=async()=>{const r=await call("buyItem",{itemId:b.dataset.buy});if(!r.ok)alert(r.error)});
 window.SoulboundV32?.render(me,s,(itemId,slot)=>call("equipItem",{itemId,targetSlot:slot}),slot=>call("unequipItem",{slot}),uid=>call("discardItem",{uid}));

@@ -5,7 +5,7 @@ test("capital scene has real interactive shop and adventure hotspots",()=>{
  const js=read("public/world-ui-v040.js");
  for(const name of ["v047-supplies","v047-weapons","v047-armor","v047-crystal","v047Adventure"]){assert.ok(js.includes(name),name+" missing")}
  for(const kind of ['data-v047-shop="potion"','data-v047-shop="weapon"','data-v047-shop="armor"'])assert.ok(js.includes(kind));
- assert.ok(js.includes('actions?.openShop()'),"City shop must call server merchant action");
+ assert.ok(js.includes('actions?.openShop(category)'),"City shop must pass category to authoritative server merchant");
  assert.ok(js.includes('window.SoulboundCityShopV47?.selectCategory(category)'));
  assert.ok(js.includes('$("v047Adventure").onclick=show'),"Crystal must open real atlas");
 });

@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.47.0",
+  "version": "0.48.0",
   "private": true,
-  "description": "SOULBOUND v0.46 Organic World Atlas and Region Scene Previews",
+  "description": "SOULBOUND v0.48 City Shops, HUD Cleanup and Curated Boss Loot",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

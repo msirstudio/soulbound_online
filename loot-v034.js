@@ -40,25 +40,29 @@ function factory(id,rarity){
 const CHANCE_BANDS=Object.freeze({
  common:[30,40],uncommon:[20,30],rare:[10,20],epic:[6,10],legendary:[1,5]
 });
+// Curated loot per enemy: 2–4 boss templates, 1–2 mini-boss templates.
+// The tables are *fixed per enemy* for a consistent, farmable bestiary;
+// each listed item makes its own independent roll on every victory.
+// Endgame regions 6–8 intentionally offer Epic/Legendary only.
 const BOSS_DROPS={
- 1:[{slot:"head",rarity:"common",chance:38},{slot:"boots",rarity:"uncommon",chance:26},{slot:"main",rarity:"rare",chance:15},{slot:"ring_left",rarity:"epic",chance:8},{slot:"neck",rarity:"legendary",chance:2}],
- 2:[{slot:"pants",rarity:"common",chance:36},{slot:"chest",rarity:"uncommon",chance:23},{slot:"boots",rarity:"rare",chance:14},{slot:"offhand",rarity:"epic",chance:7},{slot:"ring_left",rarity:"legendary",chance:2}],
- 3:[{slot:"boots",rarity:"common",chance:39},{slot:"pants",rarity:"uncommon",chance:28},{slot:"neck",rarity:"rare",chance:16},{slot:"main",rarity:"epic",chance:8},{slot:"ring_left",rarity:"legendary",chance:3}],
- 4:[{slot:"pants",rarity:"common",chance:35},{slot:"neck",rarity:"uncommon",chance:25},{slot:"head",rarity:"rare",chance:13},{slot:"offhand",rarity:"epic",chance:9},{slot:"ring_right",rarity:"legendary",chance:2}],
- 5:[{slot:"head",rarity:"common",chance:37},{slot:"boots",rarity:"uncommon",chance:24},{slot:"ring_left",rarity:"rare",chance:15},{slot:"pants",rarity:"epic",chance:8},{slot:"neck",rarity:"legendary",chance:2}],
- 6:[{slot:"chest",rarity:"common",chance:34},{slot:"offhand",rarity:"uncommon",chance:26},{slot:"ring_left",rarity:"rare",chance:14},{slot:"main",rarity:"epic",chance:7},{slot:"neck",rarity:"legendary",chance:2}],
- 7:[{slot:"head",rarity:"common",chance:36},{slot:"ring_left",rarity:"uncommon",chance:27},{slot:"ring_right",rarity:"rare",chance:12},{slot:"boots",rarity:"epic",chance:9},{slot:"chest",rarity:"legendary",chance:3}],
- 8:[{slot:"pants",rarity:"common",chance:35},{slot:"boots",rarity:"uncommon",chance:22},{slot:"offhand",rarity:"rare",chance:14},{slot:"neck",rarity:"epic",chance:8},{slot:"main",rarity:"legendary",chance:2},{slot:"ring_left",rarity:"legendary",chance:1}]
+ 1:[{slot:"boots",rarity:"uncommon",chance:26},{slot:"main",rarity:"rare",chance:15}],
+ 2:[{slot:"chest",rarity:"uncommon",chance:23},{slot:"offhand",rarity:"rare",chance:14},{slot:"ring_left",rarity:"epic",chance:7}],
+ 3:[{slot:"pants",rarity:"uncommon",chance:28},{slot:"neck",rarity:"rare",chance:16},{slot:"main",rarity:"epic",chance:8}],
+ 4:[{slot:"head",rarity:"rare",chance:13},{slot:"offhand",rarity:"epic",chance:9}],
+ 5:[{slot:"ring_left",rarity:"rare",chance:15},{slot:"pants",rarity:"epic",chance:8},{slot:"neck",rarity:"legendary",chance:2}],
+ 6:[{slot:"main",rarity:"epic",chance:7},{slot:"neck",rarity:"legendary",chance:2}],
+ 7:[{slot:"ring_right",rarity:"epic",chance:8},{slot:"boots",rarity:"epic",chance:9},{slot:"chest",rarity:"legendary",chance:3}],
+ 8:[{slot:"main",rarity:"legendary",chance:2},{slot:"ring_left",rarity:"legendary",chance:1},{slot:"neck",rarity:"epic",chance:8},{slot:"chest",rarity:"legendary",chance:1}]
 };
 const MINI_DROPS={
- 1:[{slot:"pants",rarity:"common",chance:34},{slot:"head",rarity:"uncommon",chance:24},{slot:"ring_left",rarity:"rare",chance:12}],
- 2:[{slot:"pants",rarity:"common",chance:37},{slot:"boots",rarity:"uncommon",chance:23},{slot:"offhand",rarity:"rare",chance:14},{slot:"ring_left",rarity:"epic",chance:6}],
- 3:[{slot:"head",rarity:"common",chance:38},{slot:"chest",rarity:"rare",chance:11},{slot:"neck",rarity:"epic",chance:6}],
- 4:[{slot:"boots",rarity:"common",chance:33},{slot:"ring_left",rarity:"uncommon",chance:25},{slot:"neck",rarity:"rare",chance:17}],
- 5:[{slot:"head",rarity:"common",chance:36},{slot:"boots",rarity:"rare",chance:15},{slot:"neck",rarity:"epic",chance:7}],
- 6:[{slot:"chest",rarity:"common",chance:32},{slot:"head",rarity:"rare",chance:12},{slot:"pants",rarity:"epic",chance:8},{slot:"ring_left",rarity:"legendary",chance:1}],
- 7:[{slot:"boots",rarity:"common",chance:38},{slot:"ring_left",rarity:"uncommon",chance:24},{slot:"main",rarity:"epic",chance:7}],
- 8:[{slot:"pants",rarity:"common",chance:35},{slot:"ring_left",rarity:"rare",chance:13},{slot:"neck",rarity:"epic",chance:8},{slot:"ring_right",rarity:"legendary",chance:1}]
+ 1:[{slot:"head",rarity:"uncommon",chance:24}],
+ 2:[{slot:"boots",rarity:"uncommon",chance:23},{slot:"offhand",rarity:"rare",chance:14}],
+ 3:[{slot:"chest",rarity:"rare",chance:11}],
+ 4:[{slot:"ring_left",rarity:"uncommon",chance:25},{slot:"neck",rarity:"rare",chance:17}],
+ 5:[{slot:"boots",rarity:"rare",chance:15}],
+ 6:[{slot:"head",rarity:"rare",chance:12},{slot:"pants",rarity:"epic",chance:8}],
+ 7:[{slot:"main",rarity:"epic",chance:7}],
+ 8:[{slot:"neck",rarity:"epic",chance:8},{slot:"ring_right",rarity:"legendary",chance:1}]
 };
 function lootRows(region,isMini=false){
  const num=Math.round(Number(region)),set=isMini?MINI_DROPS:BOSS_DROPS;
