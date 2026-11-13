@@ -22,7 +22,7 @@ function rewardFrom(previous,next,playerId){
  const had=new Set((before.inventory||[]).map(item=>String(item.uid||item.id||"")));
  const items=(after.inventory||[]).filter(item=>!had.has(String(item.uid||item.id||"")))
   .map(item=>({name:String(item.name||"Equipment").slice(0,100),rarity:String(item.rarity||"common").toLowerCase()}))
-  .slice(0,5);
+  .slice(0,40);
  const boss=!!(next.monster.boss||next.monster.miniBoss);
  return{stage:next.stage,gold,xp,items,boss};
 }
