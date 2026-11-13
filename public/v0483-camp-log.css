@@ -1,0 +1,63 @@
+/* SOULBOUND v0.48.3: extra-large readable Battle Log and distinct roadside merchant.
+   Keep PARTY/CHAT/LOG as floating panels without covering the full battlefield. */
+#game .game-side-column[data-v041-tab="log"] .merchant-log-panel {
+ display:flex!important;
+ flex-direction:column!important;
+ flex:1 1 auto!important;
+ min-height:0!important;
+ height:100%!important;
+ overflow:hidden!important;
+ padding:10px 8px!important;
+}
+#game .game-side-column[data-v041-tab="log"] .merchant-log-panel > .pixel-title {
+ flex:0 0 auto!important;
+ margin-bottom:8px!important;
+}
+#game .game-side-column[data-v041-tab="log"] #log {
+ display:block!important;
+ box-sizing:border-box!important;
+ flex:1 1 0!important;
+ min-height:200px!important;
+ height:auto!important;
+ max-height:none!important;
+ width:100%!important;
+ overflow-y:auto!important;
+ overscroll-behavior:contain;
+ padding:12px 10px!important;
+ background:#0d111cf5!important;
+ border:1px solid #8d7753!important;
+ border-radius:5px!important;
+ font-size:13px!important;
+ line-height:1.6!important;
+ overflow-wrap:anywhere;
+}
+#game .game-side-column[data-v041-tab="log"] #log > div {
+ padding:6px 2px!important;
+ border-bottom:1px solid #66563e66;
+}
+#game .game-side-column[data-v041-tab="log"] #log > div:last-child {border-bottom:none}
+#game.v0483-camp-shop #shopPanel{
+ border-color:#c9a16a!important;
+ background:linear-gradient(150deg,#322318,#111825 76%)!important;
+ box-shadow:0 8px 32px #000c,inset 0 0 0 1px #dfb56f55!important;
+}
+#game.v0483-camp-shop #shopPanel .v23-shop-titlebar {
+ background:linear-gradient(90deg,#5b3822,#3b2b28)!important;
+ border-bottom:1px solid #e5bc73!important;
+}
+#game.v0483-camp-shop #shopPanel:before {
+ content:"🏕 ROADSIDE CAMP · STAGE CLEAR REWARDS & SUPPLIES";
+ display:block;
+ padding:10px 14px;
+ color:#f5d6a3;
+ font:700 11px Georgia,serif;
+ letter-spacing:1px;
+ background:linear-gradient(90deg,#37271b,#1a2431);
+ border-bottom:1px solid #a78455;
+}
+#game.v0483-camp-shop #shopPanel .pixel-title.log-title,
+#game.v0483-camp-shop #shopPanel .small {color:#f0d6ad!important}
+@media(max-width:600px){
+ #game .game-side-column[data-v041-tab="log"] #log {min-height:170px!important;font-size:12px!important}
+ #game.v0483-camp-shop #shopPanel:before{font-size:9px;letter-spacing:0}
+}

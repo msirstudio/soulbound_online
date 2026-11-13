@@ -1,0 +1,25 @@
+name: SOULBOUND v0.48.3 Camp Merchant and Log
+on:
+  push:
+    branches: [v0.48.3-camp-merchant-log-ui]
+  pull_request:
+    branches: [v0.48.2-title-cover]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Validate JavaScript
+        run: |
+          node --check server.js
+          node --check public/game.js
+          node --check public/world-ui-v040.js
+      - name: Run all gameplay and UI tests
+        run: npm test

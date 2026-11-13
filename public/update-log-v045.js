@@ -2,6 +2,13 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.48.3",date:"2026-11-13",title:"Separate Roadside Merchant & Larger Log",notes:[
+  "Removed the floating BAG button from the capital, leaving the existing Equipment & Bag button in the lower HUD.",
+  "Added a distinct roadside traveling merchant available after stage victories, including a main-boss clear. It uses the battle backdrop, not the city.",
+  "Closing the roadside merchant restores the completed stage and leaves level, equipment and progression unchanged.",
+  "Capital merchants stay dedicated to weapon, armor, or potion and food sales.",
+  "Expanded the inner Battle Log scroll area to fill the side panel for better readability."
+ ]},
  {version:"0.48.2",date:"2026-11-13",title:"Main Menu Pixel-Art Cover",notes:[
   "Added the generated fantasy world illustration as the main menu hero background, with a subtle contrast overlay for readable logo and actions.",
   "The background only affects the home cover, not the city, battle arena, inventory or world map.",

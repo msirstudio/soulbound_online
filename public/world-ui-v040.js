@@ -24,7 +24,7 @@ function install(){
  '<p id="v040CityText" class="v048-visually-hidden">Visit a shop or click the crystal to adventure.</p>'+
  '<button id="v040WorldOpen" type="button" class="v048-visually-hidden" tabindex="-1">WORLD MAP</button>'+
  '<button id="v040Merchant" type="button" class="v048-visually-hidden" tabindex="-1">MERCHANT</button>'+
- '<button id="v040Bag" type="button" class="v048-city-gear" title="Open equipment and inventory">🎒 BAG</button>'+
+ ''+
  '<button id="v040BackCity" type="button" class="v048-city-return" hidden>↩ RETURN TO CITY</button>'+
  '<small id="v040PartyNote" class="v048-visually-hidden">Party controls</small></div>';
  $("arena").before(city);
@@ -57,7 +57,7 @@ function install(){
    if(result&&!result.ok)alert(result.error||"Shop unavailable.");
    else if(result?.ok&&latest?.status==="shop")window.SoulboundCityShopV47?.show();
  }));
- $("v040Bag").onclick=()=> $("toggleEquipment")?.click();
+
  $("v040BackCity").onclick=()=>actions?.returnCity(); // reserved for future out-of-city encounters; normally hidden
  $("v040WorldClose").onclick=hide;
  overlay.addEventListener("click",e=>{if(e.target===overlay)hide()});
@@ -109,7 +109,7 @@ function render(s,me,isLeader,handlers){
  latest=s;player=me;leader=!!isLeader;actions=handlers;install();
  if(!installed)return;
  // Region clear and defeat must show the final battle scene, not the city image.
- const cityLike=["city","shop"].includes(s.status);
+ const cityLike=s.status==="city"||(s.status==="shop"&&s.shopOrigin==="city");
  $("v040City").hidden=!cityLike;
  $("arena").hidden=cityLike;
  $("game").classList.toggle("v040-hub",cityLike);
