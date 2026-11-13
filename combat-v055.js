@@ -27,7 +27,8 @@ const STATUS_CODEX=Object.freeze([
  {id:"burn",name:"Burn",icon:"🔥",effect:"Lose 4.5% Max HP on the affected hero's turn.",counter:"Cleanse, Fire resistance, or reduce status chance.",turns:2},
  {id:"poison",name:"Poison",icon:"☠️",effect:"Lose 3.2% Max HP on the affected hero's turn.",counter:"Cleanse or status resistance.",turns:2},
  {id:"bleed",name:"Bleed",icon:"🩸",effect:"Lose 3.7% Max HP on the affected hero's turn.",counter:"Cleanse or status resistance.",turns:2},
- {id:"weaken",name:"Weaken",icon:"⬇️",effect:"Outgoing damage reduced by 22%.",counter:"Cleanse or wait for the duration to expire.",turns:2},
+ {id:"weaken",name:"Weaken",icon:"⬇️",effect:"Hero Weaken reduces outgoing damage by 22%; enemy Weaken reduces the monster's next attacks by 12%.",counter:"Cleanse the affected hero, or wait for the debuff to expire.",turns:2},
+ {id:"chill",name:"Chill",icon:"❄️",effect:"Enemy-only debuff from Frost Nova: reduces the monster's next attack damage by 20%.",counter:"Chill is applied to enemies and expires after their next attack.",turns:1},
  {id:"freeze",name:"Freeze",icon:"🧊",effect:"Skip the next command; gain two turns of control immunity afterward.",counter:"Cleanse an ally before their turn, or resist Ice.",turns:1},
  {id:"stun",name:"Stun",icon:"💫",effect:"Skip the next command; gain two turns of control immunity afterward.",counter:"Cleanse an ally before their turn, or resist the status.",turns:1}
 ]);

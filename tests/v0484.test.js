@@ -49,8 +49,8 @@ test("mini-boss and boss status badges are above the monster sprite and styled d
  const mark=html.indexOf('id="bossTag"'),sprite=html.indexOf('id="monsterSprite"');
  assert.ok(mark>=0&&sprite>=0&&mark<sprite);
  assert.equal(html.split('id="bossTag"').length,2,"one unique tag");
- assert.ok(g.includes('☠ MINI BOSS'));
- assert.ok(g.includes('♛ MAIN BOSS'));
+ assert.ok(g.includes('"MINI BOSS"'));
+ assert.ok(g.includes('"MAIN BOSS"'));
  assert.ok(g.includes('v0484-mini'));
  assert.ok(g.includes('v0484-boss'));
  assert.ok(css.includes('.v0484-elite-tag.v0484-mini'));
@@ -66,8 +66,8 @@ test("log scroll box is stretched to the bottom edge of its panel",()=>{
 });
 test("v0.55 resources and release log are linked",()=>{
  const html=read("public/index.html"),pkg=require("../package.json"),log=read("public/update-log-v045.js");
- assert.equal(pkg.version,"0.55.0");
+ assert.equal(pkg.version,"0.55.1");
  assert.ok(html.includes('href="v0484-audio-boss-log.css"'));
- assert.ok(html.includes('VERSION 0.55 · HARDCORE COMBAT'));
+ assert.ok(html.includes('VERSION 0.55.1 · INDEX FIX'));
  assert.ok(log.includes('version:"0.48.4"'));
 });

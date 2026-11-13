@@ -2,6 +2,13 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.55.1",date:"2026-11-14",title:"Adventure INDEX & Status UI Fix",notes:[
+  "Fixed stale INDEX scripts by loading a new versioned Index file; new ELEMENTS, STATUS and COMBAT RULES tabs now appear from live Codex data.",
+  "Boss and monster entries display their element, weak/resist affinities and actual move names immediately above their artwork. Full attack effect chances stay visible below.",
+  "Replaced long combat status labels with small clickable icons and tooltips. Clicking a status opens INDEX → STATUS; enemy Chill and Weaken are documented too.",
+  "Reduced MAIN BOSS / MINI BOSS labels to lightweight text without large colored frames.",
+  "Kept saves, drops, Hardcore balance, party combat and all progression rules unchanged."
+ ]},
  {version:"0.55",date:"2026-11-14",title:"Hardcore Combat & Adventure Codex",notes:[
   "Elemental strengths and weaknesses are now calculated by the server, with status resistance, capped damage-over-time and anti-control immunity windows.",
   "Added persistent Stagger, BREAK STRIKE, interrupt windows, Perfect Guard, adaptive boss AI and party CLEANSE.",

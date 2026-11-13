@@ -1,0 +1,30 @@
+name: SOULBOUND v0.55.1 Index and Combat UI Hotfix
+on:
+  push:
+    branches: [v0.55.1-index-status-boss-ui-fix]
+  pull_request:
+    branches: [v0.55-hardcore-combat-codex]
+permissions:
+  contents: read
+jobs:
+  index-and-combat-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Validate JavaScript syntax
+        run: |
+          node --check server.js
+          node --check combat-v054.js
+          node --check combat-v055.js
+          node --check public/adventure-index-v0551.js
+          node --check public/game.js
+          node --check public/i18n-v038.js
+          node --check tests/v0551-index-ui.test.js
+      - name: Run all old and new regression tests
+        run: npm test
