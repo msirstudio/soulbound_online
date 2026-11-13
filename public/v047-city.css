@@ -1,0 +1,70 @@
+/* SOULBOUND v0.47 — playable illustrated capital.
+   Upload /public/assets/city/forgotten-capital.webp before deployment.
+   Image is original 2172×724 pixel-art artwork; hotspot buttons are independent UI. */
+#game .v040-city{
+ aspect-ratio:3 / 1;min-height:330px!important;max-height:min(69dvh,610px);
+ background:#29354a!important;
+ border:2px solid #c6a36d;
+ display:block!important;
+ position:relative;
+}
+#game .v040-city[hidden]{display:none!important}
+#game .v047-town-art{
+ position:absolute;inset:0;
+ background-image:url("assets/city/forgotten-capital.webp");
+ background-position:center;background-size:cover;background-repeat:no-repeat;
+ pointer-events:none;
+}
+#game .v040-town-scene{display:none!important}
+#game .v040-city:after{
+ content:"";pointer-events:none;position:absolute;inset:0;
+ background:linear-gradient(0deg,#0c1423ae 0%,transparent 18%,transparent 76%,#0c14234d 100%);
+}
+#game .v047-city-hotspots{position:absolute;inset:0;z-index:3;pointer-events:none}
+#game .v047-hotspot{
+ pointer-events:auto;position:absolute;transform:translate(-50%,-50%);
+ min-width:110px;min-height:46px;padding:4px 9px;
+ border:2px solid #d8b278;border-radius:8px;
+ background:linear-gradient(180deg,#2a233be8,#161927ec)!important;
+ box-shadow:0 3px 18px #05080dbd,0 0 0 2px #ebba632c;
+ color:#ffebb2!important;text-shadow:1px 2px 2px #000;
+ font:bold 11px Georgia,serif;cursor:pointer;letter-spacing:.2px;
+ transition:transform .15s,box-shadow .15s;
+}
+#game .v047-hotspot:hover:not(:disabled),#game .v047-hotspot:focus-visible{
+ transform:translate(-50%,-50%) scale(1.07);
+ outline:2px solid #ffeb9e;box-shadow:0 0 18px #ffca67a8;
+}
+#game .v047-hotspot:disabled{opacity:.57;cursor:not-allowed}
+#game .v047-weapons{left:18%;top:58%}
+#game .v047-armor{left:32%;top:77%}
+#game .v047-supplies{left:85%;top:56%}
+#game .v047-crystal{left:51%;top:57%;min-width:134px;border-color:#9feaff;background:linear-gradient(180deg,#113958e8,#12314bea)!important;color:#dcffff!important}
+#game .v040-city-inner{
+ position:absolute;z-index:4;left:50%;bottom:7px;transform:translateX(-50%);
+ background:#121c31e8!important;border:1px solid #e7bc78;
+ width:min(720px,94%);max-width:initial;padding:5px 10px!important;
+ border-radius:7px;margin:0!important;
+}
+#game .v040-city-inner h2{font-size:clamp(12px,1.4vw,18px)!important;margin:0!important}
+#game .v040-kicker,#game #v040CityText{display:none!important}
+#game .v040-city-actions{margin:3px 0!important;gap:5px!important}
+#game .v040-city-actions button{min-height:30px!important;padding:5px 8px!important;font-size:10px!important}
+#game #v040PartyNote{font-size:9px!important;max-height:16px;overflow:hidden}
+@media(max-width:900px){
+ #game .v040-city{aspect-ratio:2 / 1;min-height:360px!important}
+ #game .v047-hotspot{min-width:88px;min-height:39px;padding:4px;font-size:9px}
+ #game .v047-crystal{min-width:112px}
+ #game .v047-armor{left:30%;top:71%}
+}
+@media(max-width:580px){
+ #game .v040-city{aspect-ratio:auto;min-height:380px!important;max-height:none;background-position:center}
+ #game .v047-town-art{background-size:auto 100%}
+ #game .v047-hotspot{font-size:9px;min-width:81px;min-height:40px}
+ #game .v047-weapons{left:22%;top:36%}
+ #game .v047-armor{left:23%;top:61%}
+ #game .v047-supplies{left:77%;top:35%}
+ #game .v047-crystal{left:65%;top:64%}
+ #game .v040-city-inner{bottom:4px}
+ #game .v040-city-actions button{font-size:9px!important}
+}
