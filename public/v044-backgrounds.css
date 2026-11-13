@@ -1,0 +1,27 @@
+/* SOULBOUND scene mapping fix: explicitly use the unique images already uploaded.
+   Region IDs come from world-v040.js. Maps 1/2/3/5 are unchanged. */
+#game .arena[data-v040-region="hollow_sanctum"],
+#game .arena[data-v040-region="titanfall_ruins"],
+#game .arena[data-v040-region="abyssal_rift"],
+#game .arena[data-v040-region="eclipse_throne"]{
+ background-position:center center!important;
+ background-size:cover!important;
+ background-repeat:no-repeat!important;
+}
+#game .arena[data-v040-region="hollow_sanctum"]{
+ background-image:url("assets/scenes/ai-hollow_sanctum.webp")!important;
+}
+#game .arena[data-v040-region="titanfall_ruins"]{
+ background-image:url("assets/scenes/ai-titanfall_ruins.webp")!important;
+}
+#game .arena[data-v040-region="abyssal_rift"]{
+ background-image:url("assets/scenes/ai-abyssal_rift.webp")!important;
+}
+#game .arena[data-v040-region="eclipse_throne"]{
+ background-image:url("assets/scenes/ai-eclipse_throne.webp")!important;
+}
+/* Existing reused scene art would otherwise cover the per-region background. */
+#game .arena[data-v040-region="hollow_sanctum"] .v22-scene-layers,
+#game .arena[data-v040-region="titanfall_ruins"] .v22-scene-layers,
+#game .arena[data-v040-region="abyssal_rift"] .v22-scene-layers,
+#game .arena[data-v040-region="eclipse_throne"] .v22-scene-layers{display:none!important;}
