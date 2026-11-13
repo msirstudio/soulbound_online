@@ -83,7 +83,7 @@ test("UI code keeps existing game hooks, saves and party calls intact",()=>{
  assert.match(game,/SoulboundUIV41\?\.updateGame\(s,v040Me\)/);
  for(const marker of ['id="v041Front"','id="v041Settings"','id="v041PartyOpen"','id="v041ChatOpen"','id="v041LogOpen"','class="v041-lobby-grid"','src="ui-foundation-v041.js"','href="v041.css"'])
   assert.ok(html.includes(marker),"Missing HTML anchor: "+marker);
- assert.ok(html.indexOf('src="ui-foundation-v041.js"')<html.indexOf('src="game.js?v=0.55.2"'));
+ assert.ok(html.search(/src="game\\.js(?:\\?v=[^"]+)?"/)>=0&&html.indexOf('src="ui-foundation-v041.js"')<html.search(/src="game\\.js(?:\\?v=[^"]+)?"/));
  for(const marker of ["@media","prefers-reduced-motion","#game .game-side-column","#v041Front","#lobby .v041-lobby-grid"])
   assert.ok(css.includes(marker),"Missing CSS foundation: "+marker);
 });
