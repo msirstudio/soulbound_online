@@ -6,7 +6,7 @@ test("v0.55 is displayed in header, title screen, server health, and package",()
  assert.equal(pkg.version,"0.55.1");
  assert.match(html,/VERSION 0\.55\.1 · INDEX FIX/);
  assert.match(html,/ONLINE RPG · v0\.55\.1 INDEX FIX/);
- assert.match(server,/version:"0\.55"/);
+ assert.match(server,/version:"0\.55\.1"/);
 });
 test("Update Log opens from main menu and is loaded once",()=>{
  const html=read("public/index.html"),js=read("public/update-log-v045.js"),css=read("public/v045.css");
