@@ -5,6 +5,21 @@
 "use strict";
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+
+/* v0.55.3 · Display-only PNG icon mapping; server element rules are unchanged. */
+const pixelIds={
+ element:new Set(["physical","nature","fire","ice","arcane","earth","void","water","lightning","light"]),
+ status:new Set(["burn","poison","bleed","weaken","chill","freeze","stun"]),
+ relation:new Set(["affinity","strong","weak","resist"])
+};
+const pixelPath={element:"elements/element_",status:"statuses/status_",relation:"relations/relation_"};
+function pixelIcon(kind,value){
+ const id=String(value??"").trim().toLowerCase();
+ if(!pixelIds[kind]?.has(id))return '<span class="v056-none" title="'+esc(value||"Unknown")+'">—</span>';
+ const title=id.charAt(0).toUpperCase()+id.slice(1);
+ return '<img class="v056-pixel-icon" src="/assets/icons/'+pixelPath[kind]+id+'.png" width="28" height="28" loading="lazy" alt="'+esc(title)+'" title="'+esc(title)+'">';
+}
+function pixelList(ids){return Array.isArray(ids)&&ids.length?ids.map(id=>pixelIcon("element",id)).join(""):'<span class="v056-none" title="None">—</span>';}
 const opts=[
  {id:"bosses",label:"BOSSES",icon:"👑"},
  {id:"monsters",label:"MONSTERS",icon:"🐺"},
@@ -122,13 +137,13 @@ function entryMarkup(item){
  const stat=isEnemy?"HP "+item.hp+" · ATK "+item.atk+" · DEF "+item.def+(item.element?" · "+item.element.toUpperCase():""):item.kind==="status"?esc(item.effect):isRace?esc(item.passive):!isZone&&item.description?esc(item.description):"";
  const rarityTag=item.rarity?'<span class="v035-rarity v035-'+esc(item.rarity)+'">'+esc(item.rarity.toUpperCase())+'</span>':"";
  return '<button type="button" data-v035-entry="'+esc(uid(item))+'" class="v035-entry '+(uid(item)===selectedId?"active ":"")+(got?"v044-discovered":"")+'">'+
- '<span class="v035-entry-icon">'+esc(item.icon|| (isZone?"🗺️":"✦"))+'</span>'+(got?'<span class="v044-found-tag">✓ OWNED</span>':'')+'<span class="v035-entry-text"><strong>'+esc(item.name)+'</strong><small>'+sub+'</small><em>'+stat+'</em></span>'+rarityTag+'</button>';
+ '<span class="v035-entry-icon">'+(item.kind==="element"?pixelIcon("element",item.id):item.kind==="status"?pixelIcon("status",item.id):esc(item.icon|| (isZone?"🗺️":"✦")))+'</span>'+(got?'<span class="v044-found-tag">✓ OWNED</span>':'')+'<span class="v035-entry-text"><strong>'+esc(item.name)+'</strong><small>'+sub+'</small><em>'+stat+'</em></span>'+rarityTag+'</button>';
 }
 function render(){
  const nav=$("v035Tabs");if(!nav||!data)return;
  nav.innerHTML=opts.map(opt=>{
   const count=opt.id==="bosses"?data.monsters.filter(x=>x.boss).length:opt.id==="monsters"?data.monsters.filter(x=>!x.boss).length:opt.id==="zones"?(data.zones||[]).length:opt.id==="races"?(data.races||[]).length:opt.id==="elements"?(data.codex?.elements||[]).length:opt.id==="statuses"?(data.codex?.statusEffects||[]).length:opt.id==="combat"?Object.keys(data.codex?.combatRules||{}).length:data.items.filter(x=>x.category===opt.id).length;
-  return '<button type="button" class="v035-tab '+(category===opt.id?"active":"")+'" data-v035-tab="'+opt.id+'" aria-pressed="'+(category===opt.id)+'"><span>'+opt.icon+'</span><strong>'+opt.label+'</strong><small>'+count+'</small></button>';
+  return '<button type="button" class="v035-tab '+(category===opt.id?"active":"")+'" data-v035-tab="'+opt.id+'" aria-pressed="'+(category===opt.id)+'"><span>'+(opt.id==="elements"?pixelIcon("element","fire"):opt.id==="statuses"?pixelIcon("status","poison"):opt.icon)+'</span><strong>'+opt.label+'</strong><small>'+count+'</small></button>';
  }).join("");
  const filtered=entries();
  const current=opts.find(x=>x.id===category);
@@ -147,12 +162,12 @@ function enemyDetail(e){
  const img=miniArt||staged?.normal||fallback;
  const quickMoves=(e.moves||[]).map(m=>m.name+(m.phase===2?" [Phase 2]":"")+(m.effect?" · "+m.effect.toUpperCase()+" "+Math.round((m.chance||0)*100)+"%":""));
  const quick='<section class="v0551-boss-quick" aria-label="Combat weaknesses and attacks">'+
- '<div class="v0551-boss-affinity"><span>✦ ELEMENT <b>'+esc((e.element||"physical").toUpperCase())+'</b></span>'+
- '<span>⬆ WEAK <b>'+esc((e.weak||[]).join(", ").toUpperCase()||"NONE")+'</b></span>'+
- '<span>⬇ RESIST <b>'+esc((e.resist||[]).join(", ").toUpperCase()||"NONE")+'</b></span></div>'+
+ '<div class="v0551-boss-affinity"><span><small class="v056-affinity-label">'+pixelIcon("relation","affinity")+' ELEMENT</small><b class="v056-affinity-values">'+pixelIcon("element",e.element||"physical")+'</b></span>'+
+ '<span><small class="v056-affinity-label">'+pixelIcon("relation","weak")+' WEAK</small><b class="v056-affinity-values">'+pixelList(e.weak)+'</b></span>'+
+ '<span><small class="v056-affinity-label">'+pixelIcon("relation","resist")+' RESIST</small><b class="v056-affinity-values">'+pixelList(e.resist)+'</b></span></div>'+
  '<p>⚔ ATTACK MOVES: '+esc(quickMoves.join(" · ")||"Strike")+'</p>'+
  (e.bossExceptions?.reason?'<p>⭐ BOSS EXCEPTION: '+esc(e.bossExceptions.reason)+'</p>':"")+
- (e.phase2?'<p>⚠ PHASE 2 AT 50% HP · '+esc((e.phase2Affinity?.element||e.element||"physical").toUpperCase())+' · WEAK: '+esc((e.phase2Affinity?.weak||[]).join(", ").toUpperCase()||"NONE")+'</p>':"")+
+ (e.phase2?'<p>⚠ PHASE 2 AT 50% HP · '+pixelIcon("element",e.phase2Affinity?.element||e.element||"physical")+' · WEAK: '+pixelList(e.phase2Affinity?.weak)+'</p>':"")+
  '</section>';
  return quick+'<div class="v035-enemy-art"><img alt="'+esc(e.name)+'" src="'+esc(img)+'" loading="lazy" data-v039-fallback="'+esc(fallback)+'" onerror="if(this.dataset.v039Fallback && this.src.indexOf(this.dataset.v039Fallback)===-1){this.src=this.dataset.v039Fallback}else{this.style.display=\'none\'}"></div>'+
  '<div class="v035-stats"><span>❤️ HP <b>'+e.hp+'</b></span><span>⚔ ATK <b>'+e.atk+'</b></span><span>🛡 DEF <b>'+e.def+'</b></span><span>✧ EXP <b>'+e.xp+'</b></span><span>🪙 GOLD <b>'+e.gold+'</b></span><span>🗺 STAGE <b>'+e.stage+'</b></span></div>'+
@@ -167,21 +182,21 @@ function enemyDetail(e){
 function guideDetail(e){
  if(e.kind==="element"){
   const all=data?.codex?.elements||[],names=ids=>(ids||[]).map(id=>{
-   const record=all.find(x=>x.id===id);return (record?.icon||"✦")+" "+(record?.name||id);
+   const record=all.find(x=>x.id===id);return '<span class="v056-element-chip" title="'+esc(record?.name||id)+'">'+pixelIcon("element",id)+'<small>'+esc(record?.name||id)+'</small></span>';
   }).join(" · ")||"None";
   const special=(data?.codex?.affinities||[]).filter(a=>(a.bossExtraWeak||[]).includes(e.id)||(a.bossExtraResist||[]).includes(e.id))
    .map(a=>a.regionId.replace(/_/g," ")+": "+a.exceptionReason);
-  return '<div class="v035-item-art">'+esc(e.icon||"✦")+'</div>'+
-   '<div class="v0552-element-advantage"><strong>⬆ STRONG AGAINST (+20% DAMAGE)</strong><p>'+esc(names(e.strongAgainst))+'</p>'+
-   '<strong>⬇ WEAK TO (TAKE +20% DAMAGE)</strong><p>'+esc(names(e.weakTo))+'</p>'+
-   '<strong>🛡 RESISTS ATTACKS FROM (-20% DAMAGE)</strong><p>'+esc(names(e.resistsAgainst))+'</p></div>'+
+  return '<div class="v035-item-art">'+pixelIcon("element",e.id)+'</div>'+
+   '<div class="v0552-element-advantage"><strong>'+pixelIcon("relation","strong")+' STRONG AGAINST (+20% DAMAGE)</strong><p>'+names(e.strongAgainst)+'</p>'+
+   '<strong>'+pixelIcon("relation","weak")+' WEAK TO (TAKE +20% DAMAGE)</strong><p>'+names(e.weakTo)+'</p>'+
+   '<strong>'+pixelIcon("relation","resist")+' RESISTS ATTACKS FROM (-20% DAMAGE)</strong><p>'+names(e.resistsAgainst)+'</p></div>'+
    '<div class="v035-detail-info"><strong>ELEMENT</strong><p>'+esc(e.description||"")+'</p>'+
    '<strong>CORE RULES</strong><p>'+esc(data?.codex?.combatRules?.damage||"")+'</p>'+
    '<strong>EXCEPTIONS</strong><p>'+esc(e.notes||"")+'</p>'+
    (special.length?'<strong>BOSS-ONLY EXCEPTIONS</strong><p>'+esc(special.join(" · "))+'</p>':"")+
    '<p>Open BOSSES to see an individual enemy\'s element, normal weakness, and any special weakness.</p></div>';
  }
- if(e.kind==="status")return '<div class="v035-item-art">'+esc(e.icon||"✦")+'</div><div class="v035-detail-info"><strong>EFFECT</strong><p>'+esc(e.effect)+'</p><strong>COUNTERPLAY</strong><p>'+esc(e.counter)+'</p><strong>BASE DURATION</strong><p>'+esc(e.turns)+' affected turns (can be refreshed; resists and immunity apply)</p><strong>DOT LIMIT</strong><p>'+esc(data?.codex?.combatRules?.dotCapPercent||10)+'% Max HP per player turn across Burn, Poison and Bleed.</p></div>';
+ if(e.kind==="status")return '<div class="v035-item-art">'+pixelIcon("status",e.id)+'</div><div class="v035-detail-info"><strong>EFFECT</strong><p>'+esc(e.effect)+'</p><strong>COUNTERPLAY</strong><p>'+esc(e.counter)+'</p><strong>BASE DURATION</strong><p>'+esc(e.turns)+' affected turns (can be refreshed; resists and immunity apply)</p><strong>DOT LIMIT</strong><p>'+esc(data?.codex?.combatRules?.dotCapPercent||10)+'% Max HP per player turn across Burn, Poison and Bleed.</p></div>';
  return '<div class="v035-item-art">📜</div><div class="v035-detail-info"><strong>HARDCORE RULE</strong><p>'+esc(e.description)+'</p></div>';
 }
 function raceDetail(r){
