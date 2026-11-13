@@ -67,6 +67,7 @@ function validateAction(p,m,type){
  if(!p||!m||typeof type!=="string")return {ok:false,error:"Missing hero or enemy."};
  if(type==="attack"||type==="guard")return {ok:true};
  if(Object.hasOwn(SKILL_COST,type)){
+  if(type==="cleanse"&&!(p.statusEffects||[]).length)return {ok:false,error:"No status ailments to purify."};
   const cost=p.raceId==="elf"&&type.startsWith("skill")?Math.floor(SKILL_COST[type]*.95):SKILL_COST[type];
   if((p.cooldowns?.[type]||0)>0)return {ok:false,error:type+" has "+p.cooldowns[type]+" cooldown turn(s) left."};
   if(p.level<(SKILL_UNLOCK[type]||1))return {ok:false,error:"Unlocks at level "+SKILL_UNLOCK[type]+"."};
