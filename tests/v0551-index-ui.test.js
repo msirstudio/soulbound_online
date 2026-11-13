@@ -8,7 +8,7 @@ function catalog(){
  const boss={id:"stage-5",name:"The Briarfang Alpha",stage:5,boss:true,miniBoss:false,
   regionId:"cursed_wilds",zone:"THE CURSED WILDS",icon:"🐺",sprite:"boss-briarfang",
   hp:260,atk:22,def:7,xp:130,gold:90,loot:"Independent drops",drops:[],partySize:1};
- return {version:"0.55.1",monsters:[{...boss,...combat.enemyCodex(boss)}],
+ return {version:"0.55.2",monsters:[{...boss,...combat.enemyCodex(boss)}],
   items:[],races:[],zones:[],codex:combat.codexData()};
 }
 function browserHarness(){
@@ -45,17 +45,17 @@ function browserHarness(){
  const context={document,window:{},fetch:async(url,options)=>{
   requests.push({url,options});return {ok:true,json:async()=>catalog()};
  },console};
- vm.runInNewContext(read("public/adventure-index-v0551.js"),context);
+ vm.runInNewContext(read("public/adventure-index-v0552.js"),context);
  assert.equal(typeof listeners.DOMContentLoaded,"function");
  listeners.DOMContentLoaded();
  return {context,requests,element:id=>registry.get(id)};
 }
 test("browser loads a uniquely versioned INDEX script and not the old cached v035 script",()=>{
  const html=read("public/index.html");
- assert.ok(html.includes('src="adventure-index-v0551.js"'));
+ assert.ok(html.includes('src="adventure-index-v0552.js"'));
  assert.ok(!html.includes('src="adventure-index-v035.js"'));
  assert.ok(html.includes('href="v0551-index-status-boss.css"'));
- assert.ok(html.includes("v0.55.1"));
+ assert.ok(html.includes("v0.55.2"));
 });
 test("interactive INDEX renders all 3 new guides and immediate boss affinity/attack summary",async()=>{
  const h=browserHarness();
@@ -71,9 +71,9 @@ test("interactive INDEX renders all 3 new guides and immediate boss affinity/att
  assert.ok(detail.includes("Briarstorm"));
  assert.ok(detail.includes("55%"));
  assert.ok(detail.includes("ATTACK MOVES / STATUS CHANCES"));
- assert.ok(h.requests[0].url.includes("codex=0.55.1"));
+ assert.ok(h.requests[0].url.includes("codex=0.55.2"));
  assert.equal(h.requests[0].options.cache,"no-store");
- assert.ok(h.element("v035Status").textContent.includes("INDEX UI v0.55.1"));
+ assert.ok(h.element("v035Status").textContent.includes("INDEX UI v0.55.2"));
  await h.context.window.SoulboundIndex.open("statuses");
  assert.equal(h.element("v035CategoryTitle").textContent,"STATUS");
  assert.ok(h.element("v035Results").innerHTML.includes("Chill"));
