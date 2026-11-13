@@ -12,10 +12,10 @@ test("new title cover affects main-menu panel only and preserves actions",()=>{
  assert.ok(html.indexOf('href="v0482-title-cover.css"')>html.indexOf('href="v048-city.css"'));
  for(const id of ["v041Play","v041NewHero","v041Account","v041SettingsOpen","v045ChangelogOpen"])assert.ok(html.includes('id="'+id+'"'));
 });
-test("v0.48.2 cover release is reflected in game and changelog",()=>{
+test("v0.48.3 includes the earlier cover and updates the version",()=>{
  const html=read("public/index.html"),log=read("public/update-log-v045.js"),pkg=require("../package.json");
- assert.equal(pkg.version,"0.48.2");
- assert.ok(html.includes("VERSION 0.48.2 · TITLE COVER"));
- assert.ok(html.includes("ONLINE RPG · v0.48.2 TITLE COVER"));
+ assert.equal(pkg.version,"0.48.3");
+ assert.ok(html.includes("VERSION 0.48.3 · CAMP MERCHANT"));
+ assert.ok(html.includes("ONLINE RPG · v0.48.3 CAMP MERCHANT"));
  assert.ok(log.includes('version:"0.48.2"'));
 });
