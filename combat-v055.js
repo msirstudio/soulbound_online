@@ -83,6 +83,10 @@ const SECONDARY_MOVES=Object.freeze({
 });
 function moveFor(m,r){
  const original=base.moveFor(m);
+ if(m?.miniBoss&&elemental.MINI_ELEMENTS[Number(m.stage)]&&original.name!=="Strike"){
+  const special=SECONDARY_MOVES[m.regionId];
+  if(special)return {...special,name:"Lesser "+special.name,power:Math.min(.8,special.power),chance:special.chance*.65,charge:false};
+ }
  if(!m?.boss||original.name!=="Strike"||m.queuedMove)return original;
  if(SECONDARY_MOVES[m.regionId]&&m.combatTurn>0&&m.combatTurn%7===2)
   return SECONDARY_MOVES[m.regionId];
@@ -221,7 +225,9 @@ function enemyCodex(m){
  const affinity=profileFor({...m,phase:1});
  const signature=base.BOSS_SPECIALS[m.regionId]||base.BOSS_SPECIALS.cursed_wilds;
  const mini=!!m.miniBoss;
- const original=mini?{...signature,name:"Lesser "+signature.name,power:Math.min(.8,signature.power),chance:signature.chance*.65}:signature;
+ const miniSpecial=mini&&elemental.MINI_ELEMENTS[Number(m.stage)]?SECONDARY_MOVES[m.regionId]:null;
+ const original=mini?{...(miniSpecial||signature),name:"Lesser "+(miniSpecial||signature).name,
+  power:Math.min(.8,(miniSpecial||signature).power),chance:(miniSpecial||signature).chance*.65}:signature;
  const moves=[
   {name:"Strike",scope:"single",element:"physical",power:1,effect:null,chance:0,charge:false,description:"Basic physical strike."},
   ...(m.boss||m.miniBoss?[{...original,charge:!mini,description:mini?"Reduced-strength signature move.":"Signature attack with one warning/charge turn."}]:[])
@@ -240,6 +246,7 @@ function enemyCodex(m){
   phase2:!!base.canPhaseTwo(m),
   phase2Affinity:base.canPhaseTwo(m)?profileFor({...m,phase:2}):null,
   bossExceptions:(m.boss&&m.phase!==2)?{extraWeak:affinity.extraWeak,extraResist:affinity.extraResist,reason:affinity.exceptionReason}:null,
+  miniElementNote:affinity.miniNote||null,
   moves,staggerThreshold:staggerThreshold(m),
   dropsStatus:[...new Set(moves.map(x=>x.effect).filter(Boolean))]
  };
