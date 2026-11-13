@@ -49,8 +49,8 @@ test("mini-boss and boss status badges are above the monster sprite and styled d
  const mark=html.indexOf('id="bossTag"'),sprite=html.indexOf('id="monsterSprite"');
  assert.ok(mark>=0&&sprite>=0&&mark<sprite);
  assert.equal(html.split('id="bossTag"').length,2,"one unique tag");
- assert.ok(g.includes('☠ MINI BOSS'));
- assert.ok(g.includes('♛ MAIN BOSS'));
+ assert.ok(g.includes('"MINI BOSS"'));
+ assert.ok(g.includes('"MAIN BOSS"'));
  assert.ok(g.includes('v0484-mini'));
  assert.ok(g.includes('v0484-boss'));
  assert.ok(css.includes('.v0484-elite-tag.v0484-mini'));
