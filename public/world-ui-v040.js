@@ -12,7 +12,13 @@ function install(){
  if(installed||!$("arena")||!$("game"))return;
  installed=true;
  const city=document.createElement("section");city.id="v040City";city.className="v040-city";city.hidden=true;
- city.innerHTML='<div class="v040-town-scene" aria-hidden="true"><span>♜</span><span>⌂</span><span>♜</span><span>⌂</span><span>♜</span></div>'+
+ city.innerHTML='<div class="v047-town-art" role="img" aria-label="Medieval capital marketplace with a central magical crystal and three shops"></div>'+
+ '<nav class="v047-city-hotspots" aria-label="City destinations">'+
+ '<button type="button" class="v047-hotspot v047-supplies" data-v047-shop="potion" title="Potions and food"><span>🍲 POTIONS & FOOD</span></button>'+
+ '<button type="button" class="v047-hotspot v047-weapons" data-v047-shop="weapon" title="Weapon shop"><span>⚔ WEAPON SHOP</span></button>'+
+ '<button type="button" class="v047-hotspot v047-armor" data-v047-shop="armor" title="Armor shop"><span>🛡 ARMOR SHOP</span></button>'+
+ '<button type="button" class="v047-hotspot v047-crystal" id="v047Adventure" aria-label="Adventure: open World Map"><span>✦ ADVENTURE</span></button>'+
+ '</nav>'+
  '<div class="v040-city-inner"><p class="v040-kicker">✦ SOULBOUND · CENTRAL CITY ✦</p><h2 id="v040CityHeading">THE FORGOTTEN CAPITAL</h2>'+
  '<p id="v040CityText">Rest at the town, prepare your party, and choose a region to explore.</p>'+
  '<div class="v040-city-actions"><button id="v040WorldOpen" class="gold" type="button">🗺 WORLD MAP · เลือกแมพ</button>'+
@@ -33,6 +39,17 @@ function install(){
  '<footer class="v040-atlas-foot">Select a map pin to inspect the area. The leader may start a run if every party member meets the minimum level.</footer></div>';
  document.body.appendChild(overlay);
  $("v040WorldOpen").onclick=show;$("v040Merchant").onclick=()=>actions?.openShop();
+ $("v047Adventure").onclick=show;
+ city.querySelectorAll("[data-v047-shop]").forEach(btn=>btn.addEventListener("click",async()=>{
+   if(btn.disabled)return;
+   const category=btn.dataset.v047Shop;
+   if(!leader){alert("Only the party leader can open the city's shop. Other players can buy items after it opens.");return}
+   if(!["city","regionClear","shop"].includes(latest?.status))return;
+   window.SoulboundCityShopV47?.selectCategory(category);
+   if(latest?.status==="shop"){window.SoulboundCityShopV47?.show();return}
+   const result=await actions?.openShop();
+   if(result&&!result.ok)alert(result.error||"Shop unavailable.");
+ }));
  $("v040Bag").onclick=()=> $("toggleEquipment")?.click();
  $("v040BackCity").onclick=()=>actions?.returnCity();
  $("v040WorldClose").onclick=hide;
@@ -98,6 +115,10 @@ function render(s,me,isLeader,handlers){
  $("v040PartyNote").textContent="Party · "+s.players.map(p=>p.name+" (LV "+p.level+")").join(" · ")+(leader?" · You are leader":" · Leader chooses the region");
  $("v040Merchant").hidden=s.status!=="city"&&s.status!=="regionClear";
  $("v040Merchant").disabled=!leader;
+ $("v047Adventure").disabled=s.status==="shop"||!["city","regionClear","defeat"].includes(s.status);
+ $("v040City").querySelectorAll("[data-v047-shop]").forEach(btn=>{
+   btn.disabled=!["city","regionClear","shop"].includes(s.status)||!leader;
+ });
  $("v040BackCity").hidden=s.status==="city";
  $("v040BackCity").disabled=!leader;
  $("v040WorldOpen").disabled=s.status==="shop"||!["city","regionClear","defeat"].includes(s.status);
