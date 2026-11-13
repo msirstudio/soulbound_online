@@ -1,24 +1,21 @@
-# SOULBOUND v0.46 — Generated Pixel-Art World Map (PNG)
+# SOULBOUND v0.46 — Generated Pixel-Art World Map
 
-**Status: Source code ready; the generated raster image must be uploaded before this branch is deployed.**
+## Ready in GitHub — no manual image upload required
 
-This branch intentionally removes the hand-drawn SVG world atlas. It uses an actual generated pixel-art **PNG** of the connected continent. All map markers and travel actions remain separate, interactive HTML elements.
+The game now uses the actual image generated in the ChatGPT conversation, converted from the original PNG to a high-quality **raster WebP**. It is **not an SVG**. The main artwork has no burned-in UI labels; eight interactive HTML pins and a Central Safe City pin are positioned on top.
 
-## One required image file
+**Uploaded artwork:** `public/assets/world/world-map-v046.webp`
+**Image size:** 1448 × 1086 pixels (4:3), generated pixel-art continent.
 
-- Relative repository path: `public/assets/world/world-map-v046.png`
-- Format: PNG (not SVG)
-- Dimensions: **1448 × 1086**
-- Source: latest image generated in the ChatGPT discussion (the continent with a safe city, forest, ice, old titan, sanctum, forge, lava, abyss and eclipse).
+**Branch:** `v0.46-generated-pixel-map`
 
-Because the connected GitHub write action is text-only, that generated binary image is not included in the branch automatically. **Do not deploy this branch until the image is uploaded to the path above.**
+### How to play
+1. Open Render Dashboard → `soulbound_online` → Settings → Branch.
+2. Select `v0.46-generated-pixel-map`, save and deploy latest commit.
+3. Wait until status is **Live**, then refresh game with **Ctrl+F5**.
+4. Enter a party → Central City → World Map.
+5. Click one of eight pins. All travel restrictions and party leadership rules remain unchanged.
 
-To upload:
-1. Download `world-map-v046.png` from the ChatGPT conversation.
-2. Open `https://github.com/msirstudio/soulbound_online/upload/v0.46-generated-pixel-map/public/assets/world`.
-3. Drag the PNG into the GitHub uploader and click **Commit changes**. No other manual edits are needed.
-4. Confirm `https://github.com/msirstudio/soulbound_online/blob/v0.46-generated-pixel-map/public/assets/world/world-map-v046.png` opens the pixel-art map (not SVG).
-5. GitHub Actions verifies the PNG signature/dimensions and the rest of the game tests.
-6. In Render → soulbound_online → Settings → Branch, switch to `v0.46-generated-pixel-map`; deploy the newest commit and press Ctrl+F5.
+The original programmatic map SVG was removed from this branch. The right-side preview uses the real arena background art per region. All image assets are already inside GitHub; no PNG upload, ZIP extraction, or CSS copy/paste is required.
 
-The 8 clickable pins and central safe-city pin are positioned for the image's actual geography. The right-hand region preview uses existing battle backgrounds.
+GitHub Actions checks the WebP file signature and native dimensions plus JavaScript syntax and tests. Browser visuals should still be checked on the actual target display.
