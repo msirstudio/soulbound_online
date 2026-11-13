@@ -1,7 +1,7 @@
 name: SOULBOUND v0.46 World Atlas checks
 on:
   push:
-    branches: [v0.46-organic-world-atlas]
+    branches: [v0.46-generated-pixel-map]
   pull_request:
     branches: [v0.45-independent-loot-changelog]
 permissions:
