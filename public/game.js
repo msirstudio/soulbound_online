@@ -31,6 +31,18 @@ function authNotice(m,e=false){$("authNotice").textContent=m;$("authNotice").cla
 function showAccount(u){currentUser=u;$("account").hidden=false;$("lobby").hidden=!u;$("accountInfo").hidden=!u;$("accountEmail").textContent=u?.email||"";$("signup").hidden=!!u;$("signin").hidden=!!u;$("guestPlay").hidden=!!u;$("email").disabled=!!u;$("password").disabled=!!u;if(u)authNotice("Signed in. Your hero data is linked to this account.");window.SoulboundUIV41?.onAuth(u)}
 function profile(p){return{id:currentUser.id,username:p.name,class_id:p.classId,class_path:p.classPath||null,level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,small_health:p.smallHealth||p.potions||0,medium_health:p.mediumHealth||0,large_health:p.largeHealth||0,small_mana:p.smallMana||p.manaPotions||0,medium_mana:p.mediumMana||0,large_mana:p.largeMana||0,weapon:p.weapon,armor:p.armor,inventory:p.inventory||[],weapon_item:p.weaponItem||null,armor_item:p.armorItem||null,food_items:p.foodItems||{},food_buffs:p.foodBuffs||{},race_id:p.raceId||"human",race_points:p.racePoints||0,strength:p.strength||0,vitality:p.vitality||0,intelligence:p.intelligence||0,agility:p.agility||0,stat_points:p.statPoints||0,speed:p.speed||10,updated_at:new Date().toISOString()}}
 async function loadProfile(){const {data,error}=await supabaseClient.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();if(error)throw error;if(data)return data;const fresh={id:currentUser.id,username:(currentUser.email||"Adventurer").split("@")[0].slice(0,16)||"Adventurer"};const {data:created,error:e}=await supabaseClient.from("profiles").insert(fresh).select().single();if(e)throw e;return created}
+// Serialize cloud/local writes so a pre-defeat save cannot overwrite the
+// subsequent server-authoritative Gold penalty or consumed inventory.
+let profileSaveQueue=Promise.resolve();
+function queueProfileSave(p){
+ const snapshot=p?JSON.parse(JSON.stringify(p)):null;
+ const owner=currentUser?.id||null,wasGuest=guestMode;
+ profileSaveQueue=profileSaveQueue.catch(()=>{}).then(()=>{
+  if(wasGuest!==guestMode||owner!==(currentUser?.id||null))return;
+  return saveProfile(snapshot);
+ });
+ return profileSaveQueue;
+}
 async function saveProfile(p){if(!restoreComplete||!p)return;const data={username:p.name,class_id:p.classId,class_path:p.classPath||null,level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,small_health:p.smallHealth||p.potions||0,medium_health:p.mediumHealth||0,large_health:p.largeHealth||0,small_mana:p.smallMana||p.manaPotions||0,medium_mana:p.mediumMana||0,large_mana:p.largeMana||0,weapon:p.weapon,armor:p.armor,inventory:p.inventory||[],weapon_item:p.weaponItem||null,armor_item:p.armorItem||null,food_items:p.foodItems||{},food_buffs:p.foodBuffs||{},race_id:p.raceId||"human",race_points:p.racePoints||0,strength:p.strength||0,vitality:p.vitality||0,intelligence:p.intelligence||0,agility:p.agility||0,stat_points:p.statPoints||0,speed:p.speed||10};const worldProgress=p.worldProgress||v40SavedWorld()||{version:40,bossDefeats:{},defeatedBossIds:[]};v40CacheWorld(worldProgress);if(guestMode){localStorage.setItem("soulbound_guest_save_v1",JSON.stringify({...data,world_progress:worldProgress}));authNotice("Guest save stored in this browser.");return}if(!supabaseClient||!currentUser)return;let {error}=await supabaseClient.from("profiles").upsert({...data,...(v40SchemaAvailable===false?{}:{world_progress:worldProgress}),id:currentUser.id,updated_at:new Date().toISOString()},{onConflict:"id"});
  if(error&&/world_progress|schema cache|column/i.test(error.message||"")){
   v40SchemaAvailable=false;({error}=await supabaseClient.from("profiles").upsert({...data,id:currentUser.id,updated_at:new Date().toISOString()},{onConflict:"id"}));
@@ -42,7 +54,7 @@ let storedGender="male";try{storedGender=localStorage.getItem(v30GenderKey())||"
 const chosen=document.querySelector('input[name="heroGender"][value="'+(storedGender==="female"?"female":"male")+'"]');
 if(chosen)chosen.checked=true;
 classInfo();v30UpdatePreview();authNotice("Hero save loaded. Choose Continue or New Game.");window.SoulboundUIV41?.onPrepared()}catch(e){authNotice("Could not load profile: "+e.message,true)}}
-async function afterJoin(){restoreComplete=false;if(savedCharacter){const r=await call("restoreCharacter",{...savedCharacter,world_progress:savedCharacter.world_progress||v40SavedWorld(),gender:v30SelectedGender()});if(!r.ok)notice(r.error,true)}restoreComplete=true;const p=gameState?.players.find(x=>x.id===myId);if(p)saveProfile(p)}
+async function afterJoin(){restoreComplete=false;if(savedCharacter){const r=await call("restoreCharacter",{...savedCharacter,world_progress:savedCharacter.world_progress||v40SavedWorld(),gender:v30SelectedGender()});if(!r.ok)notice(r.error,true)}restoreComplete=true;const p=gameState?.players.find(x=>x.id===myId);if(p)queueProfileSave(p)}
 function classInfo(){const mage=$("classId").value==="mage",tank=$("classId").value==="tank";$("classInfo").textContent=tank?"Highest HP and defense. Shield Bash, Iron Wall, and Provoke to taunt enemies for 3 turns.":mage?"Lower HP and defense, high MP and magic attack. Arcane Bolt, then Meteor at level 3.":"High HP and defense. Power Strike, then Whirlwind at level 3."}
 if(!supabaseClient){$("signup").disabled=true;$("signin").disabled=true;authNotice("Supabase unavailable. You can still play as guest.",true)}
 $("signup").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));const email=$("email").value.trim(),password=$("password").value;if(!email||password.length<6)return authNotice("Enter email and password (at least 6 characters).",true);const {data,error}=await supabaseClient.auth.signUp({email,password});if(error)return authNotice(error.message,true);if(data.session){showAccount(data.user);await prepare()}else authNotice("Account created. Check your email to confirm, then sign in.")};
@@ -145,7 +157,7 @@ socket.on("connect",()=>{myId=socket.id});socket.on("disconnect",()=>{$("status"
 socket.on("state",s=>{const last=gameState;gameState=s;render();window.SoulboundRewardV411?.show(last,s,myId);if(restoreComplete){
  const p=s.players.find(x=>x.id===myId);if(p){clearTimeout(saveTimer);
  const justCleared=s.status==="regionClear"&&last?.status!=="regionClear";
- if(justCleared||(s.status==="defeat"&&last?.status!=="defeat"))saveProfile(p);else saveTimer=setTimeout(()=>saveProfile(p),500)
+ if(justCleared||(s.status==="defeat"&&last?.status!=="defeat"))queueProfileSave(p);else saveTimer=setTimeout(()=>queueProfileSave(p),500)
  }}});
 async function restoreSession(){if(!supabaseClient)return;const {data:{session}}=await supabaseClient.auth.getSession();if(session?.user){showAccount(session.user);await prepare()}else showAccount(null);supabaseClient.auth.onAuthStateChange((ev,session)=>{if(ev==="SIGNED_OUT"){currentUser=null;savedCharacter=null;showAccount(null)}})}restoreSession();
 function render(){const s=gameState;if(!s)return;
