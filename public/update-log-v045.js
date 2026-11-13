@@ -2,6 +2,12 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.48.5",date:"2026-11-14",title:"Boss Reward Display Fix & Character Overview",notes:[
+  "Fixed the main-boss reward overlay rendering into the hidden city panel instead of the visible region-clear arena.",
+  "Boss victories now show Gold, EXP and all earned equipment; a no-drop message appears when no new equipment is earned.",
+  "Equipment & Inventory now includes HP, MP and EXP meters, hero identity, class specialization, race rarity/passive and growth attributes.",
+  "Equipping, unequipping, discarding, saved inventory and independent drop rates remain unchanged."
+ ]},
  {version:"0.48.4",date:"2026-11-13",title:"Unified Audio, Mini-Boss Merchants & Log Layout",notes:[
   "Moved Music ON/OFF and SFX ON/OFF into the Audio popup, retaining independent volume sliders and sound test.",
   "The roadside Traveling Merchant appears only after defeating each region's mini-boss on local stage 4: global stages 4, 9, 14, 19, 24, 29, 34, and 39.",

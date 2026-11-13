@@ -43,7 +43,7 @@ test("no rewards on reconnect, repeated state, stage change or defeat",()=>{
  assert.equal(reward.rewardFrom({...base,code:"AAA"},won,"me"),null);
  assert.equal(reward.rewardFrom(base,{...won,monster:{hp:1,boss:false}},"me"),null);
 });
-test("rewards are nonmodal, show near monster or city and auto-expire",()=>{
+test("rewards are nonmodal, show on visible arena even after region clear and auto-expire",()=>{
  const {reward,targets,expire}=model();
  const base=room("battle",player("me",{gold:80}),{hp:1,boss:true});
  const won=room("victory",player("me",{gold:105,inventory:[{uid:"reward",name:"Alpha Ring",rarity:"uncommon"}]}));
@@ -58,7 +58,7 @@ test("rewards are nonmodal, show near monster or city and auto-expire",()=>{
  expire();assert.equal(targets.arena.nodes.length,0);
  const clear=room("regionClear",player("me",{gold:105}));
  reward.show(base,clear,"me");
- assert.equal(targets.v040City.nodes.length,1);
+ assert.equal(targets.arena.nodes.length,1);assert.equal(targets.v040City.nodes.length,0);
 });
 test("missing equipment is not invented: show no-drop for boss, gold for normal enemies",()=>{
  const {reward}=model(),base=room("battle",player("me",{gold:80}),{hp:1,boss:true});
