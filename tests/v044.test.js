@@ -4,44 +4,55 @@ const fs=require("node:fs"),path=require("node:path");
 const loot=require("../loot-v034"),world=require("../world-v040");
 const read=name=>fs.readFileSync(path.join(__dirname,"..",name),"utf8");
 function hero(classId="swordsman"){return {name:"Tester",classId,level:75,atk:150,def:95,maxHp:900,maxMp:350,hp:900,mp:350,inventory:[],worldProgress:world.normalizeProgress(null)}}
-test("eight boss pools expose 1-4 items and mini-boss pools 1-2, with rare total odds",()=>{
- let bossDistinct=0,miniDistinct=0;
+test("all loot chances fall inside their rarity-defined bands",()=>{
+ let bossTotal=0,miniTotal=0;
  for(let i=1;i<=8;i++){
   const boss=loot.bossDrops(i),mini=loot.miniDrops(i);
-  assert.ok(boss.length>=1&&boss.length<=4);
-  assert.ok(mini.length>=1&&mini.length<=2);
-  for(const arr of [boss,mini]){
-   const total=arr.reduce((n,x)=>n+x.chance,0);
-   assert.ok(total>0&&total<=25,"Unusually high drop chance at "+i+": "+total);
-   assert.equal(new Set(arr.map(x=>x.id)).size,arr.length);
-   for(const item of arr){assert.ok(item.name);assert.ok(loot.factory(item.id,item.rarity));}
+  assert.ok(boss.length>=1&&mini.length>=1);
+  bossTotal+=boss.length;miniTotal+=mini.length;
+  for(const rows of [boss,mini]){
+   assert.equal(new Set(rows.map(it=>it.id)).size,rows.length);
+   for(const it of rows){
+    const band=loot.CHANCE_BANDS[it.rarity];
+    assert.ok(it.chance>=band[0]&&it.chance<=band[1],
+      it.name+" "+it.chance+"% is outside "+band.join("-")+"%");
+    assert.ok(loot.factory(it.id,it.rarity));
+   }
   }
-  bossDistinct+=boss.length;miniDistinct+=mini.length;
  }
- assert.equal(bossDistinct,25);assert.equal(miniDistinct,12);
+ assert.equal(bossTotal,41);assert.equal(miniTotal,27);
 });
-test("stage 4 mini boss drops correctly, stage 5 main boss drops, ordinary stage cannot",()=>{
- const original=Math.random;
+test("all listed drops succeed on independent favorable rolls",()=>{
+ const old=Math.random;
  try{
   Math.random=()=>0;
-  const h=hero(),min=loot.dropEncounterLoot(h,4,()=>{},1,true);
-  assert.ok(min&&min.id.startsWith("mini1_"));
-  assert.ok(h.worldProgress.lootSeen.includes(min.id+":"+min.rarity));
+  const h=hero(),mini=loot.dropEncounterLoot(h,4,()=>{},1,true);
+  assert.equal(mini.length,loot.miniDrops(1).length);
   const boss=loot.dropEncounterLoot(h,5,()=>{},1,false);
-  assert.ok(boss&&boss.id.startsWith("boss1_"));
-  assert.equal(loot.dropEncounterLoot(h,2),null);
-  assert.equal(h.inventory.length,2);
-  const restored=world.normalizeProgress(h.worldProgress);
-  assert.equal(restored.lootSeen.length,2);
- }finally{Math.random=original}
+  assert.equal(boss.length,loot.bossDrops(1).length);
+  assert.equal(h.inventory.length,mini.length+boss.length);
+  for(const it of [...mini,...boss])assert.ok(h.worldProgress.lootSeen.includes(it.id+":"+it.rarity));
+  assert.deepEqual(loot.dropEncounterLoot(h,2),[]);
+  assert.equal(world.normalizeProgress(h.worldProgress).lootSeen.length,h.inventory.length);
+ }finally{Math.random=old}
 });
-test("late-game rare equipment is not guaranteed even after a win",()=>{
- const old=Math.random;try{
-  Math.random=()=>0.9;
+test("unfavorable rolls award nothing, including each legendary",()=>{
+ const old=Math.random;
+ try{
+  Math.random=()=>0.99;
   for(const stage of [4,5,14,15,34,35,39,40]){
-   const h=hero();assert.equal(loot.dropEncounterLoot(h,stage),null);
-   assert.equal(h.inventory.length,0);
+   const h=hero();assert.deepEqual(loot.dropEncounterLoot(h,stage),[]);assert.equal(h.inventory.length,0);
   }
+ }finally{Math.random=old}
+});
+test("bag collects as many independent successes as remaining free slots",()=>{
+ const old=Math.random;
+ try{
+  Math.random=()=>0;
+  const h=hero();h.inventory=Array.from({length:38},(_,i)=>({...loot.factory("boss1_boots","uncommon"),uid:"test"+String(i).padStart(8,"0")}));
+  const won=loot.dropEncounterLoot(h,5);
+  assert.equal(won.length,2);assert.equal(loot.bagUsed(h),40);
+  assert.equal(new Set(h.inventory.map(it=>it.uid)).size,40);
  }finally{Math.random=old}
 });
 test("old inventory, new mini gear and class-gated equipment restore safely",()=>{
