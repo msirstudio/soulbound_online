@@ -1,0 +1,22 @@
+name: SOULBOUND v0.47 City Hub
+on:
+  push:
+    branches: [v0.47-interactive-capital]
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: JavaScript syntax validation
+        run: |
+          node --check public/game.js
+          node --check public/world-ui-v040.js
+          node --check server.js
+      - name: Gameplay and UI integration tests
+        run: npm test
