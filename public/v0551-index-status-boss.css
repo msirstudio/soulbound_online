@@ -1,0 +1,87 @@
+/* v0.55.1 – compact encounter labels + icon-only status indicators;
+   the Adventure Index remains the authoritative explanation of effects. */
+
+/* Override v0.48.4's large red/purple boss boxes. Text above enemy only. */
+#game .arena .monster-side .v0484-elite-tag:not([hidden]),
+#game .arena .monster-side .v0484-elite-tag.v0484-mini:not([hidden]),
+#game .arena .monster-side .v0484-elite-tag.v0484-boss:not([hidden]){
+ position:absolute!important;
+ display:block!important;
+ top:-17px!important;left:50%!important;
+ transform:translateX(-50%)!important;
+ z-index:12!important;
+ min-width:0!important;max-width:max-content!important;width:auto!important;
+ margin:0!important;padding:0!important;
+ color:#ffe8b0!important;
+ background:none!important;border:0!important;border-radius:0!important;
+ box-shadow:none!important;
+ font:800 clamp(11px,.95vw,15px)/1.15 Georgia,serif!important;
+ letter-spacing:1.3px!important;white-space:nowrap!important;
+ text-shadow:0 2px 3px #080a15,1px 1px 2px #080a15!important;
+ pointer-events:none!important;
+}
+#game .arena .monster-side .v0484-elite-tag.v0484-mini:not([hidden]){
+ color:#ded2ff!important;
+}
+#game .arena .monster-side .v0484-elite-tag[hidden]{display:none!important}
+
+/* Icons + remaining turns; click / keyboard activate to open INDEX → STATUS. */
+#game .v054-status-list:not([hidden]),
+#game .v0551-monster-status:not([hidden]){
+ display:flex!important;align-items:center;justify-content:center;
+ gap:5px!important;flex-wrap:wrap!important;
+ margin:4px auto!important;padding:1px 4px!important;
+ width:max-content!important;max-width:95%!important;max-height:none!important;
+ min-height:25px;overflow:visible!important;
+ border:0!important;background:none!important;box-shadow:none!important;
+ font-size:14px!important;line-height:1!important;
+}
+#game .v054-status-list[hidden],#game .v0551-monster-status[hidden]{display:none!important}
+#game .v0551-status-icon,#game .v0551-ward-icon{
+ display:inline-flex;align-items:center;gap:2px;justify-content:center;
+ height:25px;min-width:30px;padding:2px 5px;
+ border:1px solid #857355;border-radius:5px;
+ background:#171b30d9;color:#f7e2b5;
+ font:700 15px/1 Arial,"Noto Sans Thai",sans-serif;
+ vertical-align:middle;text-shadow:none!important;
+}
+#game button.v0551-status-icon{cursor:pointer;appearance:none}
+#game button.v0551-status-icon:hover,#game button.v0551-status-icon:focus-visible{
+ border-color:#ffd389;background:#3b2e44;outline:2px solid #d4b578;outline-offset:1px
+}
+#game .v0551-status-icon small,#game .v0551-ward-icon small{
+ font:700 10px Georgia,serif;color:#fff0b4;
+}
+#game .v0551-monster-status{margin-top:2px!important;}
+
+/* New INDEX combat quick-info must appear before large boss art/stat rows. */
+#v035Index .v0551-boss-quick{
+ display:grid;gap:7px;margin:2px 0 10px;padding:9px 10px;
+ border:1px solid #8c7052;border-radius:7px;
+ background:linear-gradient(120deg,#282132,#18232e);
+}
+#v035Index .v0551-boss-affinity{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;
+}
+#v035Index .v0551-boss-affinity>span{
+ display:flex;flex-direction:column;gap:2px;text-align:center;
+ border:1px solid #665343;border-radius:4px;padding:5px 3px;
+ font:700 9px Georgia,serif;color:#c4b8a8;
+}
+#v035Index .v0551-boss-affinity b{font-size:11px;color:#ffe1ac;overflow-wrap:anywhere}
+#v035Index .v0551-boss-quick p{
+ margin:0!important;font:11px/1.45 Georgia,"Noto Sans Thai",serif;
+ color:#e5d2b4;overflow-wrap:anywhere;
+}
+#v035Index .v035-enemy-art{height:130px!important;}
+#v035Index .v035-stats span{padding:6px 8px}
+#v035Index .v035-detail-info{padding-top:8px}
+#v035Index .v035-tabs{scrollbar-width:thin}
+@media(max-width:700px){
+ #game .arena .monster-side .v0484-elite-tag:not([hidden]){
+  top:-12px!important;font-size:10px!important;letter-spacing:.4px!important;
+ }
+ #v035Index .v0551-boss-affinity{grid-template-columns:repeat(3,minmax(0,1fr))}
+ #v035Index .v0551-boss-quick{padding:7px}
+ #v035Index .v035-enemy-art{height:110px!important}
+}
