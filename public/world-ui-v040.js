@@ -19,12 +19,14 @@ function install(){
  '<button type="button" class="v047-hotspot v047-armor" data-v047-shop="armor" title="Armor shop"><span>🛡 ARMOR SHOP</span></button>'+
  '<button type="button" class="v047-hotspot v047-crystal" id="v047Adventure" aria-label="Adventure: open World Map"><span>✦ ADVENTURE</span></button>'+
  '</nav>'+
- '<div class="v040-city-inner"><p class="v040-kicker">✦ SOULBOUND · CENTRAL CITY ✦</p><h2 id="v040CityHeading">THE FORGOTTEN CAPITAL</h2>'+
- '<p id="v040CityText">Rest at the town, prepare your party, and choose a region to explore.</p>'+
- '<div class="v040-city-actions"><button id="v040WorldOpen" class="gold" type="button">🗺 WORLD MAP · เลือกแมพ</button>'+
- '<button id="v040Merchant" type="button">🏪 MERCHANT</button><button id="v040Bag" type="button">⚔ EQUIPMENT & BAG</button>'+
- '<button id="v040BackCity" type="button" hidden>🏰 BACK TO CITY</button></div>'+
- '<small id="v040PartyNote">Party leader selects a region. Each member keeps personal rewards.</small></div>';
+ '<div class="v040-city-inner" aria-label="City utility controls">'+
+ '<h2 id="v040CityHeading" class="v048-visually-hidden">THE FORGOTTEN CAPITAL</h2>'+
+ '<p id="v040CityText" class="v048-visually-hidden">Visit a shop or click the crystal to adventure.</p>'+
+ '<button id="v040WorldOpen" type="button" class="v048-visually-hidden" tabindex="-1">WORLD MAP</button>'+
+ '<button id="v040Merchant" type="button" class="v048-visually-hidden" tabindex="-1">MERCHANT</button>'+
+ '<button id="v040Bag" type="button" class="v048-city-gear" title="Open equipment and inventory">🎒 BAG</button>'+
+ '<button id="v040BackCity" type="button" class="v048-city-return" hidden>↩ RETURN TO CITY</button>'+
+ '<small id="v040PartyNote" class="v048-visually-hidden">Party controls</small></div>';
  $("arena").before(city);
  const dock=document.querySelector("#game .stage-actions");
  if(dock){
