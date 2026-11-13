@@ -57,14 +57,14 @@ app.get("/api/index",(_,res)=>{
   races:races.map(({id,name,rarity,icon,weight,passive,buffs})=>({id,name,rarity:rarity==="legend"?"legendary":rarity,icon,chance:weight,passive,buffs})),
   monsters:enemies,items:[...goods,...drops],zones:world.regions.map(r=>({name:r.name,css:r.css,hint:r.hint,stages:r.firstStage+"–"+r.bossStage}))});
 });
-function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,shopCategory:r.shopCategory||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),log:r.log.slice(-14),chat:(r.chat||[]).slice(-40)}}
+function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,shopCategory:r.shopCategory||null,shopOrigin:r.shopOrigin||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),log:r.log.slice(-14),chat:(r.chat||[]).slice(-40)}}
 function emit(r){io.to(r.code).emit("state",publicRoom(r))}function say(r,m){r.log.push(m);if(r.log.length>40)r.log.shift()}
 function createRoom(code){const r={code,stage:1,regionIndex:0,monster:null,players:new Map(),turnIndex:0,status:"city",log:[],chat:[]};rooms.set(code,r);return r}
 function findRoom(s){return [...rooms.values()].find(r=>r.players.has(s.id))}function current(r){const a=[...r.players.values()];return a.length?a[r.turnIndex%a.length]:null}function alive(r){return [...r.players.values()].filter(p=>p.hp>0)}
 function player(id,name,c="swordsman",gender="male"){const mage=c==="mage",tank=c==="tank";return{id,name:cleanName(name),gender:gender==="female"?"female":"male",inventory:[],weaponItem:null,armorItem:null,foodItems:{roast_meat:0,herb_stew:0,mana_tart:0},foodBuffs:{atk:0,def:0,skill:0},classId:tank?"tank":mage?"mage":"swordsman",className:tank?"Tank":mage?"Mage":"Swordsman",hp:tank?180:mage?120:130,maxHp:tank?180:mage?120:130,mp:tank?55:mage?65:40,maxMp:tank?55:mage?65:40,level:1,xp:0,gold:80,potions:3,manaPotions:2,smallHealth:3,mediumHealth:0,largeHealth:0,smallMana:2,mediumMana:0,largeMana:0,classPath:null,tauntTurns:0,damageAmpTurns:0,damageReductionTurns:0,atk:tank?16:mage?25:22,def:tank?16:mage?8:10,weapon:tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",armor:tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",raceId:"human",racePoints:0,raceName:"Human",raceRarity:"common",racePassive:races[0].passive,raceBuffs:races[0].buffs,strength:0,vitality:0,intelligence:0,agility:0,statPoints:0,speed:10,cooldowns:{},worldProgress:world.normalizeProgress(null)}}
 function monsterStrike(r){if(r.status!=="battle"||!r.monster||r.monster.hp<=0)return;const a=alive(r);if(!a.length){r.status="defeat";say(r,"The party has fallen.");return}const taunted=a.filter(p=>p.classId==="tank"&&(p.tauntTurns||0)>0),pool=taunted.length?taunted:a,target=pool[Math.floor(Math.random()*pool.length)];let raw=Math.max(1,r.monster.atk-target.def),foodGuard=target.foodBuffs?.def>0?.8:1,classReduction=target.classPath==="knight"?.9:target.classPath==="guardian"?.88:1,reduction=(target.damageReductionTurns>0?.8:1)*classReduction,hit=Math.max(1,Math.floor(raw*reduction*foodGuard*(1-raceById(target.raceId).reduce)));target.hp=Math.max(0,target.hp-hit);say(r,r.monster.name+" strikes "+target.name+" for "+hit+" damage.");if(target.foodBuffs?.def>0)target.foodBuffs.def--;for(const p of r.players.values()){if(p.tauntTurns>0)p.tauntTurns--;if(p.damageReductionTurns>0)p.damageReductionTurns--}if(r.monster.vulnerableTurns>0)r.monster.vulnerableTurns--;if(!alive(r).length){r.status="defeat";say(r,"The party has fallen.")}}
 function skipFallenTurn(r){if(r.status!=="battle")return;const players=[...r.players.values()];if(!players.length||!alive(r).length)return;let i=0;while(current(r)?.hp<=0&&i<players.length){r.turnIndex=(r.turnIndex+1)%players.length;i++}if(i>0)say(r,"Fallen party members are skipped until victory or defeat.")}
-function start(r){r.monster=encounter(r.stage);r.status="battle";
+function start(r){r.monster=encounter(r.stage);r.status="battle";r.shopOrigin=null;r.shopCategory=null;
  // Scale with current party size at battle start; preserve unchanged reward XP/GOLD.
  const partySize=Math.max(1,r.players.size),extra=partySize-1;
  const boss=!!r.monster.boss,mini=!!r.monster.miniBoss;
@@ -114,7 +114,7 @@ io.on("connection",s=>{
   const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a party first."});
   if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only the party leader can return to the city."});
   if(r.status==="battle")return cb({ok:false,error:"Finish the battle first."});
-  r.status="city";r.monster=null;r.stage=world.regions[r.regionIndex].firstStage;
+  r.status="city";r.shopOrigin=null;r.shopCategory=null;r.monster=null;r.stage=world.regions[r.regionIndex].firstStage;
   for(const p of r.players.values()){p.hp=p.maxHp;p.mp=p.maxMp;p.cooldowns={}}
   say(r,"The party returned to the Central City and rested.");emit(r);cb({ok:true});
  });
@@ -126,15 +126,33 @@ io.on("connection",s=>{
  else if(["mana","manaSmall","manaMedium","manaLarge"].includes(type)){const tier=type==="manaLarge"?"large":type==="manaMedium"?"medium":"small",key=tier+"Mana",pct=tier==="large"?.5:tier==="medium"?.35:.2;if((p[key]||0)<1||p.mp===p.maxMp)return cb({ok:false,error:"No mana potion of this size or MP is full."});p[key]--;p.manaPotions=Math.max(0,(p.manaPotions||0)-(tier==="small"?1:0));const n=Math.min(Math.ceil(p.maxMp*pct),p.maxMp-p.mp);p.mp+=n;say(r,p.name+" uses "+tier.toUpperCase()+" Mana Potion and restores "+n+" MP.")}
  else if(type==="food_roast"||type==="food_stew"||type==="food_tart"){const key=type==="food_roast"?"roast_meat":type==="food_stew"?"herb_stew":"mana_tart";if((p.foodItems?.[key]||0)<1)return cb({ok:false,error:"You do not have this food."});p.foodItems[key]--;p.foodBuffs=p.foodBuffs||{atk:0,def:0,skill:0};if(key==="roast_meat"){p.foodBuffs.atk=3;say(r,p.name+" eats Dragonpepper Roast: +15% damage for 3 attacks.")}else if(key==="herb_stew"){p.foodBuffs.def=3;say(r,p.name+" eats Guardian Herb Stew: -20% damage for the next 3 hits.")}else{const restored=Math.min(Math.ceil(p.maxMp*.3),p.maxMp-p.mp);p.mp+=restored;p.foodBuffs.skill=3;say(r,p.name+" eats Moonberry Tart: restores "+restored+" MP and boosts the next 3 skills by 10%.")}}else if(type==="guard"){p.mp=Math.min(p.maxMp,p.mp+8);say(r,p.name+" guards and recovers 8 MP.")}else return cb({ok:false,error:"Unknown action."});
  if(m.hp<=0){finish(r);emit(r);return cb({ok:true})}const previousIndex=r.turnIndex;nextTurn(r);if(r.status==="battle"&&r.turnIndex<=previousIndex)monsterStrike(r);skipFallenTurn(r);emit(r);cb({ok:true});});
- s.on("openShop",({category}={},cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Room not found."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can open shop."});if(!["city","regionClear","shop"].includes(r.status))return cb({ok:false,error:"Visit the merchant in the city after a dungeon run."});const cat=String(category||"potion");if(!["weapon","armor","potion"].includes(cat))return cb({ok:false,error:"Unknown shop category."});r.shopCategory=cat;r.status="shop";say(r,"The party visits the "+(cat==="weapon"?"weaponsmith":cat==="armor"?"armorer":"supplies merchant")+".");emit(r);cb({ok:true})});
- // Closing a merchant means leaving its panel, NOT returning from a dungeon:
- // preserve stage, HP/MP, cooldowns, region, progress and equipped inventory.
+ s.on("openShop",({category}={},cb=()=>{})=>{
+  const r=findRoom(s);
+  if(!r)return cb({ok:false,error:"Room not found."});
+  if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can open shop."});
+  const status=r.status;
+  const fromCity=status==="city"||(status==="shop"&&r.shopOrigin==="city");
+  const fromCamp=["victory","regionClear"].includes(status)||(status==="shop"&&r.shopOrigin==="camp");
+  if(!fromCity&&!fromCamp)return cb({ok:false,error:"Merchants can be visited in the city or after a cleared battle."});
+  const cat=fromCamp?"potion":String(category||"potion");
+  if(!["weapon","armor","potion"].includes(cat))return cb({ok:false,error:"Unknown shop category."});
+  r.shopOrigin=fromCamp?"camp":"city";
+  if(fromCamp&&status!=="shop")r.shopReturnStatus=status;
+  r.shopCategory=cat;
+  r.status="shop";
+  say(r,fromCamp?"The traveling merchant has set up camp after stage "+r.stage+".":"The party visits the "+(cat==="weapon"?"weaponsmith":cat==="armor"?"armorer":"supplies merchant")+".");
+  emit(r);cb({ok:true});
+ });
+ // Closing a merchant never calls returnCity or resets the dungeon.
  s.on("closeShop",(_,cb=()=>{})=>{
-  const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a party first."});
+  const r=findRoom(s);
+  if(!r)return cb({ok:false,error:"Join a party first."});
   if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only the party leader may close the shared merchant."});
   if(r.status!=="shop")return cb({ok:false,error:"The party is not visiting a shop."});
-  r.status="city";r.shopCategory=null;
-  say(r,"The merchant closes. The party remains in the Central City.");
+  const roadside=r.shopOrigin==="camp";
+  r.status=roadside&&["victory","regionClear"].includes(r.shopReturnStatus)?r.shopReturnStatus:"city";
+  r.shopOrigin=null;r.shopCategory=null;r.shopReturnStatus=null;
+  say(r,roadside?"The party leaves the roadside merchant and continues its adventure.":"The merchant closes. The party remains in the Central City.");
   emit(r);cb({ok:true});
  });
  s.on("buyItem",({itemId}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if(r.status!=="shop")return cb({ok:false,error:"Merchant is not here."});const it=shopItems.find(x=>x.id===itemId);if(!it)return cb({ok:false,error:"Item not found."});const allowed=r.shopCategory==="potion"?["potion","food"]:[r.shopCategory||"potion"];if(!allowed.includes(it.category))return cb({ok:false,error:"This shop does not sell that item."});if(it.class&&it.class!==p.classId)return cb({ok:false,error:"This equipment is for another class."});if(p.level<(it.level||1))return cb({ok:false,error:"Requires level "+it.level+"."});if(p.gold<it.price)return cb({ok:false,error:"Not enough gold."});if((it.slot==="weapon"||it.slot==="armor")&&loot.bagUsed(p)>=40)return cb({ok:false,error:"Inventory full (40/40). Free a slot before buying equipment."});p.gold-=it.price;if(itemId==="health_potion"){p.potions++;p.smallHealth=(p.smallHealth||0)+1}else if(itemId==="health_medium")p.mediumHealth=(p.mediumHealth||0)+1;else if(itemId==="health_large")p.largeHealth=(p.largeHealth||0)+1;else if(itemId==="mana_potion"){p.manaPotions++;p.smallMana=(p.smallMana||0)+1}else if(itemId==="mana_medium")p.mediumMana=(p.mediumMana||0)+1;else if(itemId==="mana_large")p.largeMana=(p.largeMana||0)+1;else if(it.category==="food"){p.foodItems=p.foodItems||{};p.foodItems[itemId]=(p.foodItems[itemId]||0)+1}else if(it.slot==="weapon"||it.slot==="armor"){p.inventory=p.inventory||[];p.inventory.push({...it,uid:require("node:crypto").randomUUID()});p.worldProgress=world.normalizeProgress(p.worldProgress);p.worldProgress.lootSeen=[...new Set([...(p.worldProgress.lootSeen||[]),it.id+":shop"])].slice(-300)}say(r,p.name+" bought "+it.name+".");emit(r);cb({ok:true})});
