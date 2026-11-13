@@ -108,7 +108,7 @@ function entryMarkup(item){
  const stat=isEnemy?"HP "+item.hp+" · ATK "+item.atk+" · DEF "+item.def:isRace?esc(item.passive):!isZone&&item.description?esc(item.description):"";
  const rarityTag=item.rarity?'<span class="v035-rarity v035-'+esc(item.rarity)+'">'+esc(item.rarity.toUpperCase())+'</span>':"";
  return '<button type="button" data-v035-entry="'+esc(uid(item))+'" class="v035-entry '+(uid(item)===selectedId?"active ":"")+(got?"v044-discovered":"")+'">'+
- '<span class="v035-entry-icon">'+esc(item.icon|| (isZone?"🗺️":"✦"))+'</span>'+(got?'<span class="v044-found-tag">✓ OWNED</span>':'')<span class="v035-entry-text"><strong>'+esc(item.name)+'</strong><small>'+sub+'</small><em>'+stat+'</em></span>'+rarityTag+'</button>';
+ '<span class="v035-entry-icon">'+esc(item.icon|| (isZone?"🗺️":"✦"))+'</span>'+(got?'<span class="v044-found-tag">✓ OWNED</span>':'')+'<span class="v035-entry-text"><strong>'+esc(item.name)+'</strong><small>'+sub+'</small><em>'+stat+'</em></span>'+rarityTag+'</button>';
 }
 function render(){
  const nav=$("v035Tabs");if(!nav||!data)return;
@@ -148,7 +148,7 @@ function itemDetail(e){
  const bonuses=Object.entries(labels).filter(([k])=>Number(e[k])>0).map(([key,l])=>'<span>'+l+' <b>+'+e[key]+'</b></span>').join("");
  return '<div class="v035-item-art">'+esc(e.icon||"✦")+'</div>'+
  '<div class="v035-stats">'+(bonuses||'<span>Utility item</span>')+'</div>'+
- ''<div class="v035-detail-info">'+(acquired({...e,kind:"item"})?'<p class="v044-owned-note">✓ ALREADY DISCOVERED</p>':'')+'<strong>ITEM TYPE</strong><p>'+esc(e.slot||e.category||"Supplies")+'</p>'+
+ '<div class="v035-detail-info">'+(acquired({...e,kind:"item"})?'<p class="v044-owned-note">✓ ALREADY DISCOVERED</p>':'')+'<strong>ITEM TYPE</strong><p>'+esc(e.slot||e.category||"Supplies")+'</p>'+
  (e.rarity?'<strong>RARITY</strong><p>'+esc(e.rarity.toUpperCase())+'</p>':'')+
  (e.source?'<strong>ACQUIRED FROM</strong><p><button type="button" class="v037-source-link" data-v037-boss="'+esc(e.sourceStage||e.bossStage)+'">👑 '+esc(e.source)+' · Stage '+esc(e.sourceStage||e.bossStage)+' →</button></p><strong>DROP CHANCE</strong><p>'+esc(e.chance)+'% per boss victory</p>':'')+
  (e.price!=null?'<strong>MERCHANT PRICE</strong><p>'+esc(e.price)+' gold</p>':'')+
