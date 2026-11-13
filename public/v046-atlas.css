@@ -1,0 +1,78 @@
+/* SOULBOUND v0.46 · one connected continent, eight clickable region pins, and real scenic previews.
+   Put LAST in index.html to override earlier World Atlas palette-only artwork.
+*/
+#v040WorldOverlay .v040-atlas{width:min(1270px,98vw)!important}
+#v040WorldOverlay .v040-atlas-grid{
+ grid-template-columns:minmax(0,1.52fr) minmax(310px,.8fr)!important;
+ align-items:stretch!important
+}
+#v040WorldOverlay .v040-map-canvas{
+ aspect-ratio:1024 / 656!important;
+ min-height:390px!important;
+ height:auto!important;
+ background:#1c5378!important;
+}
+#v040WorldOverlay .v040-land.v046-world-art{
+ display:block;position:absolute;inset:0;width:100%;height:100%;
+ object-fit:fill!important;image-rendering:auto;
+ user-select:none;pointer-events:none;
+}
+#v040WorldOverlay .v040-pin{
+ width:42px;height:42px;border-width:2px;
+ background:#1b2742e8;box-shadow:0 2px 9px #001329bb;
+ transition:transform .15s ease,box-shadow .15s ease;
+}
+#v040WorldOverlay .v040-pin:hover{transform:translate(-50%,-50%) scale(1.09)}
+#v040WorldOverlay .v046-city-pin{
+ width:50px;height:50px;border-radius:7px;
+ background:linear-gradient(#2f6493,#142a4a);color:#fff2c0;
+ box-shadow:0 0 0 3px #ffe9a338,0 4px 15px #061329;
+ font-size:27px;line-height:1;
+}
+#v040WorldOverlay .v046-city-pin:hover{transform:translate(-50%,-50%) scale(1.08)}
+#v040WorldOverlay .v040-region-art{
+ background-color:#23344a!important;
+ background-size:cover!important;background-position:center!important;
+ background-repeat:no-repeat!important;
+}
+#v040WorldOverlay .v040-region-art .v040-art-cloud,
+#v040WorldOverlay .v040-region-art .v040-art-ridges,
+#v040WorldOverlay .v040-region-art .v040-art-landmark{display:none!important}
+#v040WorldOverlay .v040-region-art[data-v040-theme="cursed_wilds"]{
+ background-image:linear-gradient(0deg,#090e2070,transparent 58%),url("assets/scenes/ai-wilds.webp")!important
+}
+#v040WorldOverlay .v040-region-art[data-v040-theme="dreadforge_bastion"]{
+ background-image:linear-gradient(0deg,#090e2070,transparent 58%),url("assets/scenes/ai-ruins.webp")!important
+}
+#v040WorldOverlay .v040-region-art[data-v040-theme="ember_caverns"]{
+ background-image:linear-gradient(0deg,#090e2070,transparent 58%),url("assets/scenes/ai-cavern.webp")!important
+}
+#v040WorldOverlay .v040-region-art[data-v040-theme="hollow_sanctum"]{
+ background-image:linear-gradient(0deg,#090e2070,transparent 58%),url("assets/scenes/ai-hollow_sanctum.webp")!important
+}
+#v040WorldOverlay .v040-region-art[data-v040-theme="frostbound_peaks"]{
+ background-image:linear-gradient(0deg,#090e2070,transparent 58%),url("assets/scenes/ai-frost.webp")!important
+}
+#v040WorldOverlay .v040-region-art[data-v040-theme="titanfall_ruins"]{
+ background-image:linear-gradient(0deg,#090e2070,transparent 58%),url("assets/scenes/ai-titanfall_ruins.webp")!important
+}
+#v040WorldOverlay .v040-region-art[data-v040-theme="abyssal_rift"]{
+ background-image:linear-gradient(0deg,#090e2070,transparent 58%),url("assets/scenes/ai-abyssal_rift.webp")!important
+}
+#v040WorldOverlay .v040-region-art[data-v040-theme="eclipse_throne"]{
+ background-image:linear-gradient(0deg,#090e2070,transparent 58%),url("assets/scenes/ai-eclipse_throne.webp")!important
+}
+@media(max-width:850px){
+ #v040WorldOverlay .v040-atlas-grid{grid-template-columns:minmax(0,1.3fr) minmax(250px,.85fr)!important}
+ #v040WorldOverlay .v040-map-canvas{min-height:315px!important}
+ #v040WorldOverlay .v040-pin{width:36px;height:36px}
+ #v040WorldOverlay .v046-city-pin{width:43px;height:43px;font-size:22px}
+}
+@media(max-width:770px){
+ #v040WorldOverlay .v040-atlas-grid{display:block!important;overflow:auto!important}
+ #v040WorldOverlay .v040-map-canvas{height:auto!important;min-height:0!important;aspect-ratio:1024/656!important}
+ #v040WorldOverlay .v040-pin{width:32px;height:32px}
+ #v040WorldOverlay .v046-city-pin{width:36px;height:36px;font-size:18px}
+ #v040WorldOverlay .v040-pin span{font-size:15px}
+ #v040WorldOverlay .v040-pin b{font-size:9px}
+}

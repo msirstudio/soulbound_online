@@ -1,0 +1,29 @@
+name: SOULBOUND v0.46 World Atlas checks
+on:
+  push:
+    branches: [v0.46-organic-world-atlas]
+  pull_request:
+    branches: [v0.45-independent-loot-changelog]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check game JavaScript
+        run: |
+          node --check server.js
+          node --check public/world-ui-v040.js
+          node --check public/update-log-v045.js
+          node --check public/game.js
+      - name: Run all gameplay and UI tests
+        run: npm test
+      - name: Parse SVG markup
+        run: python3 -c "import xml.etree.ElementTree as E; E.parse('public/assets/world/forgotten-kingdom-v046.svg'); print('Map SVG XML valid')"

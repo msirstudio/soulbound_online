@@ -4,7 +4,8 @@
 "use strict";
 const $=id=>document.getElementById(id);
 let latest=null,player=null,leader=false,actions=null,selected=0,open=false,installed=false;
-const positions=[[13,27],[31,53],[47,73],[52,30],[31,12],[68,14],[83,55],[83,18]];
+// Atlas pin coordinates match the 1024×656 continental map illustration.
+const positions=[[21,54],[49,81],[75,77],[21,80],[39,22],[16,29],[84,44],[79,22]];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function install(){
  if(installed||!$("arena")||!$("game"))return;
@@ -26,20 +27,7 @@ function install(){
  const overlay=document.createElement("div");overlay.id="v040WorldOverlay";overlay.className="v040-overlay";overlay.hidden=true;
  overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");overlay.setAttribute("aria-label","World Map");
  overlay.innerHTML='<div class="v040-atlas"><header class="v040-atlas-head"><div><small>SOULBOUND · A NEW WORLD</small><h2>🗺 WORLD ATLAS</h2></div><button id="v040WorldClose" type="button" aria-label="Close world map">✕</button></header>'+
- '<div class="v040-atlas-grid"><div class="v040-map-canvas" id="v040MapCanvas"><svg class="v040-land" viewBox="0 0 640 410" preserveAspectRatio="none" aria-hidden="true">'+
- '<defs><linearGradient id="v040Ocean" x2="0.6" y2="1"><stop stop-color="#123347"/><stop offset="1" stop-color="#17182d"/></linearGradient></defs>'+
- '<rect width="640" height="410" fill="url(#v040Ocean)"/>'+
- '<path d="M50 78Q125 14 224 41L273 81 349 53 395 106 361 160 433 203 395 287 301 306 276 365 196 352 145 303 55 292 29 217Z" fill="#52664f" stroke="#bdad77" stroke-width="5"/>'+
- '<path d="M341 66Q408 21 487 49L594 34 617 121 566 191 595 263 548 338 446 342 403 287 429 206 387 144Z" fill="#6d5764" stroke="#bdad77" stroke-width="5"/>'+
- '<path d="M87 111Q146 151 187 161T267 217L315 251" stroke="#a4cfdb" stroke-width="11" fill="none" opacity=".7"/>'+
- '<path d="M181 329L270 282 350 179 470 147 520 81" stroke="#d2ae78" stroke-width="4" stroke-dasharray="7 10" fill="none"/>'+
- '<path d="M148 92L174 48 203 96M251 123L280 66 310 133M359 119L379 65 403 121M505 126L532 82 558 141" fill="#a5a8b7" stroke="#d6d9de" stroke-width="4"/>'+
- '<path d="M91 242l22-35 22 35-18-10zM145 269l21-42 24 42-22-12zM205 298l24-39 28 39-24-11z" fill="#214b32" stroke="#b4a376" stroke-width="3"/>'+
- '<circle cx="471" cy="264" r="41" fill="#342752" stroke="#ac85c7" stroke-width="3"/>'+
- '<circle cx="471" cy="264" r="22" fill="#1c1530" stroke="#916fae" stroke-width="3"/>'+
- '<circle cx="540" cy="93" r="38" fill="#d9b86d" opacity=".7"/><circle cx="554" cy="82" r="35" fill="#2a253b"/>'+
- '<text x="63" y="392" fill="#e4d1a5" font-size="18" font-family="Georgia" letter-spacing="3">THE FORGOTTEN KINGDOM</text>'+
- '</svg><div class="v040-map-pins" id="v040MapPins"></div></div>'+
+ '<div class="v040-atlas-grid"><div class="v040-map-canvas" id="v040MapCanvas"><img class="v040-land v046-world-art" src="assets/world/forgotten-kingdom-v046.svg" alt="" aria-hidden="true"><div class="v040-map-pins" id="v040MapPins"></div></div>'+
  '<section class="v040-map-detail" id="v040MapDetail" aria-live="polite"></section></div>'+
  '<footer class="v040-atlas-foot">Select a map pin to inspect the area. The leader may start a run if every party member meets the minimum level.</footer></div>';
  document.body.appendChild(overlay);
@@ -59,8 +47,14 @@ function partyAccess(r){return !!latest?.players?.length&&latest.players.every(p
 function drawAtlas(){
  if(!open)return;
  const regs=maps(),pins=$("v040MapPins");if(!pins)return;
- pins.innerHTML=regs.map((r,i)=>'<button type="button" class="v040-pin '+(i===selected?"selected ":"")+(levelAccess(r)?"":"locked")+'" data-v040-region="'+i+'" style="left:'+positions[i][0]+'%;top:'+positions[i][1]+'%" title="'+esc(r.name)+'" aria-label="View '+esc(r.name)+'"><span>'+r.icon+'</span><b>'+(i+1)+'</b></button>').join("");
- pins.querySelectorAll("button").forEach(b=>b.onclick=()=>{selected=Number(b.dataset.v040Region);drawAtlas()});
+ pins.innerHTML='<button type="button" id="v046CityPin" class="v040-pin v046-city-pin" style="left:51%;top:54%" title="Central Safe City · Lobby" aria-label="Central City — safe hub, return to your party">🏰</button>'+regs.map((r,i)=>'<button type="button" class="v040-pin '+(i===selected?"selected ":"")+(levelAccess(r)?"":"locked")+'" data-v040-region="'+i+'" style="left:'+positions[i][0]+'%;top:'+positions[i][1]+'%" title="'+esc(r.name)+'" aria-label="View '+esc(r.name)+'"><span>'+r.icon+'</span><b>'+(i+1)+'</b></button>').join("");
+ pins.querySelectorAll("button[data-v040-region]").forEach(b=>b.onclick=()=>{selected=Number(b.dataset.v040Region);drawAtlas()});
+ const cityPin=$("v046CityPin");
+ if(cityPin)cityPin.onclick=()=>{ // The hub already exists: leave world view and return to the central city panel.
+  if(latest?.status==="city")hide();
+  else if(["regionClear","defeat"].includes(latest?.status)&&leader){actions?.returnCity?.();hide()}
+  else hide();
+ };
  drawDetail();
 }
 function drawDetail(){
