@@ -182,7 +182,7 @@ if(showStagger){
 }
 const combatIntent=s.status==="battle"&&(s.monster?.boss||s.monster?.miniBoss)&&s.monster?.intent;
 $("v054CombatIntent").hidden=!combatIntent;
-$("v054CombatIntent").textContent=combatIntent?((combatIntent.charge||s.monster?.queuedMove?"⚠ CHARGING · ":"⚔ NEXT · ")+combatIntent.name.toUpperCase()+(combatIntent.scope==="all"?" · ALL HEROES":"")+(s.monster?.statusEffects?.length?" · DEBUFFED":"")):"";
+$("v054CombatIntent").textContent=combatIntent?((combatIntent.charge||s.monster?.queuedMove?"⚠ CHARGING · ":"⚔ NEXT · ")+combatIntent.name.toUpperCase()+(combatIntent.scope==="all"?" · ALL HEROES":"")+(combatIntent.targetName?" · TARGET "+combatIntent.targetName.toUpperCase():"")+(s.monster?.statusEffects?.length?" · DEBUFFED":"")):"";
 const teamConditions=s.players.flatMap(p=>(p.statusEffects||[]).map(effect=>p.name+": "+effect.id.toUpperCase()+" ("+effect.turns+")"));
 $("v054PartyStatuses").hidden=!teamConditions.length&&!(s.partyWardTurns>0);
 $("v054PartyStatuses").textContent=[...(s.partyWardTurns>0?["🛡 TEAM GUARD · "+s.partyWardTurns+" TURN(S)"]:[]),...teamConditions].join("  |  ");
