@@ -3,7 +3,7 @@
 "use strict";
 const entries=[
  {version:"0.46",date:"2026-11-13",title:"Continental World Atlas",notes:[
-  "Redesigned the world atlas as one irregular connected continent with eight distinct geographic biomes.",
+  "Replaced the world atlas with an actual generated pixel-art continent (raster WebP) containing eight distinct geographic biomes.",
   "Repositioned the eight region selection pins over their landmarks and added a central safe-city pin.",
   "Added the actual arena background art to each region preview panel while preserving all travel and level requirements."
  ]},
