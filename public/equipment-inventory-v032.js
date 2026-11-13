@@ -26,7 +26,7 @@ function init(){
  el.setAttribute("role","presentation");
  el.innerHTML='<div class="v032-scrim" data-v032-close></div><section class="v032-window" role="dialog" aria-modal="true" aria-labelledby="v032Title" tabindex="-1">'+
  '<header class="v032-head"><div><small>✦ SOULBOUND ONLINE · HERO LOADOUT</small><h2 id="v032Title">⚔ EQUIPMENT & INVENTORY</h2></div><button id="v032Close" type="button" aria-label="Close equipment and inventory">✕</button></header>'+
- '<div id="v044StatsBar" class="v044-stats-bar" aria-label="Current hero attributes"></div><div class="v032-content"><section class="v032-gear"><div class="v032-section-title">✦ EQUIPMENT · CLICK OR DRAG TO EQUIP ✦</div>'+
+ '<div id="v0485HeroOverview" class="v0485-overview" aria-label="Character status and progression"></div><div id="v044StatsBar" class="v044-stats-bar" aria-label="Primary battle stats"></div><div class="v032-content"><section class="v032-gear"><div class="v032-section-title">✦ EQUIPMENT · CLICK OR DRAG TO EQUIP ✦</div>'+
  '<div class="v032-paperdoll"><div class="v033-group-titles"><span>ARMOR</span><span>WEAPONS & ACCESSORIES</span></div><div id="v032Slots" class="v032-slots"></div><div class="v032-hero"><div id="v032HeroArt" class="v032-hero-art"></div><strong id="v032HeroName">HERO</strong><small id="v032HeroStats"></small></div></div>'+
  '<div class="v032-note" id="v032EquipStatus"></div></section>'+
  '<section class="v032-bag"><div class="v032-bag-top"><div class="v032-section-title">✦ INVENTORY ✦</div><span id="v032BagCount">0 ITEMS</span></div>'+
@@ -207,7 +207,27 @@ function draw(){
  }
  modal.querySelector("#v032HeroName").textContent=(me.name||"HERO").toUpperCase()+" · "+(me.className||me.classId||"");
  modal.querySelector("#v032HeroStats").textContent="LEVEL "+(me.level||1)+" · "+(me.className||me.classId||"");
- const stats=[["❤️ HP",me.hp,me.maxHp],["💠 MP",me.mp,me.maxMp],["⚔ ATK",me.atk],["🛡 DEF",me.def],["⚡ SPD",me.speed],["✦ LEVEL",me.level]];
+ const level=Math.max(1,Number(me.level)||1);
+ const raceName=String(me.raceName||({elf:"High Elf",dwarf:"Stoneborn",human:"Human",orc:"Orc",beastkin:"Beastkin",sylvan:"Sylvan",demon:"Demon",dragonkin:"Dragonkin",celestial:"Celestial",voidborn:"Voidborn"}[me.raceId]||me.raceId||"Human"));
+ const raceRarity=String(me.raceRarity||"common").toUpperCase();
+ const className=me.className||me.classId||"Adventurer";
+ const classPath=me.classPath ? String(me.classPath).replace(/_/g," ").toUpperCase() : (level>=15?"Not chosen":"Unlocks at LV 15");
+ const hp=Math.max(0,Number(me.hp)||0),maxHp=Math.max(1,Number(me.maxHp)||1);
+ const mp=Math.max(0,Number(me.mp)||0),maxMp=Math.max(1,Number(me.maxMp)||1);
+ const xp=Math.max(0,Number(me.xp)||0),xpNeed=level*100;
+ const pct=(value,max)=>Math.min(100,Math.max(0,value/max*100)).toFixed(2)+"%";
+ const meter=(name,value,max,kind)=>'<div class="v0485-meter v0485-'+kind+'"><div class="v0485-meter-head"><strong>'+name+'</strong><span>'+Math.floor(value).toLocaleString()+' / '+Math.floor(max).toLocaleString()+'</span></div><div class="v0485-meter-track" role="progressbar" aria-label="'+name+'" aria-valuemin="0" aria-valuemax="'+Math.floor(max)+'" aria-valuenow="'+Math.min(Math.floor(value),Math.floor(max))+'"><i style="width:'+pct(value,max)+'"></i></div></div>';
+ const growth=[["STR",me.strength],["VIT",me.vitality],["INT",me.intelligence],["AGI",me.agility]].map(([k,v])=>'<span>'+k+' <b>'+Math.max(0,Number(v)||0)+'</b></span>').join("");
+ const raceBuffs=Array.isArray(me.raceBuffs)?me.raceBuffs.join(" · "):String(me.raceBuffs||"");
+ modal.querySelector("#v0485HeroOverview").innerHTML=
+  '<div class="v0485-identity"><strong>'+esc(me.name||"HERO")+' <span>LV '+level+'</span></strong>'+
+  '<small>'+esc(className)+' · '+esc(classPath)+'</small>'+
+  '<div class="v0485-race"><b>'+esc(raceName)+' <span>['+esc(raceRarity)+']</span></b>'+
+  '<small>'+esc(me.racePassive||"Balanced and adaptable")+(raceBuffs?' · '+esc(raceBuffs):'')+'</small></div></div>'+
+  '<div class="v0485-vitals">'+meter("❤️ HP",hp,maxHp,"hp")+meter("💠 MP",mp,maxMp,"mp")+meter("✦ EXP",xp,xpNeed,"xp")+'</div>'+
+  '<div class="v0485-growth"><strong>GROWTH STATS <small>Available points: '+Math.max(0,Number(me.statPoints)||0)+'</small></strong>'+
+  '<div>'+growth+'</div><small>Race Points: '+Math.max(0,Number(me.racePoints)||0)+' · '+Math.max(0,Number(me.gold)||0).toLocaleString()+' Gold · '+inventory.filter(it=>!it.equippedSlot).length+'/40 Bag Slots</small></div>';
+ const stats=[["⚔ ATK",me.atk],["🛡 DEF",me.def],["⚡ SPD",me.speed]];
  modal.querySelector("#v044StatsBar").innerHTML=stats.map(([label,value,max])=>'<div class="v044-stat-box"><small>'+label+'</small><strong>'+Number(value||0).toLocaleString()+(max!=null?' / '+Number(max||0).toLocaleString():'')+'</strong></div>').join("");
  modal.querySelector("#v032BagCount").textContent=inventory.filter(it=>!it.equippedSlot).length+" / 40 BAG SLOTS · "+(me.gold||0)+" GOLD";
  const bag=inventory.filter(it=>!it.equippedSlot);
