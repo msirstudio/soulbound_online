@@ -38,24 +38,24 @@ function factory(id,rarity){
 // player per victory can award at most one item. Each boss has 1-4 possible
 // drops, each mini boss has 1-2 possible drops.
 const BOSS_DROPS={
- 1:[{slot:"main",rarity:"rare",chance:7},{slot:"ring_left",rarity:"uncommon",chance:10}],
- 2:[{slot:"chest",rarity:"uncommon",chance:8},{slot:"boots",rarity:"rare",chance:5},{slot:"offhand",rarity:"rare",chance:4}],
- 3:[{slot:"main",rarity:"epic",chance:3},{slot:"neck",rarity:"rare",chance:7},{slot:"pants",rarity:"uncommon",chance:8},{slot:"ring_left",rarity:"rare",chance:4}],
- 4:[{slot:"head",rarity:"rare",chance:8},{slot:"offhand",rarity:"epic",chance:4}],
- 5:[{slot:"pants",rarity:"epic",chance:5},{slot:"ring_left",rarity:"rare",chance:8},{slot:"boots",rarity:"uncommon",chance:8}],
- 6:[{slot:"main",rarity:"epic",chance:4},{slot:"neck",rarity:"legendary",chance:1.5},{slot:"offhand",rarity:"rare",chance:7},{slot:"head",rarity:"epic",chance:3}],
- 7:[{slot:"chest",rarity:"legendary",chance:2},{slot:"boots",rarity:"epic",chance:5},{slot:"ring_right",rarity:"rare",chance:6}],
- 8:[{slot:"main",rarity:"legendary",chance:2},{slot:"ring_left",rarity:"legendary",chance:1.5},{slot:"neck",rarity:"epic",chance:4},{slot:"chest",rarity:"legendary",chance:1}]
+ 1:[{slot:"main",rarity:"rare",chance:4},{slot:"ring_left",rarity:"uncommon",chance:6}],
+ 2:[{slot:"chest",rarity:"uncommon",chance:4},{slot:"boots",rarity:"rare",chance:3},{slot:"offhand",rarity:"rare",chance:3}],
+ 3:[{slot:"main",rarity:"epic",chance:2},{slot:"neck",rarity:"rare",chance:4},{slot:"pants",rarity:"uncommon",chance:5},{slot:"ring_left",rarity:"rare",chance:3}],
+ 4:[{slot:"head",rarity:"rare",chance:5},{slot:"offhand",rarity:"epic",chance:3}],
+ 5:[{slot:"pants",rarity:"epic",chance:4},{slot:"ring_left",rarity:"rare",chance:5},{slot:"boots",rarity:"uncommon",chance:4}],
+ 6:[{slot:"main",rarity:"epic",chance:3},{slot:"neck",rarity:"legendary",chance:1},{slot:"offhand",rarity:"rare",chance:4},{slot:"head",rarity:"epic",chance:2}],
+ 7:[{slot:"chest",rarity:"legendary",chance:3},{slot:"boots",rarity:"epic",chance:2},{slot:"ring_right",rarity:"rare",chance:4}],
+ 8:[{slot:"main",rarity:"legendary",chance:1.5},{slot:"ring_left",rarity:"legendary",chance:1},{slot:"neck",rarity:"epic",chance:2.5},{slot:"chest",rarity:"legendary",chance:1}]
 };
 const MINI_DROPS={
- 1:[{slot:"head",rarity:"uncommon",chance:11}],
- 2:[{slot:"offhand",rarity:"rare",chance:6},{slot:"boots",rarity:"uncommon",chance:9}],
- 3:[{slot:"chest",rarity:"rare",chance:10}],
- 4:[{slot:"neck",rarity:"rare",chance:7},{slot:"ring_left",rarity:"uncommon",chance:8}],
- 5:[{slot:"boots",rarity:"rare",chance:10}],
- 6:[{slot:"pants",rarity:"epic",chance:4},{slot:"head",rarity:"rare",chance:8}],
- 7:[{slot:"main",rarity:"epic",chance:4}],
- 8:[{slot:"neck",rarity:"epic",chance:5},{slot:"ring_left",rarity:"rare",chance:7}]
+ 1:[{slot:"head",rarity:"uncommon",chance:7}],
+ 2:[{slot:"offhand",rarity:"rare",chance:4},{slot:"boots",rarity:"uncommon",chance:4}],
+ 3:[{slot:"chest",rarity:"rare",chance:7}],
+ 4:[{slot:"neck",rarity:"rare",chance:4},{slot:"ring_left",rarity:"uncommon",chance:4}],
+ 5:[{slot:"boots",rarity:"rare",chance:6}],
+ 6:[{slot:"pants",rarity:"epic",chance:3},{slot:"head",rarity:"rare",chance:4}],
+ 7:[{slot:"main",rarity:"epic",chance:3}],
+ 8:[{slot:"neck",rarity:"epic",chance:3},{slot:"ring_left",rarity:"rare",chance:3}]
 };
 function lootRows(region,isMini=false){
  const num=Math.round(Number(region)),set=isMini?MINI_DROPS:BOSS_DROPS;
