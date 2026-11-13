@@ -27,6 +27,12 @@ const REGIONS=Object.freeze({
  hollow_sanctum:"arcane",frostbound_peaks:"ice",titanfall_ruins:"earth",
  abyssal_rift:"void",eclipse_throne:"light"
 });
+// Two existing mini-bosses provide real Water/Lightning enemy types
+// without changing stages, art, save data, or boss phase rules.
+const MINI_ELEMENTS=Object.freeze({
+ 4:{element:"water",reason:"Rootbound Guardian commands the flooded roots."},
+ 9:{element:"lightning",reason:"Ironbound Executioner channels storm energy through its armor."}
+});
 const BOSS_EXCEPTIONS=Object.freeze({
  dreadforge_bastion:{
   weak:["ice"],resist:[],
@@ -60,12 +66,13 @@ const AFFINITIES=Object.freeze(Object.fromEntries(Object.entries(REGIONS).map(([
 })));
 function profileFor(monster={}){
  const region=AFFINITIES[monster.regionId]||AFFINITIES.cursed_wilds;
- const original=monster.phase===2&&region.phase2?region.phase2:region;
+ const mini=monster.miniBoss?MINI_ELEMENTS[Number(monster.stage)]:null;
+ const original=mini?baseAffinity(mini.element):monster.phase===2&&region.phase2?region.phase2:region;
  const special=monster.boss&&monster.phase!==2?BOSS_EXCEPTIONS[monster.regionId]:null;
  const weak=[...original.weak],resist=[...original.resist];
  for(const el of special?.weak||[])if(relation(el,original.element)==="neutral"&&!weak.includes(el))weak.push(el);
  for(const el of special?.resist||[])if(relation(el,original.element)==="neutral"&&!resist.includes(el))resist.push(el);
- return {element:original.element,weak,resist,
+ return {element:original.element,weak,resist,miniNote:mini?.reason||null,
   extraWeak:special?.weak||[],extraResist:special?.resist||[],
   exceptionReason:special?.reason||null,
   phase2:region.phase2||null};
@@ -91,10 +98,11 @@ function codexAffinities(){
  return Object.entries(REGIONS).map(([regionId,element])=>({
   regionId,...baseAffinity(element),
   bossExtraWeak:BOSS_EXCEPTIONS[regionId]?.weak||[],
+  miniElement:Object.entries(MINI_ELEMENTS).find(([stage])=>Math.ceil(Number(stage)/5)===Object.keys(REGIONS).indexOf(regionId)+1)?.[1]?.element||null,
   bossExtraResist:BOSS_EXCEPTIONS[regionId]?.resist||[],
   exceptionReason:BOSS_EXCEPTIONS[regionId]?.reason||null,
   phase2:AFFINITIES[regionId].phase2||null
  }));
 }
-module.exports={ELEMENTS,STRONG_VS,REGIONS,BOSS_EXCEPTIONS,OUTCOMES,AFFINITIES,
+module.exports={ELEMENTS,STRONG_VS,REGIONS,BOSS_EXCEPTIONS,MINI_ELEMENTS,OUTCOMES,AFFINITIES,
  relation,baseAffinity,profileFor,multiplier,codexElements,codexAffinities};
