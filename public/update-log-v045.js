@@ -2,6 +2,15 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.55.2",date:"2026-11-14",title:"Elemental Rules — Water, Lightning & Clear Matchups",notes:[
+  "The game now has 10 damage types: Physical plus nine elements (including new Water and Lightning).",
+  "The Adventure INDEX shows a single consistent elemental matchup table: strong ×1.20, resisted/same type ×0.80, neutral/Physical ×1.00.",
+  "Light and Void have a clearly labeled mutual weakness. Boss exceptions add weaknesses or resistance only to otherwise neutral matchups.",
+  "The Dreadforge Champion gains a special Ice weakness; the Briarfang Alpha resists Void through its ancient roots.",
+  "Mage gains Tidal Surge (Water, LV 7) and Thunderbolt (Lightning, LV 9), both calculated on the server using the actual chart.",
+  "Bosses in Cursed Wilds and Dreadforge can use Water and Lightning attacks, respectively, which are documented in INDEX.",
+  "No save migration, loot rate, Gold, progression or party structure changes."
+ ]},
  {version:"0.55.1",date:"2026-11-14",title:"Adventure INDEX & Status UI Fix",notes:[
   "Fixed stale INDEX scripts by loading a new versioned Index file; new ELEMENTS, STATUS and COMBAT RULES tabs now appear from live Codex data.",
   "Boss and monster entries display their element, weak/resist affinities and actual move names immediately above their artwork. Full attack effect chances stay visible below.",

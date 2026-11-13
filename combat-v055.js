@@ -3,26 +3,8 @@
    All statuses, stagger and encounter AI live in memory only. No SQL/save migration.
  */
 const base=require("./combat-v054");
-const ELEMENTS=Object.freeze({
- physical:{name:"Physical",icon:"⚔️",description:"Neutral weapon damage; reliable against every region."},
- nature:{name:"Nature",icon:"🌿",description:"Wild magic and bleeding thorn attacks."},
- fire:{name:"Fire",icon:"🔥",description:"Burning attacks and fire-related damage."},
- ice:{name:"Ice",icon:"❄️",description:"Cold attacks; can inflict Freeze."},
- arcane:{name:"Arcane",icon:"🔮",description:"Magical attacks, curses and arcane bursts."},
- earth:{name:"Earth",icon:"🪨",description:"Stone, metal and ground-impact attacks."},
- void:{name:"Void",icon:"🌌",description:"Rift damage and poisonous void magic."},
- light:{name:"Light",icon:"✨",description:"Sacred or eclipse light magic."}
-});
-const AFFINITIES=Object.freeze({
- cursed_wilds:{element:"nature",weak:["fire"],resist:["nature"]},
- dreadforge_bastion:{element:"earth",weak:["ice"],resist:["earth"]},
- ember_caverns:{element:"fire",weak:["ice"],resist:["fire"]},
- hollow_sanctum:{element:"arcane",weak:["void"],resist:["arcane"]},
- frostbound_peaks:{element:"ice",weak:["fire"],resist:["ice"]},
- titanfall_ruins:{element:"earth",weak:["arcane"],resist:["earth"]},
- abyssal_rift:{element:"void",weak:["light"],resist:["void"]},
- eclipse_throne:{element:"light",weak:["void"],resist:["light"],phase2:{element:"void",weak:["light"],resist:["void"]}}
-});
+const elemental=require("./elemental-v0552");
+const {ELEMENTS,AFFINITIES}=elemental;
 const STATUS_CODEX=Object.freeze([
  {id:"burn",name:"Burn",icon:"🔥",effect:"Lose 4.5% Max HP on the affected hero's turn.",counter:"Cleanse, Fire resistance, or reduce status chance.",turns:2},
  {id:"poison",name:"Poison",icon:"☠️",effect:"Lose 3.2% Max HP on the affected hero's turn.",counter:"Cleanse or status resistance.",turns:2},
@@ -36,8 +18,7 @@ const CONTROL=new Set(["freeze","stun"]);
 const raceElementResist=Object.freeze({elf:{arcane:.12,ice:.08},dwarf:{earth:.15},sylvan:{nature:.15},dragonkin:{fire:.15},celestial:{light:.15},voidborn:{void:.15}});
 const clamp=(x,min,max)=>Math.max(min,Math.min(max,x));
 const profileFor=m=>{
- const record=AFFINITIES[m?.regionId]||AFFINITIES.cursed_wilds;
- return record.phase2&&m?.phase===2?record.phase2:record;
+ return elemental.profileFor(m);
 };
 const heroElementResistance=(p,element)=>{
  const fromRace=(raceElementResist[p?.raceId]||{})[element]||0;
@@ -45,9 +26,7 @@ const heroElementResistance=(p,element)=>{
  return clamp(fromRace+fromPath,0,.5);
 };
 function elementMultiplier(target,element){
- if(!ELEMENTS[element]||element==="physical")return 1;
- const affinity=profileFor(target);
- return affinity.weak.includes(element)?1.2:affinity.resist.includes(element)?.8:1;
+ return elemental.multiplier(target,element);
 }
 function statusResistance(p,id,element){
  let amount=.05;
@@ -97,9 +76,20 @@ function beforeAction(r,p,say){
  if(p.hp<=0){skip=true;say(r,p.name+" falls to a status effect.");}
  return {skip};
 }
+// Two regional bonus attacks make the new elements visible in enemy combat too.
+const SECONDARY_MOVES=Object.freeze({
+ cursed_wilds:{name:"Monsoon Surge",scope:"all",element:"water",power:.62,effect:"weaken",chance:.35,charge:true},
+ dreadforge_bastion:{name:"Stormhammer",scope:"single",element:"lightning",power:1.06,effect:"stun",chance:.20,charge:true}
+});
 function moveFor(m,r){
  const original=base.moveFor(m);
+ if(m?.miniBoss&&elemental.MINI_ELEMENTS[Number(m.stage)]&&original.name!=="Strike"){
+  const special=SECONDARY_MOVES[m.regionId];
+  if(special)return {...special,name:"Lesser "+special.name,power:Math.min(.8,special.power),chance:special.chance*.65,charge:false};
+ }
  if(!m?.boss||original.name!=="Strike"||m.queuedMove)return original;
+ if(SECONDARY_MOVES[m.regionId]&&m.combatTurn>0&&m.combatTurn%7===2)
+  return SECONDARY_MOVES[m.regionId];
  const pct=m.hp/Math.max(1,m.maxHp);
  const elem=profileFor(m).element;
  if(pct<.4&&m.combatTurn>0&&m.combatTurn%4===0)
@@ -197,11 +187,13 @@ function applyDefeatPenalty(r,say){
  }
  return true;
 }
-const SKILL_COSTS=Object.freeze({skill:[12,1],skill2:[25,3],skill3:[20,5],skill4:[30,8],skill5:[24,5],break:[15,1],cleanse:[12,1]});
+const SKILL_COSTS=Object.freeze({skill:[12,1],skill2:[25,3],skill3:[20,5],skill4:[30,8],skill5:[24,5],
+ skill6:[22,7],skill7:[26,9],break:[15,1],cleanse:[12,1]});
 function validateAction(p,type,r){
  if(!p||typeof type!=="string")return "Invalid action.";
  if(type==="attack"||type==="guard")return null;
  if(SKILL_COSTS[type]){
+  if(["skill6","skill7"].includes(type)&&p.classId!=="mage")return "Only mages can cast this spell.";
   const [baseCost,level]=SKILL_COSTS[type];
   const cost=p.raceId==="elf"?Math.floor(baseCost*.95):baseCost;
   if(p.level<level)return "Unlocks at level "+level+".";
@@ -225,7 +217,7 @@ function validateAction(p,type,r){
  return "Unknown action.";
 }
 function skillElement(p,type){
- if(p.classId==="mage")return ({skill:"arcane",skill2:"fire",skill3:"ice",skill4:"arcane",skill5:"arcane"})[type]||"physical";
+ if(p.classId==="mage")return ({skill:"arcane",skill2:"fire",skill3:"ice",skill4:"arcane",skill5:"arcane",skill6:"water",skill7:"lightning"})[type]||"physical";
  if(p.classPath==="paladin"&&type==="skill4")return "light";
  return "physical";
 }
@@ -233,12 +225,16 @@ function enemyCodex(m){
  const affinity=profileFor({...m,phase:1});
  const signature=base.BOSS_SPECIALS[m.regionId]||base.BOSS_SPECIALS.cursed_wilds;
  const mini=!!m.miniBoss;
- const original=mini?{...signature,name:"Lesser "+signature.name,power:Math.min(.8,signature.power),chance:signature.chance*.65}:signature;
+ const miniSpecial=mini&&elemental.MINI_ELEMENTS[Number(m.stage)]?SECONDARY_MOVES[m.regionId]:null;
+ const original=mini?{...(miniSpecial||signature),name:"Lesser "+(miniSpecial||signature).name,
+  power:Math.min(.8,(miniSpecial||signature).power),chance:(miniSpecial||signature).chance*.65}:signature;
  const moves=[
   {name:"Strike",scope:"single",element:"physical",power:1,effect:null,chance:0,charge:false,description:"Basic physical strike."},
   ...(m.boss||m.miniBoss?[{...original,charge:!mini,description:mini?"Reduced-strength signature move.":"Signature attack with one warning/charge turn."}]:[])
  ];
  if(m.boss){
+  if(SECONDARY_MOVES[m.regionId])
+   moves.push({...SECONDARY_MOVES[m.regionId],description:"Regional elemental attack used during the boss's attack rotation."});
   moves.push({name:"Frenzied Sweep",scope:"all",element:affinity.element,power:.64,effect:null,chance:0,charge:false,description:"Adaptive group attack when HP drops below 40%."});
   moves.push({name:"Crowd Breaker",scope:"all",element:affinity.element,power:.56,effect:null,chance:0,charge:false,description:"Adaptive attack against parties of at least 3 players."});
  }
@@ -248,15 +244,19 @@ function enemyCodex(m){
  return {
   element:affinity.element,weak:affinity.weak,resist:affinity.resist,
   phase2:!!base.canPhaseTwo(m),
-  phase2Affinity:AFFINITIES[m.regionId]?.phase2||null,
+  phase2Affinity:base.canPhaseTwo(m)?profileFor({...m,phase:2}):null,
+  bossExceptions:(m.boss&&m.phase!==2)?{extraWeak:affinity.extraWeak,extraResist:affinity.extraResist,reason:affinity.exceptionReason}:null,
+  miniElementNote:affinity.miniNote||null,
   moves,staggerThreshold:staggerThreshold(m),
   dropsStatus:[...new Set(moves.map(x=>x.effect).filter(Boolean))]
  };
 }
 function codexData(){
  return {
-  elements:Object.entries(ELEMENTS).map(([id,o])=>({id,...o})),
-  affinities:Object.entries(AFFINITIES).map(([regionId,o])=>({regionId,...o})),
+  elements:elemental.codexElements(),
+  affinities:elemental.codexAffinities(),
+  chart:{strongVs:elemental.STRONG_VS,damage:elemental.OUTCOMES,
+   priority:"Boss-only documented exceptions (neutral relations only) > core elemental chart > neutral. Same-element attacks are resisted; Physical stays neutral. Light and Void are mutually super effective."},
   statusEffects:STATUS_CODEX,
   combatRules:{
    weaknessMultiplier:1.2,resistanceMultiplier:.8,dotCapPercent:10,
@@ -267,13 +267,13 @@ function codexData(){
    cleanse:"CLEANSE costs 12 MP, cooldown 3, removes all ailments from the most affected living ally. A stunned ally can be cleansed by a teammate.",
    defeat:"On party defeat every hero loses 8% carried Gold (maximum 2000 Gold). Used consumables are not restored. No EXP or equipment loss.",
    solo:"Boss Stagger threshold scales with party size so solo players can interrupt with planning.",
-   elementalSources:"Mage Arcane Bolt=Arcane, Meteor=Fire, Frost Nova=Ice, Arcane Surge/Mark=Arcane. Other attacks are Physical, except Paladin Rallying Slash=Light.",
-   damage:"Weak element ×1.20; resisted element ×0.80; neutral ×1.00."
+   elementalSources:"Mage Arcane Bolt=Arcane, Meteor=Fire, Frost Nova=Ice, Arcane Surge/Mark=Arcane, Tidal Surge=Water (LV 7), Thunderbolt=Lightning (LV 9). Other attacks are Physical, except Paladin Rallying Slash=Light.",
+   damage:"A strong attack against the defender's element: ×1.20; a resisted attack: ×0.80; neutral or Physical: ×1.00. Same element resists. Light and Void beat each other. Boss extras only add weaknesses or resistances to neutral pairs."
   }
  };
 }
 module.exports={
- ...base,ELEMENTS,AFFINITIES,STATUS_CODEX,SKILL_COSTS,profileFor,
+ ...base,ELEMENTS,AFFINITIES,SECONDARY_MOVES,elementalChart:elemental.STRONG_VS,STATUS_CODEX,SKILL_COSTS,profileFor,
  heroElementResistance,elementMultiplier,statusResistance,applyStatus,beforeAction,
  moveFor,beginEncounter,checkPhase:phaseChange,staggerThreshold,addStagger,
  guard,cleanse,monsterStrike,applyDefeatPenalty,validateAction,skillElement,

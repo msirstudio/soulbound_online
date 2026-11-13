@@ -61,8 +61,8 @@ test("inventory overview reads real player progression and preserves item action
 test("v0.55 release links and version are aligned",()=>{
  const html=read("public/index.html"),log=read("public/update-log-v045.js");
  const pkg=require("../package.json");
- assert.equal(pkg.version,"0.55.1");
- assert.ok(html.includes("VERSION 0.55.1 · INDEX FIX"));
+ assert.equal(pkg.version,"0.55.2");
+ assert.ok(html.includes("VERSION 0.55.2 · ELEMENTAL RULES"));
  assert.ok(html.includes('href="v0485-character-overview.css"'));
  assert.ok(log.includes('version:"0.55"'));
 });

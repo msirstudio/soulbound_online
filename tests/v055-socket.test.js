@@ -23,9 +23,9 @@ function harness(){
 }
 test("live INDEX API returns 8 boss records, exact move chances, element matrix and all new guide tabs",()=>{
  const g=harness(),d=g.catalog();
- assert.equal(d.version,"0.55.1");
+ assert.equal(d.version,"0.55.2");
  for(const category of ["elements","statuses","combat"])assert.ok(d.categories.includes(category));
- assert.equal(d.codex.elements.length,8);assert.equal(d.codex.statusEffects.length,7);
+ assert.equal(d.codex.elements.length,10);assert.equal(d.codex.statusEffects.length,7);
  assert.equal(d.monsters.length,40);
  assert.equal(d.monsters.filter(x=>x.boss).length,8);
  for(const stage of [5,10,15,20,25,30,35,40]){

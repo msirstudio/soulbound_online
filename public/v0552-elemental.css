@@ -1,0 +1,17 @@
+/* v0.55.2 — elemental chart and optional Mage spells, minimal HUD impact. */
+#v035Index .v0552-element-advantage{display:grid;gap:8px;margin:9px 0;padding:10px 12px;
+ border:1px solid #917758;border-radius:7px;background:linear-gradient(135deg,#242538,#151e2a)}
+#v035Index .v0552-element-advantage strong{font:700 11px Georgia,serif;color:#f3daab}
+#v035Index .v0552-element-advantage p{margin:0!important;color:#dce3ed;
+ font:12px/1.5 Georgia,"Noto Sans Thai",serif;overflow-wrap:anywhere}
+#game [data-action="skill6"],#game [data-action="skill7"]{
+ border-color:#827aaa!important;color:#dff3ff!important;
+ background:linear-gradient(130deg,#253b51,#25203c)!important;
+ white-space:normal!important;
+}
+#game [data-action="skill6"]:disabled,#game [data-action="skill7"]:disabled{opacity:.43!important}
+@media(max-width:650px){
+ #v035Index .v0552-element-advantage{padding:7px 9px}
+ #v035Index .v0552-element-advantage strong{font-size:10px}
+ #v035Index .v0552-element-advantage p{font-size:11px}
+}
