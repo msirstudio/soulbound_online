@@ -14,7 +14,10 @@ const opts=[
  {id:"accessories",label:"ACCESSORIES",icon:"💍"},
  {id:"food",label:"FOOD",icon:"🍖"},
  {id:"consumables",label:"POTIONS",icon:"🧪"},
- {id:"zones",label:"WORLD",icon:"🗺️"}
+ {id:"zones",label:"WORLD",icon:"🗺️"},
+ {id:"elements",label:"ELEMENTS",icon:"🔥"},
+ {id:"statuses",label:"STATUS",icon:"☠️"},
+ {id:"combat",label:"COMBAT RULES",icon:"📜"}
 ];
 let data=null,category="bosses",search="",rarity="all",selectedId="",lastFocus=null,loading=false,hero=null;
 const discoveries=()=>hero?.worldProgress||{};
@@ -37,7 +40,7 @@ function init(){
  else if(game)game.appendChild(btn);
  const node=document.createElement("div");node.id="v035Index";node.className="v035-overlay";node.hidden=true;
  node.innerHTML='<div class="v035-scrim" data-v035-dismiss></div><section class="v035-window" role="dialog" aria-modal="true" aria-labelledby="v035Heading" tabindex="-1">'+
- '<header class="v035-title"><div><small>THE FORGOTTEN KINGDOM · FIELD ARCHIVE</small><h2 id="v035Heading">📖 ADVENTURE INDEX</h2><span class="v035-subtitle">Monsters · Bosses · Equipment · Supplies · The World</span></div><button type="button" id="v035Exit" aria-label="Close index">✕</button></header>'+
+ '<header class="v035-title"><div><small>THE FORGOTTEN KINGDOM · FIELD ARCHIVE</small><h2 id="v035Heading">📖 ADVENTURE INDEX</h2><span class="v035-subtitle">Boss Skills · Element Weaknesses · Status Effects · Combat Rules · Equipment</span></div><button type="button" id="v035Exit" aria-label="Close index">✕</button></header>'+
  '<div class="v035-toolbar"><label class="v035-search">⌕ <input id="v035Search" type="search" placeholder="Search names, items, stage, boss..." autocomplete="off"></label>'+
  '<label class="v035-filter">RARITY <select id="v035Rarity"><option value="all">All rarities</option><option value="common">Common</option><option value="uncommon">Uncommon</option><option value="rare">Rare</option><option value="epic">Epic</option><option value="legendary">Legendary</option></select></label></div>'+
  '<div class="v035-body"><nav id="v035Tabs" class="v035-tabs" aria-label="Index categories"></nav><main class="v035-main"><div class="v035-list-head"><strong id="v035CategoryTitle">BOSSES</strong><small id="v035Count">Loading...</small></div><div class="v035-results" id="v035Results"></div></main><aside id="v035Details" class="v035-details"><p>Select an entry to see its stats and origin.</p></aside></div>'+
@@ -96,16 +99,19 @@ function entries(){
  else if(category==="monsters")out=(data.monsters||[]).filter(x=>!x.boss).map(x=>({...x,kind:"enemy"}));
  else if(category==="races")out=(data.races||[]).map(x=>({...x,kind:"race"}));
  else if(category==="zones")out=(data.zones||[]).map((x,i)=>({...x,id:"zone-"+i,kind:"zone"}));
+ else if(category==="elements")out=(data.codex?.elements||[]).map(x=>({...x,kind:"element"}));
+ else if(category==="statuses")out=(data.codex?.statusEffects||[]).map(x=>({...x,kind:"status"}));
+ else if(category==="combat")out=Object.entries(data.codex?.combatRules||{}).map(([id,description])=>({id,name:id.replace(/([A-Z])/g," $1").toUpperCase(),description,icon:"📜",kind:"rule"}));
  else out=(data.items||[]).filter(x=>x.category===category).map((x,i)=>({...x,kind:"item",recordId:x.uid||[x.id,x.rarity||"shop",x.source||"shop",i].join("::")}));
- if(!["bosses","monsters","zones"].includes(category)&&rarity!=="all")out=out.filter(x=>(x.rarity||"common")===rarity);
- if(search)out=out.filter(x=>[x.name,x.source,x.zone,x.stage,x.slot,x.description,x.rarity,x.stages,x.hint,x.passive,...(x.buffs||[])].some(v=>String(v||"").toLowerCase().includes(search)));
+ if(!["bosses","monsters","zones","elements","statuses","combat"].includes(category)&&rarity!=="all")out=out.filter(x=>(x.rarity||"common")===rarity);
+ if(search)out=out.filter(x=>[x.name,x.source,x.zone,x.stage,x.slot,x.description,x.rarity,x.stages,x.hint,x.passive,x.effect,x.counter,x.element,...(x.weak||[]),...(x.resist||[]),...(x.buffs||[])].some(v=>String(v||"").toLowerCase().includes(search)));
  return out;
 }
 function uid(it){return String(it.recordId||it.id)}
 function entryMarkup(item){
  const isEnemy=item.kind==="enemy",isZone=item.kind==="zone",isRace=item.kind==="race",got=acquired(item);
- const sub=isEnemy?"STAGE "+item.stage+" · "+(item.miniBoss?"MINI-BOSS · ":"")+esc(item.zone):isZone?"STAGES "+esc(item.stages):isRace?"RACE · "+esc(item.chance)+"% SUMMON RATE":item.source?"DROP · "+esc(item.source):item.price!=null?"MERCHANT · "+item.price+" GOLD":"ITEM";
- const stat=isEnemy?"HP "+item.hp+" · ATK "+item.atk+" · DEF "+item.def:isRace?esc(item.passive):!isZone&&item.description?esc(item.description):"";
+ const sub=isEnemy?"STAGE "+item.stage+" · "+(item.miniBoss?"MINI-BOSS · ":"")+esc(item.zone):item.kind==="element"?"ELEMENT · WEAKNESS & RESISTANCE":item.kind==="status"?"STATUS EFFECT · COUNTERS":item.kind==="rule"?"HARDCORE COMBAT GUIDE":isZone?"STAGES "+esc(item.stages):isRace?"RACE · "+esc(item.chance)+"% SUMMON RATE":item.source?"DROP · "+esc(item.source):item.price!=null?"MERCHANT · "+item.price+" GOLD":"ITEM";
+ const stat=isEnemy?"HP "+item.hp+" · ATK "+item.atk+" · DEF "+item.def+(item.element?" · "+item.element.toUpperCase():""):item.kind==="status"?esc(item.effect):isRace?esc(item.passive):!isZone&&item.description?esc(item.description):"";
  const rarityTag=item.rarity?'<span class="v035-rarity v035-'+esc(item.rarity)+'">'+esc(item.rarity.toUpperCase())+'</span>':"";
  return '<button type="button" data-v035-entry="'+esc(uid(item))+'" class="v035-entry '+(uid(item)===selectedId?"active ":"")+(got?"v044-discovered":"")+'">'+
  '<span class="v035-entry-icon">'+esc(item.icon|| (isZone?"🗺️":"✦"))+'</span>'+(got?'<span class="v044-found-tag">✓ OWNED</span>':'')+'<span class="v035-entry-text"><strong>'+esc(item.name)+'</strong><small>'+sub+'</small><em>'+stat+'</em></span>'+rarityTag+'</button>';
@@ -113,14 +119,14 @@ function entryMarkup(item){
 function render(){
  const nav=$("v035Tabs");if(!nav||!data)return;
  nav.innerHTML=opts.map(opt=>{
-  const count=opt.id==="bosses"?data.monsters.filter(x=>x.boss).length:opt.id==="monsters"?data.monsters.filter(x=>!x.boss).length:opt.id==="zones"?(data.zones||[]).length:opt.id==="races"?(data.races||[]).length:data.items.filter(x=>x.category===opt.id).length;
+  const count=opt.id==="bosses"?data.monsters.filter(x=>x.boss).length:opt.id==="monsters"?data.monsters.filter(x=>!x.boss).length:opt.id==="zones"?(data.zones||[]).length:opt.id==="races"?(data.races||[]).length:opt.id==="elements"?(data.codex?.elements||[]).length:opt.id==="statuses"?(data.codex?.statusEffects||[]).length:opt.id==="combat"?Object.keys(data.codex?.combatRules||{}).length:data.items.filter(x=>x.category===opt.id).length;
   return '<button type="button" class="v035-tab '+(category===opt.id?"active":"")+'" data-v035-tab="'+opt.id+'" aria-pressed="'+(category===opt.id)+'"><span>'+opt.icon+'</span><strong>'+opt.label+'</strong><small>'+count+'</small></button>';
  }).join("");
  const filtered=entries();
  const current=opts.find(x=>x.id===category);
  $("v035CategoryTitle").textContent=current?.label||"INDEX";
  $("v035Count").textContent=filtered.length+" RECORDS";
- $("v035Rarity").disabled=["bosses","monsters","zones"].includes(category);
+ $("v035Rarity").disabled=["bosses","monsters","zones","elements","statuses","combat"].includes(category);
  $("v035Results").innerHTML=filtered.map(entryMarkup).join("")||'<div class="v035-empty">No entries match your filters.</div>';
  if(!filtered.some(x=>uid(x)===selectedId))selectedId=filtered[0]?uid(filtered[0]):"";
  renderSelection();
@@ -133,8 +139,22 @@ function enemyDetail(e){
  const img=miniArt||staged?.normal||fallback;
  return '<div class="v035-enemy-art"><img alt="'+esc(e.name)+'" src="'+esc(img)+'" loading="lazy" data-v039-fallback="'+esc(fallback)+'" onerror="if(this.dataset.v039Fallback && this.src.indexOf(this.dataset.v039Fallback)===-1){this.src=this.dataset.v039Fallback}else{this.style.display=\'none\'}"></div>'+
  '<div class="v035-stats"><span>❤️ HP <b>'+e.hp+'</b></span><span>⚔ ATK <b>'+e.atk+'</b></span><span>🛡 DEF <b>'+e.def+'</b></span><span>✧ EXP <b>'+e.xp+'</b></span><span>🪙 GOLD <b>'+e.gold+'</b></span><span>🗺 STAGE <b>'+e.stage+'</b></span></div>'+
- '<div class="v035-detail-info"><strong>LOCATION</strong><p>'+esc(e.zone)+'</p><strong>REWARDS</strong><p>'+esc(e.loot)+'</p>'+
+ '<div class="v035-detail-info"><strong>LOCATION</strong><p>'+esc(e.zone)+'</p>'+
+ '<strong>ELEMENT / RESISTANCES</strong><p>'+esc((e.element||"physical").toUpperCase())+' · Weak to: '+esc((e.weak||[]).join(", ")||"None")+' (×'+esc(data?.codex?.combatRules?.weaknessMultiplier||1.2)+') · Resists: '+esc((e.resist||[]).join(", ")||"None")+' (×'+esc(data?.codex?.combatRules?.resistanceMultiplier||.8)+')</p>'+
+ (e.phase2?'<p>⚠ PHASE 2 at 50% HP · Element '+esc(e.phase2Affinity?.element||e.element)+' · Weak: '+esc((e.phase2Affinity?.weak||[]).join(", "))+' · Resists: '+esc((e.phase2Affinity?.resist||[]).join(", "))+'</p>':"")+
+ '<strong>ATTACK MOVES / STATUS CHANCES</strong><div class="v055-move-codex">'+(e.moves||[]).map(m=>'<div class="v055-move"><b>'+esc(m.name)+(m.phase===2?" · PHASE 2":"")+'</b><span>'+esc((m.element||"physical").toUpperCase())+' · '+esc(m.scope==="all"?"ALL HEROES":"SINGLE TARGET")+(m.charge?" · ⚠ CHARGE FIRST":"")+' · Power ×'+esc(m.power)+'</span><small>'+esc(m.effect?("Applies "+m.effect.toUpperCase()+" · base "+Math.round((m.chance||0)*100)+"% chance before target resistance"):"No status effect")+'</small><small>'+esc(m.description||"")+'</small></div>').join("")+'</div>'+
+ (e.boss||e.miniBoss?'<strong>STAGGER / INTERRUPT</strong><p>Solo threshold: '+esc(e.staggerThreshold)+' · Stagger scales with party size. Fill during a charged attack to interrupt; bosses resist repeat interrupts briefly.</p>':"")+
+ '<strong>REWARDS</strong><p>'+esc(e.loot)+'</p>'+
  (e.boss||e.miniBoss?'<strong>'+ (e.miniBoss?"MINI-BOSS":"BOSS")+' POTENTIAL DROPS</strong><div class="v037-boss-loot">'+(e.drops||[]).map(it=>'<button type="button" data-v037-item="'+esc(it.id)+'" data-v037-rarity="'+esc(it.rarity)+'" class="v037-loot-entry '+(acquired({...it,kind:"item"})?"v044-discovered":"")+'" title="View this item"><span>'+esc(it.icon||"✦")+'</span><span>'+esc(it.name)+'</span><b>'+it.chance+'%</b>'+(acquired({...it,kind:"item"})?'<em>✓</em>':"")+'</button>').join("")+'</div><p>Each item rolls independently per player and per victory. Multiple items can drop together.</p>':'<p>Regular encounters do not drop equipment.</p>')+'</div>';
+}
+function guideDetail(e){
+ if(e.kind==="element"){
+  const vulnerabilities=(data?.codex?.affinities||[]).filter(a=>a.weak?.includes(e.id)).map(a=>a.regionId.replace(/_/g," "));
+  const defenders=(data?.codex?.affinities||[]).filter(a=>a.resist?.includes(e.id)).map(a=>a.regionId.replace(/_/g," "));
+  return '<div class="v035-item-art">'+esc(e.icon||"✦")+'</div><div class="v035-detail-info"><strong>ELEMENT</strong><p>'+esc(e.description||"")+'</p><strong>STRONG AGAINST</strong><p>'+esc(vulnerabilities.join(", ")||"No inherent regional weakness")+'</p><strong>RESISTED BY</strong><p>'+esc(defenders.join(", ")||"No inherent regional resistance")+'</p><strong>DAMAGE MODIFIERS</strong><p>'+esc(data?.codex?.combatRules?.damage||"")+'</p><p>Actual enemy vulnerabilities and phase changes are shown in BOSSES / MONSTERS.</p></div>';
+ }
+ if(e.kind==="status")return '<div class="v035-item-art">'+esc(e.icon||"✦")+'</div><div class="v035-detail-info"><strong>EFFECT</strong><p>'+esc(e.effect)+'</p><strong>COUNTERPLAY</strong><p>'+esc(e.counter)+'</p><strong>BASE DURATION</strong><p>'+esc(e.turns)+' affected turns (can be refreshed; resists and immunity apply)</p><strong>DOT LIMIT</strong><p>'+esc(data?.codex?.combatRules?.dotCapPercent||10)+'% Max HP per player turn across Burn, Poison and Bleed.</p></div>';
+ return '<div class="v035-item-art">📜</div><div class="v035-detail-info"><strong>HARDCORE RULE</strong><p>'+esc(e.description)+'</p></div>';
 }
 function raceDetail(r){
  const got=acquired(r);
@@ -160,7 +180,7 @@ function renderSelection(){
  $("v035Results")?.querySelectorAll(".v035-entry").forEach(el=>el.classList.toggle("active",el.dataset.v035Entry===selectedId));
  if(!entry){$("v035Details").innerHTML='<div class="v035-empty">Choose an entry to view details.</div>';return}
  $("v035Details").innerHTML='<div class="v035-detail-heading"><small>FIELD NOTES · '+esc(category.toUpperCase())+'</small><h3>'+esc(entry.name)+'</h3></div>'+
- (entry.kind==="enemy"?enemyDetail(entry):entry.kind==="race"?raceDetail(entry):entry.kind==="zone"?'<div class="v035-item-art">🗺️</div><div class="v035-detail-info"><strong>STAGES</strong><p>'+esc(entry.stages)+'</p><strong>ZONE</strong><p>'+esc(entry.hint)+'</p></div>':itemDetail(entry));
+ (entry.kind==="enemy"?enemyDetail(entry):["element","status","rule"].includes(entry.kind)?guideDetail(entry):entry.kind==="race"?raceDetail(entry):entry.kind==="zone"?'<div class="v035-item-art">🗺️</div><div class="v035-detail-info"><strong>STAGES</strong><p>'+esc(entry.stages)+'</p><strong>ZONE</strong><p>'+esc(entry.hint)+'</p></div>':itemDetail(entry));
 }
 window.SoulboundIndex={open,close,refresh:()=>{data=null;if(!$("v035Index")?.hidden)open()},
  updateHero(p){hero=p||null;if(data&&$("v035Index")&&!$("v035Index").hidden)render()} };

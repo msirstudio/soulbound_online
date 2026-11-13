@@ -16,7 +16,7 @@ const BOSS_SPECIALS=Object.freeze({
 });
 const PHASE_TWO_SPECIALS=Object.freeze({
  abyssal_rift:{name:"Oblivion's Grasp",scope:"single",element:"void",power:1.28,effect:"stun",chance:.37},
- eclipse_throne:{name:"Sovereign Judgment",scope:"all",element:"light",power:.92,effect:"weaken",chance:.65}
+ eclipse_throne:{name:"Sovereign Judgment",scope:"all",element:"void",power:.92,effect:"weaken",chance:.65}
 });
 const STATUS_NAMES=Object.freeze({
  burn:"Burn",poison:"Poison",bleed:"Bleed",weaken:"Weaken",freeze:"Freeze",stun:"Stun"
@@ -108,7 +108,8 @@ function hitTarget(r,p,move,ctx){
  const m=r.monster,random=ctx.random||Math.random;
  const debuffs=m.statusEffects||[];
  const enemyWeak=debuffs.some(e=>e.id==="chill")?.8:debuffs.some(e=>e.id==="weaken")?.88:1;
- const raw=Math.max(1,Math.round(m.atk*(move.power||1)*enemyWeak)-p.def);
+ const elemental=ctx.elementDamageMultiplier?ctx.elementDamageMultiplier(move.element,p,m):1;
+ const raw=Math.max(1,Math.round(m.atk*(move.power||1)*enemyWeak*elemental)-p.def);
  const foodGuard=p.foodBuffs?.def>0?.8:1;
  const classReduction=p.classPath==="knight"?.9:p.classPath==="guardian"?.88:1;
  const reduction=(p.damageReductionTurns>0?.8:1)*classReduction;
@@ -119,10 +120,12 @@ function hitTarget(r,p,move,ctx){
  p.hp=Math.max(0,p.hp-hit);
  ctx.say(r,m.name+" uses "+move.name+" against "+p.name+" for "+hit+" damage.");
  if(p.foodBuffs?.def>0)p.foodBuffs.def--;
- if(move.effect&&p.hp>0&&random()<(move.chance||0)){
+ if(move.effect&&p.hp>0){
   const turns=["stun","freeze"].includes(move.effect)?1:2;
-  effectFor(p,move.effect,turns);
-  ctx.say(r,p.name+" is afflicted with "+STATUS_NAMES[move.effect]+" ("+turns+" turn"+(turns===1?"":"s")+").");
+  const applied=ctx.applyStatus
+   ?ctx.applyStatus(p,move.effect,turns,{r,move,random,chance:move.chance||0})
+   :(random()<(move.chance||0)&&effectFor(p,move.effect,turns));
+  if(applied)ctx.say(r,p.name+" is afflicted with "+STATUS_NAMES[move.effect]+" ("+turns+" turn"+(turns===1?"":"s")+").");
  }
  return hit;
 }
@@ -140,7 +143,7 @@ function monsterStrike(r,ctx){
   m.queuedMove=null;
  }
  m.combatTurn++;
- if(!m.queuedMove)m.intent=moveFor(m);
+ if(!m.queuedMove)m.intent=ctx.selectMove?.(m,r)||moveFor(m);
  else m.intent=m.queuedMove;
  for(const p of r.players.values()){
   if(!move.charge&&p.tauntTurns>0)p.tauntTurns--;

@@ -1,6 +1,6 @@
 "use strict";
 const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path");
-const world=require("../world-v040"),combat=require("../combat-v054");
+const world=require("../world-v040"),combat=require("../combat-v055");
 function harness(){
  const source=fs.readFileSync(path.join(__dirname,"../server.js"),"utf8");
  const app={use(){},get(){}},express=()=>app;express.static=()=>()=>{};
@@ -12,7 +12,7 @@ function harness(){
  const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:
   name==="socket.io"?{Server}:name==="path"?path:
   name==="./loot-v034"?require("../loot-v034"):name==="./world-v040"?world:
-  name==="./combat-v054"?combat:require(name);
+  name==="./combat-v055"?combat:require(name);
  const runtime=new Function("require","process","console","__dirname",source+
   ";return {rooms,start,combat};")(deps,{env:{}},{log(){}},path.join(__dirname,".."));
  const connect=id=>{
