@@ -1,0 +1,41 @@
+/* v0.48: town scene is the complete city interface.
+   Only while in city-like states: no duplicate combat HUD/dock below it.
+   Preserve PARTY/CHAT/LOG floating panels and all combat HUD during battles. */
+#game.v040-hub .v22-command-dock{display:none!important}
+#game.v040-hub .game-layout{
+ display:block!important;min-height:0!important;height:0!important;
+ margin:0!important;padding:0!important;overflow:visible!important;
+ border:0!important;
+}
+#game.v040-hub .game-layout .game-main-column{display:none!important}
+#game.v040-hub .v040-city-inner{
+ left:auto!important;bottom:auto!important;top:10px!important;right:10px!important;
+ transform:none!important;width:auto!important;max-width:calc(100% - 20px)!important;
+ display:flex!important;gap:7px!important;padding:0!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;
+ margin:0!important;pointer-events:none!important
+}
+#game.v040-hub .v040-city-inner button:not([hidden]){
+ display:inline-block!important;pointer-events:auto!important;
+ min-height:35px!important;padding:6px 10px!important;
+ border:1px solid #e4bf79;border-radius:6px;
+ background:#1a2132ed!important;color:#ffe4ac!important;
+ box-shadow:0 3px 12px #0009;font:700 10px Georgia,serif;cursor:pointer
+}
+#game .v048-visually-hidden{
+ position:absolute!important;width:1px!important;height:1px!important;
+ overflow:hidden!important;clip:rect(0 0 0 0)!important;
+ white-space:nowrap!important;margin:-1px!important;padding:0!important;
+ border:0!important;clip-path:inset(50%)!important
+}
+#game.v040-hub .v040-city-inner .v048-visually-hidden{pointer-events:none!important}
+#game.v040-hub .v040-city-inner .v048-city-return[hidden]{display:none!important}
+#game.v040-hub .v040-city{margin-bottom:2px!important}
+/* Store-specific merchant: unavailable category buttons never appear. */
+#shopCategories [data-shop-category][hidden]{display:none!important}
+#shopPanel .shop-categories{display:flex;gap:6px;flex-wrap:wrap}
+/* Compact mobile town toolbar, not the old centered city action card. */
+@media(max-width:580px){
+ #game.v040-hub .v040-city-inner{top:6px!important;right:6px!important}
+ #game.v040-hub .v040-city-inner button:not([hidden]){font-size:9px!important;padding:5px 7px!important;min-height:30px!important}
+}
