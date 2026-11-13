@@ -5,7 +5,9 @@ function v40MergeWorld(cloud,local){
  const a=cloud&&typeof cloud==="object"?cloud:{},b=local&&typeof local==="object"?local:{};
  const bossDefeats={};const ids=new Set([...Object.keys(a.bossDefeats||{}),...Object.keys(b.bossDefeats||{})]);
  for(const id of ids)bossDefeats[id]=Math.max(0,Number(a.bossDefeats?.[id])||0,Number(b.bossDefeats?.[id])||0);
- return{version:40,bossDefeats,defeatedBossIds:[...new Set([...(a.defeatedBossIds||[]),...(b.defeatedBossIds||[]),...Object.keys(bossDefeats).filter(id=>bossDefeats[id]>0)])]};
+ const union=(x,y)=>[...new Set([...(Array.isArray(x)?x:[]),...(Array.isArray(y)?y:[])])].slice(-300);
+ return{version:44,bossDefeats,defeatedBossIds:[...new Set([...(a.defeatedBossIds||[]),...(b.defeatedBossIds||[]),...Object.keys(bossDefeats).filter(id=>bossDefeats[id]>0)])],
+  lootSeen:union(a.lootSeen,b.lootSeen),raceSeen:union(a.raceSeen,b.raceSeen)};
 }
 function v40WorldKey(){return "soulbound_world_progress_v040_"+(guestMode?"guest":currentUser?.id||"unknown")}
 function v40SavedWorld(){try{return JSON.parse(localStorage.getItem(v40WorldKey())||"null")}catch(e){return null}}
@@ -133,6 +135,7 @@ socket.on("state",s=>{const last=gameState;gameState=s;render();window.Soulbound
 async function restoreSession(){if(!supabaseClient)return;const {data:{session}}=await supabaseClient.auth.getSession();if(session?.user){showAccount(session.user);await prepare()}else showAccount(null);supabaseClient.auth.onAuthStateChange((ev,session)=>{if(ev==="SIGNED_OUT"){currentUser=null;savedCharacter=null;showAccount(null)}})}restoreSession();
 function render(){const s=gameState;if(!s)return;
 const v040Me=s.players.find(p=>p.id===myId);
+window.SoulboundIndex?.updateHero(v040Me);
 window.SoulboundUIV41?.updateGame(s,v040Me);
 window.SoulboundWorldV40?.render(s,v040Me,s.players[0]?.id===myId,{
  travel:async regionIndex=>call("travelRegion",{regionIndex}),
