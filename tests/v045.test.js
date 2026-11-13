@@ -6,7 +6,7 @@ test("v0.47 is displayed in header, title screen, server health, and package",()
  assert.equal(pkg.version,"0.47.0");
  assert.match(html,/VERSION 0\.47 · INTERACTIVE CITY/);
  assert.match(html,/ONLINE RPG · v0\.47 INTERACTIVE CITY/);
- assert.match(server,/version:"0\.46\.0"/);
+ assert.match(server,/version:"0\.47\.0"/);
 });
 test("Update Log opens from main menu and is loaded once",()=>{
  const html=read("public/index.html"),js=read("public/update-log-v045.js"),css=read("public/v045.css");
