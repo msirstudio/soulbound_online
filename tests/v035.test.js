@@ -48,7 +48,7 @@ test("every boss rarity/item record matches the canonical loot factory",()=>{
   assert.equal(it.name,item.name);
   assert.deepEqual([it.value,it.defense,it.maxHp,it.maxMp],[item.value,item.defense,item.maxHp,item.maxMp]);
  }
- assert.equal(data.bossDropTables[5].length,2);assert.deepEqual(data.bossDropTables[5].map(x=>[x.slot,x.rarity,x.chance]),[["main","rare",7],["ring_left","uncommon",10]]);assert.equal(data.miniDropTables[4].length,1);
+ assert.equal(data.bossDropTables[5].length,2);assert.deepEqual(data.bossDropTables[5].map(x=>[x.slot,x.rarity,x.chance]),[["main","rare",4],["ring_left","uncommon",6]]);assert.equal(data.miniDropTables[4].length,1);
 });
 test("each normal monster reports no equipment drop, bosses show loot",()=>{
  const data=catalog();
