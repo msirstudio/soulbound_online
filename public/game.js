@@ -147,7 +147,7 @@ document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{const 
 document.querySelectorAll("[data-stat]").forEach(b=>b.onclick=async()=>{const r=await call("allocateStat",{stat:b.dataset.stat});if(!r.ok)notice(r.error,true)});
 $("shopCategories")?.querySelectorAll("[data-shop-category]").forEach(b=>b.onclick=()=>{if(cityShopScope&&!cityShopScope.includes(b.dataset.shopCategory))return;activeShopCategory=b.dataset.shopCategory;if(gameState)render()});$("chatSend").onclick=sendChat;$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat()});function sendChat(){const input=$("chatInput"),message=input.value.trim();if(!message)return;call("partyChat",{message}).then(r=>{if(!r.ok)notice(r.error,true);else input.value=""})};
 socket.on("connect",()=>{myId=socket.id});socket.on("disconnect",()=>{$("status").textContent="Connection lost. Refresh to reconnect."});
-socket.on("state",s=>{const last=gameState;gameState=s;render();window.SoulboundRewardV411?.show(last,s,myId);if(restoreComplete){
+socket.on("state",s=>{const last=gameState;gameState=s;render();if(last?.players&&s?.players){for(const p of s.players){const old=last.players.find(x=>x.id===p.id);if(old&&Number.isFinite(Number(p.hp))&&Number(p.hp)<Number(old.hp))window.SoulboundSprite?.hit?.(p.id);}}window.SoulboundRewardV411?.show(last,s,myId);if(restoreComplete){
  const p=s.players.find(x=>x.id===myId);if(p){clearTimeout(saveTimer);
  const justCleared=s.status==="regionClear"&&last?.status!=="regionClear";
  if(justCleared)saveProfile(p);else saveTimer=setTimeout(()=>saveProfile(p),500)
