@@ -1,0 +1,27 @@
+name: SOULBOUND v0.48.1 HUD / Shop / Clear
+on:
+  push:
+    branches: [v0.48.1-hud-shop-clear-fix]
+  pull_request:
+    branches: [v0.48-city-shops-loot-balance]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check JavaScript syntax
+        run: |
+          node --check server.js
+          node --check public/game.js
+          node --check public/world-ui-v040.js
+          node --check tests/v0481.test.js
+      - name: Run all regression tests
+        run: npm test
