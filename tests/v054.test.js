@@ -125,3 +125,32 @@ test("server socket workflow delegates to combat and resets encounter-only state
   assert.ok(!s.includes('"'+f+'_saved"'),"no new save schema field");
  assert.ok(!src("public/game.js").includes('call("monsterStrike"'),"client cannot decide monster attacks");
 });
+
+
+test("party ward and personal Guard last through a boss warning, then absorb the actual strike",()=>{
+ const {r,say}=room(5),tank=[...r.players.values()][1];
+ r.monster.combatTurn=1;r.monster.intent=combat.moveFor(r.monster);
+ combat.guard(r,tank,say);
+ enemy(r,say,()=>0);
+ assert.equal(r.partyWardTurns,1,"wind-up is not a damaging action and cannot consume the ward");
+ assert.equal(tank.guardTurns,1);
+ const hp=[...r.players.values()].map(p=>p.hp);
+ enemy(r,say,()=>0);
+ assert.equal(r.partyWardTurns,0);
+ assert.equal(tank.guardTurns,0);
+ assert.ok([...r.players.values()].some((p,i)=>p.hp<hp[i]));
+});
+test("Mage Chill and Swordsman Weaken reduce enemy attack damage temporarily",()=>{
+ const a=room(5),b=room(5),c=room(5);
+ combat.debuffMonster(b.r.monster,"chill",1);
+ combat.debuffMonster(c.r.monster,"weaken",2);
+ const first=x=>[...x.r.players.values()][0];
+ enemy(a.r,a.say,()=>0);enemy(b.r,b.say,()=>0);enemy(c.r,c.say,()=>0);
+ const baseline=550-first(a).hp;
+ assert.ok(550-first(b).hp<baseline,"chill protects team");
+ assert.ok(550-first(c).hp<baseline,"weaken protects team");
+ assert.equal(b.r.monster.statusEffects.length,0,"chill expires after attack");
+ assert.equal(c.r.monster.statusEffects[0].turns,1,"weakness lasts another hit");
+ assert.ok(src("server.js").includes('combat.debuffMonster(m,"chill",1)'));
+ assert.ok(src("server.js").includes('combat.debuffMonster(m,"weaken",2)'));
+});
