@@ -2,6 +2,14 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.54",date:"2026-11-14",title:"Full Combat Expansion",notes:[
+  "All eight regions now have distinctive telegraphed elemental boss abilities and enemy AI, with single-target and party-wide attacks.",
+  "Added transient Burn, Poison, Bleed, Weaken, Freeze and Stun effects, resolved on the server with turn-based durations.",
+  "GUARD now protects the full party from the next enemy action; Tank GUARD and Aegis Pact grant stronger team defense.",
+  "Only The Void Reaper (stage 35) and Eclipse Sovereign (stage 40) enter Phase 2 below 50% HP, changing abilities and increasing attack power.",
+  "Added small in-battle indicators for enemy intentions, party statuses and Phase 2 without changing core HUD.",
+  "No changes to save data format, rarity drop rates, rewards or the online party flow."
+ ]},
  {version:"0.48.5",date:"2026-11-14",title:"Boss Reward Display Fix & Character Overview",notes:[
   "Fixed the main-boss reward overlay rendering into the hidden city panel instead of the visible region-clear arena.",
   "Boss victories now show Gold, EXP and all earned equipment; a no-drop message appears when no new equipment is earned.",
