@@ -2,6 +2,14 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.55",date:"2026-11-14",title:"Hardcore Combat & Adventure Codex",notes:[
+  "Elemental strengths and weaknesses are now calculated by the server, with status resistance, capped damage-over-time and anti-control immunity windows.",
+  "Added persistent Stagger, BREAK STRIKE, interrupt windows, Perfect Guard, adaptive boss AI and party CLEANSE.",
+  "Punishing Hardcore: one-time 8% Gold loss per hero on party defeat (capped at 2000); consumed items stay consumed; no loss of EXP or equipment.",
+  "The Adventure INDEX now includes ELEMENTS, STATUS and COMBAT RULES. Every enemy describes attacks, elements, weaknesses, resistance and effect chances.",
+  "Rejected actions no longer trigger unwanted status ticks. Shield Breaker defense boosts no longer permanently alter base DEF.",
+  "Only Stage 35 and 40 main bosses have Phase 2. Old saves, equipment, shops and loot rates remain intact."
+ ]},
  {version:"0.54",date:"2026-11-14",title:"Full Combat Expansion",notes:[
   "All eight regions now have distinctive telegraphed elemental boss abilities and enemy AI, with single-target and party-wide attacks.",
   "Added transient Burn, Poison, Bleed, Weaken, Freeze and Stun effects, resolved on the server with turn-based durations.",
