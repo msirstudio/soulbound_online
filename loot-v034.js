@@ -98,7 +98,7 @@ function dropEncounterLoot(player,stage,logger=()=>{},explicitRegion,explicitMin
  const n=Math.round(Number(stage)),region=explicitRegion?Math.round(Number(explicitRegion)):Math.ceil(n/5);
  const isMini=explicitMini===undefined?n%5===4:!!explicitMini;
  const table=isMini?MINI_DROPS[region]:BOSS_DROPS[region];
- if(!table||!(isMini||n%5===0))return null;
+ if(!table||(!explicitRegion&&!isMini&&n%5!==0))return null;
  player.inventory=Array.isArray(player.inventory)?player.inventory:[];
  if(bagUsed(player)>=40){logger(player.name+"'s bag is full (40/40): loot was not collected.");return null}
  const roll=Math.random()*100;let sum=0,chosen=null;
