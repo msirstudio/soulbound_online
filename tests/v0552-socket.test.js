@@ -39,13 +39,13 @@ test("live Socket: LV7 Tidal Surge deals 20% bonus to Fire, resisted by Ice",()=
  const fire=cast(15,"skill6"),ice=cast(25,"skill6");
  assert.equal(fire.element,"fire");assert.equal(ice.element,"ice");
  assert.ok(fire.damage>ice.damage*1.35,"Water against Fire must exceed Water against Ice");
- assert.equal(fire.spent,22);assert.equal(fire.cooldown,3);
+ assert.equal(fire.spent,22);assert.equal(fire.cooldown,2,"cooldown is decremented after the action as the next turn begins");
 });
 test("live Socket: LV9 Thunderbolt hits Water mini boss harder than Lightning mini boss",()=>{
  const water=cast(4,"skill7"),lightning=cast(9,"skill7");
  assert.equal(water.element,"water");assert.equal(lightning.element,"lightning");
  assert.ok(water.damage>lightning.damage*1.35,"Lightning must be strong against Water and resisted by itself");
- assert.equal(water.spent,26);assert.equal(water.cooldown,3);
+ assert.equal(water.spent,26);assert.equal(water.cooldown,2,"cooldown is decremented after the action as the next turn begins");
 });
 test("API INDEX reports all ten types, both mini-boss elements and boss-only exceptions",()=>{
  const d=harness().catalog();
