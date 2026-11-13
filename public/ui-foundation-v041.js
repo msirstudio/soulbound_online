@@ -60,6 +60,7 @@ function closeDrawer(){
 }
 function placeDrawer(){
  const side=$("v041GameDrawer"),game=$("game");if(!side||!game)return;
+ if(typeof game.getBoundingClientRect!=="function"||!side.style||!window.innerWidth)return;
  const rect=game.getBoundingClientRect(),width=Math.min(310,window.innerWidth-24),gap=10;
  const roomRight=window.innerWidth-rect.right,roomLeft=rect.left;
  const external=roomRight>=width+gap||roomLeft>=width+gap;
@@ -126,7 +127,7 @@ function setup(){
  if(initialized||!$("v041Front")||!$("account")||!$("lobby"))return;
  initialized=true;
  setupDrawer();
- window.addEventListener("resize",()=>{if(drawerTab)placeDrawer()});
+ window.addEventListener?.("resize",()=>{if(drawerTab)placeDrawer()});
  selectView("menu");
  $("v041Play").addEventListener("click",openHero);
  $("v041NewHero").addEventListener("click",openHero);
