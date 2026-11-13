@@ -1,0 +1,28 @@
+name: SOULBOUND v0.55 Hardcore Combat
+on:
+  push:
+    branches: [v0.55-hardcore-combat-resistance-interrupt]
+  pull_request:
+    branches: [v0.54-full-combat-expansion]
+permissions:
+  contents: read
+jobs:
+  all-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: JavaScript syntax checks
+        run: |
+          node --check server.js
+          node --check combat-v054.js
+          node --check combat-v055.js
+          node --check public/game.js
+          node --check public/update-log-v045.js
+      - name: Run complete gameplay, Socket and UI regression suite
+        run: npm test

@@ -3,10 +3,10 @@ const test=require("node:test"),assert=require("node:assert/strict"),fs=require(
 const read=p=>fs.readFileSync(path.join(__dirname,"..",p),"utf8");
 test("v0.54 is displayed in header, title screen, server health, and package",()=>{
  const html=read("public/index.html"),server=read("server.js"),pkg=require("../package.json");
- assert.equal(pkg.version,"0.54.0");
- assert.match(html,/VERSION 0\.54 · FULL COMBAT/);
- assert.match(html,/ONLINE RPG · v0\.54 FULL COMBAT/);
- assert.match(server,/version:"0\.54"/);
+ assert.equal(pkg.version,"0.55.0");
+ assert.match(html,/VERSION 0\.55 · HARDCORE COMBAT/);
+ assert.match(html,/ONLINE RPG · v0\.55 HARDCORE COMBAT/);
+ assert.match(server,/version:"0\.55"/);
 });
 test("Update Log opens from main menu and is loaded once",()=>{
  const html=read("public/index.html"),js=read("public/update-log-v045.js"),css=read("public/v045.css");

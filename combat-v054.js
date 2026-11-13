@@ -49,6 +49,7 @@ function checkPhase(r,say){
 }
 function effectFor(p,id,turns=2){
  if(!STATUS_NAMES[id])return false;
+ if((id==="stun"||id==="freeze")&&(p.ccImmuneTurns||0)>0)return false;
  p.statusEffects=Array.isArray(p.statusEffects)?p.statusEffects:[];
  const prior=p.statusEffects.find(e=>e.id===id);
  if(prior){prior.turns=max(Math.max(prior.turns,turns),1,3)}
@@ -66,17 +67,21 @@ function debuffMonster(m,id,turns=1){
 function beforeAction(r,p,say){
  if(p._effectTurn===r.turnSerial)return {skip:false};
  p._effectTurn=r.turnSerial;p._combatAttackMultiplier=1;
+ const controlWindow=p.ccImmuneTurns||0;
+ if(controlWindow>0)p.ccImmuneTurns--;
+ let dotDamage=0;const dotCap=Math.max(1,Math.ceil(p.maxHp*.1));
  const active=Array.isArray(p.statusEffects)?p.statusEffects:[];
  let skip=false;
  for(const e of active){
   const id=e.id;
   if(["burn","poison","bleed"].includes(id)){
    const pct=id==="burn"?.045:id==="poison"?.032:.037;
-   const damage=Math.max(1,Math.ceil(p.maxHp*pct));
+   const damage=Math.max(0,Math.min(dotCap-dotDamage,Math.max(1,Math.ceil(p.maxHp*pct))));
+   dotDamage+=damage;
    p.hp=Math.max(0,p.hp-damage);
-   say(r,"⚠ "+p.name+" suffers "+damage+" "+STATUS_NAMES[id]+" damage.");
+   if(damage>0)say(r,"⚠ "+p.name+" suffers "+damage+" "+STATUS_NAMES[id]+" damage.");
   }else if(id==="weaken")p._combatAttackMultiplier=Math.min(p._combatAttackMultiplier,.78);
-  else if(id==="freeze"||id==="stun"){skip=true;say(r,p.name+" loses a turn to "+STATUS_NAMES[id]+".")}
+  else if(id==="freeze"||id==="stun"){skip=true;p.ccImmuneTurns=Math.max(p.ccImmuneTurns||0,3);say(r,p.name+" loses a turn to "+STATUS_NAMES[id]+" and gains temporary crowd-control resistance.")}
   e.turns--;
  }
  p.statusEffects=active.filter(e=>e.turns>0);
@@ -108,21 +113,25 @@ function hitTarget(r,p,move,ctx){
  const m=r.monster,random=ctx.random||Math.random;
  const debuffs=m.statusEffects||[];
  const enemyWeak=debuffs.some(e=>e.id==="chill")?.8:debuffs.some(e=>e.id==="weaken")?.88:1;
- const raw=Math.max(1,Math.round(m.atk*(move.power||1)*enemyWeak)-p.def);
+ const raw=Math.max(1,Math.round(m.atk*(move.power||1)*enemyWeak)-(p.def+(p.battleDefenseBonus||0)));
  const foodGuard=p.foodBuffs?.def>0?.8:1;
  const classReduction=p.classPath==="knight"?.9:p.classPath==="guardian"?.88:1;
  const reduction=(p.damageReductionTurns>0?.8:1)*classReduction;
  const race=ctx.raceById?.(p.raceId)||{};
  const ward=r.partyWardTurns>0?1-max(r.partyWardReduction||0,0,.6):1;
- const guardReduction=p.guardTurns>0?.55:1;
- const hit=Math.max(1,Math.floor(raw*reduction*foodGuard*(1-(race.reduce||0))*ward*guardReduction));
+ const guardReduction=p.perfectGuardTurns>0?.3:p.guardTurns>0?.55:1;
+ const elemental=ctx.advanced?.enemyDamageFactor?.(p,move.element)||1;
+ const hit=Math.max(1,Math.floor(raw*reduction*foodGuard*(1-(race.reduce||0))*ward*guardReduction*elemental));
  p.hp=Math.max(0,p.hp-hit);
  ctx.say(r,m.name+" uses "+move.name+" against "+p.name+" for "+hit+" damage.");
+ if(p.perfectGuardTurns>0)ctx.advanced?.onPerfectBlock?.(r,p,ctx.say);
  if(p.foodBuffs?.def>0)p.foodBuffs.def--;
- if(move.effect&&p.hp>0&&random()<(move.chance||0)){
+ if(move.effect&&p.hp>0){
   const turns=["stun","freeze"].includes(move.effect)?1:2;
-  effectFor(p,move.effect,turns);
-  ctx.say(r,p.name+" is afflicted with "+STATUS_NAMES[move.effect]+" ("+turns+" turn"+(turns===1?"":"s")+").");
+  const applied=ctx.advanced?.tryApplyStatus?
+   ctx.advanced.tryApplyStatus(p,move.effect,move.chance||0,random,effectFor):
+   random()<(move.chance||0)&&effectFor(p,move.effect,turns);
+  if(applied)ctx.say(r,p.name+" is afflicted with "+STATUS_NAMES[move.effect]+" ("+turns+" turn"+(turns===1?"":"s")+").");
  }
  return hit;
 }
@@ -130,22 +139,30 @@ function monsterStrike(r,ctx){
  const m=r.monster;
  if(r.status!=="battle"||!m||m.hp<=0)return;
  if(![...r.players.values()].some(p=>p.hp>0)){r.status="defeat";ctx.say(r,"The party has fallen.");return}
+ if(m.skipNextAttack){
+  m.skipNextAttack=false;m.combatTurn++;
+  m.intent=ctx.advanced?.planMove?.(r,moveFor(m),ctx.random||Math.random)||moveFor(m);
+  ctx.say(r,"⚡ "+m.name+" is staggered and loses its attack!");
+  return;
+ }
  let move=m.queuedMove||m.intent||moveFor(m);
  if(move.charge){
   m.queuedMove={...move,charge:false};
   ctx.say(r,"⚠ "+m.name+" is CHARGING "+move.name+"! Guard to protect the party!");
  }else{
-  const targets=move.scope==="all"?[...r.players.values()].filter(p=>p.hp>0):[rollTarget(r,ctx.random||Math.random)].filter(Boolean);
+  const targets=move.scope==="all"?[...r.players.values()].filter(p=>p.hp>0):[ctx.advanced?.selectTarget?.(r,move,ctx.random||Math.random)||rollTarget(r,ctx.random||Math.random)].filter(Boolean);
   for(const p of targets)hitTarget(r,p,move,ctx);
   m.queuedMove=null;
  }
  m.combatTurn++;
- if(!m.queuedMove)m.intent=moveFor(m);
+ if(!m.queuedMove)m.intent=ctx.advanced?.planMove?.(r,moveFor(m),ctx.random||Math.random)||moveFor(m);
  else m.intent=m.queuedMove;
+ if(!move.charge)ctx.advanced?.onEnemyAttack?.(r);
  for(const p of r.players.values()){
   if(!move.charge&&p.tauntTurns>0)p.tauntTurns--;
   if(!move.charge&&p.damageReductionTurns>0)p.damageReductionTurns--;
   if(!move.charge&&p.guardTurns>0)p.guardTurns=0;
+  if(!move.charge&&p.perfectGuardTurns>0)p.perfectGuardTurns=0;
  }
  if(!move.charge&&r.partyWardTurns>0)r.partyWardTurns--;
  if(r.partyWardTurns===0)r.partyWardReduction=0;

@@ -118,7 +118,7 @@ test("server socket workflow delegates to combat and resets encounter-only state
  assert.ok(s.includes("combat.beforeAction(r,p,say)"));
  assert.ok(s.includes("combat.guard(r,p,say)"));
  assert.ok(s.includes("combat.aegis(r,p,say)"));
- assert.ok(s.includes("combat.monsterStrike(r,{say,raceById,random:Math.random})"));
+ assert.ok(s.includes("combat.monsterStrike(r,{say,raceById,random:Math.random,advanced})"));
  assert.ok(s.includes("p.statusEffects=[]"));
  assert.ok(s.includes("partyWardTurns:r.partyWardTurns||0"));
  assert.ok(html.includes('id="v054CombatIntent"'));

@@ -2,6 +2,15 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.55",date:"2026-11-14",title:"Hardcore Combat & Status Resistance",notes:[
+  "Elemental weakness and resistance are now computed on the server for boss and mini-boss encounters; mage and tank skills carry elemental types.",
+  "Added temporary status resistance and protection against repeated Stun/Freeze, capped combined damage-over-time, and a proactive 18 MP Purify action.",
+  "Added Stagger buildup, an 8 MP Interrupt action that cancels telegraphed boss moves, and temporary boss interrupt immunity.",
+  "Guard now rewards correct timing with Perfect Guard; boss AI can mark weak party members, with Taunt priority preserved.",
+  "Hardcore defeat penalty B: lose 8% Gold (maximum 2,000) once per defeat; used potions/food stay consumed, EXP/equipment remain safe.",
+  "Fixed invalid skills ticking status prematurely and temporary Shield Breaker DEF being written into permanent stats.",
+  "All new rules are server-authoritative and require no database schema changes."
+ ]},
  {version:"0.54",date:"2026-11-14",title:"Full Combat Expansion",notes:[
   "All eight regions now have distinctive telegraphed elemental boss abilities and enemy AI, with single-target and party-wide attacks.",
   "Added transient Burn, Poison, Bleed, Weaken, Freeze and Stun effects, resolved on the server with turn-based durations.",
