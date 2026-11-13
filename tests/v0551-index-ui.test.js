@@ -52,7 +52,7 @@ function browserHarness(){
 }
 test("browser loads a uniquely versioned INDEX script and not the old cached v035 script",()=>{
  const html=read("public/index.html");
- assert.ok(html.includes('src="adventure-index-v0552.js"'));
+ assert.match(html,/src="adventure-index-v0552\\.js\\?v=[^"]+"/);
  assert.ok(!html.includes('src="adventure-index-v035.js"'));
  assert.ok(html.includes('href="v0551-index-status-boss.css"'));
  assert.ok(html.includes("v0.55.2"));
@@ -67,7 +67,7 @@ test("interactive INDEX renders all 3 new guides and immediate boss affinity/att
  assert.ok(detail.includes("v0551-boss-quick"),"quick guide displayed before image");
  assert.ok(detail.indexOf("v0551-boss-quick")<detail.indexOf("v035-enemy-art"));
  assert.ok(detail.includes("WEAK"));
- assert.ok(detail.includes("FIRE"));
+ assert.ok(detail.includes('element_fire.png'),"Boss weakness should display a Fire icon");
  assert.ok(detail.includes("Briarstorm"));
  assert.ok(detail.includes("55%"));
  assert.ok(detail.includes("ATTACK MOVES / STATUS CHANCES"));
