@@ -8,6 +8,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const opts=[
  {id:"bosses",label:"BOSSES",icon:"👑"},
  {id:"monsters",label:"MONSTERS",icon:"🐺"},
+ {id:"races",label:"BLOODLINES",icon:"🧬"},
  {id:"weapons",label:"WEAPONS",icon:"⚔️"},
  {id:"armor",label:"ARMOR",icon:"🛡️"},
  {id:"accessories",label:"ACCESSORIES",icon:"💍"},
@@ -15,7 +16,15 @@ const opts=[
  {id:"consumables",label:"POTIONS",icon:"🧪"},
  {id:"zones",label:"WORLD",icon:"🗺️"}
 ];
-let data=null,category="bosses",search="",rarity="all",selectedId="",lastFocus=null,loading=false;
+let data=null,category="bosses",search="",rarity="all",selectedId="",lastFocus=null,loading=false,hero=null;
+const discoveries=()=>hero?.worldProgress||{};
+function acquired(item){
+ if(item.kind==="race")return (discoveries().raceSeen||[]).includes(item.id)||hero?.raceId===item.id;
+ if(item.kind!=="item")return false;
+ const seen=(discoveries().lootSeen||[]);
+ const key=item.id+":"+(item.rarity||"shop");
+ return seen.includes(key)||(hero?.inventory||[]).some(it=>it.id===item.id&&(!item.rarity||it.rarity===item.rarity));
+}
 const labels={value:"ATK",defense:"DEF",maxHp:"HP",maxMp:"MP"};
 function init(){
  if($("v035Index"))return;
@@ -41,7 +50,7 @@ function init(){
   const itemJump=event.target.closest("[data-v037-item]");
   if(itemJump){const item=(data?.items||[]).find(it=>it.id===itemJump.dataset.v037Item&&it.rarity===itemJump.dataset.v037Rarity);if(item){category=item.category;search="";rarity="all";$("v035Search").value="";$("v035Rarity").value="all";render();const target=entries().find(it=>it.id===item.id&&it.rarity===item.rarity);if(target){selectedId=uid(target);renderSelection()}}return}
   const jump=event.target.closest("[data-v037-boss]");
-  if(jump){category="bosses";search="";rarity="all";$("v035Search").value="";$("v035Rarity").value="all";selectedId="stage-"+jump.dataset.v037Boss;render();$("v035Details").scrollTop=0;return}
+  if(jump){category=Number(jump.dataset.v037Boss)%5===4?"monsters":"bosses";search="";rarity="all";$("v035Search").value="";$("v035Rarity").value="all";selectedId="stage-"+jump.dataset.v037Boss;render();$("v035Details").scrollTop=0;return}
   const card=event.target.closest("[data-v035-entry]");if(card){selectedId=card.dataset.v035Entry;renderSelection();return}
  });
  $("v035Search").addEventListener("input",event=>{search=event.target.value.trim().toLowerCase();selectedId="";render()});
@@ -85,25 +94,26 @@ function entries(){
  let out=[];
  if(category==="bosses")out=(data.monsters||[]).filter(x=>x.boss).map(x=>({...x,kind:"enemy"}));
  else if(category==="monsters")out=(data.monsters||[]).filter(x=>!x.boss).map(x=>({...x,kind:"enemy"}));
+ else if(category==="races")out=(data.races||[]).map(x=>({...x,kind:"race"}));
  else if(category==="zones")out=(data.zones||[]).map((x,i)=>({...x,id:"zone-"+i,kind:"zone"}));
  else out=(data.items||[]).filter(x=>x.category===category).map((x,i)=>({...x,kind:"item",recordId:x.uid||[x.id,x.rarity||"shop",x.source||"shop",i].join("::")}));
- if(category!=="bosses"&&category!=="monsters"&&category!=="zones"&&rarity!=="all")out=out.filter(x=>(x.rarity||"common")===rarity);
- if(search)out=out.filter(x=>[x.name,x.source,x.zone,x.stage,x.slot,x.description,x.rarity,x.stages,x.hint].some(v=>String(v||"").toLowerCase().includes(search)));
+ if(!["bosses","monsters","zones"].includes(category)&&rarity!=="all")out=out.filter(x=>(x.rarity||"common")===rarity);
+ if(search)out=out.filter(x=>[x.name,x.source,x.zone,x.stage,x.slot,x.description,x.rarity,x.stages,x.hint,x.passive,...(x.buffs||[])].some(v=>String(v||"").toLowerCase().includes(search)));
  return out;
 }
 function uid(it){return String(it.recordId||it.id)}
 function entryMarkup(item){
- const isEnemy=item.kind==="enemy",isZone=item.kind==="zone";
- const sub=isEnemy?"STAGE "+item.stage+" · "+esc(item.zone):isZone?"STAGES "+esc(item.stages):item.source?"DROP · "+esc(item.source):item.price!=null?"MERCHANT · "+item.price+" GOLD":"ITEM";
- const stat=isEnemy?"HP "+item.hp+" · ATK "+item.atk+" · DEF "+item.def:!isZone&&item.description?esc(item.description):"";
+ const isEnemy=item.kind==="enemy",isZone=item.kind==="zone",isRace=item.kind==="race",got=acquired(item);
+ const sub=isEnemy?"STAGE "+item.stage+" · "+(item.miniBoss?"MINI-BOSS · ":"")+esc(item.zone):isZone?"STAGES "+esc(item.stages):isRace?"RACE · "+esc(item.chance)+"% SUMMON RATE":item.source?"DROP · "+esc(item.source):item.price!=null?"MERCHANT · "+item.price+" GOLD":"ITEM";
+ const stat=isEnemy?"HP "+item.hp+" · ATK "+item.atk+" · DEF "+item.def:isRace?esc(item.passive):!isZone&&item.description?esc(item.description):"";
  const rarityTag=item.rarity?'<span class="v035-rarity v035-'+esc(item.rarity)+'">'+esc(item.rarity.toUpperCase())+'</span>':"";
- return '<button type="button" data-v035-entry="'+esc(uid(item))+'" class="v035-entry '+(uid(item)===selectedId?"active":"")+'">'+
- '<span class="v035-entry-icon">'+esc(item.icon|| (isZone?"🗺️":"✦"))+'</span><span class="v035-entry-text"><strong>'+esc(item.name)+'</strong><small>'+sub+'</small><em>'+stat+'</em></span>'+rarityTag+'</button>';
+ return '<button type="button" data-v035-entry="'+esc(uid(item))+'" class="v035-entry '+(uid(item)===selectedId?"active ":"")+(got?"v044-discovered":"")+'">'+
+ '<span class="v035-entry-icon">'+esc(item.icon|| (isZone?"🗺️":"✦"))+'</span>'+(got?'<span class="v044-found-tag">✓ OWNED</span>':'')<span class="v035-entry-text"><strong>'+esc(item.name)+'</strong><small>'+sub+'</small><em>'+stat+'</em></span>'+rarityTag+'</button>';
 }
 function render(){
  const nav=$("v035Tabs");if(!nav||!data)return;
  nav.innerHTML=opts.map(opt=>{
-  const count=opt.id==="bosses"?data.monsters.filter(x=>x.boss).length:opt.id==="monsters"?data.monsters.filter(x=>!x.boss).length:opt.id==="zones"?(data.zones||[]).length:data.items.filter(x=>x.category===opt.id).length;
+  const count=opt.id==="bosses"?data.monsters.filter(x=>x.boss).length:opt.id==="monsters"?data.monsters.filter(x=>!x.boss).length:opt.id==="zones"?(data.zones||[]).length:opt.id==="races"?(data.races||[]).length:data.items.filter(x=>x.category===opt.id).length;
   return '<button type="button" class="v035-tab '+(category===opt.id?"active":"")+'" data-v035-tab="'+opt.id+'" aria-pressed="'+(category===opt.id)+'"><span>'+opt.icon+'</span><strong>'+opt.label+'</strong><small>'+count+'</small></button>';
  }).join("");
  const filtered=entries();
@@ -117,18 +127,28 @@ function render(){
 }
 function enemyDetail(e){
  const fallback=e.boss?"/assets/bosses/"+e.sprite+".svg":"/assets/monsters/"+e.sprite+".svg";
+ const miniKeys=["rootbound_guardian","ironbound_executioner","molten_behemoth","sanctum_keeper","frosthorn_colossus","titans_sentinel","abyss_watcher","twilight_regent"];
+ const miniArt=e.miniBoss?"/assets/minibosses/v043/"+miniKeys[Math.ceil(e.stage/5)-1]+"_normal.svg":null;
  const staged=e.boss?window.SoulboundBossSpritesV39?.imagesFor(e.stage):null;
- const img=staged?.normal||fallback;
+ const img=miniArt||staged?.normal||fallback;
  return '<div class="v035-enemy-art"><img alt="'+esc(e.name)+'" src="'+esc(img)+'" loading="lazy" data-v039-fallback="'+esc(fallback)+'" onerror="if(this.dataset.v039Fallback && this.src.indexOf(this.dataset.v039Fallback)===-1){this.src=this.dataset.v039Fallback}else{this.style.display=\'none\'}"></div>'+
  '<div class="v035-stats"><span>❤️ HP <b>'+e.hp+'</b></span><span>⚔ ATK <b>'+e.atk+'</b></span><span>🛡 DEF <b>'+e.def+'</b></span><span>✧ EXP <b>'+e.xp+'</b></span><span>🪙 GOLD <b>'+e.gold+'</b></span><span>🗺 STAGE <b>'+e.stage+'</b></span></div>'+
  '<div class="v035-detail-info"><strong>LOCATION</strong><p>'+esc(e.zone)+'</p><strong>REWARDS</strong><p>'+esc(e.loot)+'</p>'+
- (e.boss?'<strong>EXCLUSIVE BOSS DROPS</strong><div class="v037-boss-loot">'+(e.drops||[]).map(it=>'<button type="button" data-v037-item="'+esc(it.id)+'" data-v037-rarity="'+esc(it.rarity)+'" class="v037-loot-entry" title="View this item"><span>'+esc(it.icon||"✦")+'</span><span>'+esc(it.name)+'</span><b>'+it.chance+'%</b></button>').join("")+'</div><p>Each percentage is the chance per boss victory for that specific item. Only one roll is made per player, so at most one item drops; no item is also possible.</p>':'<p>Regular encounters do not drop equipment.</p>')+'</div>';
+ (e.boss||e.miniBoss?'<strong>'+ (e.miniBoss?"MINI-BOSS":"BOSS")+' POTENTIAL DROPS</strong><div class="v037-boss-loot">'+(e.drops||[]).map(it=>'<button type="button" data-v037-item="'+esc(it.id)+'" data-v037-rarity="'+esc(it.rarity)+'" class="v037-loot-entry '+(acquired({...it,kind:"item"})?"v044-discovered":"")+'" title="View this item"><span>'+esc(it.icon||"✦")+'</span><span>'+esc(it.name)+'</span><b>'+it.chance+'%</b>'+(acquired({...it,kind:"item"})?'<em>✓</em>':"")+'</button>').join("")+'</div><p>Each probability is per player and per victory. One roll can drop at most one item; nothing may drop.</p>':'<p>Regular encounters do not drop equipment.</p>')+'</div>';
+}
+function raceDetail(r){
+ const got=acquired(r);
+ return '<div class="v044-race-icon">'+esc(r.icon||"✦")+'</div>'+
+ '<div class="v035-detail-info"><strong>RARITY</strong><p>'+esc((r.rarity||"common").toUpperCase())+
+ ' · SUMMON CHANCE '+esc(r.chance)+'%</p><strong>PASSIVE</strong><p>'+esc(r.passive||"")+
+ '</p><strong>ATTRIBUTES</strong><p>'+(r.buffs||[]).map(esc).join(" · ")+
+ '</p><p class="'+(got?"v044-owned-note":"")+'">'+(got?"✓ DISCOVERED BLOODLINE":"Not yet discovered")+'</p></div>';
 }
 function itemDetail(e){
  const bonuses=Object.entries(labels).filter(([k])=>Number(e[k])>0).map(([key,l])=>'<span>'+l+' <b>+'+e[key]+'</b></span>').join("");
  return '<div class="v035-item-art">'+esc(e.icon||"✦")+'</div>'+
  '<div class="v035-stats">'+(bonuses||'<span>Utility item</span>')+'</div>'+
- '<div class="v035-detail-info"><strong>ITEM TYPE</strong><p>'+esc(e.slot||e.category||"Supplies")+'</p>'+
+ ''<div class="v035-detail-info">'+(acquired({...e,kind:"item"})?'<p class="v044-owned-note">✓ ALREADY DISCOVERED</p>':'')+'<strong>ITEM TYPE</strong><p>'+esc(e.slot||e.category||"Supplies")+'</p>'+
  (e.rarity?'<strong>RARITY</strong><p>'+esc(e.rarity.toUpperCase())+'</p>':'')+
  (e.source?'<strong>ACQUIRED FROM</strong><p><button type="button" class="v037-source-link" data-v037-boss="'+esc(e.sourceStage||e.bossStage)+'">👑 '+esc(e.source)+' · Stage '+esc(e.sourceStage||e.bossStage)+' →</button></p><strong>DROP CHANCE</strong><p>'+esc(e.chance)+'% per boss victory</p>':'')+
  (e.price!=null?'<strong>MERCHANT PRICE</strong><p>'+esc(e.price)+' gold</p>':'')+
@@ -140,8 +160,9 @@ function renderSelection(){
  $("v035Results")?.querySelectorAll(".v035-entry").forEach(el=>el.classList.toggle("active",el.dataset.v035Entry===selectedId));
  if(!entry){$("v035Details").innerHTML='<div class="v035-empty">Choose an entry to view details.</div>';return}
  $("v035Details").innerHTML='<div class="v035-detail-heading"><small>FIELD NOTES · '+esc(category.toUpperCase())+'</small><h3>'+esc(entry.name)+'</h3></div>'+
- (entry.kind==="enemy"?enemyDetail(entry):entry.kind==="zone"?'<div class="v035-item-art">🗺️</div><div class="v035-detail-info"><strong>STAGES</strong><p>'+esc(entry.stages)+'</p><strong>ZONE</strong><p>'+esc(entry.hint)+'</p></div>':itemDetail(entry));
+ (entry.kind==="enemy"?enemyDetail(entry):entry.kind==="race"?raceDetail(entry):entry.kind==="zone"?'<div class="v035-item-art">🗺️</div><div class="v035-detail-info"><strong>STAGES</strong><p>'+esc(entry.stages)+'</p><strong>ZONE</strong><p>'+esc(entry.hint)+'</p></div>':itemDetail(entry));
 }
-window.SoulboundIndex={open,close,refresh:()=>{data=null;if(!$("v035Index")?.hidden)open()}};
+window.SoulboundIndex={open,close,refresh:()=>{data=null;if(!$("v035Index")?.hidden)open()},
+ updateHero(p){hero=p||null;if(data&&$("v035Index")&&!$("v035Index").hidden)render()} };
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })();
