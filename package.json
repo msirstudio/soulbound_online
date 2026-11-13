@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.42.0",
+  "version": "0.43.0",
   "private": true,
-  "description": "SOULBOUND v0.42 HUD Layout and Secondary Class Update",
+  "description": "SOULBOUND v0.43 Mini Bosses — 8 illustrated dual-state mini boss sprites and fixed boss 3/5 images",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
