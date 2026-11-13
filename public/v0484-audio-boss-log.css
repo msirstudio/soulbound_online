@@ -1,4 +1,6 @@
 /* SOULBOUND v0.48.4 — single AUDIO menu, readable LOG, elite encounter labels. */
+/* Keep the Audio menu above the battlefield and below global dialogs. */
+#game .roomline{position:relative!important;z-index:1800!important;overflow:visible!important}
 #game .roomline .v0484-audio-anchor{
  position:relative;display:inline-flex;align-items:center;flex:0 0 auto;
  min-width:0;isolation:isolate;
