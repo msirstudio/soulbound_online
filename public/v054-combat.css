@@ -1,0 +1,25 @@
+/* SOULBOUND v0.54: small informational combat indicators only.
+ * Status/AI remain fully authoritative on the Node server. */
+#game .v054-combat-intent:not([hidden]){
+ display:block;max-width:min(290px,92%);
+ margin:4px auto 7px;padding:6px 9px;
+ border:1px solid #d2a36a;border-radius:5px;
+ color:#ffe2a9;background:#241b2bdc;
+ font:700 10px/1.35 Georgia,serif;text-align:center;
+ text-shadow:0 2px 2px #000;overflow-wrap:anywhere;
+ box-shadow:0 0 12px #0007;
+}
+#game .v054-status-list:not([hidden]){
+ display:block;width:min(350px,95%);max-height:55px;
+ margin:4px auto;padding:5px 7px;
+ color:#e5d4ff;background:#201a38b8;
+ border:1px solid #8865a9;border-radius:5px;
+ font:700 9px/1.45 Georgia,serif;
+ text-align:center;overflow-y:auto;overflow-wrap:anywhere;
+}
+#game .v054-combat-intent[hidden],#game .v054-status-list[hidden]{display:none!important}
+#game .arena .v0484-elite-tag{z-index:12!important}
+@media(max-width:700px){
+ #game .v054-combat-intent:not([hidden]){font-size:9px;padding:4px 6px;max-width:90%}
+ #game .v054-status-list:not([hidden]){font-size:8px;max-height:42px}
+}
