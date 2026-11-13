@@ -58,11 +58,11 @@ test("inventory overview reads real player progression and preserves item action
  assert.ok(js.includes('data-v044-action="unequip"'));
  assert.ok(css.includes('@media(max-width:650px)'));
 });
-test("v0.54 release links and version are aligned",()=>{
+test("v0.55 release links and version are aligned",()=>{
  const html=read("public/index.html"),log=read("public/update-log-v045.js");
  const pkg=require("../package.json");
- assert.equal(pkg.version,"0.54.0");
- assert.ok(html.includes("VERSION 0.54 · FULL COMBAT"));
+ assert.equal(pkg.version,"0.55.0");
+ assert.ok(html.includes("VERSION 0.55 · HARDCORE COMBAT"));
  assert.ok(html.includes('href="v0485-character-overview.css"'));
- assert.ok(log.includes('version:"0.54"'));
+ assert.ok(log.includes('version:"0.55"'));
 });
