@@ -2,6 +2,11 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.46",date:"2026-11-13",title:"Continental World Atlas",notes:[
+  "Redesigned the world atlas as one irregular connected continent with eight distinct geographic biomes.",
+  "Repositioned the eight region selection pins over their landmarks and added a central safe-city pin.",
+  "Added the actual arena background art to each region preview panel while preserving all travel and level requirements."
+ ]},
  {version:"0.45",date:"2026-11-13",title:"Independent Loot & Update Log",notes:[
   "Boss and mini-boss gear now rolls independently per item; multiple different pieces may drop together.",
   "Rarity odds per item: Common 30–40%, Uncommon 20–30%, Rare 10–20%, Epic 6–10%, Legendary 1–5%.",
