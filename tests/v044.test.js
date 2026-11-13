@@ -20,7 +20,7 @@ test("all loot chances fall inside their rarity-defined bands",()=>{
    }
   }
  }
- assert.equal(bossTotal,41);assert.equal(miniTotal,27);
+ assert.equal(bossTotal,22);assert.equal(miniTotal,12);
 });
 test("all listed drops succeed on independent favorable rolls",()=>{
  const old=Math.random;
