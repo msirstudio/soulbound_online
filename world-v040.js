@@ -37,7 +37,9 @@ function normalizeProgress(v){
  const bossDefeats={};
  for(const r of regions)bossDefeats[r.id]=Math.max(0,Math.min(999999,Math.floor(Number(original.bossDefeats?.[r.id])||0)));
  for(const id of defeated)bossDefeats[id]=Math.max(1,bossDefeats[id]);
- return {version:40,defeatedBossIds:regions.filter(r=>bossDefeats[r.id]>0).map(r=>r.id),bossDefeats};
+ const cleanHistory=(list)=>Array.isArray(list)?[...new Set(list.filter(x=>typeof x==="string"&&/^[a-z0-9_:-]{3,90}$/i.test(x)))].slice(-300):[];
+ return {version:44,defeatedBossIds:regions.filter(r=>bossDefeats[r.id]>0).map(r=>r.id),bossDefeats,
+  lootSeen:cleanHistory(original.lootSeen),raceSeen:cleanHistory(original.raceSeen)};
 }
 function markBossClear(v,id){
  const p=normalizeProgress(v);if(!byId(id))return p;
