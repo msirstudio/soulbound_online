@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.43.0",
+  "version": "0.44.0",
   "private": true,
-  "description": "SOULBOUND v0.43 Mini Bosses — 8 illustrated dual-state mini boss sprites and fixed boss 3/5 images",
+  "description": "SOULBOUND v0.44 Rare Loot, Collection Index, Party Difficulty and Inventory UX",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
