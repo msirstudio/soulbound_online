@@ -73,9 +73,11 @@ test("guard protects entire team; Tank guards more effectively and Aegis lasts t
  assert.equal(b.r.partyWardTurns,0);
  combat.aegis(b.r,guardian,b.say);
  assert.equal(b.r.partyWardTurns,2);
- enemy(b.r,b.say,()=>0);
+ enemy(b.r,b.say,()=>0); // boss wind-up: no attack, Ward remains active
+ assert.equal(b.r.partyWardTurns,2);
+ enemy(b.r,b.say,()=>0); // charged attack resolves
  assert.equal(b.r.partyWardTurns,1);
- enemy(b.r,b.say,()=>0);
+ enemy(b.r,b.say,()=>0); // next regular strike
  assert.equal(b.r.partyWardTurns,0);
 });
 test("temporary dots and debuffs apply on player turns and expire; no saved-hero stat permanently changes",()=>{
