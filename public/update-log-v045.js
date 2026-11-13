@@ -2,6 +2,12 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.48",date:"2026-11-13",title:"City HUD Cleanup & Boss Loot Balance",notes:[
+  "Removed the duplicate lower battle HUD and command dock while in the city, without changing the in-battle HUD.",
+  "Weapon and armor shops only show their respective category; supplies shop shows only potions and food.",
+  "Each boss now has 2–4 curated possible drops and each mini-boss has 1–2; individual rarity drop chances and independent multi-drops are retained.",
+  "Late-region bosses (6–8) drop Epic or Legendary items only. Previously owned equipment and save data remain valid."
+ ]},
  {version:"0.47",date:"2026-11-13",title:"Interactive Capital & City Shops",notes:[
   "The Forgotten Capital now has a full pixel-art city backdrop with clickable locations.",
   "Potion and food supplies, weapons, and armor share the existing merchant inventory and gold system.",
