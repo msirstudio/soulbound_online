@@ -16,7 +16,7 @@ const BOSS_SPECIALS=Object.freeze({
 });
 const PHASE_TWO_SPECIALS=Object.freeze({
  abyssal_rift:{name:"Oblivion's Grasp",scope:"single",element:"void",power:1.28,effect:"stun",chance:.37},
- eclipse_throne:{name:"Sovereign Judgment",scope:"all",element:"light",power:.92,effect:"weaken",chance:.65}
+ eclipse_throne:{name:"Sovereign Judgment",scope:"all",element:"void",power:.92,effect:"weaken",chance:.65}
 });
 const STATUS_NAMES=Object.freeze({
  burn:"Burn",poison:"Poison",bleed:"Bleed",weaken:"Weaken",freeze:"Freeze",stun:"Stun"
