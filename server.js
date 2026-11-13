@@ -132,8 +132,11 @@ io.on("connection",s=>{
   if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can open shop."});
   const status=r.status;
   const fromCity=status==="city"||(status==="shop"&&r.shopOrigin==="city");
-  const fromCamp=["victory","regionClear"].includes(status)||(status==="shop"&&r.shopOrigin==="camp");
-  if(!fromCity&&!fromCamp)return cb({ok:false,error:"Merchants can be visited in the city or after a cleared battle."});
+  // Exactly one roadside merchant per region, after defeating its mini-boss:
+  // local stages 4, 9, 14, 19, 24, 29, 34, 39 only.
+  const miniCleared=r.stage%5===4&&!!r.monster?.miniBoss;
+  const fromCamp=(status==="victory"&&miniCleared)||(status==="shop"&&r.shopOrigin==="camp"&&miniCleared);
+  if(!fromCity&&!fromCamp)return cb({ok:false,error:"Traveling merchant appears only after defeating the mini-boss in stage 4 of a region."});
   const cat=fromCamp?"potion":String(category||"potion");
   if(!["weapon","armor","potion"].includes(cat))return cb({ok:false,error:"Unknown shop category."});
   r.shopOrigin=fromCamp?"camp":"city";
