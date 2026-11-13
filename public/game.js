@@ -149,13 +149,18 @@ socket.on("state",s=>{const last=gameState;gameState=s;render();window.Soulbound
  }}});
 async function restoreSession(){if(!supabaseClient)return;const {data:{session}}=await supabaseClient.auth.getSession();if(session?.user){showAccount(session.user);await prepare()}else showAccount(null);supabaseClient.auth.onAuthStateChange((ev,session)=>{if(ev==="SIGNED_OUT"){currentUser=null;savedCharacter=null;showAccount(null)}})}restoreSession();
 function render(){const s=gameState;if(!s)return;
+ // Server chooses the shared shop for the whole party; individual purchases remain personal.
+ if(s.status==="shop"){
+  cityShopScope=s.shopCategory==="potion"?["potion","food"]:["weapon","armor"].includes(s.shopCategory)?[s.shopCategory]:["potion","food"];
+  if(!cityShopScope.includes(activeShopCategory))activeShopCategory=cityShopScope[0];
+ }else if(s.status==="city")cityShopScope=null;
 const v040Me=s.players.find(p=>p.id===myId);
 window.SoulboundIndex?.updateHero(v040Me);
 window.SoulboundUIV41?.updateGame(s,v040Me);
 window.SoulboundWorldV40?.render(s,v040Me,s.players[0]?.id===myId,{
  travel:async regionIndex=>call("travelRegion",{regionIndex}),
  returnCity:async()=>{const r=await call("returnCity");if(!r.ok)alert(r.error);return r},
- openShop:async()=>{const r=await call("openShop");if(!r.ok)alert(r.error);return r}
+ openShop:async(category)=>{const r=await call("openShop",{category:category||"potion"});if(!r.ok)alert(r.error);return r}
 });
 window.SoulboundAudio?.setScene(s.scene?.css||"wilds");
 window.SoulboundAudio?.setCombatMood(s.status==="battle");
@@ -211,7 +216,7 @@ $("v23ShopToggle").hidden=s.status!=="shop";
 $("v23ShopToggle").setAttribute("aria-expanded",String(s.status==="shop"&&!v23ShopCollapsed));
 
 // A storefront is not an all-purpose merchant: only show its inventory.
-if(s.status==="city"&&previousStatus==="shop")cityShopScope=null;
+
 if(cityShopScope&&!cityShopScope.includes(activeShopCategory))activeShopCategory=cityShopScope[0];
 const categories=$("shopCategories");
 if(categories)categories.querySelectorAll("[data-shop-category]").forEach(b=>{
