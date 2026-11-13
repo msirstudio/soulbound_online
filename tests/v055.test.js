@@ -16,7 +16,7 @@ function room(stage=5,party=1){
 const strike=r=>combat.monsterStrike(r,{say,raceById:()=>({reduce:0}),random:()=>0});
 test("all eight affinity profiles and codex weakness/resistance match actual battle multipliers",()=>{
  const codex=combat.codexData();
- assert.equal(codex.elements.length,8);assert.equal(codex.affinities.length,8);
+ assert.equal(codex.elements.length,10);assert.equal(codex.affinities.length,8);
  assert.equal(codex.statusEffects.length,7);
  for(let i=0;i<8;i++){
   const m=room((i+1)*5).monster,entry=combat.enemyCodex(m);
@@ -150,6 +150,6 @@ test("Codex and gameplay integration keep Phase 2 exclusive and preserve existin
   assert.ok(index.includes(t),t);
  assert.deepEqual(base.PHASE_TWO_STAGES,[35,40]);
  assert.ok(!js.includes("ADD COLUMN")&&!js.includes("DROP TABLE"));
- const pkg=require("../package.json");assert.equal(pkg.version,"0.55.1");
- assert.ok(html.includes("VERSION 0.55.1 · INDEX FIX"));
+ const pkg=require("../package.json");assert.equal(pkg.version,"0.55.2");
+ assert.ok(html.includes("VERSION 0.55.2 · ELEMENTAL RULES"));
 });
