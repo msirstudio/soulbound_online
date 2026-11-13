@@ -1,0 +1,33 @@
+/* SOULBOUND v0.48.2 — generated pixel-art title screen cover
+   Intentionally scoped to the main menu (#v041Front), not game or settings.
+   Cover file: public/assets/ui/title-cover.webp
+*/
+#v041Front{
+ background-color:#19283b!important;
+ background-image:
+  linear-gradient(90deg,rgba(8,15,30,.77) 0%,rgba(9,18,35,.52) 45%,rgba(8,13,30,.52) 100%),
+  url("assets/ui/title-cover.webp")!important;
+ background-position:center center!important;
+ background-size:cover!important;
+ background-repeat:no-repeat!important;
+}
+#v041Front .v041-front-vista{display:none!important}
+#v041Front::before{
+ background:linear-gradient(180deg,rgba(6,12,26,.04) 0%,rgba(8,10,22,.04) 48%,rgba(7,10,22,.43) 100%)!important;
+ z-index:0!important;
+}
+#v041Front .v041-front-story{z-index:1}
+#v041Front .v041-front-menu{
+ z-index:2;
+ background:linear-gradient(155deg,rgba(17,22,39,.95),rgba(17,23,40,.94))!important;
+ backdrop-filter:blur(4px);
+}
+#v041Front h1{color:#fff0d0!important;text-shadow:0 3px 0 #765333,0 5px 22px #000!important}
+#v041Front .v041-front-description{color:#f0e7d8!important}
+@media(max-width:770px){
+ #v041Front{background-position:54% center!important}
+ #v041Front .v041-front-menu{background:rgba(15,21,39,.96)!important}
+}
+@media(prefers-reduced-transparency:reduce){
+ #v041Front .v041-front-menu{backdrop-filter:none!important}
+}
