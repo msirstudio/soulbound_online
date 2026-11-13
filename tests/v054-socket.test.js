@@ -67,7 +67,7 @@ test("stage-40 Phase 2 is visible online, temporary status damage is server-owne
  r.players.get("solo").tauntTurns=0;
  assert.equal(leader.call("action",{type:"guard"}).ok,true);
  assert.ok(r.players.get("solo").hp<hp);
- assert.equal((g.last().players[0].statusEffects||[]).length,0);
+ assert.ok(!(g.last().players[0].statusEffects||[]).some(x=>x.id==="burn"),"the original Burn has expired; fresh boss ailments may be applied");
 });
 test("non-final boss never enters Phase 2 via Socket action even when below half HP",()=>{
  const g=harness(),leader=g.connect("solo"),{code}=leader.call("createRoom",{name:"Hero",classId:"swordsman"});
