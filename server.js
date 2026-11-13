@@ -91,7 +91,7 @@ io.on("connection",s=>{
  }p.foodItems={roast_meat:bounded(v.food_items?.roast_meat,0,9999,0),herb_stew:bounded(v.food_items?.herb_stew,0,9999,0),mana_tart:bounded(v.food_items?.mana_tart,0,9999,0)};p.foodBuffs={atk:bounded(v.food_buffs?.atk,0,99,0),def:bounded(v.food_buffs?.def,0,99,0),skill:bounded(v.food_buffs?.skill,0,99,0)};p.worldProgress=world.normalizeProgress(v.world_progress);
  // Existing owned items count as discovered even if the prior save predates v0.44.
  const seen=new Set(p.worldProgress.lootSeen);
- for(const it of p.inventory){if(/^(boss|mini)[1-8]_/.test(it.id||""))seen.add(it.id+":"+it.rarity)}
+ for(const it of p.inventory){if(it.id)seen.add(it.id+":"+(it.rarity||"shop"))}
  p.worldProgress.lootSeen=[...seen].slice(-300);
  if(p.raceId)p.worldProgress.raceSeen=[...new Set([...(p.worldProgress.raceSeen||[]),p.raceId])];
  emit(r);cb({ok:true})});
