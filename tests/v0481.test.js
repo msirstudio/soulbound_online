@@ -34,7 +34,7 @@ test("closing merchant does not reset stage, region, monster or player stats",()
 });
 test("v0.55 version is shown and Update Log describes the fix",()=>{
  const html=read("public/index.html"),pkg=require("../package.json"),log=read("public/update-log-v045.js");
- assert.equal(pkg.version,"0.55.1");
- assert.ok(html.includes("VERSION 0.55.1 · INDEX FIX"));
+ assert.equal(pkg.version,"0.55.2");
+ assert.ok(html.includes("VERSION 0.55.2 · ELEMENTAL RULES"));
  assert.ok(log.includes('version:"0.48.1"'));
 });
