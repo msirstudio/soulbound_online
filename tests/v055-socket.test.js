@@ -90,9 +90,10 @@ test("Socket: all players receive server AI and status snapshots, phase 2 only o
  for(const c of [host,guest])assert.equal(c.call("restoreCharacter",{level:80,speed:60,max_hp:3000}).ok,true);
  const r=g.live.rooms.get(code);r.regionIndex=6;r.stage=35;g.live.start(r);
  assert.equal(r.players.size,2);
- assert.equal(g.last().monster.phase,1);
- assert.equal(g.last().monster.staggerThreshold,130);
+ assert.equal(r.monster.phase,1);
+ assert.equal(r.monster.staggerThreshold,130);
  assert.equal(host.call("action",{type:"guard"}).ok,true);
+ assert.equal(g.last().monster.phase,1);
  assert.equal(g.last().partyWardTurns,1);
  assert.equal(g.last().players.length,2);
  assert.ok(g.last().monster.intent.name);
