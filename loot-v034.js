@@ -9,15 +9,16 @@ const RARITIES=["common","uncommon","rare","epic","legendary"];
 const ICONS={head:"🪖",chest:"🛡️",pants:"👖",boots:"🥾",main:"⚔️",offhand:"🗡️",neck:"💎",ring_left:"💍",ring_right:"💍"};
 const BASE_NAMES={head:"Helm",chest:"Armor",pants:"Greaves",boots:"Boots",main:"Blade",offhand:"Guard",neck:"Amulet",ring_left:"Ring",ring_right:"Ring"};
 const TITLES=["Briarfang","Dreadforge","Ember","Hollow","Glacier","World-Eater","Void","Eclipse"];
+const MINI_TITLES=["Rootbound","Ironbound","Molten","Sanctum","Frosthorn","Titan","Abyss","Twilight"];
 const FACTORS={common:1,uncommon:1.35,rare:1.8,epic:2.45,legendary:3.4};
 const SLOT_ALIASES={weapon:"main",armor:"chest",helmet:"head",necklace:"neck",ring:"ring_left",shield:"offhand"};
 const clamp=(v,lo,hi)=>Math.max(lo,Math.min(hi,Math.trunc(Number(v)||0)));
 function slotOf(item){return SLOT_ALIASES[item?.slot]||item?.slot||null}
 function rarityFromRoll(){const r=Math.random();return r<.50?"common":r<.78?"uncommon":r<.94?"rare":r<.99?"epic":"legendary"}
-function validLootId(id){return /^boss([1-8])_(head|chest|pants|boots|main|offhand|neck|ring_left|ring_right)$/.exec(String(id||""))}
+function validLootId(id){return /^(boss|mini)([1-8])_(head|chest|pants|boots|main|offhand|neck|ring_left|ring_right)$/.exec(String(id||""))}
 function factory(id,rarity){
  const m=validLootId(id);if(!m||!RARITIES.includes(rarity))return null;
- const boss=Number(m[1]),slot=m[2],power=Math.round((3+boss*2.15)*FACTORS[rarity]),isWeapon=slot==="main",armor=["chest","pants","head","boots"].includes(slot);
+ const isMini=m[1]==="mini",boss=Number(m[2]),slot=m[3],power=Math.round((3+boss*2.15)*(isMini?.78:1)*FACTORS[rarity]),isWeapon=slot==="main",armor=["chest","pants","head","boots"].includes(slot);
  const stats={
   value:isWeapon?Math.max(2,Math.round(power*1.4)):0,
   defense:armor?Math.max(1,Math.round(power*(slot==="chest"?.72:.42))):slot==="offhand"?Math.max(1,Math.round(power*.66)):Math.max(0,Math.round(power*.2)),
@@ -27,23 +28,45 @@ function factory(id,rarity){
  if(slot==="offhand")stats.value=Math.round(power*.2);
  if(slot==="neck")stats.value=Math.round(power*.45);
  if(slot.startsWith("ring"))stats.value=Math.round(power*.3);
- return {id,templateId:id,name:TITLES[boss-1]+" "+(slot==="main"&&(boss===3||boss===6)?"Staff":BASE_NAMES[slot])+" ["+rarity.toUpperCase()+"]",icon:ICONS[slot],slot,rarity,level:1,bossStage:boss*3,
+ return {id,templateId:id,name:(isMini?MINI_TITLES[boss-1]:TITLES[boss-1])+" "+(slot==="main"&&(boss===3||boss===6||isMini&&boss===7)?"Staff":BASE_NAMES[slot])+" ["+rarity.toUpperCase()+"]",icon:ICONS[slot],slot,rarity,level:1,bossStage:boss*5,sourceStage:boss*5-(isMini?1:0),
+  ...(isMini&&slot==="main"?{class:boss===7?"mage":"swordsman"}:{}),
   value:stats.value,defense:stats.defense,maxHp:stats.maxHp,maxMp:stats.maxMp,
   description:Object.entries(stats).filter(([,n])=>n>0).map(([k,n])=>"+"+n+" "+({value:"ATK",defense:"DEF",maxHp:"HP",maxMp:"MP"}[k])).join(" · ")};
 }
-// Curated per-boss rewards. chance is the unconditional per-player drop probability.
-// One roll per boss victory; at most one item. No rerolls into other rarities.
+// v0.44 curated per-encounter tables. Entries are POSSIBLE rewards, not a
+// guaranteed number of items. Their chances sum to under 25%; one roll per
+// player per victory can award at most one item. Each boss has 1-4 possible
+// drops, each mini boss has 1-2 possible drops.
 const BOSS_DROPS={
-  1:[{slot:"main",rarity:"rare",chance:12},{slot:"ring_left",rarity:"uncommon",chance:38}],
-  2:[{slot:"chest",rarity:"uncommon",chance:35},{slot:"boots",rarity:"rare",chance:20}],
-  3:[{slot:"main",rarity:"epic",chance:12},{slot:"neck",rarity:"rare",chance:32}],
-  4:[{slot:"head",rarity:"rare",chance:35},{slot:"offhand",rarity:"epic",chance:18}],
-  5:[{slot:"pants",rarity:"epic",chance:25},{slot:"ring_left",rarity:"rare",chance:38}],
-  6:[{slot:"main",rarity:"epic",chance:30},{slot:"neck",rarity:"legendary",chance:7}],
-  7:[{slot:"chest",rarity:"legendary",chance:12},{slot:"boots",rarity:"epic",chance:32}],
-  8:[{slot:"main",rarity:"legendary",chance:18},{slot:"ring_left",rarity:"legendary",chance:12}]
+ 1:[{slot:"main",rarity:"rare",chance:7},{slot:"ring_left",rarity:"uncommon",chance:10}],
+ 2:[{slot:"chest",rarity:"uncommon",chance:8},{slot:"boots",rarity:"rare",chance:5},{slot:"offhand",rarity:"rare",chance:4}],
+ 3:[{slot:"main",rarity:"epic",chance:3},{slot:"neck",rarity:"rare",chance:7},{slot:"pants",rarity:"uncommon",chance:8},{slot:"ring_left",rarity:"rare",chance:4}],
+ 4:[{slot:"head",rarity:"rare",chance:8},{slot:"offhand",rarity:"epic",chance:4}],
+ 5:[{slot:"pants",rarity:"epic",chance:5},{slot:"ring_left",rarity:"rare",chance:8},{slot:"boots",rarity:"uncommon",chance:8}],
+ 6:[{slot:"main",rarity:"epic",chance:4},{slot:"neck",rarity:"legendary",chance:1.5},{slot:"offhand",rarity:"rare",chance:7},{slot:"head",rarity:"epic",chance:3}],
+ 7:[{slot:"chest",rarity:"legendary",chance:2},{slot:"boots",rarity:"epic",chance:5},{slot:"ring_right",rarity:"rare",chance:6}],
+ 8:[{slot:"main",rarity:"legendary",chance:2},{slot:"ring_left",rarity:"legendary",chance:1.5},{slot:"neck",rarity:"epic",chance:4},{slot:"chest",rarity:"legendary",chance:1}]
 };
-function bossDrops(boss){return(BOSS_DROPS[boss]||[]).map(row=>({...factory("boss"+boss+"_"+row.slot,row.rarity),chance:row.chance}));}
+const MINI_DROPS={
+ 1:[{slot:"head",rarity:"uncommon",chance:11}],
+ 2:[{slot:"offhand",rarity:"rare",chance:6},{slot:"boots",rarity:"uncommon",chance:9}],
+ 3:[{slot:"chest",rarity:"rare",chance:10}],
+ 4:[{slot:"neck",rarity:"rare",chance:7},{slot:"ring_left",rarity:"uncommon",chance:8}],
+ 5:[{slot:"boots",rarity:"rare",chance:10}],
+ 6:[{slot:"pants",rarity:"epic",chance:4},{slot:"head",rarity:"rare",chance:8}],
+ 7:[{slot:"main",rarity:"epic",chance:4}],
+ 8:[{slot:"neck",rarity:"epic",chance:5},{slot:"ring_left",rarity:"rare",chance:7}]
+};
+function lootRows(region,isMini=false){
+ const num=Math.round(Number(region)),set=isMini?MINI_DROPS:BOSS_DROPS;
+ return(set[num]||[]).map(row=>({...factory((isMini?"mini":"boss")+num+"_"+row.slot,row.rarity),chance:row.chance}));
+}
+function bossDrops(boss){return lootRows(boss,false)}
+function miniDrops(boss){return lootRows(boss,true)}
+function encounterDrops(stage){
+ const n=Number(stage),idx=Math.ceil(n/5);
+ return n%5===0?bossDrops(idx):n%5===4?miniDrops(idx):[];
+}
 function canonical(saved,shopItems){
  if(!saved||typeof saved!=="object")return null;
  const id=String(saved.id||"");let item;
@@ -71,21 +94,28 @@ function normalizeInventory(raw,shopItems){
  return result;
 }
 function bagUsed(player){return (player.inventory||[]).filter(it=>!it.equippedSlot).length}
-function dropBossLoot(player,stage,logger=()=>{},explicitBossIndex){
- if(!explicitBossIndex&&stage%3!==0)return null;
+function dropEncounterLoot(player,stage,logger=()=>{},explicitRegion,explicitMini){
+ const n=Math.round(Number(stage)),region=explicitRegion?Math.round(Number(explicitRegion)):Math.ceil(n/5);
+ const isMini=explicitMini===undefined?n%5===4:!!explicitMini;
+ const table=isMini?MINI_DROPS[region]:BOSS_DROPS[region];
+ if(!table||!(isMini||n%5===0))return null;
  player.inventory=Array.isArray(player.inventory)?player.inventory:[];
- if(bagUsed(player)>=40){logger(player.name+"'s bag is full (40/40): boss loot was not collected.");return null}
- // Each player rolls once against a fixed per-boss drop table. A failed roll gives no item.
- const boss=explicitBossIndex?Math.round(Number(explicitBossIndex)):Math.max(1,Math.min(8,Math.round(stage/3)));
- if(!Number.isInteger(boss)||!BOSS_DROPS[boss])return null;
+ if(bagUsed(player)>=40){logger(player.name+"'s bag is full (40/40): loot was not collected.");return null}
  const roll=Math.random()*100;let sum=0,chosen=null;
- for(const entry of BOSS_DROPS[boss]){sum+=entry.chance;if(roll<sum){chosen=entry;break}}
- if(!chosen){logger(player.name+" received no boss equipment this time.");return null}
- const it=factory("boss"+boss+"_"+chosen.slot,chosen.rarity);
- it.uid=randomUUID();
- player.inventory.push(it);
- logger(player.name+" received "+chosen.rarity.toUpperCase()+" boss loot: "+it.name+"!");
- return it;
+ for(const entry of table){sum+=entry.chance;if(roll<sum){chosen=entry;break}}
+ if(!chosen){logger(player.name+" received no equipment this time.");return null}
+ const item=factory((isMini?"mini":"boss")+region+"_"+chosen.slot,chosen.rarity);
+ if(!item)return null;
+ item.uid=randomUUID();player.inventory.push(item);
+ const old=Array.isArray(player.worldProgress?.lootSeen)?player.worldProgress.lootSeen:[];
+ const key=item.id+":"+item.rarity;
+ player.worldProgress={...(player.worldProgress||{}),lootSeen:[...new Set([...old,key])].slice(-300)};
+ logger(player.name+" found "+chosen.rarity.toUpperCase()+" "+(isMini?"mini-boss":"boss")+" loot: "+item.name+"!");
+ return item;
+}
+// Keep old export compatible with v0.34 callers/tests.
+function dropBossLoot(player,stage,logger=()=>{},explicitBossIndex){
+ return dropEncounterLoot(player,stage,logger,explicitBossIndex,false);
 }
 function bonuses(it){return{atk:clamp(it?.value,0,10000),def:clamp(it?.defense,0,10000),maxHp:clamp(it?.maxHp,0,100000),maxMp:clamp(it?.maxMp,0,100000)}}
 function updateStats(p,oldItem,newItem){
@@ -140,4 +170,4 @@ function unequip(p,slot){
  if(slot==="chest"){p.armorItem=null;p.armor=p.classId==="mage"?"Novice Robe":p.classId==="tank"?"Guardian Armor":"Traveler Armor"}
  return{ok:true,slot};
 }
-module.exports={SLOTS,RARITIES,canonical,normalizeInventory,dropBossLoot,equip,unequip,equipped,slotOf,bagUsed,factory,BOSS_DROPS,bossDrops};
+module.exports={SLOTS,RARITIES,canonical,normalizeInventory,dropBossLoot,dropEncounterLoot,encounterDrops,miniDrops,equip,unequip,equipped,slotOf,bagUsed,factory,BOSS_DROPS,MINI_DROPS,bossDrops};
