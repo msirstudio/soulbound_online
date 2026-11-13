@@ -2,16 +2,19 @@
 const test=require("node:test"),assert=require("node:assert/strict");
 const fs=require("node:fs"),path=require("node:path");
 const root=path.join(__dirname,".."),read=p=>fs.readFileSync(path.join(root,p),"utf8");
-test("Atlas uses one organic continental image, eight numbered pins and central safe city",()=>{
- const art=read("public/assets/world/forgotten-kingdom-v046.svg");
+test("World Atlas uses the actual generated raster WebP, and its 8 overlay pins match the scene",()=>{
+ const artPath=path.join(root,"public/assets/world/world-map-v046.webp");
+ assert.ok(fs.existsSync(artPath),"Generated Pixel Art WebP is missing from GitHub.");
+ const art=fs.readFileSync(artPath);
+ assert.equal(art.toString("ascii",0,4),"RIFF");
+ assert.equal(art.toString("ascii",8,12),"WEBP");
+ assert.ok(art.length>200000, "Map should contain the full high-resolution rendered image.");
  const ui=read("public/world-ui-v040.js");
- assert.match(art,/<svg/);assert.match(art,/viewBox="0 0 1024 656"/);
- assert.match(art,/id="landclip"/);assert.match(art,/Central safe city/);
- assert.match(ui,/forgotten-kingdom-v046\.svg/);
+ assert.ok(ui.includes("world-map-v046.webp"));
  assert.match(ui,/v046CityPin/);
- assert.match(ui,/positions=\[\[21,54\]/);
+ assert.ok(ui.includes("positions=[[18,67]"));
  assert.match(ui,/data-v040-region/);
- assert.ok(!ui.includes('<svg class="v040-land"'),"Old hard-coded map should be replaced");
+ assert.ok(!ui.includes("forgotten-kingdom-v046.svg"));
 });
 test("Eight region previews use the corresponding existing arena images",()=>{
  const css=read("public/v046-atlas.css");

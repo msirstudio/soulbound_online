@@ -5,7 +5,8 @@
 const $=id=>document.getElementById(id);
 let latest=null,player=null,leader=false,actions=null,selected=0,open=false,installed=false;
 // Atlas pin coordinates match the 1024×656 continental map illustration.
-const positions=[[21,54],[49,81],[75,77],[21,80],[39,22],[16,29],[84,44],[79,22]];
+// Overlay pins align to the generated 1448 x 1086 PNG artwork (4:3), not the prior SVG.
+const positions=[[18,67],[55,81],[84,73],[15,33],[30,17],[65,19],[85,40],[88,13]];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 function install(){
  if(installed||!$("arena")||!$("game"))return;
@@ -27,7 +28,7 @@ function install(){
  const overlay=document.createElement("div");overlay.id="v040WorldOverlay";overlay.className="v040-overlay";overlay.hidden=true;
  overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");overlay.setAttribute("aria-label","World Map");
  overlay.innerHTML='<div class="v040-atlas"><header class="v040-atlas-head"><div><small>SOULBOUND · A NEW WORLD</small><h2>🗺 WORLD ATLAS</h2></div><button id="v040WorldClose" type="button" aria-label="Close world map">✕</button></header>'+
- '<div class="v040-atlas-grid"><div class="v040-map-canvas" id="v040MapCanvas"><img class="v040-land v046-world-art" src="assets/world/forgotten-kingdom-v046.svg" alt="" aria-hidden="true"><div class="v040-map-pins" id="v040MapPins"></div></div>'+
+ '<div class="v040-atlas-grid"><div class="v040-map-canvas" id="v040MapCanvas"><img class="v040-land v046-world-art" src="assets/world/world-map-v046.webp" alt="SOULBOUND pixel-art continent with eight interconnected regions" draggable="false"><div class="v040-map-pins" id="v040MapPins"></div></div>'+
  '<section class="v040-map-detail" id="v040MapDetail" aria-live="polite"></section></div>'+
  '<footer class="v040-atlas-foot">Select a map pin to inspect the area. The leader may start a run if every party member meets the minimum level.</footer></div>';
  document.body.appendChild(overlay);
@@ -47,7 +48,7 @@ function partyAccess(r){return !!latest?.players?.length&&latest.players.every(p
 function drawAtlas(){
  if(!open)return;
  const regs=maps(),pins=$("v040MapPins");if(!pins)return;
- pins.innerHTML='<button type="button" id="v046CityPin" class="v040-pin v046-city-pin" style="left:51%;top:54%" title="Central Safe City · Lobby" aria-label="Central City — safe hub, return to your party">🏰</button>'+regs.map((r,i)=>'<button type="button" class="v040-pin '+(i===selected?"selected ":"")+(levelAccess(r)?"":"locked")+'" data-v040-region="'+i+'" style="left:'+positions[i][0]+'%;top:'+positions[i][1]+'%" title="'+esc(r.name)+'" aria-label="View '+esc(r.name)+'"><span>'+r.icon+'</span><b>'+(i+1)+'</b></button>').join("");
+ pins.innerHTML='<button type="button" id="v046CityPin" class="v040-pin v046-city-pin" style="left:47%;top:49%" title="Central Safe City · Lobby" aria-label="Central City — safe hub, return to your party">🏰</button>'+regs.map((r,i)=>'<button type="button" class="v040-pin '+(i===selected?"selected ":"")+(levelAccess(r)?"":"locked")+'" data-v040-region="'+i+'" style="left:'+positions[i][0]+'%;top:'+positions[i][1]+'%" title="'+esc(r.name)+'" aria-label="View '+esc(r.name)+'"><span>'+r.icon+'</span><b>'+(i+1)+'</b></button>').join("");
  pins.querySelectorAll("button[data-v040-region]").forEach(b=>b.onclick=()=>{selected=Number(b.dataset.v040Region);drawAtlas()});
  const cityPin=$("v046CityPin");
  if(cityPin)cityPin.onclick=()=>{ // The hub already exists: leave world view and return to the central city panel.

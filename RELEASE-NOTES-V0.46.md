@@ -1,7 +1,7 @@
 # SOULBOUND v0.46 — Connected Continent World Atlas
 
 ## Implemented directly on GitHub
-- `public/assets/world/forgotten-kingdom-v046.svg`: one irregular connected continent with different natural biomes and eight grounded landmarks (not eight floating islands), drawn as scalable pixel-edged SVG artwork.
+- `public/assets/world/world-map-v046.webp`: rasterized 1448×1086 generated Pixel Art world map (converted from the image produced in ChatGPT). No SVG.
 - `public/world-ui-v040.js`: replaces the old symmetric two-polygon SVG, places all eight interactive region pins on matching landscapes, adds Central Safe City clickable pin.
 - `public/v046-atlas.css`: responsive map layout and REAL pre-existing battle background images in the right-side region detail panel.
 - Header, menu, package and update log now say v0.46.
@@ -29,3 +29,6 @@ Central Safe City — center of main continent (click closes atlas and returns t
 
 No image upload or manual CSS edits are required when deploying this branch.
 Note: GitHub CI validates SVG XML, source syntax, and regression tests, but actual browser layout must still be checked at your screen size. This is a source-code artwork, not a rendered image-generation screenshot.
+
+## Raster artwork integration
+The `v0.46-generated-pixel-map` branch contains the actual generated art file at `public/assets/world/world-map-v046.webp`; no manual upload is necessary. This file replaces the earlier SVG atlas on that branch.

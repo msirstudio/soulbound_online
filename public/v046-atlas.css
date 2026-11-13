@@ -1,4 +1,4 @@
-/* SOULBOUND v0.46 · one connected continent, eight clickable region pins, and real scenic previews.
+/* SOULBOUND v0.46 · generated PNG continent, eight clickable region pins, and real scenic previews.
    Put LAST in index.html to override earlier World Atlas palette-only artwork.
 */
 #v040WorldOverlay .v040-atlas{width:min(1270px,98vw)!important}
@@ -7,7 +7,7 @@
  align-items:stretch!important
 }
 #v040WorldOverlay .v040-map-canvas{
- aspect-ratio:1024 / 656!important;
+ aspect-ratio:4 / 3!important;
  min-height:390px!important;
  height:auto!important;
  background:#1c5378!important;
@@ -70,9 +70,12 @@
 }
 @media(max-width:770px){
  #v040WorldOverlay .v040-atlas-grid{display:block!important;overflow:auto!important}
- #v040WorldOverlay .v040-map-canvas{height:auto!important;min-height:0!important;aspect-ratio:1024/656!important}
+ #v040WorldOverlay .v040-map-canvas{height:auto!important;min-height:0!important;aspect-ratio:4/3!important}
  #v040WorldOverlay .v040-pin{width:32px;height:32px}
  #v040WorldOverlay .v046-city-pin{width:36px;height:36px;font-size:18px}
  #v040WorldOverlay .v040-pin span{font-size:15px}
  #v040WorldOverlay .v040-pin b{font-size:9px}
 }
+
+/* Keep real generated image un-stretched; the button overlay shares its boundaries. */
+#v040WorldOverlay .v040-land.v046-world-art{object-fit:fill!important;user-select:none;}

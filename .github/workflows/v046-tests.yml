@@ -1,7 +1,7 @@
 name: SOULBOUND v0.46 World Atlas checks
 on:
   push:
-    branches: [v0.46-organic-world-atlas]
+    branches: [v0.46-generated-pixel-map]
   pull_request:
     branches: [v0.45-independent-loot-changelog]
 permissions:
@@ -25,5 +25,18 @@ jobs:
           node --check public/game.js
       - name: Run all gameplay and UI tests
         run: npm test
-      - name: Parse SVG markup
-        run: python3 -c "import xml.etree.ElementTree as E; E.parse('public/assets/world/forgotten-kingdom-v046.svg'); print('Map SVG XML valid')"
+      - name: Verify actual generated raster world map
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p=Path("public/assets/world/world-map-v046.webp")
+          assert p.is_file(), "Generated Pixel Art WebP missing."
+          b=p.read_bytes()
+          assert b[:4]==b"RIFF" and b[8:12]==b"WEBP", "Not a raster WebP image."
+          assert b[12:16]==b"VP8 ", "Unexpected WebP image codec."
+          width=int.from_bytes(b[26:28],"little") & 16383
+          height=int.from_bytes(b[28:30],"little") & 16383
+          assert (width,height)==(1448,1086), (width,height)
+          assert len(b)>200000, "Missing full resolution raster asset."
+          print("Generated Pixel Art WebP verified:",width,height,len(b))
+          PY
