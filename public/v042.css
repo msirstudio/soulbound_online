@@ -1,0 +1,45 @@
+/* SOULBOUND v0.42 — non-reflowing utility panels & grounded combat. */
+#game .game-layout,
+#game.v041-drawer-open .game-layout{
+  display:grid!important;grid-template-columns:minmax(0,1fr)!important;
+  grid-template-rows:minmax(0,1fr)!important;min-height:0!important;
+  overflow:hidden!important;
+}
+#game .game-layout .game-main-column,
+#game.v041-drawer-open .game-layout .game-main-column{
+  grid-column:1!important;grid-row:1!important;width:100%!important;
+  max-width:100%!important;min-width:0!important;
+}
+#game .game-layout .game-side-column,
+#game.v041-drawer-open .game-layout .game-side-column{
+  position:fixed!important;top:var(--v042-panel-top,48px)!important;
+  left:var(--v042-panel-left,auto)!important;right:var(--v042-panel-right,12px)!important;
+  bottom:auto!important;z-index:1700!important;
+  width:min(310px,calc(100vw - 24px))!important;
+  height:var(--v042-panel-height,calc(100dvh - 70px))!important;
+  max-width:calc(100vw - 24px)!important;
+  max-height:calc(100dvh - 24px)!important;min-height:0!important;
+  grid-column:auto!important;grid-row:auto!important;
+  box-shadow:0 9px 28px #0009,inset 0 0 0 1px #d0ac7540!important;
+  overflow:hidden!important;transform:none!important;
+}
+#game .game-layout .game-side-column{display:none!important}
+#game.v041-drawer-open .game-layout .game-side-column{display:flex!important}
+#game .game-side-column .party-panel,#game .game-side-column .merchant-log-panel{
+  flex:1 1 0!important;min-height:0!important;overflow:hidden!important;
+}
+#game .game-side-column .chat-messages,#game .game-side-column .players,
+#game .game-side-column .log{min-height:0!important;overflow-y:auto!important}
+#game #v041DrawerScrim{display:none!important}
+#game .v042-index-spot{display:flex!important;align-items:center!important;justify-content:flex-end!important;margin-left:auto!important}
+#game .v042-index-spot #v035Open{position:static!important;inset:auto!important;transform:none!important;min-height:30px!important;
+  padding:5px 10px!important;font:800 10px Georgia,serif!important;background:#292b3d!important;color:#f4dbac!important;
+  border:1px solid #b49a6a!important;border-radius:5px!important;white-space:nowrap!important}
+#game .arena .party-side{transform:translateY(clamp(36px,8dvh,90px))!important}
+#game .arena .monster-side{transform:translateY(0)!important}
+@media(max-width:800px){
+ #game .game-layout,#game.v041-drawer-open .game-layout{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important}
+ #game .arena .party-side{transform:translateY(clamp(12px,4dvh,38px))!important}
+ #game .game-layout .game-side-column,#game.v041-drawer-open .game-layout .game-side-column{
+ width:min(310px,calc(100vw - 20px))!important;max-height:calc(100dvh - 30px)!important}
+}
