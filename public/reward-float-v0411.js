@@ -29,9 +29,9 @@ function rewardFrom(previous,next,playerId){
 let fadeTimer=null,host=null;
 function draw(entry,status){
  if(typeof document==="undefined")return;
- const target=status==="regionClear"?
-  document.getElementById("v040City"):
-  document.getElementById("arena");
+ // Since v0.48.1 a region-clear victory remains on the battle arena.
+ // The city panel is hidden in that state, so rendering there silently hides rewards.
+ const target=document.getElementById("arena");
  if(!target||!entry)return;
  if(host?.parentNode)host.remove();
  if(fadeTimer!==null){clearTimeout(fadeTimer);fadeTimer=null}
