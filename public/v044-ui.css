@@ -1,0 +1,52 @@
+/* SOULBOUND v0.44 — inventory collection + non-overlapping utility rail.
+   Add after all prior CSS to preserve existing combat and map styles. */
+#v032Modal .v032-window{max-width:min(1290px,98vw)!important;max-height:96dvh!important}
+#v032Modal .v032-content{grid-template-columns:minmax(0,1.05fr) minmax(0,1.03fr)!important;min-height:0!important}
+#v032Modal .v044-stats-bar{display:grid!important;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:9px 13px 2px;flex:none}
+#v032Modal .v044-stat-box{background:#191b27;border:1px solid #706047;border-radius:6px;min-width:0;padding:6px 8px;text-align:center;display:flex;flex-direction:column;gap:3px}
+#v032Modal .v044-stat-box small{font:700 10px Georgia;color:#cdb98e;white-space:nowrap}
+#v032Modal .v044-stat-box strong{font:700 clamp(12px,1.1vw,17px) Georgia;color:#fff2cd;white-space:nowrap}
+#v032Modal #v032Bag{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;grid-auto-rows:minmax(78px,auto)!important;align-content:start!important;gap:6px!important;padding:5px!important;min-height:0!important;overflow-y:auto!important;scrollbar-width:thin}
+#v032Modal #v032Bag .v032-item{min-width:0!important;min-height:76px!important;height:100%!important;overflow:hidden;gap:2px!important;padding:5px 3px!important;transition:border-color .12s}
+#v032Modal #v032Bag .v032-item strong{font:700 10px/1.12 Georgia!important;max-height:26px;overflow:hidden;word-break:break-word}
+#v032Modal #v032Bag .v032-item small{font:8px/1.14 Georgia!important;max-height:20px;overflow:hidden}
+#v032Modal #v032Bag .v032-item .v032-item-icon{font-size:22px!important;line-height:1}
+#v032Modal #v032Bag .v032-item .v034-rarity-name{font-size:8px!important}
+#v032Modal #v032Bag .v032-item.v044-compatible{background:linear-gradient(145deg,#1c332c,#141823)!important;border-color:#569a75!important}
+#v032Modal #v032Bag .v032-item.v044-incompatible{background:linear-gradient(150deg,#492022,#29161d)!important;border-color:#b65f66!important;opacity:.94}
+#v032Modal #v032Bag .v032-item.selected{outline:2px solid #ffda79;outline-offset:0;box-shadow:0 0 9px #d6ad57a8!important}
+#v032Modal .v044-empty-cell{border:1px dashed #564b41;border-radius:5px;min-height:76px;display:grid;place-items:center;font:bold 16px Georgia;color:#554d50;background:#10121e}
+#v032Modal #v044Actions{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center;padding:6px 2px 8px;flex:none}
+#v032Modal #v044Selected{font:700 11px Georgia;color:#f1cf91;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#v032Modal #v044Actions button{background:#473421;border:1px solid #d3a762;border-radius:5px;color:#fff0d2;cursor:pointer;padding:7px 11px;font:700 10px Georgia;min-height:32px}
+#v032Modal #v044Actions button:disabled{background:#262530;border-color:#504943;color:#77717a;cursor:not-allowed}
+#v032Modal .v032-quick-help{flex:none}
+#v035Index .v035-entry.v044-discovered,#v035Index .v037-loot-entry.v044-discovered{background:linear-gradient(120deg,#193428,#1b2430)!important;border-color:#4eb67e!important;box-shadow:inset 3px 0 #6cd29d!important}
+#v035Index .v044-found-tag{font:700 8px Georgia;color:#b5f7c6;display:inline-block;border:1px solid #4a8d64;border-radius:3px;padding:3px 4px;flex:none}
+#v035Index .v044-owned-note{color:#8bebb0!important;font-weight:700}
+#v035Index .v044-race-icon{font-size:72px;text-align:center;line-height:1.3}
+#game .game-layout,#game.v041-drawer-open .game-layout{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(0,1fr)!important}
+#game .game-layout .game-side-column,#game.v041-drawer-open .game-layout .game-side-column{
+ position:fixed!important;left:var(--v042-panel-left,auto)!important;right:var(--v042-panel-right,auto)!important;
+ top:var(--v042-panel-top,48px)!important;bottom:auto!important;
+ height:var(--v042-panel-height,380px)!important;max-height:calc(100dvh - 20px)!important;
+ width:var(--v044-panel-width,310px)!important;max-width:calc(100vw - 16px)!important;
+ z-index:2000!important;grid-column:auto!important;grid-row:auto!important;
+ overflow:hidden!important;padding:9px!important;
+}
+#game .game-layout .game-side-column{display:none!important}
+#game.v041-drawer-open .game-layout .game-side-column{display:flex!important}
+#game.v044-drawer-in-scene .game-layout .game-side-column{box-shadow:0 12px 28px #000c!important;border:2px solid #bd9d67!important}
+#game .game-side-column .party-panel,#game .game-side-column .merchant-log-panel{min-height:0!important;flex:1 1 0!important}
+#game .game-side-column .chat-messages,#game .game-side-column .players,#game .game-side-column .log{overflow-y:auto!important;min-height:0!important}
+@media(max-width:950px){
+ #v032Modal .v032-content{grid-template-columns:1fr!important;overflow:auto!important}
+ #v032Modal #v032Bag{grid-template-columns:repeat(4,minmax(0,1fr))!important;max-height:350px}
+ #v032Modal .v044-stats-bar{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+@media(max-width:480px){
+ #v032Modal #v032Bag{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+ #v032Modal #v044Actions{grid-template-columns:1fr 1fr}
+ #v032Modal #v044Selected{grid-column:1/-1}
+ #v032Modal .v044-stat-box strong{font-size:11px}
+}
