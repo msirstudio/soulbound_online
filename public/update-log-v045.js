@@ -2,6 +2,11 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.48.2",date:"2026-11-13",title:"Main Menu Pixel-Art Cover",notes:[
+  "Added the generated fantasy world illustration as the main menu hero background, with a subtle contrast overlay for readable logo and actions.",
+  "The background only affects the home cover, not the city, battle arena, inventory or world map.",
+  "The new WebP is loaded from assets/ui/title-cover.webp."
+ ]},
  {version:"0.48.1",date:"2026-11-13",title:"Restore HUD, Fix Merchant Exit and Region Clear",notes:[
   "Restored the lower character HUD, stats, and battle controls in the city.",
   "Closing a city shop now simply closes the merchant without resetting hero HP/MP, stage, or progress.",
