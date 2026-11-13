@@ -32,9 +32,9 @@ test("closing merchant does not reset stage, region, monster or player stats",()
  assert.match(game,/\$\("continueShop"\)\.hidden=true/);
  assert.match(ui,/\$\("v040BackCity"\)\.hidden=true/);
 });
-test("v0.48.3 version is shown and Update Log describes the fix",()=>{
+test("v0.48.4 version is shown and Update Log describes the fix",()=>{
  const html=read("public/index.html"),pkg=require("../package.json"),log=read("public/update-log-v045.js");
- assert.equal(pkg.version,"0.48.3");
- assert.ok(html.includes("VERSION 0.48.3 · CAMP MERCHANT"));
+ assert.equal(pkg.version,"0.48.4");
+ assert.ok(html.includes("VERSION 0.48.4 · AUDIO & MINI BOSS"));
  assert.ok(log.includes('version:"0.48.1"'));
 });
