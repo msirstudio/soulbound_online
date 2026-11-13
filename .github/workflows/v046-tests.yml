@@ -25,5 +25,15 @@ jobs:
           node --check public/game.js
       - name: Run all gameplay and UI tests
         run: npm test
-      - name: Parse SVG markup
-        run: python3 -c "import xml.etree.ElementTree as E; E.parse('public/assets/world/forgotten-kingdom-v046.svg'); print('Map SVG XML valid')"
+      - name: Verify generated world map PNG
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import struct
+          p=Path("public/assets/world/world-map-v046.png")
+          assert p.is_file(), "Upload world-map-v046.png to this branch before deploying."
+          with p.open("rb") as f: data=f.read(24)
+          assert data[:8] == b"\\x89PNG\\r\\n\\x1a\\n", "Map must be a PNG, not SVG."
+          assert struct.unpack(">II",data[16:24]) == (1448,1086), "Incorrect map dimensions."
+          print("Generated pixel-art PNG verified:",p)
+          PY
