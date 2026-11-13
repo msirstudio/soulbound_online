@@ -89,3 +89,34 @@ test("Socket rejects insufficient MP before DOT ticks; Break interrupts and Clea
  assert.ok(r.log.some(x=>x.includes("CLEANSE on Ally")));
  assert.equal(g.last().status,"battle");
 });
+
+
+test("actual Socket Mage Meteor exploits boss Fire weakness and Codex reports the same multiplier",()=>{
+ function run(regionId){
+  const g=harness(),a=g.connect("mage"),{code}=a.call("createRoom",{name:"Mage",classId:"mage"});
+  a.call("restoreCharacter",{level:80,attack:220,speed:80,max_hp:3000});
+  const r=g.runtime.rooms.get(code);r.stage=25;r.regionIndex=4;g.runtime.start(r);
+  r.monster.regionId=regionId;
+  r.monster.hp=10000;r.monster.maxHp=10000;
+  const before=r.monster.hp;
+  assert.equal(a.call("action",{type:"skill2"}).ok,true);
+  return before-r.monster.hp;
+ }
+ const weak=run("frostbound_peaks");
+ const neutral=run("dreadforge_bastion");
+ assert.ok(weak>neutral*1.12,"fire Meteor gains a real elemental weakness bonus, not just a Codex label");
+ const data=harness().catalog();
+ assert.equal(data.monsters.find(x=>x.stage===25).weak[0],"fire");
+ assert.equal(data.codex.combatRules.weaknessMultiplier,1.2);
+});
+test("Eclipse Phase 2 uses Void damage in the real move and exposes a matching Light weakness",()=>{
+ const m=combat.beginEncounter({...world.encounter(40,
+  [{hp:1,atk:1,def:1,xp:1,gold:1,sprite:"n"}],
+  Array.from({length:8},()=>({hp:100,atk:20,def:5,xp:20,gold:15,sprite:"b"}))),stage:40});
+ const r={monster:m,log:[]};
+ m.hp=49;m.maxHp=100;
+ assert.equal(combat.checkPhase(r,(room,msg)=>room.log.push(msg)),true);
+ assert.equal(m.intent.element,"void");
+ assert.equal(combat.enemyCodex(m).phase2Affinity.weak[0],"light");
+ assert.equal(combat.elementMultiplier(m,"light"),1.2);
+});
