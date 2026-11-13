@@ -211,7 +211,7 @@ function draw(){
  modal.querySelector("#v044StatsBar").innerHTML=stats.map(([label,value,max])=>'<div class="v044-stat-box"><small>'+label+'</small><strong>'+Number(value||0).toLocaleString()+(max!=null?' / '+Number(max||0).toLocaleString():'')+'</strong></div>').join("");
  modal.querySelector("#v032BagCount").textContent=inventory.filter(it=>!it.equippedSlot).length+" / 40 BAG SLOTS · "+(me.gold||0)+" GOLD";
  const bag=inventory.filter(it=>!it.equippedSlot);
- const safe=bag.slice(0,40).map((it,i)=>{
+ const safe=bag.map((it,i)=>{
   const key=displaySlot(it),icon=it.icon||(key==="main"?"⚔":key==="chest"?"🛡":key.includes("ring")?"💍":key==="boots"?"🥾":"✦");
   const stats=["value","defense","maxHp","maxMp"].map((k,j)=>Number(it[k])>0?"+"+it[k]+" "+["ATK","DEF","HP","MP"][j]:"").filter(Boolean).join(" · ")||key.toUpperCase();
   const id=itemKey(it),rarity=["common","uncommon","rare","epic","legendary"].includes(it.rarity)?it.rarity:"common";
