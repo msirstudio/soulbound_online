@@ -2,7 +2,7 @@
 const test=require("node:test"),assert=require("node:assert/strict");
 const fs=require("node:fs"),path=require("node:path");
 const root=path.join(__dirname,".."),read=p=>fs.readFileSync(path.join(root,p),"utf8");
-test("World Atlas uses the actual generated PNG, and its 8 overlay pins match the scene",()=>{
+test("World Atlas uses the actual generated raster WebP, and its 8 overlay pins match the scene",()=>{
  const artPath=path.join(root,"public/assets/world/world-map-v046.webp");
  assert.ok(fs.existsSync(artPath),"Generated Pixel Art WebP is missing from GitHub.");
  const art=fs.readFileSync(artPath);
