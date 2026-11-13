@@ -74,7 +74,7 @@ function mockLiveServer(){
  const loot=require("../loot-v034");
  const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:
   name==="path"?path:name==="socket.io"?{Server}:
-  name==="./loot-v034"?loot:name==="./world-v040"?world:name==="./combat-v054"?require("../combat-v054"):require(name);
+  name==="./loot-v034"?loot:name==="./world-v040"?world:name==="./combat-v055"?require("../combat-v055"):require(name);
  new Function("require","process","console","__dirname",code)(deps,{env:{}},{log(){}},path.join(__dirname,".."));
  const connect=id=>{const events={};onConnect({id,join(){},on:(ev,fn)=>events[ev]=fn});
   return{call(ev,payload={}){let response=null;events[ev](payload,answer=>{response=answer});return response}}};
