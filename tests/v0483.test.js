@@ -38,6 +38,7 @@ test("Battle Log inner scroll view fills available drawer height",()=>{
  assert.ok(css.includes('min-height:200px!important'));
  assert.ok(css.includes('overflow-y:auto!important'));
  assert.ok(html.includes('href="v0483-camp-log.css"'));
+ assert.ok(read("server.js").includes("log:r.log.slice(-40)"),"Battle Log must send the retained history, not only 14 events");
 });
 test("title version and release notes reflect v0.48.3",()=>{
  const html=read("public/index.html"),pkg=require("../package.json"),log=read("public/update-log-v045.js");
