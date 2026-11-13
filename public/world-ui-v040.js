@@ -48,9 +48,9 @@ function install(){
    if(!leader){alert("Only the party leader can open the city's shop. Other players can buy items after it opens.");return}
    if(!["city","regionClear","shop"].includes(latest?.status))return;
    window.SoulboundCityShopV47?.selectCategory(category);
-   if(latest?.status==="shop"){window.SoulboundCityShopV47?.show();return}
-   const result=await actions?.openShop();
+   const result=await actions?.openShop(category);
    if(result&&!result.ok)alert(result.error||"Shop unavailable.");
+   else if(result?.ok&&latest?.status==="shop")window.SoulboundCityShopV47?.show();
  }));
  $("v040Bag").onclick=()=> $("toggleEquipment")?.click();
  $("v040BackCity").onclick=()=>actions?.returnCity();
