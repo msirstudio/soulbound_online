@@ -8,8 +8,8 @@ const shop=[{id:"iron_sword",name:"Iron Sword",slot:"weapon",value:8,level:1,cla
 function hero(){return{name:"Tester",classId:"swordsman",level:20,atk:25,def:10,maxHp:100,maxMp:40,hp:100,mp:40,weapon:"Training Sword",armor:"Traveler Armor",weaponItem:null,armorItem:null,inventory:[]}}
 function gear(slot,rarity="rare",boss=3){return loot.canonical({id:"boss"+boss+"_"+slot,rarity},shop)}
 test("boss rewards are curated and include a no-drop chance",()=>{
- const p=hero();assert.equal(loot.dropBossLoot(p,1),null);assert.equal(p.inventory.length,0);
- const original=Math.random;try{Math.random=()=>0;const item=loot.dropBossLoot(p,5);assert.ok(item&&item.uid&&item.rarity==="rare");assert.equal(p.inventory.length,1);const other=hero();Math.random=()=>.99;assert.equal(loot.dropBossLoot(other,5),null);assert.equal(other.inventory.length,0);}finally{Math.random=original}
+ const p=hero();assert.deepEqual(loot.dropBossLoot(p,1),[]);assert.equal(p.inventory.length,0);
+ const original=Math.random;try{Math.random=()=>0;const items=loot.dropBossLoot(p,5);assert.ok(items.length>=2&&items.every(it=>it.uid));assert.equal(p.inventory.length,items.length);const other=hero();Math.random=()=>.99;assert.deepEqual(loot.dropBossLoot(other,5),[]);assert.equal(other.inventory.length,0);}finally{Math.random=original}
 });
 test("all five rarity tiers and all nine slots are canonical and deterministic",()=>{
  for(const slot of loot.SLOTS)for(const rarity of loot.RARITIES){
@@ -42,7 +42,7 @@ test("two rings can be worn independently",()=>{
 });
 test("40 free bag slots block rewards and unequip, not worn gear",()=>{
  const p=hero();p.inventory=Array.from({length:40},()=>gear("boots"));
- assert.equal(loot.bagUsed(p),40);assert.equal(loot.dropBossLoot(p,6),null);
+ assert.equal(loot.bagUsed(p),40);assert.deepEqual(loot.dropBossLoot(p,6),[]);
  assert.equal(loot.equip(p,p.inventory[0].uid,"boots").ok,true);
  assert.equal(loot.bagUsed(p),39);
  p.inventory.push(gear("pants"));assert.equal(loot.bagUsed(p),40);
@@ -70,5 +70,5 @@ test("fallen turn is skipped, and fallen allies revive when party wins",()=>{
  const r={players:new Map([["a",a],["b",b]]),turnIndex:0,status:"battle",stage:3,monster:{boss:true,hp:1,maxHp:1,atk:1000,def:0,name:"Boss",xp:20,gold:10,vulnerableTurns:0},log:[]};
  sim.monsterStrike(r);assert.equal(a.hp,0);assert.equal(r.status,"battle");sim.skipFallenTurn(r);assert.equal(sim.current(r).id,"b");
  sim.finish(r);assert.equal(a.hp,30);assert.equal(a.mp,8);assert.equal(r.status,"victory");
- assert.ok(a.inventory.length<=1);assert.ok(b.inventory.length<=1);
+ assert.ok(a.inventory.length<=6);assert.ok(b.inventory.length<=6);
 });
