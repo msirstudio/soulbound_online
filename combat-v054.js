@@ -55,6 +55,14 @@ function effectFor(p,id,turns=2){
  else p.statusEffects.push({id,turns:max(turns,1,3)});
  return true;
 }
+function debuffMonster(m,id,turns=1){
+ if(!m||!["chill","weaken"].includes(id))return false;
+ m.statusEffects=Array.isArray(m.statusEffects)?m.statusEffects:[];
+ const prior=m.statusEffects.find(e=>e.id===id);
+ if(prior)prior.turns=max(Math.max(prior.turns,turns),1,3);
+ else m.statusEffects.push({id,turns:max(turns,1,3)});
+ return true;
+}
 function beforeAction(r,p,say){
  if(p._effectTurn===r.turnSerial)return {skip:false};
  p._effectTurn=r.turnSerial;p._combatAttackMultiplier=1;
@@ -98,7 +106,9 @@ function rollTarget(r,random){
 }
 function hitTarget(r,p,move,ctx){
  const m=r.monster,random=ctx.random||Math.random;
- const raw=Math.max(1,Math.round(m.atk*(move.power||1))-p.def);
+ const debuffs=m.statusEffects||[];
+ const enemyWeak=debuffs.some(e=>e.id==="chill")?.8:debuffs.some(e=>e.id==="weaken")?.88:1;
+ const raw=Math.max(1,Math.round(m.atk*(move.power||1)*enemyWeak)-p.def);
  const foodGuard=p.foodBuffs?.def>0?.8:1;
  const classReduction=p.classPath==="knight"?.9:p.classPath==="guardian"?.88:1;
  const reduction=(p.damageReductionTurns>0?.8:1)*classReduction;
@@ -133,18 +143,22 @@ function monsterStrike(r,ctx){
  if(!m.queuedMove)m.intent=moveFor(m);
  else m.intent=m.queuedMove;
  for(const p of r.players.values()){
-  if(p.tauntTurns>0)p.tauntTurns--;
-  if(p.damageReductionTurns>0)p.damageReductionTurns--;
-  if(p.guardTurns>0)p.guardTurns=0;
+  if(!move.charge&&p.tauntTurns>0)p.tauntTurns--;
+  if(!move.charge&&p.damageReductionTurns>0)p.damageReductionTurns--;
+  if(!move.charge&&p.guardTurns>0)p.guardTurns=0;
  }
- if(r.partyWardTurns>0)r.partyWardTurns--;
+ if(!move.charge&&r.partyWardTurns>0)r.partyWardTurns--;
  if(r.partyWardTurns===0)r.partyWardReduction=0;
- if(m.vulnerableTurns>0)m.vulnerableTurns--;
+ if(!move.charge&&m.vulnerableTurns>0)m.vulnerableTurns--;
+ if(!move.charge&&Array.isArray(m.statusEffects)){
+  for(const e of m.statusEffects)e.turns--;
+  m.statusEffects=m.statusEffects.filter(e=>e.turns>0);
+ }
  if(![...r.players.values()].some(p=>p.hp>0)){
   r.status="defeat";ctx.say(r,"The party has fallen.");
  }
 }
 module.exports={
  PHASE_TWO_STAGES,BOSS_SPECIALS,PHASE_TWO_SPECIALS,STATUS_NAMES,
- canPhaseTwo,beginEncounter,checkPhase,effectFor,beforeAction,guard,aegis,monsterStrike,moveFor
+ canPhaseTwo,beginEncounter,checkPhase,effectFor,debuffMonster,beforeAction,guard,aegis,monsterStrike,moveFor
 };
