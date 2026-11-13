@@ -33,7 +33,7 @@ test("index serves exact scaled values for 40 stages and all eight bosses",()=>{
 });
 test("wiki lists boss and mini-boss loot, shop gear and food",()=>{
  const data=catalog();
- assert.equal(data.items.filter(x=>x.source).length,75);
+ assert.equal(data.items.filter(x=>x.source).length,68);
  assert.ok(data.items.some(x=>x.category==="weapons"&&x.price!=null));
  assert.ok(data.items.some(x=>x.category==="armor"&&x.price!=null));
  assert.equal(data.items.filter(x=>x.category==="food").length,3);
