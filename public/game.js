@@ -1,4 +1,19 @@
 const socket=io(),$=id=>document.getElementById(id);let gameState=null,myId=null,currentUser=null,supabaseClient=null,savedCharacter=null,restoreComplete=false,saveTimer=null,previousStatus=null,selectedGameMode=null,guestMode=false,activeShopCategory="weapon",v23ShopCollapsed=false,v23ShopWasActive=false,specDismissedFor="",specLastEligible="",specModalOpen=false;
+// City storefronts all reuse the existing authoritative merchant and purchase logic.
+window.SoulboundCityShopV47={
+ selectCategory(category){
+  activeShopCategory=["weapon","armor","potion","food"].includes(category)?category:"potion";
+  document.querySelectorAll("#shopCategories [data-shop-category]").forEach(b=>b.classList.toggle("active",b.dataset.shopCategory===activeShopCategory));
+  // render() will re-render available items when shop mode becomes active.
+  if(gameState?.status==="shop")render();
+ },
+ show(){
+  if(gameState?.status!=="shop")return;
+  v23ShopCollapsed=false;const panel=document.getElementById("shopPanel");
+  if(panel){panel.hidden=false;document.getElementById("v23ShopToggle")?.setAttribute("aria-expanded","true");panel.focus();}
+  render();
+ }
+};
 const cfg=window.SOULBOUND_SUPABASE||{};if(cfg.url&&cfg.anonKey&&!cfg.anonKey.includes("PASTE_YOUR")&&window.supabase)supabaseClient=window.supabase.createClient(cfg.url,cfg.anonKey);
 let v40SchemaAvailable=null;
 function v40MergeWorld(cloud,local){
