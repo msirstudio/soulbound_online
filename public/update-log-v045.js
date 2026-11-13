@@ -2,6 +2,12 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.47",date:"2026-11-13",title:"Interactive Capital & City Shops",notes:[
+  "The Forgotten Capital now has a full pixel-art city backdrop with clickable locations.",
+  "Potion and food supplies, weapons, and armor share the existing merchant inventory and gold system.",
+  "Visit the central crystal to open the World Atlas and choose an adventure.",
+  "The city panel is responsive and retains older buttons as accessible alternatives."
+ ]},
  {version:"0.46",date:"2026-11-13",title:"Continental World Atlas",notes:[
   "Replaced the world atlas with an actual generated pixel-art continent (raster WebP) containing eight distinct geographic biomes.",
   "Repositioned the eight region selection pins over their landmarks and added a central safe-city pin.",
