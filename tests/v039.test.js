@@ -45,13 +45,13 @@ test("normal -> hit -> normal on HP decrease, but not on healing",async()=>{
  assert.equal(app.target.attrs.src,"/assets/bosses/v039/briarfang_alpha_normal.png");
 });
 test("non-boss encounter and missing sprite assets fall back safely",async()=>{
- const app=harness({missing:true});app.api.render(monster(260),3);await app.settle();
+ const app=harness({missing:true});app.api.render(monster(260),5);await app.settle();
  assert.equal(app.target.attrs.src,"/assets/bosses/boss-briarfang.svg");
  app.api.render({boss:false,name:"Wolf",sprite:"mossfang-wolf",hp:50},1);
  assert.equal(app.api.status().ready.length,0);
 });
 test("assets are pair-checked before replacing SVG",async()=>{
- const app=harness();app.api.render(monster(260),3);await app.settle();
+ const app=harness();app.api.render(monster(260),5);await app.settle();
  assert.equal(app.images.length,2);
  assert.deepEqual(app.images,[
  "/assets/bosses/v039/briarfang_alpha_normal.png",
