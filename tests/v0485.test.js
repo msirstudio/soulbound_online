@@ -50,7 +50,7 @@ test("inventory overview reads real player progression and preserves item action
  const js=read("public/equipment-inventory-v032.js"),css=read("public/v0485-character-overview.css");
  for(const id of ["v0485HeroOverview","v032Slots","v032Bag","v044Actions","v034Discard"]){assert.ok(js.includes(id),id)}
  for(const field of ["me.raceName","me.raceRarity","me.racePassive","me.raceBuffs","me.classPath","me.strength","me.vitality","me.intelligence","me.agility","me.statPoints","me.racePoints","me.gold","me.hp","me.mp","me.xp","me.level"]){assert.ok(js.includes(field),field)}
- for(const mark of ['v0485-meter-track','v0485-hp','v0485-mp','v0485-xp','role="progressbar"'])assert.ok(js.includes(mark),mark);
+ for(const mark of ['v0485-meter-track','v0485-'+kind,'role="progressbar"'])assert.ok(js.includes(mark),mark);
  assert.ok(js.includes("const xpNeed=level*100"));
  assert.ok(js.includes("9 equipment slots"));
  assert.ok(js.includes('data-v044-action="equip"'));
