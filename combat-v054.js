@@ -81,7 +81,7 @@ function beforeAction(r,p,say){
    p.hp=Math.max(0,p.hp-damage);
    if(damage>0)say(r,"⚠ "+p.name+" suffers "+damage+" "+STATUS_NAMES[id]+" damage.");
   }else if(id==="weaken")p._combatAttackMultiplier=Math.min(p._combatAttackMultiplier,.78);
-  else if(id==="freeze"||id==="stun"){skip=true;p.ccImmuneTurns=Math.max(p.ccImmuneTurns||0,2);say(r,p.name+" loses a turn to "+STATUS_NAMES[id]+" and gains temporary crowd-control resistance.")}
+  else if(id==="freeze"||id==="stun"){skip=true;p.ccImmuneTurns=Math.max(p.ccImmuneTurns||0,3);say(r,p.name+" loses a turn to "+STATUS_NAMES[id]+" and gains temporary crowd-control resistance.")}
   e.turns--;
  }
  p.statusEffects=active.filter(e=>e.turns>0);
