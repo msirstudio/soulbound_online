@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.55.0",
+  "version": "0.55.1",
   "private": true,
-  "description": "SOULBOUND v0.55 Hardcore Combat and Comprehensive Adventure Codex",
+  "description": "SOULBOUND v0.55.1 Adventure Index Cache & Combat Status UI Fix",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
