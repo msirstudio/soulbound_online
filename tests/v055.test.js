@@ -106,7 +106,7 @@ test("Perfect Guard works during charge, survives wind-up, and offers party prot
 });
 test("adaptive boss AI targets group when HP low and avoids invisible random phase changes",()=>{
  const r=room(25,3),m=r.monster;
- m.combatTurn=4;m.hp=m.maxHp*.35;
+ m.combatTurn=8;m.hp=m.maxHp*.35;
  const move=combat.moveFor(m,r);
  assert.equal(move.name,"Frenzied Sweep");
  assert.equal(move.scope,"all");
