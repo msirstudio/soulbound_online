@@ -7,21 +7,25 @@
 const map=Object.freeze({
  5:"briarfang_alpha",
  10:"dreadforge_champion",
- 25:"ember_tyrant",
+ 15:"ember_tyrant",
  20:"hollow_oracle",
- 15:"glacier_warden",
+ 25:"glacier_warden",
  30:"ancient_world_eater",
  35:"void_reaper",
  40:"eclipse_sovereign"
 });
 const base="/assets/bosses/v039/";
+const miniBase="/assets/minibosses/v043/";
+const miniMap=Object.freeze({4:"rootbound_guardian",9:"ironbound_executioner",14:"molten_behemoth",19:"sanctum_keeper",24:"frosthorn_colossus",29:"titans_sentinel",34:"abyss_watcher",39:"twilight_regent"});
+const spriteForStage=stage=>map[stage]?{key:map[stage],base,ext:"png"}:miniMap[stage]?{key:miniMap[stage],base:miniBase,ext:"svg"}:null;
 const assets=new Map();
 let activeKey="",lastHP=null,hitUntil=0,hitTimer=null,currentMonster=null,renderTarget=null;
 const damageMs=540;
 function imagesFor(stage){
- if(!map[stage])return null;
+ const sprite=spriteForStage(stage);
+ if(!sprite)return null;
  if(assets.has(stage))return assets.get(stage);
- const id=map[stage],normal=base+id+"_normal.png",hit=base+id+"_hit.png";
+ const normal=sprite.base+sprite.key+"_normal."+sprite.ext,hit=sprite.base+sprite.key+"_hit."+sprite.ext;
  const record={normal,hit,ready:false,failed:false,pending:true};
  assets.set(stage,record);
  const check=(url)=>new Promise(resolve=>{
@@ -58,7 +62,7 @@ function render(monster,stage){
  const el=document.getElementById("monsterSprite");
  if(!el)return;
  renderTarget=el;
- if(!monster?.boss||!map[stage]){
+ if(!(monster?.boss||monster?.miniBoss)||!spriteForStage(stage)){
    activeKey="";lastHP=null;hitUntil=0;currentMonster=null;
    if(hitTimer){clearTimeout(hitTimer);hitTimer=null}
    el.classList.remove("v039-boss-art","v039-hit");delete el.dataset.v039Frame;
@@ -83,7 +87,7 @@ function render(monster,stage){
  display(stage);
 }
 function status(){
- return{bosses:Object.keys(map).length,ready:[...assets.entries()].filter(([,a])=>a.ready).map(([stage])=>stage),assetBase:base};
+ return{bosses:Object.keys(map).length,miniBosses:Object.keys(miniMap).length,ready:[...assets.entries()].filter(([,a])=>a.ready).map(([stage])=>stage),assetBase:base,miniAssetBase:miniBase};
 }
 window.SoulboundBossSpritesV39={render,imagesFor,status};
 })();
