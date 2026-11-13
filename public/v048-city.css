@@ -1,13 +1,6 @@
-/* v0.48: town scene is the complete city interface.
-   Only while in city-like states: no duplicate combat HUD/dock below it.
-   Preserve PARTY/CHAT/LOG floating panels and all combat HUD during battles. */
-#game.v040-hub .v22-command-dock{display:none!important}
-#game.v040-hub .game-layout{
- display:block!important;min-height:0!important;height:0!important;
- margin:0!important;padding:0!important;overflow:visible!important;
- border:0!important;
-}
-#game.v040-hub .game-layout .game-main-column{display:none!important}
+/* v0.48.1: Restore the lower hero/attribute HUD in the city and shop.
+   Keep compact top-corner city controls; no duplicated bottom navigation.
+   Battle and region-clear result scenes retain their full original HUD. */
 #game.v040-hub .v040-city-inner{
  left:auto!important;bottom:auto!important;top:10px!important;right:10px!important;
  transform:none!important;width:auto!important;max-width:calc(100% - 20px)!important;

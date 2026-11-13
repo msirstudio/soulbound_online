@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.48.0",
+  "version": "0.48.1",
   "private": true,
-  "description": "SOULBOUND v0.48 City Shops, HUD Cleanup and Curated Boss Loot",
+  "description": "SOULBOUND v0.48.1 HUD Restoration and Merchant Close Fix",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

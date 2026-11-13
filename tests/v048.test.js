@@ -36,11 +36,11 @@ test("independent multi-drop, no-drop, and existing saved gear still work",()=>{
   Math.random=()=>.999;assert.equal(loot.dropEncounterLoot(h,10).length,0);
  }finally{Math.random=old}
 });
-test("city hides only duplicated lower HUD, keeps bag and return action",()=>{
+test("city restores lower hero HUD; still keeps the compact bag",()=>{
  const css=read("public/v048-city.css");
  const city=read("public/world-ui-v040.js");
- assert.match(css,/#game\.v040-hub \.v22-command-dock/);
- assert.match(css,/#game\.v040-hub \.game-layout \.game-main-column/);
+ assert.doesNotMatch(css,/#game\.v040-hub \.v22-command-dock\{display:none/);
+ assert.doesNotMatch(css,/#game\.v040-hub \.game-layout \.game-main-column\{display:none/);
  assert.doesNotMatch(css,/#game \.v22-command-dock\s*\{display:none/);
  assert.ok(city.includes('id="v040Bag"'));
  assert.ok(city.includes('id="v040BackCity"'));

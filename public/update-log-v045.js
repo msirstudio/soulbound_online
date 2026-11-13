@@ -2,6 +2,12 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.48.1",date:"2026-11-13",title:"Restore HUD, Fix Merchant Exit and Region Clear",notes:[
+  "Restored the lower character HUD, stats, and battle controls in the city.",
+  "Closing a city shop now simply closes the merchant without resetting hero HP/MP, stage, or progress.",
+  "Removed the redundant Return to City button while already in the city.",
+  "Clearing a region now stays on the completed battle screen until the party leader chooses World Atlas or Return to City."
+ ]},
  {version:"0.48",date:"2026-11-13",title:"City HUD Cleanup & Boss Loot Balance",notes:[
   "Removed the duplicate lower battle HUD and command dock while in the city, without changing the in-battle HUD.",
   "Weapon and armor shops only show their respective category; supplies shop shows only potions and food.",

@@ -31,7 +31,12 @@ function install(){
  const dock=document.querySelector("#game .stage-actions");
  if(dock){
   const b=document.createElement("button");b.id="v040QuickCity";b.type="button";b.className="secondary";b.textContent="🏰 CITY / WORLD";dock.appendChild(b);
-  b.onclick=()=>{if(latest?.status==="city")show();else if(["victory","regionClear","defeat","shop"].includes(latest?.status)){if(confirm("Return the party to the city? This will end the current dungeon run."))actions?.returnCity()}else show()};
+  b.onclick=()=>{
+   // A cleared region stays on the end-of-battle scene until the leader chooses.
+   // Open Atlas directly to pick another region; don't reset the party.
+   if(["city","victory","regionClear","defeat"].includes(latest?.status))show();
+   else if(latest?.status==="shop"){window.SoulboundCityShopV47?.hide?.()}
+ };
  }
  const overlay=document.createElement("div");overlay.id="v040WorldOverlay";overlay.className="v040-overlay";overlay.hidden=true;
  overlay.setAttribute("role","dialog");overlay.setAttribute("aria-modal","true");overlay.setAttribute("aria-label","World Map");
@@ -53,7 +58,7 @@ function install(){
    else if(result?.ok&&latest?.status==="shop")window.SoulboundCityShopV47?.show();
  }));
  $("v040Bag").onclick=()=> $("toggleEquipment")?.click();
- $("v040BackCity").onclick=()=>actions?.returnCity();
+ $("v040BackCity").onclick=()=>actions?.returnCity(); // reserved for future out-of-city encounters; normally hidden
  $("v040WorldClose").onclick=hide;
  overlay.addEventListener("click",e=>{if(e.target===overlay)hide()});
  document.addEventListener("keydown",e=>{if(e.key==="Escape"&&open)hide()});
@@ -103,11 +108,13 @@ function drawDetail(){
 function render(s,me,isLeader,handlers){
  latest=s;player=me;leader=!!isLeader;actions=handlers;install();
  if(!installed)return;
- const cityLike=["city","regionClear","defeat","shop"].includes(s.status);
+ // Region clear and defeat must show the final battle scene, not the city image.
+ const cityLike=["city","shop"].includes(s.status);
  $("v040City").hidden=!cityLike;
  $("arena").hidden=cityLike;
  $("game").classList.toggle("v040-hub",cityLike);
- $("v040QuickCity").hidden=s.status==="battle";
+ $("v040QuickCity").hidden=!["city","victory","regionClear","defeat"].includes(s.status);
+ $("v040QuickCity").textContent=s.status==="regionClear"?"🗺 CHOOSE NEXT REGION":"🗺 WORLD MAP";
  $("v040QuickCity").disabled=!leader;
  const header=$("v040CityHeading"),txt=$("v040CityText");
  if(s.status==="regionClear"){header.textContent="REGION CLEARED ✦";txt.textContent="The main boss is defeated. Your clear and loot are saved. Replay the map or visit another region."}
@@ -121,7 +128,8 @@ function render(s,me,isLeader,handlers){
  $("v040City").querySelectorAll("[data-v047-shop]").forEach(btn=>{
    btn.disabled=!["city","regionClear","shop"].includes(s.status)||!leader;
  });
- $("v040BackCity").hidden=s.status==="city";
+ // Opening or closing a shop never means physically returning from a dungeon.
+ $("v040BackCity").hidden=true;
  $("v040BackCity").disabled=!leader;
  $("v040WorldOpen").disabled=s.status==="shop"||!["city","regionClear","defeat"].includes(s.status);
  if(open)drawAtlas();
