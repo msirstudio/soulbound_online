@@ -55,7 +55,7 @@ test("browser loads a uniquely versioned INDEX script and not the old cached v03
  assert.match(html,/src="adventure-index-v0552[.]js[?]v=[^"]+"/);
  assert.ok(!html.includes('src="adventure-index-v035.js"'));
  assert.ok(html.includes('href="v0551-index-status-boss.css"'));
- assert.ok(html.includes("v0.56.1"));
+ assert.ok(html.includes("v0.56.2"));
 });
 test("interactive INDEX renders all 3 new guides and immediate boss affinity/attack summary",async()=>{
  const h=browserHarness();

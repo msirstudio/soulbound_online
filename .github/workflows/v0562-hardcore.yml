@@ -1,0 +1,20 @@
+name: SOULBOUND v0.56.2 Hardcore Encounter Regression
+on:
+  push:
+    branches: [v0.56.2-hardcore-encounters]
+  pull_request:
+    branches: [v0.56.1-city-ost-save-slots]
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: node --check server.js && node --check encounter-pack-v0562.js && node --check public/game.js
+      - run: npm test

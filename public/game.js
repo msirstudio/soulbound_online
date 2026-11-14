@@ -3,7 +3,7 @@ for(const id of ["v054PartyStatuses","v0551MonsterStatuses"]){
  $(id)?.addEventListener("click",event=>{
   if(event.target.closest("[data-v0551-status]"))window.SoulboundIndex?.open("statuses");
  });
-}let gameState=null,myId=null,currentUser=null,supabaseClient=null,savedCharacter=null,restoreComplete=false,saveTimer=null,previousStatus=null,selectedGameMode=null,guestMode=false,activeShopCategory="weapon",v23ShopCollapsed=false,v23ShopWasActive=false,specDismissedFor="",specLastEligible="",specModalOpen=false;
+}let v562TargetId=null;let gameState=null,myId=null,currentUser=null,supabaseClient=null,savedCharacter=null,restoreComplete=false,saveTimer=null,previousStatus=null,selectedGameMode=null,guestMode=false,activeShopCategory="weapon",v23ShopCollapsed=false,v23ShopWasActive=false,specDismissedFor="",specLastEligible="",specModalOpen=false;
 // City storefronts all reuse the existing authoritative merchant and purchase logic.
 let cityShopScope=null;
 window.SoulboundCityShopV47={
@@ -225,7 +225,7 @@ function startGachaAnimation(){
  gachaTimeout=setTimeout(()=>{v25SetGachaPhase("converging");gachaTimeout=setTimeout(revealGacha,550)},2700);
 }
 $("openGacha").onclick=openGacha;$("skipGacha").onclick=revealGacha;$("closeGacha").onclick=()=>{$("gachaModal").hidden=true;v25SetGachaPhase("idle");gachaOutcome=null;gachaRevealed=false};
-document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{const r=await call("action",{type:b.dataset.action});if(!r.ok)alert(r.error);else{const a=b.dataset.action;const hero=gameState?.players?.find(p=>p.id===myId);const sound=({attack:"attack",skill:"skill",skill2:"skill",skill3:"skill",skill4:"skill",skill5:"skill",skill6:"skill",skill7:"skill",heal:"heal",healSmall:"heal",healMedium:"heal",healLarge:"heal",mana:"mana",manaSmall:"mana",manaMedium:"mana",manaLarge:"mana",guard:"guard",break:"attack",cleanse:"skill"})[a]||"attack";window.SoulboundAudio?.sfx(sound,{weapon:hero?.weapon||"",classId:hero?.classId||""});if(["attack","skill","skill2","skill3","skill4","skill5","skill6","skill7"].includes(a)){if(window.SoulboundSprite?.canDraw(hero)){window.SoulboundSprite.attack(myId)}else requestAnimationFrame(()=>{const figure=Array.from(document.querySelectorAll("#partySprites .hero-figure")).find(el=>el.querySelector(".v17-nameplate")?.textContent.includes(" · YOU"))?.querySelector(".sprite-img");if(figure){figure.classList.remove("v30-attacking");void figure.offsetWidth;figure.classList.add("v30-attacking");setTimeout(()=>figure.classList.remove("v30-attacking"),500)}})}}});
+document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{const r=await call("action",{type:b.dataset.action,targetId:v562TargetId});if(!r.ok)alert(r.error);else{const a=b.dataset.action;const hero=gameState?.players?.find(p=>p.id===myId);const sound=({attack:"attack",skill:"skill",skill2:"skill",skill3:"skill",skill4:"skill",skill5:"skill",skill6:"skill",skill7:"skill",heal:"heal",healSmall:"heal",healMedium:"heal",healLarge:"heal",mana:"mana",manaSmall:"mana",manaMedium:"mana",manaLarge:"mana",guard:"guard",break:"attack",cleanse:"skill"})[a]||"attack";window.SoulboundAudio?.sfx(sound,{weapon:hero?.weapon||"",classId:hero?.classId||""});if(["attack","skill","skill2","skill3","skill4","skill5","skill6","skill7"].includes(a)){if(window.SoulboundSprite?.canDraw(hero)){window.SoulboundSprite.attack(myId)}else requestAnimationFrame(()=>{const figure=Array.from(document.querySelectorAll("#partySprites .hero-figure")).find(el=>el.querySelector(".v17-nameplate")?.textContent.includes(" · YOU"))?.querySelector(".sprite-img");if(figure){figure.classList.remove("v30-attacking");void figure.offsetWidth;figure.classList.add("v30-attacking");setTimeout(()=>figure.classList.remove("v30-attacking"),500)}})}}});
 document.querySelectorAll("[data-stat]").forEach(b=>b.onclick=async()=>{const r=await call("allocateStat",{stat:b.dataset.stat});if(!r.ok)notice(r.error,true)});
 $("shopCategories")?.querySelectorAll("[data-shop-category]").forEach(b=>b.onclick=()=>{if(cityShopScope&&!cityShopScope.includes(b.dataset.shopCategory))return;activeShopCategory=b.dataset.shopCategory;if(gameState)render()});$("chatSend").onclick=sendChat;$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat()});function sendChat(){const input=$("chatInput"),message=input.value.trim();if(!message)return;call("partyChat",{message}).then(r=>{if(!r.ok)notice(r.error,true);else input.value=""})};
 socket.on("connect",()=>{myId=socket.id});socket.on("disconnect",()=>{$("status").textContent="Connection lost. Refresh to reconnect."});
@@ -321,6 +321,23 @@ $("arena").className="arena panel "+(s.scene?.css||"wilds");$("arena").dataset.v
 $("bossTag").textContent=s.monster?.miniBoss?"MINI BOSS":"MAIN BOSS"+(s.monster?.phase===2?" · PHASE 2":"");
 $("bossTag").classList.toggle("v0484-mini",!!s.monster?.miniBoss);
 $("bossTag").classList.toggle("v0484-boss",!!s.monster?.boss);const mh=s.monster?.hp||0,mm=s.monster?.maxHp||1;$("monsterHp").style.width=(mh/mm*100)+"%";$("monsterHpText").textContent=mh+" / "+mm+" HP";
+const v562Alive=(s.enemies||[]).filter(e=>e.hp>0);
+if(!v562Alive.some(e=>e.enemyId===v562TargetId))v562TargetId=s.monster?.enemyId||v562Alive[0]?.enemyId||null;
+const v562Holder=$("v562EnemyChoices");
+v562Holder.hidden=v562Alive.length<=1||s.status!=="battle";
+v562Holder.innerHTML=v562Holder.hidden?"":v562Alive.map(e=>{
+ const isTarget=e.enemyId===v562TargetId,ratio=Math.max(0,Math.min(100,100*e.hp/Math.max(1,e.maxHp)));
+ return '<button type="button" class="v562-target'+(isTarget?' selected':'')+'" data-v562-id="'+esc(e.enemyId)+'" aria-pressed="'+isTarget+'" title="Attack '+esc(e.name)+'">'+
+ '<img src="assets/monsters/'+esc(e.sprite||"mossfang-wolf")+'.svg" alt="" loading="lazy">'+
+ '<span><b>'+esc(e.name)+'</b><small>'+e.hp+' / '+e.maxHp+' HP</small><i class="v562-health"><i style="width:'+ratio+'%"></i></i></span></button>';
+}).join("");
+v562Holder.querySelectorAll("[data-v562-id]").forEach(b=>b.onclick=()=>{
+ v562TargetId=b.dataset.v562Id;
+ v562Holder.querySelectorAll(".v562-target").forEach(x=>{
+  const selected=x.dataset.v562Id===v562TargetId;
+  x.classList.toggle("selected",selected);x.setAttribute("aria-pressed",String(selected));
+ });
+});
 const rawCombatIntent=s.status==="battle"&&(s.monster?.boss||s.monster?.miniBoss)&&s.monster?.intent;
 const combatIntent=rawCombatIntent&&String(rawCombatIntent.name||"").trim().toLowerCase()!=="strike"?rawCombatIntent:null;
 const activeStagger=s.status==="battle"&&!!(s.monster?.boss||s.monster?.miniBoss);

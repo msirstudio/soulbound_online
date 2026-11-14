@@ -31,6 +31,8 @@ test("Enemy counter is server-timed, not simultaneous with the player's input",(
  assert.equal(h.scheduled.length,1);
  assert.equal(h.scheduled[0].ms,760);
  h.scheduled[0].fn();
+ assert.equal(h.last().enemyWindup,true);
+ h.scheduled[1].fn();
  assert.equal(h.last().enemyWindup,false);
  assert.ok(r.log.some(line=>line.includes(" uses Strike against ")),"enemy action resolves after the pause");
  assert.equal(h.call("action",{type:"guard"}).ok,true,"player regains control after counter resolves");
@@ -44,10 +46,10 @@ test("Hit pose takes precedence over attack, with visible length",()=>{
  assert.ok(game.includes("!s.enemyWindup"));
 });
 test("All visible game and API version identifiers advance to v0.56.1",()=>{
- assert.ok(html.includes("<small>v0.56.1</small>"));
- assert.ok(html.includes("VERSION 0.56.1"));
- assert.ok(html.includes('game.js?v=0.56.1'));
+ assert.ok(html.includes("<small>v0.56.2</small>"));
+ assert.ok(html.includes("VERSION 0.56.2"));
+ assert.ok(html.includes('game.js?v=0.56.2'));
  assert.ok(html.includes("v0560-combat-pacing.css?v=0.56.0"));
- assert.ok(server.includes('version:"0.56.1"'));
- assert.equal(require("../package.json").version,"0.56.1");
+ assert.ok(server.includes('version:"0.56.2"'));
+ assert.equal(require("../package.json").version,"0.56.2");
 });

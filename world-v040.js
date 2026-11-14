@@ -67,3 +67,5 @@ function encounter(stage,normal,bosses){
   boss:m.type==="boss",miniBoss:m.type==="mini",regionId:m.region.id,stageInRegion:slot};
 }
 module.exports={regions,totalStages,byId,regionForStage,meta,canEnter,normalizeProgress,markBossClear,encounter};
+/* The encounter pack is attached after exporting World to avoid a circular require. */
+module.exports.encounterPack=require("./encounter-pack-v0562");

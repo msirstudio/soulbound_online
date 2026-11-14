@@ -75,7 +75,7 @@ function mockLiveServer(){
  const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:
   name==="path"?path:name==="socket.io"?{Server}:
   name==="./loot-v034"?loot:name==="./world-v040"?world:name==="./combat-v055"?require("../combat-v055"):require(name);
- new Function("require","process","console","__dirname",code)(deps,{env:{}},{log(){}},path.join(__dirname,".."));
+ new Function("require","process","console","__dirname","setTimeout",code)(deps,{env:{}},{log(){}},path.join(__dirname,".."),fn=>{fn();return 0});
  const connect=id=>{const events={};onConnect({id,join(){},on:(ev,fn)=>events[ev]=fn});
   return{call(ev,payload={}){let response=null;events[ev](payload,answer=>{response=answer});return response}}};
  return{connect,emitted,last:()=>emitted.at(-1)?.state};
@@ -100,7 +100,7 @@ test("socket-driven farm run clears, returns to city and increments boss kills o
  for(let run=1;run<=2;run++){
   assert.equal(hero.call("travelRegion",{regionIndex:0}).ok,true);
   for(let stage=1;stage<=5;stage++){
-   assert.equal(hero.call("action",{type:"attack"}).ok,true);
+   for(let tries=0;tries<6&&game.last().status==="battle";tries++)assert.equal(hero.call("action",{type:"attack"}).ok,true);
    assert.equal(game.last().stage,stage);
    assert.equal(game.last().status,stage===5?"regionClear":"victory");
    if(stage<5)assert.equal(hero.call("nextStage").ok,true);

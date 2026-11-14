@@ -1,7 +1,7 @@
 const express=require("express"),http=require("http"),path=require("path");
 const {Server}=require("socket.io");const loot=require("./loot-v034");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
-app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.56.1"}));
-const world=require("./world-v040");const combat=require("./combat-v055");const rooms=new Map();
+app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.56.2"}));
+const world=require("./world-v040");const combat=require("./combat-v055");const pack=world.encounterPack;const rooms=new Map();
 const normal=[{name:"Mossfang Wolf",sprite:"mossfang-wolf",icon:"🐺",hp:90,atk:12,def:2,xp:35,gold:18},{name:"Goblin Raider",sprite:"goblin-raider",icon:"👺",hp:115,atk:15,def:4,xp:45,gold:24},{name:"Grave Beetle",sprite:"grave-beetle",icon:"🪲",hp:140,atk:17,def:5,xp:55,gold:30},{name:"Cursed Knight",sprite:"cursed-knight",icon:"💀",hp:165,atk:19,def:7,xp:65,gold:36},{name:"Wisp Stalker",sprite:"wisp-stalker",icon:"👻",hp:185,atk:21,def:8,xp:75,gold:42}];
 const bosses=[{name:"The Briarfang Alpha",sprite:"boss-briarfang",icon:"🐺",hp:260,atk:22,def:7,xp:130,gold:90},{name:"Dreadforge Champion",sprite:"boss-dreadforge",icon:"🛡️",hp:390,atk:29,def:10,xp:180,gold:125},{name:"Ember Tyrant",sprite:"boss-ember-tyrant",icon:"🐉",hp:540,atk:36,def:13,xp:240,gold:165},{name:"The Hollow Oracle",sprite:"boss-hollow-oracle",icon:"🔮",hp:690,atk:42,def:16,xp:300,gold:210},{name:"Glacier Warden",sprite:"boss-glacier-warden",icon:"🧊",hp:850,atk:48,def:19,xp:370,gold:260},{name:"Ancient World-Eater",sprite:"boss-world-eater",icon:"🗿",hp:1030,atk:55,def:22,xp:450,gold:320},{name:"The Void Reaper",sprite:"boss-void-reaper",icon:"☠️",hp:1240,atk:62,def:25,xp:540,gold:390},{name:"Eclipse Sovereign",sprite:"boss-eclipse-sovereign",icon:"👑",hp:1500,atk:72,def:29,xp:700,gold:500}];
 const shopItems=[{id:"health_potion",name:"Small Health Potion",icon:"🧪",description:"Restore 20% Max HP",price:35},{id:"health_medium",name:"Medium Health Potion",icon:"🧪",description:"Restore 35% Max HP",price:65},{id:"health_large",name:"Large Health Potion",icon:"🧪",description:"Restore 50% Max HP",price:100},{id:"mana_potion",name:"Small Mana Potion",icon:"🔷",description:"Restore 20% Max MP",price:30},{id:"mana_medium",name:"Medium Mana Potion",icon:"🔷",description:"Restore 35% Max MP",price:60},{id:"mana_large",name:"Large Mana Potion",icon:"🔷",description:"Restore 50% Max MP",price:90},{id:"iron_sword",name:"Iron Sword",icon:"⚔️",description:"+8 ATK · Swordsman · Lv 1",price:120,class:"swordsman",slot:"weapon",value:8,level:1},{id:"arcane_staff",name:"Arcane Staff",icon:"🪄",description:"+8 ATK · Mage · Lv 1",price:120,class:"mage",slot:"weapon",value:8,level:1},{id:"iron_mace",name:"Iron Mace",icon:"🔨",description:"+8 ATK · Tank · Lv 1",price:120,class:"tank",slot:"weapon",value:8,level:1},{id:"steel_blade",name:"Steel Blade",icon:"🗡️",description:"+16 ATK · Swordsman · Lv 3",price:320,class:"swordsman",slot:"weapon",value:16,level:3},{id:"crystal_staff",name:"Crystal Staff",icon:"🔮",description:"+17 ATK · Mage · Lv 3",price:340,class:"mage",slot:"weapon",value:17,level:3},{id:"warhammer",name:"Warhammer",icon:"⚒️",description:"+16 ATK · Tank · Lv 3",price:330,class:"tank",slot:"weapon",value:16,level:3},{id:"knight_greatsword",name:"Knight Greatsword",icon:"⚔️",description:"+28 ATK · Swordsman · Lv 8",price:780,class:"swordsman",slot:"weapon",value:28,level:8},{id:"starweave_staff",name:"Starweave Staff",icon:"🌟",description:"+30 ATK · Mage · Lv 8",price:820,class:"mage",slot:"weapon",value:30,level:8},{id:"titan_maul",name:"Titan Maul",icon:"🔨",description:"+29 ATK · Tank · Lv 8",price:800,class:"tank",slot:"weapon",value:29,level:8},{id:"iron_armor",name:"Iron Armor",icon:"🛡️",description:"+5 DEF · +20 HP · Lv 1",price:140,slot:"armor",defense:5,maxHp:20,level:1},{id:"sage_robe",name:"Sage Robe",icon:"🥋",description:"+3 DEF · +20 MP · Lv 1",price:140,slot:"armor",defense:3,maxMp:20,level:1},{id:"guardian_plate",name:"Guardian Plate",icon:"🛡️",description:"+12 DEF · +55 HP · Lv 5",price:520,slot:"armor",defense:12,maxHp:55,level:5},{id:"archmage_raiment",name:"Archmage Raiment",icon:"✨",description:"+8 DEF · +65 MP · Lv 5",price:540,slot:"armor",defense:8,maxMp:65,level:5},{id:"dragon_scale",name:"Dragon Scale Armor",icon:"🐉",description:"+20 DEF · +100 HP · Lv 12",price:1300,slot:"armor",defense:20,maxHp:100,level:12},{id:"void_mantle",name:"Void Mantle",icon:"🌌",description:"+16 DEF · +110 MP · Lv 12",price:1350,slot:"armor",defense:16,maxMp:110,level:12},{id:"roast_meat",name:"Dragonpepper Roast",icon:"🍖",description:"+15% ATK for next 3 attacks",price:75,category:"food"},{id:"herb_stew",name:"Guardian Herb Stew",icon:"🍲",description:"Reduce next 3 hits by 20%",price:75,category:"food"},{id:"mana_tart",name:"Moonberry Tart",icon:"🥧",description:"Restore 30% Max MP + boost next 3 skills by 10%",price:85,category:"food"}];
@@ -51,41 +51,63 @@ app.get("/api/index",(_,res)=>{
    enemy.loot="Each listed item is rolled independently for each player. Several items may drop on the same victory; bag capacity still applies.";}
  });
  res.set("Cache-Control","no-store, max-age=0");
- res.json({version:"0.56.1",title:"SOULBOUND ADVENTURE INDEX",stageCount:world.totalStages,
+ res.json({version:"0.56.2",title:"SOULBOUND ADVENTURE INDEX",stageCount:world.totalStages,
   categories:["bosses","monsters","races","weapons","armor","accessories","food","consumables","elements","statuses","combat"],
   codex:combat.codexData(),
   bossDropTables,miniDropTables,lootRule:"Each possible item has its own independent drop roll based on rarity. Multiple items may drop; inventory remains limited to 40 unequipped pieces.",
   races:races.map(({id,name,rarity,icon,weight,passive,buffs})=>({id,name,rarity:rarity==="legend"?"legendary":rarity,icon,chance:weight,passive,buffs})),
   monsters:enemies,items:[...goods,...drops],zones:world.regions.map(r=>({name:r.name,css:r.css,hint:r.hint,stages:r.firstStage+"–"+r.bossStage}))});
 });
-function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,partyWardReduction:r.partyWardReduction||0,enemyWindup:!!r.pendingEnemy,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,partyWardTurns:r.partyWardTurns||0,shopCategory:r.shopCategory||null,shopOrigin:r.shopOrigin||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),log:r.log.slice(-40),chat:(r.chat||[]).slice(-40)}}
+function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,enemies:pack.publicEnemies(r),partyWardReduction:r.partyWardReduction||0,enemyWindup:!!r.pendingEnemy,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,partyWardTurns:r.partyWardTurns||0,shopCategory:r.shopCategory||null,shopOrigin:r.shopOrigin||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),log:r.log.slice(-40),chat:(r.chat||[]).slice(-40)}}
 function emit(r){io.to(r.code).emit("state",publicRoom(r))}function say(r,m){r.log.push(m);if(r.log.length>40)r.log.shift()}
-function createRoom(code){const r={code,stage:1,regionIndex:0,monster:null,players:new Map(),turnIndex:0,status:"city",log:[],chat:[]};rooms.set(code,r);return r}
+function createRoom(code){const r={code,stage:1,regionIndex:0,monster:null,enemies:[],players:new Map(),turnIndex:0,status:"city",log:[],chat:[]};rooms.set(code,r);return r}
 function findRoom(s){return [...rooms.values()].find(r=>r.players.has(s.id))}function current(r){const a=[...r.players.values()];return a.length?a[r.turnIndex%a.length]:null}function alive(r){return [...r.players.values()].filter(p=>p.hp>0)}
 function player(id,name,c="swordsman",gender="male"){const mage=c==="mage",tank=c==="tank";return{id,name:cleanName(name),gender:gender==="female"?"female":"male",inventory:[],weaponItem:null,armorItem:null,foodItems:{roast_meat:0,herb_stew:0,mana_tart:0},foodBuffs:{atk:0,def:0,skill:0},classId:tank?"tank":mage?"mage":"swordsman",className:tank?"Tank":mage?"Mage":"Swordsman",hp:tank?180:mage?120:130,maxHp:tank?180:mage?120:130,mp:tank?55:mage?65:40,maxMp:tank?55:mage?65:40,level:1,xp:0,gold:80,potions:3,manaPotions:2,smallHealth:3,mediumHealth:0,largeHealth:0,smallMana:2,mediumMana:0,largeMana:0,classPath:null,tauntTurns:0,damageAmpTurns:0,damageReductionTurns:0,atk:tank?16:mage?25:22,def:tank?16:mage?8:10,weapon:tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",armor:tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",raceId:"human",racePoints:0,raceName:"Human",raceRarity:"common",racePassive:races[0].passive,raceBuffs:races[0].buffs,strength:0,vitality:0,intelligence:0,agility:0,statPoints:0,speed:10,cooldowns:{},worldProgress:world.normalizeProgress(null)}}
 function monsterStrike(r){combat.monsterStrike(r,{say,raceById,random:Math.random})}
 function enemyCounterAfterBeat(r){
- const token={stage:r.stage,monster:r.monster};
+ const token={stage:r.stage,enemies:pack.alive(r),selected:r.monster};
  r.pendingEnemy=token;
- setTimeout(()=>{
+ function attackAt(index){
   if(r.pendingEnemy!==token)return;
-  r.pendingEnemy=null;
-  if(r.status!=="battle"||r.stage!==token.stage||r.monster!==token.monster)return;
-  monsterStrike(r);skipFallenTurn(r);combat.applyDefeatPenalty(r,say);emit(r);
- },760);
+  if(r.status!=="battle"||r.stage!==token.stage){r.pendingEnemy=null;return}
+  if(index>=token.enemies.length||!alive(r).length){
+   r.pendingEnemy=null;r.monster=pack.select(r,token.selected?.enemyId)||pack.alive(r)[0]||r.monster;
+   skipFallenTurn(r);combat.applyDefeatPenalty(r,say);emit(r);return;
+  }
+  const attacker=token.enemies[index];
+  if(attacker?.hp>0){
+   r.monster=attacker;monsterStrike(r);
+   r.monster=pack.select(r,token.selected?.enemyId)||pack.alive(r)[0]||r.monster;
+   say(r,"⚔ "+attacker.name+" finishes its attack.");
+   emit(r);
+  }
+  if(r.status!=="battle"){r.pendingEnemy=null;combat.applyDefeatPenalty(r,say);emit(r);return}
+  setTimeout(()=>attackAt(index+1),600);
+ }
+ setTimeout(()=>attackAt(0),760);
 }
 function skipFallenTurn(r){if(r.status!=="battle")return;const players=[...r.players.values()];if(!players.length||!alive(r).length)return;let i=0;while(current(r)?.hp<=0&&i<players.length){r.turnIndex=(r.turnIndex+1)%players.length;i++}if(i>0)say(r,"Fallen party members are skipped until victory or defeat.")}
-function start(r){r.monster=encounter(r.stage);r.monster.stage=r.stage;r.status="battle";r.shopOrigin=null;r.shopCategory=null;
- // Scale with current party size at battle start; preserve unchanged reward XP/GOLD.
- const partySize=Math.max(1,r.players.size),extra=partySize-1;
- const boss=!!r.monster.boss,mini=!!r.monster.miniBoss;
- const hpScale=(boss?1.55:mini?1.25:1)*(1+extra*(boss?.85:mini?.72:.55));
- const atkScale=(boss?1.25:mini?1.12:1)*(1+extra*(boss?.19:mini?.16:.11));
- r.monster.maxHp=Math.max(1,Math.round(r.monster.maxHp*hpScale));
- r.monster.hp=r.monster.maxHp;r.monster.atk=Math.max(1,Math.round(r.monster.atk*atkScale));
- r.defeatPenaltyApplied=false;combat.beginEncounter(r.monster,r);r.turnSerial=1;r.partyWardTurns=0;r.partyWardReduction=0;
- r.monster.partySize=partySize;r.monster.staggerThreshold=combat.staggerThreshold(r.monster);r.monster.difficulty={hpScale:Math.round(hpScale*100)/100,atkScale:Math.round(atkScale*100)/100};
- say(r,"⚔ Party size "+partySize+" · enemy HP x"+r.monster.difficulty.hpScale+" · ATK x"+r.monster.difficulty.atkScale+".");r.players=new Map([...r.players.entries()].sort((a,b)=>(b[1].speed||10)-(a[1].speed||10)));r.turnIndex=0;for(const p of r.players.values()){p.hp=p.maxHp;p.mp=p.maxMp;p.cooldowns={};p.statusEffects=[];p.guardTurns=0;p._effectTurn=0;p._combatAttackMultiplier=1;p.controlImmunityTurns=0;p.perfectGuard=false;}say(r,r.monster.boss?"BOSS ENCOUNTER: "+r.monster.name+"!":"Stage "+r.stage+": "+r.monster.name+" approaches!");r.monster.speed=8+Math.floor((r.stage-1)/4)*2;const fastest=Math.max(...[...r.players.values()].map(p=>p.speed||10));if(r.monster.speed>fastest){say(r,"⚡ "+r.monster.name+" is faster and strikes first!");monsterStrike(r);skipFallenTurn(r)}}
+function start(r){
+ const first=encounter(r.stage);r.status="battle";r.shopOrigin=null;r.shopCategory=null;
+ r.enemies=[];r.monster=first;
+ pack.makeGroup(r,first,normal,Math.random);
+ r.defeatPenaltyApplied=false;r.turnSerial=1;r.partyWardTurns=0;r.partyWardReduction=0;
+ for(const foe of r.enemies){foe.stage=r.stage;combat.beginEncounter(foe,r);foe.staggerThreshold=combat.staggerThreshold(foe)}
+ const members=Math.max(1,r.players.size);
+ say(r,"⚔ HARDCORE · "+r.enemies.length+" enemies vs "+members+" heroes · boss ATK boosted.");
+ r.players=new Map([...r.players.entries()].sort((a,b)=>(b[1].speed||10)-(a[1].speed||10)));
+ r.turnIndex=0;for(const p of r.players.values()){
+  p.hp=p.maxHp;p.mp=p.maxMp;p.cooldowns={};p.statusEffects=[];
+  p.guardTurns=0;p._effectTurn=0;p._combatAttackMultiplier=1;p.controlImmunityTurns=0;p.perfectGuard=false;
+ }
+ say(r,r.monster.boss?"BOSS ENCOUNTER: "+r.monster.name+"!":"Stage "+r.stage+": "+r.enemies.length+" enemies approach!");
+ for(const foe of r.enemies)foe.speed=8+Math.floor((r.stage-1)/4)*2;
+ const fastest=Math.max(...[...r.players.values()].map(p=>p.speed||10));
+ if(r.monster.speed>fastest){
+  say(r,"⚡ "+r.monster.name+" is faster and strikes first!");
+  monsterStrike(r);skipFallenTurn(r);
+ }
+}
 function nextTurn(r){const a=[...r.players.values()],living=alive(r);if(!living.length){r.status="defeat";say(r,"The party has fallen.");return}let tries=0;do{r.turnIndex=(r.turnIndex+1)%a.length;tries++}while(a[r.turnIndex].hp<=0&&tries<=a.length);r.turnSerial=(r.turnSerial||0)+1;const next=a[r.turnIndex];if(next?.cooldowns)for(const k of Object.keys(next.cooldowns))next.cooldowns[k]=Math.max(0,next.cooldowns[k]-1)}
 function finish(r){const m=r.monster;r.status=r.stage%5===0?"regionClear":"victory";for(const p of r.players.values()){if(p.hp<=0){p.hp=Math.max(1,Math.ceil(p.maxHp*.3));p.mp=Math.ceil(p.maxMp*.2);say(r,p.name+" is revived after the victory with 30% HP and 20% MP.")}p.xp+=m.xp;p.gold+=m.gold;if(m.boss){p.worldProgress=world.markBossClear(p.worldProgress,m.regionId);p.racePoints=(p.racePoints||0)+1;say(r,p.name+" earned 1 Race Point for defeating a boss!");}if(m.boss||m.miniBoss)loot.dropEncounterLoot(p,r.stage,msg=>say(r,msg),world.regionForStage(r.stage).index+1,!!m.miniBoss);if(p.raceId==="human")p.xp+=Math.ceil(m.xp*.05);if(p.raceId==="sylvan")p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*.03));while(p.xp>=p.level*100){p.xp-=p.level*100;p.level++;p.statPoints=(p.statPoints||0)+3;p.maxHp+=p.classId==="tank"?22:p.classId==="swordsman"?16:10;p.maxMp+=p.classId==="mage"?12:p.classId==="tank"?8:6;p.atk+=p.classId==="mage"?3:p.classId==="tank"?2:4;p.def+=p.classId==="tank"?4:p.classId==="swordsman"?2:1;p.hp=p.maxHp;p.mp=p.maxMp;say(r,p.name+" reached level "+p.level+"! +3 STAT POINTS. Allocate them in the character panel.")}}say(r,"Victory! "+m.name+" defeated. +"+m.xp+" EXP · +"+m.gold+" GOLD.");if(r.stage===40)say(r,"THE ECLIPSE SOVEREIGN HAS FALLEN. THE KINGDOM IS FREE! All regions can be replayed.")}
 function valid(s,r){const p=r.players.get(s.id);return r.status==="battle"&&!r.pendingEnemy&&p&&p.hp>0&&current(r)?.id===s.id}
@@ -118,7 +140,7 @@ io.on("connection",s=>{
   if(!region)return cb({ok:false,error:"Unknown region."});
   const blocked=[...r.players.values()].filter(p=>!world.canEnter(p.level,index));
   if(blocked.length)return cb({ok:false,error:"Region locked: "+blocked.map(p=>p.name).join(", ")+" must reach LV "+region.requiredLevel+"."});
-  r.regionIndex=index;r.stage=region.firstStage;r.monster=null;
+  r.regionIndex=index;r.stage=region.firstStage;r.monster=null;r.enemies=[];
   say(r,"Party traveled from the Central City to "+region.name+".");start(r);emit(r);
   cb({ok:true,regionId:region.id,stage:r.stage});
  });
@@ -126,12 +148,14 @@ io.on("connection",s=>{
   const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a party first."});
   if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only the party leader can return to the city."});
   if(r.status==="battle")return cb({ok:false,error:"Finish the battle first."});
-  r.status="city";r.shopOrigin=null;r.shopCategory=null;r.monster=null;r.stage=world.regions[r.regionIndex].firstStage;
+  r.status="city";r.shopOrigin=null;r.shopCategory=null;r.monster=null;r.enemies=[];r.stage=world.regions[r.regionIndex].firstStage;
   for(const p of r.players.values()){p.hp=p.maxHp;p.mp=p.maxMp;p.cooldowns={}}
   say(r,"The party returned to the Central City and rested.");emit(r);cb({ok:true});
  });
  s.on("startBattle",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a room first."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can start."});if(r.status!=="city")return cb({ok:false,error:"Return to the city to start a region."});if([...r.players.values()].some(p=>!world.canEnter(p.level,r.regionIndex)))return cb({ok:false,error:"A party member does not meet this region\u0027s level requirement."});r.stage=world.regions[r.regionIndex].firstStage;start(r);say(r,"The party sets out into "+world.regions[r.regionIndex].name+".");emit(r);cb({ok:true})});
- s.on("action",({type}={},cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a room first."});if(!valid(s,r))return cb({ok:false,error:"Wait for your turn."});const p=r.players.get(s.id),m=r.monster;
+ s.on("action",({type,targetId}={},cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a room first."});if(!valid(s,r))return cb({ok:false,error:"Wait for your turn."});
+ if(targetId&&!(pack.select(r,String(targetId))))return cb({ok:false,error:"Enemy is already defeated."});
+ const p=r.players.get(s.id),m=r.monster;
  // Reject invalid commands before DOT/status ticks; clients cannot spam rejected
  // skill requests to drain HP or advance status effects.
  const invalid=combat.validateAction(p,type,r);
@@ -161,7 +185,11 @@ io.on("connection",s=>{
  // can be interrupted. The boss resists subsequent interrupts briefly.
  if(["attack","skill","skill2","skill3","skill4","skill5","break"].includes(type)&&m.hp>0)
   combat.addStagger(r,p,type,combat.skillElement(p,type),say);
- if(m.hp<=0){finish(r);emit(r);return cb({ok:true})}combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status==="battle"&&r.turnIndex<=previousIndex){enemyCounterAfterBeat(r);emit(r);return cb({ok:true});}skipFallenTurn(r);emit(r);cb({ok:true});});
+ if(m.hp<=0){
+ say(r,"☠ "+m.name+" defeated! "+pack.alive(r).length+" enemies remain.");
+ if(pack.deadTarget(r)){finish(r);emit(r);return cb({ok:true})}
+}
+combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status==="battle"&&r.turnIndex<=previousIndex){enemyCounterAfterBeat(r);emit(r);return cb({ok:true});}skipFallenTurn(r);emit(r);cb({ok:true});});
  s.on("openShop",({category}={},cb=()=>{})=>{
   const r=findRoom(s);
   if(!r)return cb({ok:false,error:"Room not found."});
@@ -200,7 +228,7 @@ io.on("connection",s=>{
 
  s.on("discardItem",({uid}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if(!["city","shop","victory","regionClear"].includes(r.status))return cb({ok:false,error:"Items can only be discarded between battles."});const index=(p.inventory||[]).findIndex(it=>it.uid===String(uid||""));if(index<0)return cb({ok:false,error:"Item not found in bag."});const item=p.inventory[index];if(item.equippedSlot||(p.weaponItem&&p.weaponItem.uid===item.uid)||(p.armorItem&&p.armorItem.uid===item.uid))return cb({ok:false,error:"Unequip this item first."});p.inventory.splice(index,1);say(r,p.name+" discarded "+item.name+".");emit(r);cb({ok:true})});
  s.on("nextStage",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Room not found."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can continue."});if(r.status!=="victory"||r.stage%5===0)return cb({ok:false,error:"Finish a non-boss stage before advancing."});r.stage++;start(r);say(r,"The party advances to stage "+r.stage+" of "+world.totalStages+".");emit(r);cb({ok:true})});
- s.on("restart",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Room not found."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can restart."});if(r.status==="battle")return cb({ok:false,error:"Cannot reset a dungeon during an active battle."});r.stage=world.regions[r.regionIndex].firstStage;r.status="city";r.monster=null;for(const p of r.players.values()){p.hp=p.maxHp;p.mp=p.maxMp}r.log=["Returned to the Central City. Your hero progress and equipment are kept."];emit(r);cb({ok:true})});
+ s.on("restart",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Room not found."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can restart."});if(r.status==="battle")return cb({ok:false,error:"Cannot reset a dungeon during an active battle."});r.stage=world.regions[r.regionIndex].firstStage;r.status="city";r.monster=null;r.enemies=[];for(const p of r.players.values()){p.hp=p.maxHp;p.mp=p.maxMp}r.log=["Returned to the Central City. Your hero progress and equipment are kept."];emit(r);cb({ok:true})});
  s.on("chooseClassPath",({path:chosen}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if(p.level<15)return cb({ok:false,error:"Class specialization unlocks at level 15."});const choices={swordsman:["berserker","knight"],mage:["archmage","warlock"],tank:["guardian","paladin"]};if(!choices[p.classId]?.includes(chosen))return cb({ok:false,error:"Invalid specialization for this class."});if(p.classPath)return cb({ok:false,error:"You have already chosen your path."});p.classPath=chosen;p.className=({berserker:"Berserker",knight:"Knight",archmage:"Archmage",warlock:"Warlock",guardian:"Guardian",paladin:"Paladin"})[chosen];if(chosen==="guardian"){p.maxHp+=50;p.hp+=50;p.def+=6}else if(chosen==="paladin"){p.maxHp+=25;p.hp+=25;p.def+=3;p.atk+=6;p.maxMp+=10;p.mp+=10}else if(chosen==="berserker"){p.atk+=6;p.def=Math.max(1,p.def-2)}else if(chosen==="knight"){p.def+=5;p.maxHp+=20;p.hp+=20}else if(chosen==="archmage"){p.maxMp+=30;p.mp+=30;p.atk+=4}else if(chosen==="warlock"){p.atk+=6;p.maxHp+=10;p.hp+=10}say(r,p.name+" chose the "+p.className+" path!");emit(r);cb({ok:true})});
  s.on("allocateStat",({stat}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if((p.statPoints||0)<1)return cb({ok:false,error:"No stat points available."});const key=String(stat||"");if(!["strength","vitality","intelligence","agility"].includes(key))return cb({ok:false,error:"Unknown stat."});p.statPoints--;p[key]=(p[key]||0)+1;if(key==="strength")p.atk+=2;if(key==="vitality"){p.maxHp+=12;p.hp+=12}if(key==="intelligence"){p.maxMp+=10;p.mp+=10}if(key==="agility")p.speed=(p.speed||10)+2;say(r,p.name+" increased "+key.toUpperCase()+".");emit(r);cb({ok:true})});
  s.on("partyChat",({message}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});const body=String(message||"").replace(/[<>]/g,"").trim().slice(0,180);if(!body)return cb({ok:false,error:"Message is empty."});r.chat=r.chat||[];r.chat.push({name:p.name,id:p.id,message:body,time:Date.now()});if(r.chat.length>60)r.chat.shift();emit(r);cb({ok:true})});

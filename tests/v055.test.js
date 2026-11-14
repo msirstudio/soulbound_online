@@ -150,6 +150,6 @@ test("Codex and gameplay integration keep Phase 2 exclusive and preserve existin
   assert.ok(index.includes(t),t);
  assert.deepEqual(base.PHASE_TWO_STAGES,[35,40]);
  assert.ok(!js.includes("ADD COLUMN")&&!js.includes("DROP TABLE"));
- const pkg=require("../package.json");assert.equal(pkg.version,"0.56.1");
- assert.ok(html.includes("VERSION 0.56.1 · SOUNDTRACK & SAVE SLOTS"));
+ const pkg=require("../package.json");assert.equal(pkg.version,"0.56.2");
+ assert.ok(html.includes("VERSION 0.56.2 · HARDCORE ENCOUNTERS"));
 });
