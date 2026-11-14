@@ -5,7 +5,7 @@ test("v0.55 is displayed in header, title screen, server health, and package",()
  const html=read("public/index.html"),server=read("server.js"),pkg=require("../package.json");
  assert.equal(pkg.version,"0.56.1");
  assert.match(html,/VERSION 0\.56\.1 · SOUNDTRACK & SAVE SLOTS/);
- assert.match(html,/ONLINE RPG · v0\.56\.0 COMBAT TIMING/);
+ assert.match(html,/ONLINE RPG · v0\.56\.1 SOUNDTRACK & SAVE SLOTS/);
  assert.match(server,/version:"0\.56\.1"/);
 });
 test("Update Log opens from main menu and is loaded once",()=>{
