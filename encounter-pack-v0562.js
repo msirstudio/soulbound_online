@@ -3,7 +3,6 @@
  * Non-boss stages 1–3 of each region: base 1–2 enemies, +1 per extra human.
  * The group is a server-only battle state, not fake decorative duplicates.
  */
-const world=require("./world-v040");
 const difficulty=(stage,partySize,kind)=>{
  const region=Math.max(0,Math.min(7,Math.floor((stage-1)/5)));
  const extra=Math.max(0,partySize-1);
@@ -21,6 +20,7 @@ const baseCount=(stage,random=Math.random)=>{
  return 1;
 };
 function makeGroup(room,first,normal,random=Math.random){
+ const world=require("./world-v040");
  const members=Math.max(1,room.players.size);
  const isNormal=!first.boss&&!first.miniBoss;
  const count=isNormal?baseCount(room.stage,random)+(members-1):1;
