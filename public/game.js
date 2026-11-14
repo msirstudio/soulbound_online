@@ -29,37 +29,117 @@ function v40MergeWorld(cloud,local){
  return{version:44,bossDefeats,defeatedBossIds:[...new Set([...(a.defeatedBossIds||[]),...(b.defeatedBossIds||[]),...Object.keys(bossDefeats).filter(id=>bossDefeats[id]>0)])],
   lootSeen:union(a.lootSeen,b.lootSeen),raceSeen:union(a.raceSeen,b.raceSeen)};
 }
-function v40WorldKey(){return "soulbound_world_progress_v040_"+(guestMode?"guest":currentUser?.id||"unknown")}
+function v40WorldKeyFor(slot){return "soulbound_world_progress_v040_"+(guestMode?"guest":currentUser?.id||"unknown")+(slot===1?"":"_slot_"+slot)}
+function v40WorldKey(){return v40WorldKeyFor(v561Slot)}
 function v40SavedWorld(){try{return JSON.parse(localStorage.getItem(v40WorldKey())||"null")}catch(e){return null}}
 function v40CacheWorld(p){if(!p)return;try{localStorage.setItem(v40WorldKey(),JSON.stringify(p))}catch(e){}}
+
+/* v0.56.1 · Three independent character slots.
+ * Legacy profile is unchanged in Slot 1. Slots 2/3 use hero_save_slots
+ * when SQL migration is installed, and a browser-local backup otherwise. */
+let v561Slot=1,v561Slots=[null,null,null],v561CloudSlots=false,v561SlotBusy=false;
+function v561Key(slot){return "soulbound_hero_slot_v561_"+(guestMode?"guest":currentUser?.id||"unknown")+"_"+slot}
+function v561ReadLocal(slot){try{return JSON.parse(localStorage.getItem(slot===1&&guestMode?"soulbound_guest_save_v1":v561Key(slot))||"null")}catch{return null}}
+function v561WriteLocal(slot,data){try{localStorage.setItem(slot===1&&guestMode?"soulbound_guest_save_v1":v561Key(slot),JSON.stringify(data))}catch(e){authNotice("Browser storage is full. Export your hero before leaving.",true)}}
+async function v561PersistExtra(slot,data){
+ if(slot===1)return;
+ v561WriteLocal(slot,data);
+ if(guestMode||!currentUser||!supabaseClient)return;
+ if(!v561CloudSlots){$("v561SlotNotice").textContent="Slot "+slot+": saved on this browser. Install the Save Slots SQL to enable cloud sync.";return}
+ const {error}=await supabaseClient.from("hero_save_slots").upsert({user_id:currentUser.id,slot,data,updated_at:new Date().toISOString()},{onConflict:"user_id,slot"});
+ if(error){v561CloudSlots=false;$("v561SlotNotice").textContent="Cloud slot unavailable; Slot "+slot+" is backed up in this browser. "+error.message}
+}
+async function v561Load(){
+ v561Slots=[null,null,null];v561CloudSlots=false;
+ if(guestMode)v561Slots[0]=v561ReadLocal(1);
+ else v561Slots[0]=await loadProfile();
+ for(let n=2;n<=3;n++)v561Slots[n-1]=v561ReadLocal(n);
+ if(!guestMode&&supabaseClient&&currentUser){
+  const {data,error}=await supabaseClient.from("hero_save_slots").select("slot,data").eq("user_id",currentUser.id);
+  if(!error){v561CloudSlots=true;for(const row of data||[]){
+   if(row.slot===2||row.slot===3){v561Slots[row.slot-1]=row.data||null;if(row.data)v561WriteLocal(row.slot,row.data)}
+  }}
+ }
+ v561Slot=1;
+ v561Select(1);
+}
+function v561Render(){
+ const box=$("v561Slots");if(!box)return;
+ box.innerHTML=v561Slots.map((data,i)=>{
+  const n=i+1,exists=!!data?.class_id,cls=String(data?.class_id||"").toUpperCase();
+  const label=exists?esc(data.username||"Adventurer")+" · "+cls+" · LV "+Number(data.level||1):"EMPTY SLOT";
+  return '<div class="v561-slot'+(n===v561Slot?" selected":"")+'" data-v561-slot="'+n+'">'+
+   '<button class="v561-select" type="button" data-v561-pick="'+n+'" aria-pressed="'+(n===v561Slot)+'"><b>SLOT '+n+'</b><span>'+label+'</span></button>'+
+   '<button class="v561-delete" type="button" data-v561-delete="'+n+'" '+(!exists?"disabled":"")+' title="Delete only Slot '+n+'">✕</button></div>';
+ }).join("");
+ box.querySelectorAll("[data-v561-pick]").forEach(btn=>btn.onclick=()=>v561Select(Number(btn.dataset.v561Pick)));
+ box.querySelectorAll("[data-v561-delete]").forEach(btn=>btn.onclick=()=>v561Delete(Number(btn.dataset.v561Delete)));
+ $("continueGame").disabled=!v561Slots[v561Slot-1]?.class_id;
+}
+function v561Select(n){
+ if(v561SlotBusy||n<1||n>3)return;
+ v561Slot=n;savedCharacter=v561Slots[n-1]||{};
+ selectedGameMode=null;restoreComplete=false;
+ $("continueGame").classList.remove("selected");$("newGame").classList.remove("selected");
+ $("classId").disabled=false;$("create").disabled=true;$("join").disabled=true;
+ const has=!!savedCharacter.class_id;
+ if(has){$("name").value=savedCharacter.username||"Adventurer";$("classId").value=savedCharacter.class_id}
+ else {$("name").value="Adventurer";$("classId").value="swordsman"}
+ const g=localStorage.getItem(v30GenderKey())||"male",radio=document.querySelector('input[name="heroGender"][value="'+(g==="female"?"female":"male")+'"]');
+ if(radio)radio.checked=true;
+ classInfo();v30UpdatePreview();v561Render();
+ $("saveMode").textContent=has?"Slot "+n+" loaded · Choose CONTINUE to keep progress, or NEW GAME to replace only this slot.":"Slot "+n+" empty · Choose NEW GAME to create a character here.";
+ $("v561SlotNotice").textContent=n===1?"Slot 1 uses your existing save.":guestMode?"Slots are stored on this browser.":v561CloudSlots?"Slots 2–3 use encrypted-connection account storage.":"Slots 2–3 are local to this browser until the Save Slots SQL is installed.";
+}
+async function v561Delete(n){
+ if(v561SlotBusy||n<1||n>3||!v561Slots[n-1]?.class_id)return;
+ if(!confirm("Delete SLOT "+n+" permanently? Its character, gear, gold and boss progress will be lost. Other slots are not affected."))return;
+ v561SlotBusy=true;
+ try{
+  if(!guestMode&&supabaseClient&&currentUser){
+   const table=n===1?"profiles":"hero_save_slots";
+   let q=supabaseClient.from(table).delete().eq(n===1?"id":"user_id",currentUser.id);
+   if(n!==1&&v561CloudSlots)q=q.eq("slot",n);
+   if(n===1||v561CloudSlots){const {error}=await q;if(error)throw error}
+  }
+  if(n===1){localStorage.removeItem(v40WorldKeyFor(1));if(guestMode)localStorage.removeItem("soulbound_guest_save_v1")}
+  else{localStorage.removeItem(v561Key(n));localStorage.removeItem(v40WorldKeyFor(n))}
+  v561Slots[n-1]=null;
+ }catch(e){notice("Cannot delete Slot "+n+": "+e.message,true)}
+ finally{v561SlotBusy=false;v561Select(n)}
+}
 function authNotice(m,e=false){$("authNotice").textContent=m;$("authNotice").className=e?"notice error":"notice"}function notice(m,e=false){$("notice").textContent=m;$("notice").className=e?"notice error":"notice"}function call(ev,data={}){return new Promise(resolve=>socket.emit(ev,data,r=>resolve(r||{ok:false,error:"No response"})))}
 function showAccount(u){currentUser=u;$("account").hidden=false;$("lobby").hidden=!u;$("accountInfo").hidden=!u;$("accountEmail").textContent=u?.email||"";$("signup").hidden=!!u;$("signin").hidden=!!u;$("guestPlay").hidden=!!u;$("email").disabled=!!u;$("password").disabled=!!u;if(u)authNotice("Signed in. Your hero data is linked to this account.");window.SoulboundUIV41?.onAuth(u)}
 function profile(p){return{id:currentUser.id,username:p.name,class_id:p.classId,class_path:p.classPath||null,level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,small_health:p.smallHealth||p.potions||0,medium_health:p.mediumHealth||0,large_health:p.largeHealth||0,small_mana:p.smallMana||p.manaPotions||0,medium_mana:p.mediumMana||0,large_mana:p.largeMana||0,weapon:p.weapon,armor:p.armor,inventory:p.inventory||[],weapon_item:p.weaponItem||null,armor_item:p.armorItem||null,food_items:p.foodItems||{},food_buffs:p.foodBuffs||{},race_id:p.raceId||"human",race_points:p.racePoints||0,strength:p.strength||0,vitality:p.vitality||0,intelligence:p.intelligence||0,agility:p.agility||0,stat_points:p.statPoints||0,speed:p.speed||10,updated_at:new Date().toISOString()}}
 async function loadProfile(){const {data,error}=await supabaseClient.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();if(error)throw error;if(data)return data;const fresh={id:currentUser.id,username:(currentUser.email||"Adventurer").split("@")[0].slice(0,16)||"Adventurer"};const {data:created,error:e}=await supabaseClient.from("profiles").insert(fresh).select().single();if(e)throw e;return created}
-async function saveProfile(p){if(!restoreComplete||!p)return;const data={username:p.name,class_id:p.classId,class_path:p.classPath||null,level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,small_health:p.smallHealth||p.potions||0,medium_health:p.mediumHealth||0,large_health:p.largeHealth||0,small_mana:p.smallMana||p.manaPotions||0,medium_mana:p.mediumMana||0,large_mana:p.largeMana||0,weapon:p.weapon,armor:p.armor,inventory:p.inventory||[],weapon_item:p.weaponItem||null,armor_item:p.armorItem||null,food_items:p.foodItems||{},food_buffs:p.foodBuffs||{},race_id:p.raceId||"human",race_points:p.racePoints||0,strength:p.strength||0,vitality:p.vitality||0,intelligence:p.intelligence||0,agility:p.agility||0,stat_points:p.statPoints||0,speed:p.speed||10};const worldProgress=p.worldProgress||v40SavedWorld()||{version:40,bossDefeats:{},defeatedBossIds:[]};v40CacheWorld(worldProgress);if(guestMode){localStorage.setItem("soulbound_guest_save_v1",JSON.stringify({...data,world_progress:worldProgress}));authNotice("Guest save stored in this browser.");return}if(!supabaseClient||!currentUser)return;let {error}=await supabaseClient.from("profiles").upsert({...data,...(v40SchemaAvailable===false?{}:{world_progress:worldProgress}),id:currentUser.id,updated_at:new Date().toISOString()},{onConflict:"id"});
+async function saveProfile(p){if(!restoreComplete||!p)return;const data={username:p.name,class_id:p.classId,class_path:p.classPath||null,level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,small_health:p.smallHealth||p.potions||0,medium_health:p.mediumHealth||0,large_health:p.largeHealth||0,small_mana:p.smallMana||p.manaPotions||0,medium_mana:p.mediumMana||0,large_mana:p.largeMana||0,weapon:p.weapon,armor:p.armor,inventory:p.inventory||[],weapon_item:p.weaponItem||null,armor_item:p.armorItem||null,food_items:p.foodItems||{},food_buffs:p.foodBuffs||{},race_id:p.raceId||"human",race_points:p.racePoints||0,strength:p.strength||0,vitality:p.vitality||0,intelligence:p.intelligence||0,agility:p.agility||0,stat_points:p.statPoints||0,speed:p.speed||10};const worldProgress=p.worldProgress||v40SavedWorld()||{version:40,bossDefeats:{},defeatedBossIds:[]};v40CacheWorld(worldProgress);const full={...data,world_progress:worldProgress};v561Slots[v561Slot-1]=full;
+ if(v561Slot!==1){await v561PersistExtra(v561Slot,full);return}
+ if(guestMode){v561WriteLocal(1,full);authNotice("Guest Slot 1 saved in this browser.");return}if(!supabaseClient||!currentUser)return;let {error}=await supabaseClient.from("profiles").upsert({...data,...(v40SchemaAvailable===false?{}:{world_progress:worldProgress}),id:currentUser.id,updated_at:new Date().toISOString()},{onConflict:"id"});
  if(error&&/world_progress|schema cache|column/i.test(error.message||"")){
   v40SchemaAvailable=false;({error}=await supabaseClient.from("profiles").upsert({...data,id:currentUser.id,updated_at:new Date().toISOString()},{onConflict:"id"}));
   if(!error){authNotice("Hero saved. World progress backed up in this browser; install v0.40 SQL for cloud sync.",true);return}
  }
  if(error)authNotice("Save failed: "+error.message,true);else if(v40SchemaAvailable===false)authNotice("Hero saved locally + cloud character. Run v0.40 SQL for cloud map progression.",true);else {v40SchemaAvailable=true;authNotice("Hero + world saved · "+new Date().toLocaleTimeString())}}
-async function prepare(){try{savedCharacter=guestMode?JSON.parse(localStorage.getItem("soulbound_guest_save_v1")||"null"):await loadProfile();savedCharacter=savedCharacter||{};savedCharacter.world_progress=v40MergeWorld(savedCharacter.world_progress,v40SavedWorld());$("name").value=savedCharacter.username||$("name").value;if(savedCharacter.class_id)$("classId").value=savedCharacter.class_id;
-let storedGender="male";try{storedGender=localStorage.getItem(v30GenderKey())||"male"}catch(e){}
-const chosen=document.querySelector('input[name="heroGender"][value="'+(storedGender==="female"?"female":"male")+'"]');
-if(chosen)chosen.checked=true;
-classInfo();v30UpdatePreview();authNotice("Hero save loaded. Choose Continue or New Game.");window.SoulboundUIV41?.onPrepared()}catch(e){authNotice("Could not load profile: "+e.message,true)}}
-async function afterJoin(){restoreComplete=false;if(savedCharacter){const r=await call("restoreCharacter",{...savedCharacter,world_progress:savedCharacter.world_progress||v40SavedWorld(),gender:v30SelectedGender()});if(!r.ok)notice(r.error,true)}restoreComplete=true;const p=gameState?.players.find(x=>x.id===myId);if(p)saveProfile(p)}
+async function prepare(){
+ try{
+  await v561Load();
+  authNotice("Save Slots loaded. Select your hero, then Continue or New Game.");
+  window.SoulboundUIV41?.onPrepared();
+ }catch(e){authNotice("Could not load Save Slots: "+e.message,true)}
+}
+async function afterJoin(){restoreComplete=false;if(savedCharacter?.class_id){const r=await call("restoreCharacter",{...savedCharacter,world_progress:savedCharacter.world_progress||v40SavedWorld(),gender:v30SelectedGender()});if(!r.ok)notice(r.error,true)}restoreComplete=true;const p=gameState?.players.find(x=>x.id===myId);if(p)saveProfile(p)}
 function classInfo(){const mage=$("classId").value==="mage",tank=$("classId").value==="tank";$("classInfo").textContent=tank?"Highest HP and defense. Shield Bash, Iron Wall, and Provoke to taunt enemies for 3 turns.":mage?"Lower HP and defense, high MP and magic attack. Arcane Bolt, then Meteor at level 3.":"High HP and defense. Power Strike, then Whirlwind at level 3."}
 if(!supabaseClient){$("signup").disabled=true;$("signin").disabled=true;authNotice("Supabase unavailable. You can still play as guest.",true)}
 $("signup").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));const email=$("email").value.trim(),password=$("password").value;if(!email||password.length<6)return authNotice("Enter email and password (at least 6 characters).",true);const {data,error}=await supabaseClient.auth.signUp({email,password});if(error)return authNotice(error.message,true);if(data.session){showAccount(data.user);await prepare()}else authNotice("Account created. Check your email to confirm, then sign in.")};
 $("signin").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));const {data,error}=await supabaseClient.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error)return authNotice(error.message,true);showAccount(data.user);await prepare()};
 $("signout").onclick=async()=>{if(guestMode){guestMode=false;savedCharacter=null;restoreComplete=false;location.reload();return}await supabaseClient.auth.signOut();currentUser=null;savedCharacter=null;restoreComplete=false;$("game").hidden=true;$("lobby").hidden=true;showAccount(null);authNotice("Signed out.")};
-$("continueGame").onclick=()=>{selectedGameMode="continue";if(savedCharacter?.class_id)$("classId").value=savedCharacter.class_id;$("classId").disabled=true;$("continueGame").classList.add("selected");$("newGame").classList.remove("selected");$("create").disabled=false;$("join").disabled=false;$("saveMode").textContent="CONTINUE selected · Your saved level, XP, gold, and equipment will be kept.";notice("Continue selected. Create a new party or join a friend.");};
-$("newGame").onclick=async()=>{$("classId").disabled=false;if(!guestMode&&(!currentUser||!supabaseClient))return notice("Sign in first.",true);if(!confirm("Start a New Game? Your saved hero level, XP, gold, potions, and equipment will be reset. This cannot be undone."))return;const cls=$("classId").value,mage=cls==="mage",tank=cls==="tank";const fresh={id:currentUser?.id||null,username:$("name").value.trim()||savedCharacter?.username||"Adventurer",class_id:cls,class_path:null,level:1,xp:0,gold:80,hp:tank?180:mage?120:130,max_hp:tank?180:mage?120:130,mp:tank?55:mage?65:40,max_mp:tank?55:mage?65:40,attack:tank?16:mage?25:22,defense:tank?16:mage?8:10,potions:3,mana_potions:2,small_health:3,medium_health:0,large_health:0,small_mana:2,medium_mana:0,large_mana:0,weapon:tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",armor:tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",inventory:[],weapon_item:null,armor_item:null,food_items:{roast_meat:0,herb_stew:0,mana_tart:0},food_buffs:{atk:0,def:0,skill:0},race_id:"human",race_points:0,strength:0,vitality:0,intelligence:0,agility:0,stat_points:0,speed:10,updated_at:new Date().toISOString()};v40CacheWorld({version:40,bossDefeats:{},defeatedBossIds:[]});if(guestMode){localStorage.setItem("soulbound_guest_save_v1",JSON.stringify({...fresh,world_progress:v40SavedWorld()}))}else{let {error}=await supabaseClient.from("profiles").upsert({...fresh,world_progress:v40SavedWorld()},{onConflict:"id"});
+$("continueGame").onclick=()=>{if(!savedCharacter?.class_id)return notice("This slot is empty. Choose New Game first.",true);selectedGameMode="continue";if(savedCharacter?.class_id)$("classId").value=savedCharacter.class_id;$("classId").disabled=true;$("continueGame").classList.add("selected");$("newGame").classList.remove("selected");$("create").disabled=false;$("join").disabled=false;$("saveMode").textContent="CONTINUE selected · Your saved level, XP, gold, and equipment will be kept.";notice("Continue selected. Create a new party or join a friend.");};
+$("newGame").onclick=async()=>{$("classId").disabled=false;if(!guestMode&&(!currentUser||!supabaseClient))return notice("Sign in first.",true);if(!confirm("Start a New Game? Your saved hero level, XP, gold, potions, and equipment will be reset. This cannot be undone."))return;const cls=$("classId").value,mage=cls==="mage",tank=cls==="tank";const fresh={id:currentUser?.id||null,username:$("name").value.trim()||savedCharacter?.username||"Adventurer",class_id:cls,class_path:null,level:1,xp:0,gold:80,hp:tank?180:mage?120:130,max_hp:tank?180:mage?120:130,mp:tank?55:mage?65:40,max_mp:tank?55:mage?65:40,attack:tank?16:mage?25:22,defense:tank?16:mage?8:10,potions:3,mana_potions:2,small_health:3,medium_health:0,large_health:0,small_mana:2,medium_mana:0,large_mana:0,weapon:tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",armor:tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",inventory:[],weapon_item:null,armor_item:null,food_items:{roast_meat:0,herb_stew:0,mana_tart:0},food_buffs:{atk:0,def:0,skill:0},race_id:"human",race_points:0,strength:0,vitality:0,intelligence:0,agility:0,stat_points:0,speed:10,updated_at:new Date().toISOString()};v40CacheWorld({version:40,bossDefeats:{},defeatedBossIds:[]});if(v561Slot!==1){await v561PersistExtra(v561Slot,{...fresh,world_progress:v40SavedWorld()})}else if(guestMode){v561WriteLocal(1,{...fresh,world_progress:v40SavedWorld()})}else{let {error}=await supabaseClient.from("profiles").upsert({...fresh,world_progress:v40SavedWorld()},{onConflict:"id"});
  if(error&&/world_progress|schema cache|column/i.test(error.message||""))({error}=await supabaseClient.from("profiles").upsert(fresh,{onConflict:"id"}));
- if(error)return notice("Could not reset save: "+error.message,true)}savedCharacter={...fresh,world_progress:v40SavedWorld()};selectedGameMode="new";$("continueGame").classList.remove("selected");$("newGame").classList.add("selected");$("create").disabled=false;$("join").disabled=false;$("saveMode").textContent="NEW GAME selected · Level 1, fresh stats, starting gear and supplies.";notice("New Game save created. Your old hero progress has been reset.");};
+ if(error)return notice("Could not reset save: "+error.message,true)}savedCharacter={...fresh,world_progress:v40SavedWorld()};v561Slots[v561Slot-1]=savedCharacter;v561Render();selectedGameMode="new";$("continueGame").classList.remove("selected");$("newGame").classList.add("selected");$("create").disabled=false;$("join").disabled=false;$("saveMode").textContent="NEW GAME selected · Level 1, fresh stats, starting gear and supplies.";notice("New Game save created. Your old hero progress has been reset.");};
 /* Character appearance is stored locally, outside the existing Supabase schema;
    the server validates gender and broadcasts the actual selection for multiplayer. */
-function v30GenderKey(){return "soulbound_hero_gender_v030_"+(guestMode?"guest":currentUser?.id||"guest")}
+function v30GenderKey(){return "soulbound_hero_gender_v030_"+(guestMode?"guest":currentUser?.id||"guest")+(v561Slot===1?"":"_slot_"+v561Slot)}
 function v30SelectedGender(){return document.querySelector('input[name="heroGender"]:checked')?.value==="female"?"female":"male"}
 function v30SaveGender(){try{localStorage.setItem(v30GenderKey(),v30SelectedGender())}catch(e){}}
 function v30UpdatePreview(){
@@ -229,7 +309,7 @@ window.SoulboundWorldV40?.render(s,v040Me,s.players[0]?.id===myId,{
  returnCity:async()=>{const r=await call("returnCity");if(!r.ok)alert(r.error);return r},
  openShop:async(category)=>{const r=await call("openShop",{category:category||"potion"});if(!r.ok)alert(r.error);return r}
 });
-window.SoulboundAudio?.setScene(s.scene?.css||"wilds");
+window.SoulboundAudio?.setScene(s.scene?.css||"wilds");window.SoulboundAudio?.setRegion(s.region?.id||"cursed_wilds",s.status==="city");
 window.SoulboundAudio?.setCombatMood(s.status==="battle");
 
 if(s.status==="shop"&&!v23ShopWasActive)v23ShopCollapsed=false;
