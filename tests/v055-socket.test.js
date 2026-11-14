@@ -11,8 +11,8 @@ function harness(){
   name==="socket.io"?{Server}:name==="path"?path:
   name==="./loot-v034"?require("../loot-v034"):name==="./world-v040"?world:
   name==="./combat-v055"?combat:require(name);
- const runtime=new Function("require","process","console","__dirname",serverText+";return {rooms,start,combat};")(
-  deps,{env:{}},{log(){}},path.join(__dirname,".."));
+ const runtime=new Function("require","process","console","__dirname","setTimeout",serverText+";return {rooms,start,combat};")(
+  deps,{env:{}},{log(){}},path.join(__dirname,".."),fn=>{fn();return 0;});
  const connect=id=>{
   const handlers={};
   onConnect({id,join(){},on:(event,fn)=>handlers[event]=fn});
@@ -23,7 +23,7 @@ function harness(){
 }
 test("live INDEX API returns 8 boss records, exact move chances, element matrix and all new guide tabs",()=>{
  const g=harness(),d=g.catalog();
- assert.equal(d.version,"0.55.2");
+ assert.equal(d.version,"0.56.0");
  for(const category of ["elements","statuses","combat"])assert.ok(d.categories.includes(category));
  assert.equal(d.codex.elements.length,10);assert.equal(d.codex.statusEffects.length,7);
  assert.equal(d.monsters.length,40);
