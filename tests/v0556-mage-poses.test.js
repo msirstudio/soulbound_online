@@ -8,7 +8,7 @@ test("Mage uses six separate class-specific PNG paths, including hit and attack"
  const poseNames=["male_idle","male_hit","male_attack","female_idle","female_hit","female_attack"];
  for(const state of ["idle","hit","attack"])assert.ok(src.includes('"_'+state+'.png"'),"missing Mage "+state+" path construction");
  for(const sex of ["male","female"])assert.ok(src.includes(sex),"missing gender "+sex);
- assert.ok(html.includes('sprite-animation-v0311.js?v=0.55.6'));
+ assert.ok(html.includes('sprite-animation-v0311.js?v=0.56.0'));
  assert.ok(src.includes('poseRoot+cls+"/"+g+"_'));
  assert.ok(src.includes('const classes=["swordsman","mage"]'));
  assert.equal(poseNames.length,6);
