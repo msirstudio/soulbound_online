@@ -1,0 +1,20 @@
+name: SOULBOUND v0.56.1 original OST and save slots
+on:
+  push:
+    branches: [v0.56.1-city-ost-save-slots]
+  pull_request:
+    branches: [v0.56.0-combat-pacing-animation]
+permissions:
+  contents: read
+jobs:
+  regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: node --check server.js && node --check public/game.js && node --check public/music-v0561.js && node --check public/audio-real.js
+      - run: npm test
