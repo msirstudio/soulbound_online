@@ -2,6 +2,14 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.56.1",date:"2026-11-14",title:"Three Hero Save Slots & Regional Soundtrack",notes:[
+  "Three selectable character slots; Slot 1 preserves the existing hero while Slots 2 and 3 can have different classes, stats, equipment and boss progress.",
+  "Install SUPABASE-SAVE-SLOTS-V0561.sql for account cloud saves in Slots 2 and 3; until then these slots are backed up in the current browser.",
+  "Select a slot, Continue or start a New Game in that slot; delete asks for confirmation and targets only the selected slot.",
+  "Original procedural background scores for Central City and all 8 regions: relaxed city theme and an epic final Eclipse theme.",
+  "Audio joins the Equipment toolbar rather than using its own empty strip.",
+  "Combat, enemy AI, damage, loot drop percentages and save table profiles remain unchanged."
+ ]},
  {version:"0.56.0",date:"2026-11-14",title:"Combat Pacing & Visible Hit Reactions",notes:[
   "Enemy counterattacks now occur after a 760ms server-controlled pause rather than simultaneously with player actions.",
   "New enemy lunge and hero hit presentation makes each exchange easier to read. The Swordsman and Mage use their separate hit PNGs when available.",
