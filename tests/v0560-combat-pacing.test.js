@@ -9,7 +9,7 @@ function harness(){
  class Server{on(ev,fn){if(ev==="connection")onConnect=fn}to(code){return{emit:(event,state)=>emits.push({code,event,state})}}}
  const fakeTimer=(fn,ms)=>{scheduled.push({fn,ms});return scheduled.length};
  const dep=n=>n==="express"?express:n==="http"?{createServer:()=>({listen(){}})}:n==="socket.io"?{Server}:
-  n==="path"?path:n==="./loot-v034"?require("../loot-v034"):n==="./world-v040"?world:n==="./combat-v055"?combat:require(n);
+  n==="path"?path:n==="./loot-v034"?require("../loot-v034"):n==="./world-v040"?world:n==="./combat-v055"?combat:(String(n).startsWith("./")?require(path.join(__dirname,"..",n)):require(n));
  const rt=new Function("require","process","console","__dirname","setTimeout",server+";return {rooms,start};")(
   dep,{env:{}},{log(){}},path.join(__dirname,".."),fakeTimer);
  const handlers={};onConnect({id:"solo",join(){},on:(ev,fn)=>handlers[ev]=fn});
