@@ -2,6 +2,13 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.56.3",date:"2026-11-14",title:"Full Combat Rebalance & Visible Enemy Packs",notes:[
+  "Every monster in a group now appears as a large, selectable creature on the actual battlefield instead of only as tiny HP buttons.",
+  "Mage METEOR/FROST NOVA/TIDAL SURGE and Swordsman WHIRLWIND attack all living enemies; players do not need to select targets for area spells.",
+  "Diminishing-return DEF mitigation keeps defensive builds valuable without negating boss damage.",
+  "HP and attack growth have been retuned for every region, including normal monsters, mini bosses and main bosses.",
+  "Existing saves, loot probabilities, class unlocks, audio and party networking remain unchanged."
+ ]},
  {version:"0.56.2",date:"2026-11-14",title:"Hardcore Packs & Boss Rebalance",notes:[
   "Normal stages 1–3 of all eight regions now field 1–2 random enemies for solo heroes, plus exactly one foe per additional party member.",
   "Each enemy is individually targetable with its own HP, status and attack turn. Defeat the entire pack for one encounter victory.",
