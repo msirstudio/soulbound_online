@@ -1,0 +1,21 @@
+name: SOULBOUND 0.58 Unified Combat Parity
+on:
+  push:
+    branches: [v0.58-unified-combat-engine]
+  pull_request:
+    branches: [v0.57-core-hardening]
+permissions:
+  contents: read
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: node --check server.js && node --check combat-v054.js && node --check combat-v055.js && node --check combat/formulas.js && node --check combat/skills.js
+      - run: npm test
+      - run: npm run audit:combat
