@@ -49,3 +49,13 @@
  #game .v563-foe-hp{font-size:9px}
 }
 @media(prefers-reduced-motion:reduce){#game .v563-foe{transition:none!important}}
+
+/* A pack's actual attacking sprite lunges. Earlier animation addressed only
+   the now-hidden single-monster image. */
+#game .v563-foe.v0560-enemy-attacking{
+ animation:v0560EnemyLunge 650ms cubic-bezier(.2,.75,.2,1) both!important;
+ filter:drop-shadow(0 0 14px #f5be7a99)!important;
+}
+@media(prefers-reduced-motion:reduce){
+ #game .v563-foe.v0560-enemy-attacking{animation:none!important}
+}
