@@ -11,13 +11,13 @@ function audit(){
  const passed=[],failed=[];
  const check=(label,test)=>(test?passed:failed).push(label);
  check("package version is semver",/^\d+\.\d+\.\d+$/.test(pkg.version));
- check("visible game version matches package",html.includes("<small>v"+pkg.version+"</small>"));
- check("menu version matches package",html.includes("v"+pkg.version+" SYSTEM FOUNDATION"));
+ check("visible game version matches package",html.includes("<small>v"+pkg.version.replace(/\.0$/,"")+"</small>"));
+ check("menu version matches package",html.includes("v"+pkg.version.replace(/\.0$/,"")+" SECURE SAVES"));
  check("API version uses canonical package value",server.includes('readFileSync(path.join(__dirname,"package.json")')&&
   (server.match(/version:APP_VERSION/g)||[]).length>=2);
- check("version sync client present",html.includes('version-v0564.js?v=0.56.4'));
+ check("version sync client present",html.includes('version-v0564.js?v=0.57'));
  check("save export controller loads before game.js",html.indexOf("save-guard-v0564.js")>=0&&
-  html.indexOf("save-guard-v0564.js")<html.indexOf("game.js?v=0.56.4"));
+  html.indexOf("save-guard-v0564.js")<html.indexOf("game.js?v=0.57"));
  check("all 3 save slots remain selectable",game.includes("v561Slots=[null,null,null]")&&
   game.includes('data-v561-pick'));
  check("pre-delete backup is required",game.includes('snapshot(v564Owner(),n,v564SnapshotData(n,v561Slots[n-1]),"before-delete")'));
@@ -35,8 +35,8 @@ function audit(){
  check("RLS migration is present (not applied here)",read("SUPABASE-SAVE-SLOTS-V0561.sql").includes("enable row level security"));
  check("regression tests remain enabled",pkg.scripts.test.includes("tests/*.test.js"));
  const risks=[
-  "P0 OPEN: restoreCharacter still trusts some client-supplied stats; harden in v0.56.5",
-  "P0 OPEN: profile/slot writes lack server-side revision conflict control; harden in v0.56.5",
+  "P0 OPEN: legacy restoreCharacter trusts client stats unless Secure Save backend is enabled",
+  "P0 OPEN: legacy profile/slot writes lack revision checks unless Secure Save backend is enabled",
   "P1 OPEN: browser backups are device-local JSON exports, not verified cloud recovery",
   "P1 OPEN: actual Render/Supabase restore and multiplayer stress tests need manual verification"
  ];
