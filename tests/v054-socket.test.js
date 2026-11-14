@@ -13,8 +13,8 @@ function harness(){
   name==="socket.io"?{Server}:name==="path"?path:
   name==="./loot-v034"?require("../loot-v034"):name==="./world-v040"?world:
   name==="./combat-v055"?combat:require(name);
- const runtime=new Function("require","process","console","__dirname",source+
-  ";return {rooms,start,combat};")(deps,{env:{}},{log(){}},path.join(__dirname,".."));
+ const runtime=new Function("require","process","console","__dirname","setTimeout",source+
+  ";return {rooms,start,combat};")(deps,{env:{}},{log(){}},path.join(__dirname,".."),fn=>{fn();return 0;});
  const connect=id=>{
   const handlers={};const socket={id,join(){},on:(ev,fn)=>handlers[ev]=fn};
   connectHook(socket);
