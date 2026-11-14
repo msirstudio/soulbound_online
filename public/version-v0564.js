@@ -5,13 +5,14 @@
 (()=>{
 "use strict";
 const apply=version=>{
- if(typeof version!=="string"||!/^\d+\.\d+\.\d+$/.test(version))return;
+ if(typeof version!=="string"||!/^\d+\.\d+(?:\.\d+)?$/.test(version))return;
+ version=version.replace(/\.0$/,"");
  const brand=document.querySelector(".v16-game-brand small");
  if(brand)brand.textContent="v"+version;
  const footer=document.querySelector(".v041-menu-foot");
- if(footer)footer.textContent=footer.textContent.replace(/v\d+\.\d+\.\d+/, "v"+version);
+ if(footer)footer.textContent=footer.textContent.replace(/v\d+\.\d+(?:\.\d+)?/, "v"+version);
  const title=document.querySelector("[data-soulbound-version]");
- if(title)title.textContent="VERSION "+version+" · SYSTEM FOUNDATION";
+ if(title)title.textContent="VERSION "+version+" · SECURE SAVES";
 };
 if(typeof fetch!=="function")return;
 fetch("/health",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(data=>{
