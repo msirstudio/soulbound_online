@@ -3,6 +3,7 @@
    All statuses, stagger and encounter AI live in memory only. No SQL/save migration.
  */
 const base=require("./combat-v054");
+const skillCore=require("./combat/skills");
 const elemental=require("./elemental-v0552");
 const {ELEMENTS,AFFINITIES}=elemental;
 const STATUS_CODEX=Object.freeze([
@@ -187,8 +188,7 @@ function applyDefeatPenalty(r,say){
  }
  return true;
 }
-const SKILL_COSTS=Object.freeze({skill:[12,1],skill2:[25,3],skill3:[20,5],skill4:[30,8],skill5:[24,5],
- skill6:[22,7],skill7:[26,9],break:[15,1],cleanse:[12,1]});
+const SKILL_COSTS=skillCore.SKILL_COSTS;
 function validateAction(p,type,r){
  if(!p||typeof type!=="string")return "Invalid action.";
  if(type==="attack"||type==="guard")return null;
