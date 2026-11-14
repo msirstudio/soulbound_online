@@ -14,8 +14,8 @@ test("new title cover affects main-menu panel only and preserves actions",()=>{
 });
 test("v0.55 includes the earlier cover and updates the version",()=>{
  const html=read("public/index.html"),log=read("public/update-log-v045.js"),pkg=require("../package.json");
- assert.equal(pkg.version,"0.56.2");
- assert.ok(html.includes("VERSION 0.56.2 · HARDCORE ENCOUNTERS"));
+ assert.equal(pkg.version,"0.56.3");
+ assert.ok(html.includes("VERSION 0.56.3 · COMBAT REBALANCE"));
  assert.ok(html.includes("ONLINE RPG · v0.56.2 HARDCORE ENCOUNTERS"));
  assert.ok(log.includes('version:"0.48.2"'));
 });
