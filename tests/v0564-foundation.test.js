@@ -70,12 +70,12 @@ test("pre-change backup merges the correct world-progress slot and never uses fr
   ["world_2",JSON.stringify({bossDefeats:{region2:3}})],
   ["world_3",JSON.stringify({bossDefeats:{region3:2}})]
  ]);
- const extract=new Function("localStorage","v40WorldKeyFor","v40MergeWorld",
+ const extract=new Function("localStorage","v40WorldKeyFor","v40MergeWorld","v57Mode",
    game.slice(begin,end)+";return v564SnapshotData");
  const backup=extract(
   {getItem:key=>cache.get(key)||null},
   slot=>"world_"+slot,
-  (cloud,local)=>({bossDefeats:{...(cloud?.bossDefeats||{}),...(local?.bossDefeats||{})}})
+  (cloud,local)=>({bossDefeats:{...(cloud?.bossDefeats||{}),...(local?.bossDefeats||{})}}),false
  );
  const saved=backup(2,{class_id:"mage",world_progress:{bossDefeats:{earlier:1}}});
  assert.equal(saved.world_progress.bossDefeats.region2,3);
