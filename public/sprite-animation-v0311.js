@@ -22,7 +22,7 @@ const sheetReady={male:false,female:false};
 const poseReady={swordsman:{male:false,female:false},mage:{male:false,female:false}};
 const attacks=new Map(),hits=new Map();
 const idleCount=6,attackCount=8,idleFps=7,attackFps=12;
-const attackMs=650,hitMs=450;
+const attackMs=680,hitMs=780;
 let previewGender="male",previewClass="swordsman",previewActive=false,started=false;
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const basename=g=>g==="female"?"female":"male";
@@ -70,7 +70,7 @@ function attack(id){
  if(id!=null){const key=String(id);attacks.set(key,performance.now()+attackMs);hits.delete(key);}
 }
 function hit(id){
- if(id!=null){const key=String(id);hits.set(key,performance.now()+hitMs);}
+ if(id!=null){const key=String(id);attacks.delete(key);hits.set(key,performance.now()+hitMs);}
 }
 function tick(now){
  document.querySelectorAll(".v311-hero").forEach(el=>{
