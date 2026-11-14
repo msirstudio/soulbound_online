@@ -100,7 +100,7 @@ const profileFromPlayer=p=>({
 function createQueue(onError=()=>{}){
  const claims=new Map();
  const key=claim=>claim.userId+":"+claim.slot;
- const register=claim=>{const k=key(claim);claims.set(k,{...claim,queue:Promise.resolve(),last:""});return claims.get(k)};
+ const register=claim=>{const k=key(claim);if(claims.has(k))fail("This character slot is already active in another game session.",409);claims.set(k,{...claim,queue:Promise.resolve(),last:""});return claims.get(k)};
  const persist=(claim,player)=>{
   if(!claim||!player)return Promise.resolve();
   const active=claims.get(key(claim));if(!active||active!==claim)return Promise.resolve();
@@ -114,6 +114,6 @@ function createQueue(onError=()=>{}){
   return active.queue;
  };
  const release=claim=>{if(claim&&claims.get(key(claim))===claim)claims.delete(key(claim))};
- return{register,persist,release};
+ return{register,persist,release,isActive:(userId,slot)=>claims.has(userId+":"+slot)};
 }
 module.exports={enabled,authenticate,list,load,starter,newGame,remove,compareAndSwap,profileFromPlayer,createQueue,slotId};
