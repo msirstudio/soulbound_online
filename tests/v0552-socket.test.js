@@ -8,7 +8,7 @@ function harness(){
  class Server{on(n,fn){if(n==="connection")onConnect=fn}to(code){return{emit:(name,s)=>emits.push({code,name,s})}}}
  const dep=n=>n==="express"?express:n==="http"?{createServer:()=>({listen(){}})}:
   n==="socket.io"?{Server}:n==="path"?path:n==="./loot-v034"?require("../loot-v034"):
-  n==="./world-v040"?world:n==="./combat-v055"?combat:require(n);
+  n==="./world-v040"?world:n==="./combat-v055"?combat:(String(n).startsWith("./")?require(path.join(__dirname,"..",n)):require(n));
  const runtime=new Function("require","process","console","__dirname","setTimeout",serverText+";return {rooms,start};")(
   dep,{env:{}},{log(){}},path.join(__dirname,".."),fn=>{fn();return 0;});
  const connect=id=>{
