@@ -1,0 +1,20 @@
+name: SOULBOUND v0.55.9 Header Audio and Enemy Intent
+on:
+  push:
+    branches: [v0.55.9-header-audio-special-only]
+  pull_request:
+    branches: [v0.55.8-mage-path-fix]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: node --check public/game.js
+      - run: npm test
