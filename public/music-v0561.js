@@ -7,6 +7,7 @@
 "use strict";
 const old=window.SoulboundAudio;
 if(!old)return;
+const original={setScene:old.setScene.bind(old),setMusic:old.setMusic.bind(old),setVolume:old.setVolume.bind(old),setCombatMood:old.setCombatMood.bind(old)};
 const themes={
  city:{name:"Central City · Market Day",bpm:102,root:60,scale:[0,2,4,5,7,9,11],lead:[0,2,4,5,4,2,0,4,7,5,4,2,4,2,0,-1],bass:[0,4,5,4],voice:"triangle",bright:.42},
  cursed_wilds:{name:"Cursed Wilds · Forest Whispers",bpm:92,root:57,scale:[0,2,3,5,7,8,10],lead:[0,2,4,2,0,2,5,4,2,0,-1,2,4,3,2,0],bass:[0,5,3,4],voice:"sine",bright:.3},
@@ -87,7 +88,7 @@ function select(next){
  key=next;resetSequence();return key;
 }
 function setScene(next){
- old.setScene?.(next);
+ original.setScene(next);
  if(next==="city")return select("city");
  return select(cssRegion[next]||next);
 }
@@ -97,7 +98,7 @@ function setRegion(id,city=false){
 function setMusic(on){
  enabled=!!on;
  // Pause the previous streamed soundtrack, preserving its SFX handling.
- old.setMusic(false);
+ original.setMusic(false);
  if(!enabled){if(interval){clearInterval(interval);interval=null}return false}
  ensureContext().then(()=>{
   if(!enabled)return;
@@ -108,12 +109,12 @@ function setMusic(on){
  return enabled;
 }
 function setVolume(v){
- volume=clamp(v);old.setVolume(v);
+ volume=clamp(v);original.setVolume(v);
  if(master)master.gain.setTargetAtTime(volume*.26,ctx.currentTime,.07);
  return volume;
 }
 function setCombatMood(v){
- combat=!!v;old.setCombatMood(false);
+ combat=!!v;original.setCombatMood(false);
 }
 old.setScene=setScene;
 old.setRegion=setRegion;
