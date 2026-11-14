@@ -125,12 +125,12 @@ function finish(r){const m=r.monster;r.status=r.stage%5===0?"regionClear":"victo
 function valid(s,r){const p=r.players.get(s.id);return r.status==="battle"&&!r.pendingEnemy&&p&&(!secure.enabled||p.verified||p.guest)&&p.hp>0&&current(r)?.id===s.id}
 io.on("connection",s=>{
  let restoring=false;
- s.on("createRoom",({name,classId,gender,guest}={},cb=()=>{})=>{const code=Math.random().toString(36).slice(2,7).toUpperCase(),r=createRoom(code);r.players.set(s.id,player(s.id,name,classId,gender));r.players.get(s.id).guest=!!guest;s.join(code);say(r,cleanName(name)+" founded the party.");emit(r);cb({ok:true,code})});
- s.on("joinRoom",({code,name,classId,gender,guest}={},cb=()=>{})=>{code=String(code||"").trim().toUpperCase();const r=rooms.get(code);if(!r)return cb({ok:false,error:"Room not found. Check the code."});if(r.players.size>=4)return cb({ok:false,error:"Party full (maximum 4)."});if(r.status!=="city")return cb({ok:false,error:"Adventure already started."});const p=player(s.id,name,classId,gender);p.guest=!!guest;r.players.set(s.id,p);s.join(code);say(r,p.name+" joined the party.");emit(r);cb({ok:true,code})});
+ s.on("createRoom",({name,classId,gender,guest}={},cb=()=>{})=>{const code=Math.random().toString(36).slice(2,7).toUpperCase(),r=createRoom(code);r.players.set(s.id,player(s.id,name,classId,gender));r.players.get(s.id).guest=!!guest;r.accountMode=secure.enabled?(guest?"guest":"account"):"legacy";s.join(code);say(r,cleanName(name)+" founded the party.");emit(r);cb({ok:true,code})});
+ s.on("joinRoom",({code,name,classId,gender,guest}={},cb=()=>{})=>{code=String(code||"").trim().toUpperCase();const r=rooms.get(code);if(!r)return cb({ok:false,error:"Room not found. Check the code."});if(r.players.size>=4)return cb({ok:false,error:"Party full (maximum 4)."});if(secure.enabled&&r.accountMode!==(guest?"guest":"account"))return cb({ok:false,error:"Secure account heroes and Guest heroes must use separate party rooms."});if(r.status!=="city")return cb({ok:false,error:"Adventure already started."});const p=player(s.id,name,classId,gender);p.guest=!!guest;r.players.set(s.id,p);s.join(code);say(r,p.name+" joined the party.");emit(r);cb({ok:true,code})});
  s.on("restoreCharacter",async(v={},cb=()=>{})=>{
   let r=findRoom(s);
   if(!r||r.status!=="city")return cb({ok:false,error:"Restore only works in the waiting room."});
-  if(restoring)return cb({ok:false,error:"Character restore already in progress."});
+  if(restoring)return cb({ok:false,error:"Character restore already in progress."});if(secure.enabled&&!!v.guest!==!!r.players.get(s.id)?.guest)return cb({ok:false,error:"Character auth mode does not match party."});
   restoring=true;
   let claim=null;
   try{
