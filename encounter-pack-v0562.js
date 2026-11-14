@@ -3,6 +3,7 @@
  * Non-boss stages 1–3 of each region: base 1–2 enemies, +1 per extra human.
  * The group is a server-only battle state, not fake decorative duplicates.
  */
+const world=require("./world-v040");
 const difficulty=(stage,partySize,kind)=>{
  const region=Math.max(0,Math.min(7,Math.floor((stage-1)/5)));
  const extra=Math.max(0,partySize-1);
@@ -33,8 +34,9 @@ function makeGroup(room,first,normal,random=Math.random){
   if(extra){
    // Use world-matched encounter identity, with a seeded selection from the
    // existing normal sprite pool. Name repetition is allowed.
-   const idx=Math.floor((room.regionIndex*3+random()*3))%normal.length;
-   foe.name=room.region?.normalNames?.[idx%3]||first.name;
+   const idx=Math.floor(random()*normal.length);
+   const region=world.regionForStage(room.stage);
+   foe.name=region.normalNames[Math.floor(random()*region.normalNames.length)]||first.name;
    foe.sprite=(normal[idx]||template).sprite||first.sprite;
    foe.icon=(normal[idx]||template).icon||first.icon;
   }
