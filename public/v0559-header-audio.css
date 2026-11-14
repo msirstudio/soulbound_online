@@ -1,0 +1,74 @@
+/* SOULBOUND v0.55.9 · Readable top banner, lower Audio row, viewport-safe battle.
+   Scoped overrides; retains all audio IDs, game saves and combat mechanics. */
+
+/* Readable header bar: more vertical breathing room, legible controls. */
+#game .roomline.panel{
+ box-sizing:border-box!important;min-height:54px!important;
+ padding:8px 12px!important;margin:0!important;
+ display:flex!important;align-items:center!important;gap:12px!important;
+ flex:0 0 auto!important;flex-wrap:wrap!important;overflow:visible!important;
+}
+#game .roomline .v16-game-brand{flex:0 0 auto!important;min-width:0!important}
+#game .roomline .v16-game-brand strong{font-size:clamp(18px,1.55vw,25px)!important;line-height:1.1!important}
+#game .roomline .v16-game-brand small{font-size:10px!important}
+#game .roomline #code{font-size:clamp(14px,1.15vw,17px)!important;letter-spacing:.5px!important}
+#game .roomline #stageBadge{font-size:clamp(12px,.9vw,14px)!important}
+#game .roomline .v041-toolbar{gap:7px!important;min-width:0!important}
+#game .roomline .v041-toolbar button,
+#game .roomline #copy,#game .roomline #leave{
+ min-height:34px!important;padding:7px 11px!important;
+ font-size:clamp(10px,.75vw,12px)!important;line-height:1.15!important;
+ white-space:nowrap!important;
+}
+
+/* Audio now has a separate lower bar after the command row. */
+#game .v0559-audio-row{
+ box-sizing:border-box!important;display:flex!important;justify-content:flex-end!important;
+ align-items:center!important;flex:0 0 34px!important;
+ height:34px!important;min-height:34px!important;
+ margin:0!important;padding:0 7px!important;position:relative!important;z-index:180!important;
+ border:1px solid #897048!important;border-radius:5px!important;
+ background:linear-gradient(100deg,#121726,#211a2a)!important;
+ overflow:visible!important;
+}
+#game .v0559-audio-row .v0484-audio-anchor{
+ position:relative!important;display:inline-flex!important;align-items:center!important;
+ isolation:isolate!important;flex:0 0 auto!important;
+}
+#game .v0559-audio-row #audioSettingsToggle{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ min-height:29px!important;margin:0!important;padding:4px 12px!important;
+ border:1px solid #b99661!important;border-radius:5px!important;
+ background:linear-gradient(#493a37,#2a2330)!important;color:#ffe5ad!important;
+ font:700 11px Georgia,serif!important;white-space:nowrap!important;
+}
+#game .v0559-audio-row #audioSettings.audio-settings-pop:not([hidden]){
+ position:absolute!important;top:auto!important;bottom:calc(100% + 8px)!important;
+ left:auto!important;right:0!important;z-index:2600!important;
+ width:min(305px,calc(100vw - 24px))!important;max-height:min(390px,70dvh)!important;
+ overflow-y:auto!important;
+}
+#game .v0559-audio-row #audioSettings[hidden]{display:none!important}
+
+/* Put the freed room under the banner back into the game by reducing arena height,
+   not by hiding player status or actions. The HUD retains internal overflow fallback. */
+@media(min-width:1060px) and (min-height:700px){
+ #game:not([hidden]){gap:3px!important}
+ #game .roomline.panel{min-height:54px!important;padding:7px 12px!important}
+ #game .campaign{height:16px!important;flex-basis:16px!important}
+ #game .arena:not([hidden]){
+  height:clamp(200px,34dvh,425px)!important;
+  max-height:34dvh!important;flex:0 1 34dvh!important;
+  min-height:200px!important;
+ }
+ #game .v0559-audio-row{flex:0 0 32px!important;height:32px!important;min-height:32px!important}
+ #game .game-layout{min-height:0!important;flex:1 1 0!important;overflow:hidden!important}
+ #game .game-layout .v22-hud-stack{min-height:0!important;overflow-y:auto!important}
+}
+/* Small/short displays keep content accessible rather than clipping controls. */
+@media(max-width:1059px),(max-height:699px){
+ #game .roomline.panel{gap:7px!important;padding:7px 8px!important}
+ #game .roomline .v041-toolbar button,#game .roomline #copy,#game .roomline #leave{
+  min-height:30px!important;padding:5px 7px!important;font-size:10px!important}
+ #game .v0559-audio-row{min-height:32px!important;height:32px!important}
+}
