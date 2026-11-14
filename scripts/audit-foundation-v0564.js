@@ -12,7 +12,7 @@ function audit(){
  const check=(label,test)=>(test?passed:failed).push(label);
  check("package version is semver",/^\d+\.\d+\.\d+$/.test(pkg.version));
  check("visible game version matches package",html.includes("<small>v"+pkg.version.replace(/\.0$/,"")+"</small>"));
- check("menu version matches package",html.includes("v"+pkg.version.replace(/\.0$/,"")+" MULTIPLAYER"));
+ check("menu version matches package",html.includes("v"+pkg.version.replace(/\.0$/,"")+" WEAPON SHOP"));
  check("API version uses canonical package value",server.includes('readFileSync(path.join(__dirname,"package.json")')&&
   (server.match(/version:APP_VERSION/g)||[]).length>=2);
  check("version sync client present",html.includes('version-v0564.js?v=0.60'));
