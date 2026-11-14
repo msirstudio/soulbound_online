@@ -1,0 +1,20 @@
+name: SOULBOUND v0.55.7 Audio and viewport UI regression
+on:
+  push:
+    branches: [v0.55.7-audio-bottom-fit-screen]
+  pull_request:
+    branches: [v0.55.6-mage-poses]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: node --check public/game.js && node --check public/sprite-animation-v0311.js
+      - run: npm test
