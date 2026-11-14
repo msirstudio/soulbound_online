@@ -28,7 +28,7 @@ test("Eight region previews use the corresponding existing arena images",()=>{
 });
 test("v0.46 resources load after earlier styles, all main interfaces remain wired",()=>{
  const html=read("public/index.html"),p=require("../package.json"),log=read("public/update-log-v045.js");
- assert.equal(p.version,"0.57.0");
+ assert.equal(p.version,"0.58.0");
  assert.ok(html.includes('href="v046-atlas.css"'));
  assert.ok(html.includes('src="world-ui-v040.js"'));
  assert.ok(html.indexOf('href="v046-atlas.css"')>html.indexOf('href="v045.css"'));

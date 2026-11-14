@@ -83,8 +83,8 @@ test("new Water/Lightning Mage skills are real unlockable authoritative actions"
  assert.equal(combat.validateAction(mage,"skill6",{players:new Map()}),null);
  assert.equal(combat.validateAction(mage,"skill7",{players:new Map()}),null);
  const server=read("server.js"),game=read("public/game.js"),html=read("public/index.html");
- assert.ok(server.includes('skill6:{cost:22,mult:1.8,unlock:7,name:"TIDAL SURGE",cd:3}'));
- assert.ok(server.includes('skill7:{cost:26,mult:1.95,unlock:9,name:"THUNDERBOLT",cd:3}'));
+ assert.deepEqual(require("../combat/skills").definition({classId:"mage"},"skill6"),{cost:22,unlock:7,mult:1.8,name:"TIDAL SURGE",cd:3,area:true});
+ assert.deepEqual(require("../combat/skills").definition({classId:"mage"},"skill7"),{cost:26,unlock:9,mult:1.95,name:"THUNDERBOLT",cd:3,area:false});
  assert.ok(game.includes('"skill6Button"')&&game.includes('"skill7Button"'));
  assert.ok(html.includes('data-action="skill6"')&&html.includes('data-action="skill7"'));
 });
