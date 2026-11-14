@@ -2,6 +2,14 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.56.2",date:"2026-11-14",title:"Hardcore Packs & Boss Rebalance",notes:[
+  "Normal stages 1–3 of all eight regions now field 1–2 random enemies for solo heroes, plus exactly one foe per additional party member.",
+  "Each enemy is individually targetable with its own HP, status and attack turn. Defeat the entire pack for one encounter victory.",
+  "Boss ATK is raised substantially so guarding, healing, status removal and coordinated party attacks matter; mini-bosses are also stronger.",
+  "Enemy attacks resolve in readable timed sequence rather than all at once.",
+  "Normal encounters grant a modest pack reward bonus, with no extra boss loot rolls or changes to player saves.",
+  "Party rooms still allow up to four players; one enemy is added for each extra player on normal stages."
+ ]},
  {version:"0.56.1",date:"2026-11-14",title:"Three Hero Save Slots & Regional Soundtrack",notes:[
   "Three selectable character slots; Slot 1 preserves the existing hero while Slots 2 and 3 can have different classes, stats, equipment and boss progress.",
   "Install SUPABASE-SAVE-SLOTS-V0561.sql for account cloud saves in Slots 2 and 3; until then these slots are backed up in the current browser.",
