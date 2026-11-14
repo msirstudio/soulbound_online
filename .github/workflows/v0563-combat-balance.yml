@@ -1,0 +1,20 @@
+name: SOULBOUND v0.56.3 Battle-wide Balance and Monster Presentation
+on:
+  push:
+    branches: [v0.56.3-combat-rebalance-visible-packs]
+  pull_request:
+    branches: [v0.56.2-hardcore-encounters]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: node --check server.js && node --check public/game.js && node --check combat-v054.js
+      - run: npm test

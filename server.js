@@ -1,6 +1,6 @@
 const express=require("express"),http=require("http"),path=require("path");
 const {Server}=require("socket.io");const loot=require("./loot-v034");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
-app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.56.2"}));
+app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.56.3"}));
 const world=require("./world-v040");const combat=require("./combat-v055");const pack=world.encounterPack;const rooms=new Map();
 const normal=[{name:"Mossfang Wolf",sprite:"mossfang-wolf",icon:"🐺",hp:90,atk:12,def:2,xp:35,gold:18},{name:"Goblin Raider",sprite:"goblin-raider",icon:"👺",hp:115,atk:15,def:4,xp:45,gold:24},{name:"Grave Beetle",sprite:"grave-beetle",icon:"🪲",hp:140,atk:17,def:5,xp:55,gold:30},{name:"Cursed Knight",sprite:"cursed-knight",icon:"💀",hp:165,atk:19,def:7,xp:65,gold:36},{name:"Wisp Stalker",sprite:"wisp-stalker",icon:"👻",hp:185,atk:21,def:8,xp:75,gold:42}];
 const bosses=[{name:"The Briarfang Alpha",sprite:"boss-briarfang",icon:"🐺",hp:260,atk:22,def:7,xp:130,gold:90},{name:"Dreadforge Champion",sprite:"boss-dreadforge",icon:"🛡️",hp:390,atk:29,def:10,xp:180,gold:125},{name:"Ember Tyrant",sprite:"boss-ember-tyrant",icon:"🐉",hp:540,atk:36,def:13,xp:240,gold:165},{name:"The Hollow Oracle",sprite:"boss-hollow-oracle",icon:"🔮",hp:690,atk:42,def:16,xp:300,gold:210},{name:"Glacier Warden",sprite:"boss-glacier-warden",icon:"🧊",hp:850,atk:48,def:19,xp:370,gold:260},{name:"Ancient World-Eater",sprite:"boss-world-eater",icon:"🗿",hp:1030,atk:55,def:22,xp:450,gold:320},{name:"The Void Reaper",sprite:"boss-void-reaper",icon:"☠️",hp:1240,atk:62,def:25,xp:540,gold:390},{name:"Eclipse Sovereign",sprite:"boss-eclipse-sovereign",icon:"👑",hp:1500,atk:72,def:29,xp:700,gold:500}];
@@ -51,7 +51,7 @@ app.get("/api/index",(_,res)=>{
    enemy.loot="Each listed item is rolled independently for each player. Several items may drop on the same victory; bag capacity still applies.";}
  });
  res.set("Cache-Control","no-store, max-age=0");
- res.json({version:"0.56.2",title:"SOULBOUND ADVENTURE INDEX",stageCount:world.totalStages,
+ res.json({version:"0.56.3",title:"SOULBOUND ADVENTURE INDEX",stageCount:world.totalStages,
   categories:["bosses","monsters","races","weapons","armor","accessories","food","consumables","elements","statuses","combat"],
   codex:combat.codexData(),
   bossDropTables,miniDropTables,lootRule:"Each possible item has its own independent drop roll based on rarity. Multiple items may drop; inventory remains limited to 40 unequipped pieces.",
@@ -154,7 +154,12 @@ io.on("connection",s=>{
  });
  s.on("startBattle",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a room first."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can start."});if(r.status!=="city")return cb({ok:false,error:"Return to the city to start a region."});if([...r.players.values()].some(p=>!world.canEnter(p.level,r.regionIndex)))return cb({ok:false,error:"A party member does not meet this region\u0027s level requirement."});r.stage=world.regions[r.regionIndex].firstStage;start(r);say(r,"The party sets out into "+world.regions[r.regionIndex].name+".");emit(r);cb({ok:true})});
  s.on("action",({type,targetId}={},cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a room first."});if(!valid(s,r))return cb({ok:false,error:"Wait for your turn."});
- if(targetId&&!(pack.select(r,String(targetId))))return cb({ok:false,error:"Enemy is already defeated."});
+ const acting=r.players.get(s.id);
+ const aoe=(type==="skill2"&&(acting?.classId==="mage"||acting?.classId==="swordsman"))
+   ||(type==="skill3"&&acting?.classId==="mage")
+   ||(type==="skill6"&&acting?.classId==="mage");
+ if(aoe)r.monster=pack.alive(r)[0]||r.monster;
+ else if(targetId&&!(pack.select(r,String(targetId))))return cb({ok:false,error:"Enemy is already defeated."});
  const p=r.players.get(s.id),m=r.monster;
  // Reject invalid commands before DOT/status ticks; clients cannot spam rejected
  // skill requests to drain HP or advance status effects.
@@ -181,12 +186,29 @@ io.on("connection",s=>{
   const cost=p.raceId==="elf"?11:12;p.mp-=cost;p.cooldowns=p.cooldowns||{};p.cooldowns.cleanse=3;
   combat.cleanse(r,p,say);
  }else return cb({ok:false,error:"Unknown action."});
+ // Server-authoritative AoE: primary full damage, other living enemies
+ // receive 65% with their individual armour and elemental resistance.
+ if(aoe&&d>0){
+  let struck=1;
+  for(const other of pack.alive(r)){
+   if(other===m)continue;
+   const base=Math.max(1,p.atk*({skill2:2.5,skill3:1.6,skill6:1.8}[type]||1.5));
+   const correction=Math.max(.4,Math.min(1.6,(base-other.def)/Math.max(1,base-m.def)));
+   const element=combat.skillElement(p,type);
+   const ratio=combat.elementMultiplier(other,element)/Math.max(.01,combat.elementMultiplier(m,element));
+   const hit=Math.max(1,Math.floor(d*.65*correction*ratio));
+   other.hp=Math.max(0,other.hp-hit);
+   if(type==="skill3"&&p.classId==="mage"&&other.hp>0)combat.debuffMonster(other,"chill",1);
+   struck++;say(r,p.name+" hits "+other.name+" with AoE for "+hit+" damage.");
+  }
+  say(r,"✦ AREA ATTACK · "+struck+" enemies struck.");
+ }
  // All damaging actions build a persistent Stagger bar. Only a charged attack
  // can be interrupted. The boss resists subsequent interrupts briefly.
  if(["attack","skill","skill2","skill3","skill4","skill5","break"].includes(type)&&m.hp>0)
   combat.addStagger(r,p,type,combat.skillElement(p,type),say);
- if(m.hp<=0){
- say(r,"☠ "+m.name+" defeated! "+pack.alive(r).length+" enemies remain.");
+ if(m.hp<=0||pack.alive(r).length===0){
+ for(const fallen of r.enemies.filter(x=>x.hp<=0&&!x.defeatAnnounced)){fallen.defeatAnnounced=true;say(r,"☠ "+fallen.name+" defeated!");}
  if(pack.deadTarget(r)){finish(r);emit(r);return cb({ok:true})}
 }
 combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status==="battle"&&r.turnIndex<=previousIndex){enemyCounterAfterBeat(r);emit(r);return cb({ok:true});}skipFallenTurn(r);emit(r);cb({ok:true});});

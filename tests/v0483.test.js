@@ -42,7 +42,7 @@ test("Battle Log inner scroll view fills available drawer height",()=>{
 });
 test("title version and release notes reflect v0.55",()=>{
  const html=read("public/index.html"),pkg=require("../package.json"),log=read("public/update-log-v045.js");
- assert.equal(pkg.version,"0.56.2");
- assert.ok(html.includes("VERSION 0.56.2 · HARDCORE ENCOUNTERS"));
+ assert.equal(pkg.version,"0.56.3");
+ assert.ok(html.includes("VERSION 0.56.3 · COMBAT REBALANCE"));
  assert.ok(log.includes('version:"0.48.3"'));
 });

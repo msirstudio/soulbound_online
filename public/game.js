@@ -253,7 +253,7 @@ function v0560AddedLog(previous,current){
  return b.slice(Math.max(0,b.length-8));
 }
 function v0560OnState(last,s){
- const key=(s.status==="battle"||s.status==="defeat")&&s.monster?(s.code+"|"+s.stage+"|"+s.monster.name):"";
+ const key=(s.status==="battle"||s.status==="defeat")&&s.monster?(s.code+"|"+s.stage):"";
  if(!key||key!==v0560BattleKey){
   v0560Clear();v0560BattleKey=key;
   if(!key||!last||last.status!=="battle"||last.stage!==s.stage)return;
@@ -264,7 +264,7 @@ function v0560OnState(last,s){
   const old=last.players.find(x=>x.id===p.id);
   return old&&Number(p.hp)<Number(old.hp);
  });
- const enemyUsedMove=newLog.some(line=>name&&String(line).startsWith(name+" uses ")&&String(line).includes(" damage"));
+ const enemyUsedMove=newLog.some(line=>(s.enemies||[s.monster]).some(e=>String(line).startsWith(String(e.name)+" uses ")&&String(line).includes(" damage")));
  const enemyAttacked=lost.length>0||enemyUsedMove;
  if(!enemyAttacked)return;
  // Delay the enemy lunge until the player's attack pose has been readable.
@@ -273,7 +273,10 @@ function v0560OnState(last,s){
  v0560BeatEnd=start+1000;
  v0560After(Math.max(0,start-now),()=>{
   if(v0560BattleKey!==key)return;
-  const el=document.getElementById("monsterSprite");
+  const activePack=Array.from(document.querySelectorAll("#v563EnemyField .v563-foe"));
+  const attackerLog=[...newLog].reverse().find(line=>String(line).includes(" uses ")&&String(line).includes(" damage"));
+  const attackerName=attackerLog?String(attackerLog).split(" uses ")[0]:"";
+  const el=activePack.length?(activePack.find(x=>x.querySelector(".v563-foe-name")?.textContent===attackerName)||activePack[0]):document.getElementById("monsterSprite");
   if(!el)return;
   el.classList.remove("v0560-enemy-attacking");void el.offsetWidth;
   el.classList.add("v0560-enemy-attacking");
@@ -324,7 +327,7 @@ $("bossTag").classList.toggle("v0484-boss",!!s.monster?.boss);const mh=s.monster
 const v562Alive=(s.enemies||[]).filter(e=>e.hp>0);
 if(!v562Alive.some(e=>e.enemyId===v562TargetId))v562TargetId=s.monster?.enemyId||v562Alive[0]?.enemyId||null;
 const v562Holder=$("v562EnemyChoices");
-v562Holder.hidden=v562Alive.length<=1||s.status!=="battle";
+v562Holder.hidden=true; // Large clickable enemy sprites replace thumbnail selectors.
 v562Holder.innerHTML=v562Holder.hidden?"":v562Alive.map(e=>{
  const isTarget=e.enemyId===v562TargetId,ratio=Math.max(0,Math.min(100,100*e.hp/Math.max(1,e.maxHp)));
  return '<button type="button" class="v562-target'+(isTarget?' selected':'')+'" data-v562-id="'+esc(e.enemyId)+'" aria-pressed="'+isTarget+'" title="Attack '+esc(e.name)+'">'+
@@ -336,6 +339,23 @@ v562Holder.querySelectorAll("[data-v562-id]").forEach(b=>b.onclick=()=>{
  v562Holder.querySelectorAll(".v562-target").forEach(x=>{
   const selected=x.dataset.v562Id===v562TargetId;
   x.classList.toggle("selected",selected);x.setAttribute("aria-pressed",String(selected));
+ });
+});
+const v563Field=$("v563EnemyField"),v563Multiple=v562Alive.length>1&&s.status==="battle";
+$("v563MonsterSide").classList.toggle("v563-multi",v563Multiple);
+v563Field.hidden=!v563Multiple;
+v563Field.innerHTML=v563Multiple?v562Alive.map((e,i)=>{
+ const selected=e.enemyId===v562TargetId,ratio=Math.max(0,Math.min(100,100*e.hp/Math.max(1,e.maxHp)));
+ return '<button class="v563-foe'+(selected?' selected':'')+'" type="button" data-v563-target="'+esc(e.enemyId)+'" aria-pressed="'+selected+'" aria-label="Attack '+esc(e.name)+'" title="Target '+esc(e.name)+'">'+
+ '<span class="v563-foe-name">'+esc(e.name)+'</span>'+
+ '<img class="v563-foe-sprite" src="assets/monsters/'+esc(e.sprite||"mossfang-wolf")+'.svg" alt="'+esc(e.name)+'" draggable="false">'+
+ '<span class="v563-foe-hp"><span class="v563-foe-meter"><i style="width:'+ratio+'%"></i></span>'+e.hp+' / '+e.maxHp+'</span></button>';
+}).join(""):"";
+v563Field.querySelectorAll("[data-v563-target]").forEach(btn=>btn.onclick=()=>{
+ v562TargetId=btn.dataset.v563Target;
+ v563Field.querySelectorAll("[data-v563-target]").forEach(other=>{
+  const selected=other.dataset.v563Target===v562TargetId;
+  other.classList.toggle("selected",selected);other.setAttribute("aria-pressed",String(selected));
  });
 });
 const rawCombatIntent=s.status==="battle"&&(s.monster?.boss||s.monster?.miniBoss)&&s.monster?.intent;
