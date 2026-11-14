@@ -55,7 +55,7 @@ function harness(){
  const app={use(){},get(){}},express=()=>app;express.static=()=>()=>{};
  class Server{on(event,fn){if(event==="connection")connect=fn}to(room){return{emit:(name,s)=>events.push({room,name,s})}}}
  const source=read("server.js");
- const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:name==="socket.io"?{Server}:name==="path"?path:require(name);
+ const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:name==="socket.io"?{Server}:name==="path"?path:name==="./loot-v034"?loot:name==="./world-v040"?world:name==="./combat-v055"?require("../combat-v055"):require(name);
  const runtime=new Function("require","process","console","__dirname","setTimeout",source+";return {rooms};")(
   deps,{env:{}},{log(){},error(){}},root,fn=>{fn();return 0});
  const user=id=>{
