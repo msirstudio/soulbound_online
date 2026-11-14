@@ -1,6 +1,6 @@
 {
   "name": "soulbound-online",
-  "version": "0.56.1",
+  "version": "0.56.2",
   "private": true,
   "description": "SOULBOUND v0.55.1 Adventure Index Cache & Combat Status UI Fix",
   "main": "server.js",
