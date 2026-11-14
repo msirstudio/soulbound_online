@@ -2,6 +2,14 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.58",date:"2026-11-14",title:"Unified Combat Core — Formula Parity Refactor",notes:[
+  "All main damage calculations now use shared pure combat formulas for player attack, skills, BREAK, area splash and enemy hits.",
+  "Skill MP costs, unlock levels, cooldowns, class names and area-of-effect flags are centralized in a canonical skill catalog.",
+  "Original 0.57 rounding, element modifiers, DEF/Guard, boss HP/ATK and party AoE ratios are deliberately preserved; this is a stability refactor, not another difficulty adjustment.",
+  "Added automated old-vs-new formula parity checks across all eight regions, classes, element modifiers, high DEF and party scenarios.",
+  "Server-authoritative Secure Save 0.57 remains enabled only after SQL and Render server secrets are configured.",
+  "Status effect execution, enemy AI and full combat event logs are scheduled for a later extraction. Test the combat UI and multiplayer before publishing."
+ ]},
  {version:"0.57",date:"2026-11-14",title:"Secure Save Backend & Two-Digit Versions",notes:[
   "Signed-in hero saves use a server-controlled table with revision checks after Secure Save mode is activated on Render.",
   "Server verifies Supabase login tokens and restores server-owned Level, ATK, DEF, Gold, equipment and world progress rather than trusting the browser.",
