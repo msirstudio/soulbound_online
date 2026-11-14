@@ -18,3 +18,10 @@ create policy "slot_insert_self" on public.hero_save_slots for insert to authent
 create policy "slot_update_self" on public.hero_save_slots for update to authenticated using (auth.uid() = user_id) with check (auth.uid() = user_id);
 create policy "slot_delete_self" on public.hero_save_slots for delete to authenticated using (auth.uid() = user_id);
 grant select,insert,update,delete on public.hero_save_slots to authenticated;
+
+-- Optional but required for the Slot 1 Delete button on accounts whose existing
+-- public.profiles RLS does not already allow owner deletions.
+-- This only permits a signed-in user to delete their own profile row.
+drop policy if exists "v0561_profile_delete_own" on public.profiles;
+create policy "v0561_profile_delete_own" on public.profiles for delete to authenticated using (auth.uid() = id);
+grant delete on public.profiles to authenticated;
