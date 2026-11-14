@@ -16,7 +16,7 @@ In your *test* Render Web Service > Environment, add:
 
 - \`SUPABASE_URL\`: your Supabase project URL
 - \`SUPABASE_PUBLISHABLE_KEY\`: the existing public project key (not secret)
-- \`SUPABASE_SERVICE_ROLE_KEY\`: a server-only secret key with database access; never place it in frontend code or commit it
+- \`SUPABASE_SECRET_KEY\`: a server-only secret key with database access; never place it in frontend code or commit it
 
 When **all three are set**, Secure Save mode is enabled in the 0.57 backend. The server verifies signed-in Supabase JWTs, ignores user-submitted Level/ATK/DEF/Gold and reads trusted character data from \`hero_secure_saves\`. It writes game progress from authoritative server state using a revision-checked compare-and-swap operation.
 
@@ -47,3 +47,7 @@ Branch \`v0.57-core-hardening\` is a staging branch. Retain 0.56.4 and legacy Su
 - Verify the first server save increments `hero_secure_saves.revision`; refresh and confirm HP/Gold/XP match. Verify a failed save produces a visible `saveError` warning, not a fake success.
 - In Secure Save mode, Guest players cannot join a signed-in-only party, protecting account-backed progression from unverified Guest stats. Guest-only parties remain available.
 - For production use, perform a staging cutover and keep backups. This PR does not itself apply SQL or change Render environment variables.
+
+### Current API-key guidance (Nov 2026)
+
+New Supabase server keys start with `sb_secret_` and MUST be sent in the **`apikey` header**, never as the JWT in `Authorization: Bearer`. The server has been updated to handle this correctly; it retains the legacy `service_role` JWT fallback only if needed. Use the new `SUPABASE_SECRET_KEY` key name in Render whenever possible. Never share the value in chat or screenshots.
