@@ -79,7 +79,7 @@ test("settings controls operate the original audio buttons without changing game
 test("UI code keeps existing game hooks, saves and party calls intact",()=>{
  assert.match(game,/SoulboundUIV41\?\.onAuth\(u\)/);
  assert.match(game,/SoulboundUIV41\?\.onPrepared\(\)/);
- assert.equal((game.match(/SoulboundUIV41\?\.enterGame\(\)/g)||[]).length,2);
+ assert.equal((game.match(/SoulboundUIV41\?\.enterGame\(\)/g)||[]).length,3,"Create, Join, and Reconnect must all restore gameplay UI");
  assert.match(game,/SoulboundUIV41\?\.updateGame\(s,v040Me\)/);
  for(const marker of ['id="v041Front"','id="v041Settings"','id="v041PartyOpen"','id="v041ChatOpen"','id="v041LogOpen"','class="v041-lobby-grid"','src="ui-foundation-v041.js"','href="v041.css"'])
   assert.ok(html.includes(marker),"Missing HTML anchor: "+marker);
