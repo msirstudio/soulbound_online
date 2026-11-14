@@ -11,7 +11,7 @@ const apply=version=>{
  const footer=document.querySelector(".v041-menu-foot");
  if(footer)footer.textContent=footer.textContent.replace(/v\d+\.\d+\.\d+/, "v"+version);
  const title=document.querySelector("[data-soulbound-version]");
- if(title)title.textContent="VERSION "+version+" · SYSTEM FOUNDATION";
+ if(title)title.textContent="VERSION "+version+" · SECURE FOUNDATION";
 };
 if(typeof fetch!=="function")return;
 fetch("/health",{cache:"no-store"}).then(r=>r.ok?r.json():null).then(data=>{
