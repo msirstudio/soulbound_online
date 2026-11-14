@@ -7,7 +7,7 @@ function harness(){
  const messages=[];
  const app={use(){},get(){}};const express=()=>app;express.static=()=>()=>{};
  class Server{on(event,fn){if(event==="connection")connection=fn}to(room){return{emit:(name,state)=>messages.push({room,name,state})}}}
- const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:name==="socket.io"?{Server}:name==="path"?path:name==="./loot-v034"?loot:name==="./world-v040"?world:name==="./combat-v055"?combat:require(name);
+ const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:name==="socket.io"?{Server}:name==="path"?path:name==="./loot-v034"?loot:name==="./world-v040"?world:name==="./combat-v055"?combat:(String(name).startsWith("./")?require(path.join(__dirname,"..",name)):require(name));
  const rt=new Function("require","process","console","__dirname","setTimeout",serverText+";return {rooms};")(deps,{env:{}},{log(){}},path.join(__dirname,".."),fn=>{fn();return 0});
  const connect=id=>{
   const events={};connection({id,join(){},on:(event,fn)=>events[event]=fn});
