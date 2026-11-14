@@ -48,8 +48,8 @@ test("Audio shares Equipment/INDEX toolbar instead of taking a standalone row",(
  assert.ok(css.includes('bottom:calc(100% + 8px)'));
 });
 test("Release and API versions agree",()=>{
- assert.ok(html.includes('<small>v0.59</small>'));
- assert.ok(html.includes('VERSION 0.59 · MULTIPLAYER'));
- assert.equal(require("../package.json").version,"0.59.0");
+ assert.ok(html.includes('<small>v0.60</small>'));
+ assert.ok(html.includes('VERSION 0.60 · EXPANDED WEAPON SHOP'));
+ assert.equal(require("../package.json").version,"0.60.0");
  assert.ok(read("server.js").includes("version:APP_VERSION"));
 });
