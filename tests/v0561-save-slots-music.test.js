@@ -51,5 +51,5 @@ test("Release and API versions agree",()=>{
  assert.ok(html.includes('<small>v0.56.4</small>'));
  assert.ok(html.includes('VERSION 0.56.4 · SYSTEM FOUNDATION'));
  assert.equal(require("../package.json").version,"0.56.4");
- assert.ok(read("server.js").includes('version:"0.56.4"'));
+ assert.ok(read("server.js").includes("version:APP_VERSION"));
 });
