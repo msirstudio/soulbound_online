@@ -1,0 +1,26 @@
+name: SOULBOUND v0.56.5 Secure Foundation
+on:
+  push:
+    branches: [v0.56.5-secure-foundation]
+  pull_request:
+    branches: [v0.56.4-system-foundation]
+permissions:
+  contents: read
+jobs:
+  secure-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Syntax and foundation audit
+        run: |
+          node --check server.js
+          node --check public/game.js
+          node --check server/secure-runtime-v0565.js
+          node --check persistence/secure-save-v0565.js
+          npm run audit:foundation
+      - run: npm test
