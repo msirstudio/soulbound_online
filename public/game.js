@@ -171,7 +171,7 @@ function v0560AddedLog(previous,current){
  return b.slice(Math.max(0,b.length-8));
 }
 function v0560OnState(last,s){
- const key=s.status==="battle"&&s.monster?(s.code+"|"+s.stage+"|"+s.monster.name):"";
+ const key=(s.status==="battle"||s.status==="defeat")&&s.monster?(s.code+"|"+s.stage+"|"+s.monster.name):"";
  if(!key||key!==v0560BattleKey){
   v0560Clear();v0560BattleKey=key;
   if(!key||!last||last.status!=="battle"||last.stage!==s.stage)return;
@@ -187,8 +187,8 @@ function v0560OnState(last,s){
  if(!enemyAttacked)return;
  // Delay the enemy lunge until the player's attack pose has been readable.
  // If a second network state arrives, the next beat starts after the active one.
- const now=performance.now(),start=Math.max(now+520,v0560BeatEnd);
- v0560BeatEnd=start+1150;
+ const now=performance.now(),start=Math.max(now+100,v0560BeatEnd);
+ v0560BeatEnd=start+1000;
  v0560After(Math.max(0,start-now),()=>{
   if(v0560BattleKey!==key)return;
   const el=document.getElementById("monsterSprite");
@@ -308,7 +308,7 @@ $("skill3Button").textContent=mage?"❄ FROST NOVA":tank?"📣 PROVOKE":"🛡 SH
 $("skill4Button").textContent=mage?"🌠 ARCANE SURGE":tank?"🏰 FORTRESS STRIKE":"⚡ RALLYING SLASH";$("skill5Button").textContent=mage?"✦ ARCANE MARK":tank?"🛡 AEGIS PACT":"⚔ ARMOR REND";
 $("skill6Button").textContent="💧 TIDAL SURGE";$("skill7Button").textContent="⚡ THUNDERBOLT";
 $("skillGuide").textContent="Hover over a skill to view its damage, mana cost and effects.";
-$("partyChatMessages").innerHTML=(s.chat||[]).map(m=>"<div class=\"chat-line\"><b>"+esc(m.name)+"</b> <span>"+esc(m.message)+"</span></div>").join("");$("partyChatMessages").scrollTop=$("partyChatMessages").scrollHeight;const turn=!!me&&active?.id===myId&&s.status==="battle"&&me.hp>0;$("healthMediumCount").textContent="OWNED: "+(me?.mediumHealth||0);$("healthLargeCount").textContent="OWNED: "+(me?.largeHealth||0);$("manaMediumCount").textContent="OWNED: "+(me?.mediumMana||0);$("manaLargeCount").textContent="OWNED: "+(me?.largeMana||0);
+$("partyChatMessages").innerHTML=(s.chat||[]).map(m=>"<div class=\"chat-line\"><b>"+esc(m.name)+"</b> <span>"+esc(m.message)+"</span></div>").join("");$("partyChatMessages").scrollTop=$("partyChatMessages").scrollHeight;const turn=!!me&&active?.id===myId&&s.status==="battle"&&!s.enemyWindup&&me.hp>0;$("healthMediumCount").textContent="OWNED: "+(me?.mediumHealth||0);$("healthLargeCount").textContent="OWNED: "+(me?.largeHealth||0);$("manaMediumCount").textContent="OWNED: "+(me?.mediumMana||0);$("manaLargeCount").textContent="OWNED: "+(me?.largeMana||0);
 document.querySelectorAll("[data-action]").forEach(b=>{const c=b.dataset.action==="skill"?(me.raceId==="elf"?11:12):b.dataset.action==="skill2"?(me.raceId==="elf"?23:25):b.dataset.action==="skill3"?(me.raceId==="elf"?19:20):b.dataset.action==="skill4"?(me.raceId==="elf"?28:30):b.dataset.action==="skill5"?(me.raceId==="elf"?22:24):b.dataset.action==="skill6"?(me.raceId==="elf"?20:22):b.dataset.action==="skill7"?(me.raceId==="elf"?24:26):b.dataset.action==="break"?(me.raceId==="elf"?14:15):b.dataset.action==="cleanse"?(me.raceId==="elf"?11:12):0;b.disabled=!turn||(c>0&&me.mp<c)||((me.cooldowns?.[b.dataset.action]||0)>0)||(b.dataset.action==="skill2"&&me.level<3)||(b.dataset.action==="skill3"&&me.level<5)||(b.dataset.action==="skill4"&&me.level<8)||((b.dataset.action.startsWith("heal"))&&(!(me[{healSmall:"smallHealth",healMedium:"mediumHealth",healLarge:"largeHealth"}[b.dataset.action]]||0)||me.hp===me.maxHp))||((b.dataset.action.startsWith("mana"))&&(!(me[{manaSmall:"smallMana",manaMedium:"mediumMana",manaLarge:"largeMana"}[b.dataset.action]]||0)||me.mp===me.maxMp))||(b.dataset.action==="skill5"&&me.level<5)||(b.dataset.action==="skill6"&&(me.level<7||me.classId!=="mage"))||(b.dataset.action==="skill7"&&(me.level<9||me.classId!=="mage"))||
  (b.dataset.action==="cleanse"&&!s.players.some(x=>x.hp>0&&x.statusEffects?.length))});
 for(const id of ["v055Break","v055Cleanse"]){const button=$(id);if(button){const cd=me?.cooldowns?.[button.dataset.action]||0;
