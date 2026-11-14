@@ -34,9 +34,9 @@ test("client displays camp button only after mini-boss victory and keeps city me
 test("audio popup is single home for music mute, sfx mute, both volumes and test sound",()=>{
  const html=read("public/index.html"),game=read("public/game.js");
  const start=html.indexOf('id="audioSettingsToggle"');
- const end=html.indexOf('PARTY CODE',start);
+ const end=html.indexOf('<div class="game-layout">',start);
  const region=html.slice(start,end);
- assert.ok(start>=0&&end>start);
+ assert.ok(start>=0&&end>start&&start>html.indexOf('class="v22-command-dock"'));
  for(const id of ['id="audioSettings"','id="musicQuick"','id="sfxQuick"','id="gameMusicVolume"','id="gameSfxVolume"','id="audioTest"'])assert.ok(region.includes(id),id);
  const preceding=html.slice(Math.max(0,start-260),start);
  assert.ok(!preceding.includes('id="musicQuick"'));
