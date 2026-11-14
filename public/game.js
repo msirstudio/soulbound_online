@@ -38,6 +38,24 @@ function v40CacheWorld(p){if(!p)return;try{localStorage.setItem(v40WorldKey(),JS
  * Legacy profile is unchanged in Slot 1. Slots 2/3 use hero_save_slots
  * when SQL migration is installed, and a browser-local backup otherwise. */
 let v561Slot=1,v561Slots=[null,null,null],v561CloudSlots=false,v561SlotBusy=false;
+let v57Mode=false,v57Revisions={1:null,2:null,3:null};
+async function v57Discover(){
+ try{const res=await fetch("/health",{cache:"no-store"});if(!res.ok)throw Error("Health endpoint unavailable");
+  const health=await res.json();v57Mode=!!health.secureSavesEnabled&&!guestMode;
+  if(!v57Mode&&!guestMode)authNotice("Legacy saves are not anti-cheat protected. Configure Secure Saves before public release.",true);
+  return v57Mode;
+ }catch(e){v57Mode=false;return false}
+}
+async function v57Api(method,route,payload){
+ if(!supabaseClient||!currentUser)throw Error("Sign in to access secure character saves.");
+ const {data:{session}}=await supabaseClient.auth.getSession();
+ if(!session?.access_token)throw Error("Session expired. Please sign in again.");
+ const res=await fetch(route,{method,headers:{"Authorization":"Bearer "+session.access_token,...(payload?{"Content-Type":"application/json"}:{})},body:payload?JSON.stringify(payload):undefined,cache:"no-store"});
+ let output={};try{output=await res.json()}catch{}
+ if(!res.ok)throw Error(output.error||"Secure Save request failed ("+res.status+").");
+ return output;
+}
+
 function v561Key(slot){return "soulbound_hero_slot_v561_"+(guestMode?"guest":currentUser?.id||"unknown")+"_"+slot}
 function v561ReadLocal(slot){try{return JSON.parse(localStorage.getItem(slot===1&&guestMode?"soulbound_guest_save_v1":v561Key(slot))||"null")}catch{return null}}
 function v561WriteLocal(slot,data){try{localStorage.setItem(slot===1&&guestMode?"soulbound_guest_save_v1":v561Key(slot),JSON.stringify(data))}catch(e){authNotice("Browser storage is full. Export your hero before leaving.",true)}}
@@ -51,6 +69,12 @@ async function v561PersistExtra(slot,data){
 }
 async function v561Load(){
  v561Slots=[null,null,null];v561CloudSlots=false;
+ if(v57Mode&&!guestMode){
+  const response=await v57Api("GET","/api/secure-saves");
+  v57Revisions={1:null,2:null,3:null};
+  for(const row of response.slots||[]){if(row.slot>=1&&row.slot<=3){v561Slots[row.slot-1]=row.data||null;v57Revisions[row.slot]=Number(row.revision)}}
+  v561CloudSlots=true;v561Slot=1;v561Select(1);return;
+ }
  if(guestMode)v561Slots[0]=v561ReadLocal(1);
  else v561Slots[0]=await loadProfile();
  for(let n=2;n<=3;n++)v561Slots[n-1]=v561ReadLocal(n);
@@ -79,7 +103,7 @@ function v561Render(){
 function v561Select(n){
  if(v561SlotBusy||n<1||n>3)return;
  v561Slot=n;savedCharacter=v561Slots[n-1]||{};
- if(savedCharacter.class_id)savedCharacter.world_progress=v40MergeWorld(savedCharacter.world_progress,v40SavedWorld());
+ if(savedCharacter.class_id&&!v57Mode)savedCharacter.world_progress=v40MergeWorld(savedCharacter.world_progress,v40SavedWorld());
  selectedGameMode=null;restoreComplete=false;
  $("continueGame").classList.remove("selected");$("newGame").classList.remove("selected");
  $("classId").disabled=false;$("create").disabled=true;$("join").disabled=true;
@@ -96,7 +120,7 @@ function v564Owner(){return guestMode?"guest":currentUser?.id||"unknown"}
 function v564SnapshotData(slot,data){
  let localWorld=null;
  try{localWorld=JSON.parse(localStorage.getItem(v40WorldKeyFor(slot))||"null")}catch(e){}
- return {...data,world_progress:v40MergeWorld(data?.world_progress,localWorld)};
+ return v57Mode&&!guestMode?{...data}:{...data,world_progress:v40MergeWorld(data?.world_progress,localWorld)};
 }
 async function v561Delete(n){
  if(v561SlotBusy||n<1||n>3||!v561Slots[n-1]?.class_id)return;
@@ -104,7 +128,10 @@ async function v561Delete(n){
  if(!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),n,v564SnapshotData(n,v561Slots[n-1]),"before-delete"))return notice("Backup failed. Slot NOT deleted. Free browser storage, then try again.",true);
  v561SlotBusy=true;
  try{
-  if(!guestMode&&supabaseClient&&currentUser){
+  if(v57Mode&&!guestMode){
+   await v57Api("DELETE","/api/secure-saves/"+n,{revision:v57Revisions[n]});
+   v57Revisions[n]=null;
+  }else if(!guestMode&&supabaseClient&&currentUser){
    const table=n===1?"profiles":"hero_save_slots";
    let q=supabaseClient.from(table).delete().eq(n===1?"id":"user_id",currentUser.id);
    if(n!==1&&v561CloudSlots)q=q.eq("slot",n);
@@ -120,7 +147,7 @@ function authNotice(m,e=false){$("authNotice").textContent=m;$("authNotice").cla
 function showAccount(u){currentUser=u;$("account").hidden=false;$("lobby").hidden=!u;$("accountInfo").hidden=!u;$("accountEmail").textContent=u?.email||"";$("signup").hidden=!!u;$("signin").hidden=!!u;$("guestPlay").hidden=!!u;$("email").disabled=!!u;$("password").disabled=!!u;if(u)authNotice("Signed in. Your hero data is linked to this account.");window.SoulboundUIV41?.onAuth(u)}
 function profile(p){return{id:currentUser.id,username:p.name,class_id:p.classId,class_path:p.classPath||null,level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,small_health:p.smallHealth||p.potions||0,medium_health:p.mediumHealth||0,large_health:p.largeHealth||0,small_mana:p.smallMana||p.manaPotions||0,medium_mana:p.mediumMana||0,large_mana:p.largeMana||0,weapon:p.weapon,armor:p.armor,inventory:p.inventory||[],weapon_item:p.weaponItem||null,armor_item:p.armorItem||null,food_items:p.foodItems||{},food_buffs:p.foodBuffs||{},race_id:p.raceId||"human",race_points:p.racePoints||0,strength:p.strength||0,vitality:p.vitality||0,intelligence:p.intelligence||0,agility:p.agility||0,stat_points:p.statPoints||0,speed:p.speed||10,updated_at:new Date().toISOString()}}
 async function loadProfile(){const {data,error}=await supabaseClient.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();if(error)throw error;if(data)return data;const fresh={id:currentUser.id,username:(currentUser.email||"Adventurer").split("@")[0].slice(0,16)||"Adventurer"};const {data:created,error:e}=await supabaseClient.from("profiles").insert(fresh).select().single();if(e)throw e;return created}
-async function saveProfile(p){if(!restoreComplete||!p)return;const data={username:p.name,class_id:p.classId,class_path:p.classPath||null,level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,small_health:p.smallHealth||p.potions||0,medium_health:p.mediumHealth||0,large_health:p.largeHealth||0,small_mana:p.smallMana||p.manaPotions||0,medium_mana:p.mediumMana||0,large_mana:p.largeMana||0,weapon:p.weapon,armor:p.armor,inventory:p.inventory||[],weapon_item:p.weaponItem||null,armor_item:p.armorItem||null,food_items:p.foodItems||{},food_buffs:p.foodBuffs||{},race_id:p.raceId||"human",race_points:p.racePoints||0,strength:p.strength||0,vitality:p.vitality||0,intelligence:p.intelligence||0,agility:p.agility||0,stat_points:p.statPoints||0,speed:p.speed||10};const worldProgress=p.worldProgress||v40SavedWorld()||{version:40,bossDefeats:{},defeatedBossIds:[]};v40CacheWorld(worldProgress);const full={...data,world_progress:worldProgress};v561Slots[v561Slot-1]=full;
+async function saveProfile(p){if(!restoreComplete||!p)return;if(v57Mode&&!guestMode)return;const data={username:p.name,class_id:p.classId,class_path:p.classPath||null,level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,small_health:p.smallHealth||p.potions||0,medium_health:p.mediumHealth||0,large_health:p.largeHealth||0,small_mana:p.smallMana||p.manaPotions||0,medium_mana:p.mediumMana||0,large_mana:p.largeMana||0,weapon:p.weapon,armor:p.armor,inventory:p.inventory||[],weapon_item:p.weaponItem||null,armor_item:p.armorItem||null,food_items:p.foodItems||{},food_buffs:p.foodBuffs||{},race_id:p.raceId||"human",race_points:p.racePoints||0,strength:p.strength||0,vitality:p.vitality||0,intelligence:p.intelligence||0,agility:p.agility||0,stat_points:p.statPoints||0,speed:p.speed||10};const worldProgress=p.worldProgress||v40SavedWorld()||{version:40,bossDefeats:{},defeatedBossIds:[]};v40CacheWorld(worldProgress);const full={...data,world_progress:worldProgress};v561Slots[v561Slot-1]=full;
  if(v561Slot!==1){await v561PersistExtra(v561Slot,full);return}
  if(guestMode){v561WriteLocal(1,full);authNotice("Guest Slot 1 saved in this browser.");return}if(!supabaseClient||!currentUser)return;let {error}=await supabaseClient.from("profiles").upsert({...data,...(v40SchemaAvailable===false?{}:{world_progress:worldProgress}),id:currentUser.id,updated_at:new Date().toISOString()},{onConflict:"id"});
  if(error&&/world_progress|schema cache|column/i.test(error.message||"")){
@@ -130,13 +157,28 @@ async function saveProfile(p){if(!restoreComplete||!p)return;const data={usernam
  if(error)authNotice("Save failed: "+error.message,true);else if(v40SchemaAvailable===false)authNotice("Hero saved locally + cloud character. Run v0.40 SQL for cloud map progression.",true);else {v40SchemaAvailable=true;authNotice("Hero + world saved · "+new Date().toLocaleTimeString())}}
 async function prepare(){
  try{
+  await v57Discover();
   await v561Load();
   window.SoulboundAudio?.setRegion("city",true);
   authNotice("Save Slots loaded. Select your hero, then Continue or New Game.");
   window.SoulboundUIV41?.onPrepared();
  }catch(e){authNotice("Could not load Save Slots: "+e.message,true)}
 }
-async function afterJoin(){restoreComplete=false;if(savedCharacter?.class_id){const r=await call("restoreCharacter",{...savedCharacter,world_progress:savedCharacter.world_progress||v40SavedWorld(),gender:v30SelectedGender()});if(!r.ok)notice(r.error,true)}restoreComplete=true;const p=gameState?.players.find(x=>x.id===myId);if(p)saveProfile(p)}
+async function afterJoin(){
+ restoreComplete=false;
+ if(!savedCharacter?.class_id)return notice("Select an existing hero or create a new game first.",true);
+ let accessToken=null;
+ if(v57Mode&&!guestMode){
+  const result=await supabaseClient.auth.getSession();
+  accessToken=result.data?.session?.access_token||null;
+  if(!accessToken)return notice("Session expired. Sign in again.",true);
+ }
+ const r=await call("restoreCharacter",{...savedCharacter,world_progress:v57Mode?savedCharacter.world_progress:savedCharacter.world_progress||v40SavedWorld(),
+  accessToken,slot:v561Slot,guest:guestMode,gender:v30SelectedGender()});
+ if(!r.ok)return notice("Character restore blocked: "+r.error,true);
+ restoreComplete=true;
+ const p=gameState?.players.find(x=>x.id===myId);if(p)saveProfile(p);
+}
 function classInfo(){const mage=$("classId").value==="mage",tank=$("classId").value==="tank";$("classInfo").textContent=tank?"Highest HP and defense. Shield Bash, Iron Wall, and Provoke to taunt enemies for 3 turns.":mage?"Lower HP and defense, high MP and magic attack. Arcane Bolt, then Meteor at level 3.":"High HP and defense. Power Strike, then Whirlwind at level 3."}
 if(!supabaseClient){$("signup").disabled=true;$("signin").disabled=true;authNotice("Supabase unavailable. You can still play as guest.",true)}
 $("signup").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));const email=$("email").value.trim(),password=$("password").value;if(!email||password.length<6)return authNotice("Enter email and password (at least 6 characters).",true);const {data,error}=await supabaseClient.auth.signUp({email,password});if(error)return authNotice(error.message,true);if(data.session){showAccount(data.user);await prepare()}else authNotice("Account created. Check your email to confirm, then sign in.")};
@@ -153,7 +195,12 @@ $("v564ExportBackup").onclick=()=>{
  else notice("No local recovery backup exists yet for this slot.",true);
 };
 $("continueGame").onclick=()=>{if(!savedCharacter?.class_id)return notice("This slot is empty. Choose New Game first.",true);selectedGameMode="continue";if(savedCharacter?.class_id)$("classId").value=savedCharacter.class_id;$("classId").disabled=true;$("continueGame").classList.add("selected");$("newGame").classList.remove("selected");$("create").disabled=false;$("join").disabled=false;$("saveMode").textContent="CONTINUE selected · Your saved level, XP, gold, and equipment will be kept.";notice("Continue selected. Create a new party or join a friend.");};
-$("newGame").onclick=async()=>{$("classId").disabled=false;if(!guestMode&&(!currentUser||!supabaseClient))return notice("Sign in first.",true);if(!confirm("Start a New Game in SLOT "+v561Slot+"? The current character in this slot will be replaced."))return;if(savedCharacter?.class_id&&!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),v561Slot,v564SnapshotData(v561Slot,savedCharacter),"before-new-game"))return notice("Backup failed. New Game cancelled. Free browser storage before retrying.",true);const cls=$("classId").value,mage=cls==="mage",tank=cls==="tank";const fresh={id:currentUser?.id||null,username:$("name").value.trim()||savedCharacter?.username||"Adventurer",class_id:cls,class_path:null,level:1,xp:0,gold:80,hp:tank?180:mage?120:130,max_hp:tank?180:mage?120:130,mp:tank?55:mage?65:40,max_mp:tank?55:mage?65:40,attack:tank?16:mage?25:22,defense:tank?16:mage?8:10,potions:3,mana_potions:2,small_health:3,medium_health:0,large_health:0,small_mana:2,medium_mana:0,large_mana:0,weapon:tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",armor:tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",inventory:[],weapon_item:null,armor_item:null,food_items:{roast_meat:0,herb_stew:0,mana_tart:0},food_buffs:{atk:0,def:0,skill:0},race_id:"human",race_points:0,strength:0,vitality:0,intelligence:0,agility:0,stat_points:0,speed:10,updated_at:new Date().toISOString()};const freshWorld={version:40,bossDefeats:{},defeatedBossIds:[]};if(v561Slot!==1){await v561PersistExtra(v561Slot,{...fresh,world_progress:freshWorld})}else if(guestMode){v561WriteLocal(1,{...fresh,world_progress:freshWorld})}else{let {error}=await supabaseClient.from("profiles").upsert({...fresh,world_progress:freshWorld},{onConflict:"id"});
+$("newGame").onclick=async()=>{$("classId").disabled=false;if(!guestMode&&(!currentUser||!supabaseClient))return notice("Sign in first.",true);if(!confirm("Start a New Game in SLOT "+v561Slot+"? The current character in this slot will be replaced."))return;if(savedCharacter?.class_id&&!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),v561Slot,v564SnapshotData(v561Slot,savedCharacter),"before-new-game"))return notice("Backup failed. New Game cancelled. Free browser storage before retrying.",true);const cls=$("classId").value,mage=cls==="mage",tank=cls==="tank";const fresh={id:currentUser?.id||null,username:$("name").value.trim()||savedCharacter?.username||"Adventurer",class_id:cls,class_path:null,level:1,xp:0,gold:80,hp:tank?180:mage?120:130,max_hp:tank?180:mage?120:130,mp:tank?55:mage?65:40,max_mp:tank?55:mage?65:40,attack:tank?16:mage?25:22,defense:tank?16:mage?8:10,potions:3,mana_potions:2,small_health:3,medium_health:0,large_health:0,small_mana:2,medium_mana:0,large_mana:0,weapon:tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",armor:tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",inventory:[],weapon_item:null,armor_item:null,food_items:{roast_meat:0,herb_stew:0,mana_tart:0},food_buffs:{atk:0,def:0,skill:0},race_id:"human",race_points:0,strength:0,vitality:0,intelligence:0,agility:0,stat_points:0,speed:10,updated_at:new Date().toISOString()};const freshWorld={version:40,bossDefeats:{},defeatedBossIds:[]};if(v57Mode&&!guestMode){
+ try{const response=await v57Api("POST","/api/secure-saves/"+v561Slot+"/new",{classId:cls,name:fresh.username,revision:v57Revisions[v561Slot]});
+  v57Revisions[v561Slot]=response.revision;
+  Object.assign(fresh,response.data);
+ }catch(e){return notice("Secure New Game failed: "+e.message,true)}
+ }else if(v561Slot!==1){await v561PersistExtra(v561Slot,{...fresh,world_progress:freshWorld})}else if(guestMode){v561WriteLocal(1,{...fresh,world_progress:freshWorld})}else{let {error}=await supabaseClient.from("profiles").upsert({...fresh,world_progress:freshWorld},{onConflict:"id"});
  if(error&&/world_progress|schema cache|column/i.test(error.message||""))({error}=await supabaseClient.from("profiles").upsert(fresh,{onConflict:"id"}));
  if(error)return notice("Could not reset save: "+error.message,true)}v40CacheWorld(freshWorld);savedCharacter={...fresh,world_progress:freshWorld};v561Slots[v561Slot-1]=savedCharacter;v561Render();selectedGameMode="new";$("continueGame").classList.remove("selected");$("newGame").classList.add("selected");$("create").disabled=false;$("join").disabled=false;$("saveMode").textContent="NEW GAME selected · Level 1, fresh stats, starting gear and supplies.";notice("New Game save created. Your old hero progress has been reset.");};
 /* Character appearance is stored locally, outside the existing Supabase schema;
@@ -171,8 +218,8 @@ document.querySelectorAll("[data-hero-class]").forEach(b=>b.onclick=()=>{$("clas
 document.querySelectorAll('input[name="heroGender"]').forEach(b=>b.onchange=()=>{v30UpdatePreview();v30SaveGender()});
 $("classId").onchange=()=>{classInfo();v30UpdatePreview()};
 v30UpdatePreview();$("guestPlay").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));guestMode=true;currentUser=null;showAccount({email:"Guest Player"});$("accountEmail").textContent="GUEST · LOCAL SAVE";$("signup").hidden=true;$("signin").hidden=true;$("email").hidden=true;$("password").hidden=true;$("guestPlay").hidden=true;await prepare();authNotice("Guest mode ready. Friends can join your room with its code.")};
-$("create").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("createRoom",{name:$("name").value,classId:$("classId").value,gender:v30SelectedGender()});if(r.ok){v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
-$("join").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value,classId:$("classId").value,gender:v30SelectedGender()});if(r.ok){v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
+$("create").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("createRoom",{name:$("name").value,classId:$("classId").value,gender:v30SelectedGender(),guest:guestMode});if(r.ok){v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
+$("join").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value,classId:$("classId").value,gender:v30SelectedGender(),guest:guestMode});if(r.ok){v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
 function syncMusicUI(on){["musicToggle","musicQuick"].forEach(id=>{const b=$(id);if(!b)return;b.textContent="♫ MUSIC · "+(on?"ON":"OFF");b.classList.toggle("music-on",on);b.setAttribute("aria-pressed",String(on))})}function toggleMusic(){const on=window.SoulboundAudio.setMusic(!window.SoulboundAudio.musicOn);syncMusicUI(on)}$("musicToggle").onclick=toggleMusic;$("musicQuick").onclick=toggleMusic;$("musicVolume").oninput=e=>{window.SoulboundAudio.setVolume(Number(e.target.value)/100);if($("gameMusicVolume"))$("gameMusicVolume").value=e.target.value};
 const sfxSlider=$("sfxVolume");
 if(sfxSlider)sfxSlider.oninput=e=>{window.SoulboundAudio.setSfxVolume(Number(e.target.value)/100);if($("gameSfxVolume"))$("gameSfxVolume").value=e.target.value};
