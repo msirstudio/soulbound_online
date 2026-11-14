@@ -79,6 +79,7 @@ function v561Render(){
 function v561Select(n){
  if(v561SlotBusy||n<1||n>3)return;
  v561Slot=n;savedCharacter=v561Slots[n-1]||{};
+ if(savedCharacter.class_id)savedCharacter.world_progress=v40MergeWorld(savedCharacter.world_progress,v40SavedWorld());
  selectedGameMode=null;restoreComplete=false;
  $("continueGame").classList.remove("selected");$("newGame").classList.remove("selected");
  $("classId").disabled=false;$("create").disabled=true;$("join").disabled=true;
@@ -123,6 +124,7 @@ async function saveProfile(p){if(!restoreComplete||!p)return;const data={usernam
 async function prepare(){
  try{
   await v561Load();
+  window.SoulboundAudio?.setRegion("city",true);
   authNotice("Save Slots loaded. Select your hero, then Continue or New Game.");
   window.SoulboundUIV41?.onPrepared();
  }catch(e){authNotice("Could not load Save Slots: "+e.message,true)}
