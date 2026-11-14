@@ -7,7 +7,7 @@ test("foundation audit detects version and save safety invariants without claimi
  const result=audit();
  assert.equal(result.pass,true,result.failed.join("; "));
  assert.ok(result.passed.length>=10);
- assert.ok(result.risks.some(r=>r.includes("P0 OPEN: restoreCharacter")));
+ assert.ok(result.risks.some(r=>r.includes("P0 OPEN: legacy restoreCharacter")));
  assert.equal(result.version,"0.57.0");
 });
 test("slot-specific local recovery snapshots never include account secrets",()=>{
