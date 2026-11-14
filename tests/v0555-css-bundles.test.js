@@ -12,9 +12,9 @@ test("CSS bundles contain the complete original source styles in unchanged order
 test("Game loads bundled CSS and final UI override without double-loading sources",()=>{
  const html=fs.readFileSync(path.join(root,"index.html"),"utf8");
  const links=[...html.matchAll(/<link rel="stylesheet" href="([^"]+)">/g)].map(m=>m[1]);
- assert.equal(links.length,21);
+ assert.equal(links.length,22);
  for(const dest of Object.keys(bundles))assert.equal(links.filter(x=>x.split("?")[0]===dest).length,1,dest);
  for(const file of Object.values(bundles).flat())assert.ok(!links.some(x=>x.split("?")[0]===file),"Original CSS still linked: "+file);
- const expected=["css-legacy-v0555.css?v=0.55.5","v040.css","v041.css","css-hud-v0555.css?v=0.55.5","v045.css","v046-atlas.css","v047-city.css","v048-city.css","v0482-title-cover.css","v0483-camp-log.css","v0484-audio-boss-log.css","v0485-character-overview.css","css-combat-v0555.css?v=0.55.5","v0551-index-status-boss.css","v0552-elemental.css?v=0.55.3","v0557-compact-battle.css?v=0.55.7","v0559-header-audio.css?v=0.55.9","v0560-combat-pacing.css?v=0.56.0","v0561-ui.css?v=0.56.1","v0562-encounters.css?v=0.56.2","v0563-rebalance.css?v=0.56.3"];
+ const expected=["css-legacy-v0555.css?v=0.55.5","v040.css","v041.css","css-hud-v0555.css?v=0.55.5","v045.css","v046-atlas.css","v047-city.css","v048-city.css","v0482-title-cover.css","v0483-camp-log.css","v0484-audio-boss-log.css","v0485-character-overview.css","css-combat-v0555.css?v=0.55.5","v0551-index-status-boss.css","v0552-elemental.css?v=0.55.3","v0557-compact-battle.css?v=0.55.7","v0559-header-audio.css?v=0.55.9","v0560-combat-pacing.css?v=0.56.0","v0561-ui.css?v=0.56.1","v0562-encounters.css?v=0.56.2","v0563-rebalance.css?v=0.56.3","v0564-foundation.css?v=0.56.4"];
  assert.deepEqual(links,expected,"Cascade order must not change");
 });
