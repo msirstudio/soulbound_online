@@ -15,7 +15,7 @@ test("Normal Strike monster intent is hidden without removing ability to warn fo
 test("Header is larger and Audio exists only in dedicated row BELOW command dock",()=>{
  const banner=html.indexOf('class="roomline panel"');
  const dock=html.indexOf('class="v22-command-dock"');
- const row=html.indexOf('class="v0559-audio-row"');
+ const row=html.indexOf('class="loadout-tools"');
  const layout=html.indexOf('class="game-layout"');
  assert.ok(banner>=0&&banner<dock&&dock<row&&row<layout);
  assert.ok(html.slice(row,layout).includes('id="audioSettingsToggle"'));
@@ -24,5 +24,5 @@ test("Header is larger and Audio exists only in dedicated row BELOW command dock
  assert.ok(css.includes('min-height:54px!important'));
  assert.ok(css.includes('bottom:calc(100% + 8px)!important'));
  assert.ok(html.includes('v0559-header-audio.css?v=0.55.9'));
- assert.ok(html.includes('game.js?v=0.56.0'));
+ assert.ok(html.includes('game.js?v=0.56.1'));
 });
