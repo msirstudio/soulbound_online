@@ -3,6 +3,7 @@
  * Combat state is attached to live room/character objects. No schema changes.
  * Only the Void Reaper (stage 35) and Eclipse Sovereign (stage 40) use Phase 2.
  */
+const formulas=require("./combat/formulas");
 const PHASE_TWO_STAGES=Object.freeze([35,40]);
 const BOSS_SPECIALS=Object.freeze({
  cursed_wilds:{name:"Briarstorm",scope:"all",element:"nature",power:.76,effect:"bleed",chance:.55},
@@ -111,16 +112,14 @@ function hitTarget(r,p,move,ctx){
  const elemental=ctx.elementDamageMultiplier?ctx.elementDamageMultiplier(move.element,p,m):1;
  // Diminishing-return armour: high DEF remains valuable, but cannot nullify boss hits.
  // DEF 77 now mitigates ~39% of an incoming hit rather than subtracting all 77.
- const armor=Math.max(0,Number(p.def)||0);
- const mitigation=100/(100+armor*.85);
- const raw=Math.max(1,Math.round(m.atk*(move.power||1)*enemyWeak*elemental*mitigation));
+ const raw=formulas.enemyRaw({attack:m.atk,power:move.power||1,debuffMultiplier:enemyWeak,elementMultiplier:elemental,defense:p.def});
  const foodGuard=p.foodBuffs?.def>0?.8:1;
  const classReduction=p.classPath==="knight"?.9:p.classPath==="guardian"?.88:1;
  const reduction=(p.damageReductionTurns>0?.8:1)*classReduction;
  const race=ctx.raceById?.(p.raceId)||{};
  const ward=r.partyWardTurns>0?1-max(r.partyWardReduction||0,0,.6):1;
  const guardReduction=p.guardTurns>0?.55:1;
- const hit=Math.max(1,Math.floor(raw*reduction*foodGuard*(1-(race.reduce||0))*ward*guardReduction));
+ const hit=formulas.enemyFinal({raw,reduction,foodGuard,raceReduction:race.reduce||0,partyWard:ward,guardReduction});
  p.hp=Math.max(0,p.hp-hit);
  ctx.say(r,m.name+" uses "+move.name+" against "+p.name+" for "+hit+" damage.");
  if(p.foodBuffs?.def>0)p.foodBuffs.def--;
