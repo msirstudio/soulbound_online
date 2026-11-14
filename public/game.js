@@ -177,7 +177,8 @@ $("arena").className="arena panel "+(s.scene?.css||"wilds");$("arena").dataset.v
 $("bossTag").textContent=s.monster?.miniBoss?"MINI BOSS":"MAIN BOSS"+(s.monster?.phase===2?" · PHASE 2":"");
 $("bossTag").classList.toggle("v0484-mini",!!s.monster?.miniBoss);
 $("bossTag").classList.toggle("v0484-boss",!!s.monster?.boss);const mh=s.monster?.hp||0,mm=s.monster?.maxHp||1;$("monsterHp").style.width=(mh/mm*100)+"%";$("monsterHpText").textContent=mh+" / "+mm+" HP";
-const combatIntent=s.status==="battle"&&(s.monster?.boss||s.monster?.miniBoss)&&s.monster?.intent;
+const rawCombatIntent=s.status==="battle"&&(s.monster?.boss||s.monster?.miniBoss)&&s.monster?.intent;
+const combatIntent=rawCombatIntent&&String(rawCombatIntent.name||"").trim().toLowerCase()!=="strike"?rawCombatIntent:null;
 const activeStagger=s.status==="battle"&&!!(s.monster?.boss||s.monster?.miniBoss);
 $("v055Stagger").hidden=!activeStagger;
 if(activeStagger){
