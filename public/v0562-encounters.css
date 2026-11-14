@@ -1,0 +1,22 @@
+/* v0.56.2 · Individual target cards; miniatures are real server enemies. */
+#game .monster-side{position:relative}
+#game .v562-enemy-choices:not([hidden]){
+ display:flex;align-items:stretch;justify-content:center;gap:5px;
+ max-width:100%;overflow-x:auto;overscroll-behavior:contain;
+ padding:4px 1px;margin:2px 0;
+}
+#game .v562-target{
+ display:flex;align-items:center;gap:5px;flex:0 0 auto;
+ max-width:155px;min-width:100px;min-height:45px;
+ padding:4px 6px!important;border:1px solid #84633f!important;
+ border-radius:5px;background:#161824e8!important;text-align:left;
+ color:#ecd6ab!important;font:10px Georgia,serif!important;
+}
+#game .v562-target.selected{outline:2px solid #ffca79!important;background:#33283a!important}
+#game .v562-target img{width:31px;height:33px;object-fit:contain;image-rendering:pixelated}
+#game .v562-target span{display:grid;gap:2px;min-width:0;overflow:hidden}
+#game .v562-target b{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#game .v562-target small{font-size:9px;color:#dbc89f}
+#game .v562-health{height:4px;background:#463943;border-radius:3px;overflow:hidden}
+#game .v562-health i{height:100%;display:block;background:#bd394d}
+@media(max-width:700px){#game .v562-target{min-width:80px;max-width:118px;padding:3px!important}#game .v562-target img{width:24px;height:28px}}
