@@ -63,7 +63,7 @@ app.get("/api/index",(_,res)=>{
   races:races.map(({id,name,rarity,icon,weight,passive,buffs})=>({id,name,rarity:rarity==="legend"?"legendary":rarity,icon,chance:weight,passive,buffs})),
   monsters:enemies,items:[...goods,...drops],zones:world.regions.map(r=>({name:r.name,css:r.css,hint:r.hint,stages:r.firstStage+"–"+r.bossStage}))});
 });
-function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,enemies:pack.publicEnemies(r),partyWardReduction:r.partyWardReduction||0,enemyWindup:!!r.pendingEnemy,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,partyWardTurns:r.partyWardTurns||0,shopCategory:r.shopCategory||null,shopOrigin:r.shopOrigin||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),log:r.log.slice(-40),chat:(r.chat||[]).slice(-40)}}
+function publicRoom(r){return{code:r.code,eventSeq:r.eventSeq||0,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,enemies:pack.publicEnemies(r),partyWardReduction:r.partyWardReduction||0,enemyWindup:!!r.pendingEnemy,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,partyWardTurns:r.partyWardTurns||0,shopCategory:r.shopCategory||null,shopOrigin:r.shopOrigin||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),log:r.log.slice(-40),chat:(r.chat||[]).slice(-40)}}
 function emit(r){
  r.eventSeq=(r.eventSeq||0)+1;
  io.to(r.code).emit("state",publicRoom(r));
@@ -183,7 +183,18 @@ io.on("connection",s=>{
   if(members.some(p=>p._secure?.blocked))return cb({ok:false,error:"A saved character has a conflict. Reload before battling."});
  }
  if([...r.players.values()].some(p=>!world.canEnter(p.level,r.regionIndex)))return cb({ok:false,error:"A party member does not meet this region\u0027s level requirement."});r.stage=world.regions[r.regionIndex].firstStage;start(r);say(r,"The party sets out into "+world.regions[r.regionIndex].name+".");emit(r);cb({ok:true})});
- s.on("action",({type,targetId}={},cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a room first."});if(!valid(s,r))return cb({ok:false,error:"Wait for your turn."});
+ s.on("action",({type,targetId,requestId}={},cb=()=>{})=>{
+ const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a room first."});
+ const validId=typeof requestId==="string"&&/^[a-zA-Z0-9_-]{8,96}$/.test(requestId);
+ if(secureStore.enabled&&!validId)return cb({ok:false,error:"Action identifier required; please refresh."});
+ if(validId){
+  const ids=r.actionIds||(r.actionIds=new Set()),key=s.id+":"+requestId;
+  if(ids.has(key))return cb({ok:false,error:"Duplicate action ignored."});
+  if(ids.size>512)ids.clear();
+  ids.add(key);
+ }
+ if(!valid(s,r))return cb({ok:false,error:"Wait for your turn."});
+ audit("combat_action",{room:r.code,stage:r.stage,eventSeq:r.eventSeq||0,type});
  const acting=r.players.get(s.id);
  const aoe=(type==="skill2"&&(acting?.classId==="mage"||acting?.classId==="swordsman"))
    ||(type==="skill3"&&acting?.classId==="mage")
