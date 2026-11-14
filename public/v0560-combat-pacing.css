@@ -1,0 +1,29 @@
+/* SOULBOUND v0.56.0 — battle presentation beats (no combat math). */
+#game #monsterSprite{will-change:transform;transform-origin:50% 82%}
+#game #monsterSprite.v0560-enemy-attacking{
+ animation:v0560EnemyLunge 650ms cubic-bezier(.2,.75,.2,1) both!important;
+ filter:drop-shadow(0 8px 6px #000a) drop-shadow(0 0 13px #ffe39b8c)!important;
+}
+@keyframes v0560EnemyLunge{
+ 0%,100%{transform:translateX(0) scale(1)}
+ 20%{transform:translateX(-6px) scale(1.04,.97)}
+ 52%{transform:translateX(-48px) scale(1.14,1.04)}
+ 70%{transform:translateX(-36px) scale(1.09)}
+}
+#game .hero-figure.v0560-hero-hurt .v311-hero,
+#game .hero-figure.v0560-hero-hurt>.sprite-img{
+ animation:v0560HeroHurt 780ms ease-out both!important;
+ transform-origin:50% 80%;
+}
+@keyframes v0560HeroHurt{
+ 0%,100%{transform:translateX(0);filter:brightness(1)}
+ 16%{transform:translateX(-7px) rotate(-3deg);filter:brightness(1.7)}
+ 35%{transform:translateX(-11px) rotate(-4deg);filter:brightness(1.3)}
+ 60%{transform:translateX(-4px);filter:brightness(1.1)}
+}
+#game .v311-hero.v311-hit .v311-pose{filter:drop-shadow(0 3px 6px #0009) brightness(1.35)!important}
+@media(prefers-reduced-motion:reduce){
+ #game #monsterSprite.v0560-enemy-attacking,
+ #game .hero-figure.v0560-hero-hurt .v311-hero,
+ #game .hero-figure.v0560-hero-hurt>.sprite-img{animation:none!important}
+}

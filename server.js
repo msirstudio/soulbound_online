@@ -1,6 +1,6 @@
 const express=require("express"),http=require("http"),path=require("path");
 const {Server}=require("socket.io");const loot=require("./loot-v034");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
-app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.55.2"}));
+app.use(express.static(path.join(__dirname,"public")));app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:"0.56.0"}));
 const world=require("./world-v040");const combat=require("./combat-v055");const rooms=new Map();
 const normal=[{name:"Mossfang Wolf",sprite:"mossfang-wolf",icon:"🐺",hp:90,atk:12,def:2,xp:35,gold:18},{name:"Goblin Raider",sprite:"goblin-raider",icon:"👺",hp:115,atk:15,def:4,xp:45,gold:24},{name:"Grave Beetle",sprite:"grave-beetle",icon:"🪲",hp:140,atk:17,def:5,xp:55,gold:30},{name:"Cursed Knight",sprite:"cursed-knight",icon:"💀",hp:165,atk:19,def:7,xp:65,gold:36},{name:"Wisp Stalker",sprite:"wisp-stalker",icon:"👻",hp:185,atk:21,def:8,xp:75,gold:42}];
 const bosses=[{name:"The Briarfang Alpha",sprite:"boss-briarfang",icon:"🐺",hp:260,atk:22,def:7,xp:130,gold:90},{name:"Dreadforge Champion",sprite:"boss-dreadforge",icon:"🛡️",hp:390,atk:29,def:10,xp:180,gold:125},{name:"Ember Tyrant",sprite:"boss-ember-tyrant",icon:"🐉",hp:540,atk:36,def:13,xp:240,gold:165},{name:"The Hollow Oracle",sprite:"boss-hollow-oracle",icon:"🔮",hp:690,atk:42,def:16,xp:300,gold:210},{name:"Glacier Warden",sprite:"boss-glacier-warden",icon:"🧊",hp:850,atk:48,def:19,xp:370,gold:260},{name:"Ancient World-Eater",sprite:"boss-world-eater",icon:"🗿",hp:1030,atk:55,def:22,xp:450,gold:320},{name:"The Void Reaper",sprite:"boss-void-reaper",icon:"☠️",hp:1240,atk:62,def:25,xp:540,gold:390},{name:"Eclipse Sovereign",sprite:"boss-eclipse-sovereign",icon:"👑",hp:1500,atk:72,def:29,xp:700,gold:500}];
@@ -51,19 +51,29 @@ app.get("/api/index",(_,res)=>{
    enemy.loot="Each listed item is rolled independently for each player. Several items may drop on the same victory; bag capacity still applies.";}
  });
  res.set("Cache-Control","no-store, max-age=0");
- res.json({version:"0.55.2",title:"SOULBOUND ADVENTURE INDEX",stageCount:world.totalStages,
+ res.json({version:"0.56.0",title:"SOULBOUND ADVENTURE INDEX",stageCount:world.totalStages,
   categories:["bosses","monsters","races","weapons","armor","accessories","food","consumables","elements","statuses","combat"],
   codex:combat.codexData(),
   bossDropTables,miniDropTables,lootRule:"Each possible item has its own independent drop roll based on rarity. Multiple items may drop; inventory remains limited to 40 unequipped pieces.",
   races:races.map(({id,name,rarity,icon,weight,passive,buffs})=>({id,name,rarity:rarity==="legend"?"legendary":rarity,icon,chance:weight,passive,buffs})),
   monsters:enemies,items:[...goods,...drops],zones:world.regions.map(r=>({name:r.name,css:r.css,hint:r.hint,stages:r.firstStage+"–"+r.bossStage}))});
 });
-function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,partyWardReduction:r.partyWardReduction||0,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,partyWardTurns:r.partyWardTurns||0,shopCategory:r.shopCategory||null,shopOrigin:r.shopOrigin||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),log:r.log.slice(-40),chat:(r.chat||[]).slice(-40)}}
+function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,partyWardReduction:r.partyWardReduction||0,enemyWindup:!!r.pendingEnemy,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,partyWardTurns:r.partyWardTurns||0,shopCategory:r.shopCategory||null,shopOrigin:r.shopOrigin||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),log:r.log.slice(-40),chat:(r.chat||[]).slice(-40)}}
 function emit(r){io.to(r.code).emit("state",publicRoom(r))}function say(r,m){r.log.push(m);if(r.log.length>40)r.log.shift()}
 function createRoom(code){const r={code,stage:1,regionIndex:0,monster:null,players:new Map(),turnIndex:0,status:"city",log:[],chat:[]};rooms.set(code,r);return r}
 function findRoom(s){return [...rooms.values()].find(r=>r.players.has(s.id))}function current(r){const a=[...r.players.values()];return a.length?a[r.turnIndex%a.length]:null}function alive(r){return [...r.players.values()].filter(p=>p.hp>0)}
 function player(id,name,c="swordsman",gender="male"){const mage=c==="mage",tank=c==="tank";return{id,name:cleanName(name),gender:gender==="female"?"female":"male",inventory:[],weaponItem:null,armorItem:null,foodItems:{roast_meat:0,herb_stew:0,mana_tart:0},foodBuffs:{atk:0,def:0,skill:0},classId:tank?"tank":mage?"mage":"swordsman",className:tank?"Tank":mage?"Mage":"Swordsman",hp:tank?180:mage?120:130,maxHp:tank?180:mage?120:130,mp:tank?55:mage?65:40,maxMp:tank?55:mage?65:40,level:1,xp:0,gold:80,potions:3,manaPotions:2,smallHealth:3,mediumHealth:0,largeHealth:0,smallMana:2,mediumMana:0,largeMana:0,classPath:null,tauntTurns:0,damageAmpTurns:0,damageReductionTurns:0,atk:tank?16:mage?25:22,def:tank?16:mage?8:10,weapon:tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",armor:tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",raceId:"human",racePoints:0,raceName:"Human",raceRarity:"common",racePassive:races[0].passive,raceBuffs:races[0].buffs,strength:0,vitality:0,intelligence:0,agility:0,statPoints:0,speed:10,cooldowns:{},worldProgress:world.normalizeProgress(null)}}
 function monsterStrike(r){combat.monsterStrike(r,{say,raceById,random:Math.random})}
+function enemyCounterAfterBeat(r){
+ const token={stage:r.stage,monster:r.monster};
+ r.pendingEnemy=token;
+ setTimeout(()=>{
+  if(r.pendingEnemy!==token)return;
+  r.pendingEnemy=null;
+  if(r.status!=="battle"||r.stage!==token.stage||r.monster!==token.monster)return;
+  monsterStrike(r);skipFallenTurn(r);combat.applyDefeatPenalty(r,say);emit(r);
+ },760);
+}
 function skipFallenTurn(r){if(r.status!=="battle")return;const players=[...r.players.values()];if(!players.length||!alive(r).length)return;let i=0;while(current(r)?.hp<=0&&i<players.length){r.turnIndex=(r.turnIndex+1)%players.length;i++}if(i>0)say(r,"Fallen party members are skipped until victory or defeat.")}
 function start(r){r.monster=encounter(r.stage);r.monster.stage=r.stage;r.status="battle";r.shopOrigin=null;r.shopCategory=null;
  // Scale with current party size at battle start; preserve unchanged reward XP/GOLD.
@@ -78,7 +88,7 @@ function start(r){r.monster=encounter(r.stage);r.monster.stage=r.stage;r.status=
  say(r,"⚔ Party size "+partySize+" · enemy HP x"+r.monster.difficulty.hpScale+" · ATK x"+r.monster.difficulty.atkScale+".");r.players=new Map([...r.players.entries()].sort((a,b)=>(b[1].speed||10)-(a[1].speed||10)));r.turnIndex=0;for(const p of r.players.values()){p.hp=p.maxHp;p.mp=p.maxMp;p.cooldowns={};p.statusEffects=[];p.guardTurns=0;p._effectTurn=0;p._combatAttackMultiplier=1;p.controlImmunityTurns=0;p.perfectGuard=false;}say(r,r.monster.boss?"BOSS ENCOUNTER: "+r.monster.name+"!":"Stage "+r.stage+": "+r.monster.name+" approaches!");r.monster.speed=8+Math.floor((r.stage-1)/4)*2;const fastest=Math.max(...[...r.players.values()].map(p=>p.speed||10));if(r.monster.speed>fastest){say(r,"⚡ "+r.monster.name+" is faster and strikes first!");monsterStrike(r);skipFallenTurn(r)}}
 function nextTurn(r){const a=[...r.players.values()],living=alive(r);if(!living.length){r.status="defeat";say(r,"The party has fallen.");return}let tries=0;do{r.turnIndex=(r.turnIndex+1)%a.length;tries++}while(a[r.turnIndex].hp<=0&&tries<=a.length);r.turnSerial=(r.turnSerial||0)+1;const next=a[r.turnIndex];if(next?.cooldowns)for(const k of Object.keys(next.cooldowns))next.cooldowns[k]=Math.max(0,next.cooldowns[k]-1)}
 function finish(r){const m=r.monster;r.status=r.stage%5===0?"regionClear":"victory";for(const p of r.players.values()){if(p.hp<=0){p.hp=Math.max(1,Math.ceil(p.maxHp*.3));p.mp=Math.ceil(p.maxMp*.2);say(r,p.name+" is revived after the victory with 30% HP and 20% MP.")}p.xp+=m.xp;p.gold+=m.gold;if(m.boss){p.worldProgress=world.markBossClear(p.worldProgress,m.regionId);p.racePoints=(p.racePoints||0)+1;say(r,p.name+" earned 1 Race Point for defeating a boss!");}if(m.boss||m.miniBoss)loot.dropEncounterLoot(p,r.stage,msg=>say(r,msg),world.regionForStage(r.stage).index+1,!!m.miniBoss);if(p.raceId==="human")p.xp+=Math.ceil(m.xp*.05);if(p.raceId==="sylvan")p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*.03));while(p.xp>=p.level*100){p.xp-=p.level*100;p.level++;p.statPoints=(p.statPoints||0)+3;p.maxHp+=p.classId==="tank"?22:p.classId==="swordsman"?16:10;p.maxMp+=p.classId==="mage"?12:p.classId==="tank"?8:6;p.atk+=p.classId==="mage"?3:p.classId==="tank"?2:4;p.def+=p.classId==="tank"?4:p.classId==="swordsman"?2:1;p.hp=p.maxHp;p.mp=p.maxMp;say(r,p.name+" reached level "+p.level+"! +3 STAT POINTS. Allocate them in the character panel.")}}say(r,"Victory! "+m.name+" defeated. +"+m.xp+" EXP · +"+m.gold+" GOLD.");if(r.stage===40)say(r,"THE ECLIPSE SOVEREIGN HAS FALLEN. THE KINGDOM IS FREE! All regions can be replayed.")}
-function valid(s,r){const p=r.players.get(s.id);return r.status==="battle"&&p&&p.hp>0&&current(r)?.id===s.id}
+function valid(s,r){const p=r.players.get(s.id);return r.status==="battle"&&!r.pendingEnemy&&p&&p.hp>0&&current(r)?.id===s.id}
 io.on("connection",s=>{
  s.on("createRoom",({name,classId,gender}={},cb=()=>{})=>{const code=Math.random().toString(36).slice(2,7).toUpperCase(),r=createRoom(code);r.players.set(s.id,player(s.id,name,classId,gender));s.join(code);say(r,cleanName(name)+" founded the party.");emit(r);cb({ok:true,code})});
  s.on("joinRoom",({code,name,classId,gender}={},cb=()=>{})=>{code=String(code||"").trim().toUpperCase();const r=rooms.get(code);if(!r)return cb({ok:false,error:"Room not found. Check the code."});if(r.players.size>=4)return cb({ok:false,error:"Party full (maximum 4)."});if(r.status!=="city")return cb({ok:false,error:"Adventure already started."});const p=player(s.id,name,classId,gender);r.players.set(s.id,p);s.join(code);say(r,p.name+" joined the party.");emit(r);cb({ok:true,code})});
@@ -130,7 +140,7 @@ io.on("connection",s=>{
  if(tick.skip){
   const previousIndex=r.turnIndex;
   if(alive(r).length)nextTurn(r);else{r.status="defeat";say(r,"The party has fallen.")}
-  if(r.status==="battle"&&r.turnIndex<=previousIndex)monsterStrike(r);
+  if(r.status==="battle"&&r.turnIndex<=previousIndex){enemyCounterAfterBeat(r);emit(r);return cb({ok:true,skipped:true});}
   skipFallenTurn(r);combat.applyDefeatPenalty(r,say);emit(r);return cb({ok:true,skipped:true});
  }
  let d=0;const race=raceById(p.raceId),lowHp=p.hp/p.maxHp<=.5,pathDamage=p.classPath==="berserker"&&lowHp?1.1:1,foodAttack=p.foodBuffs?.atk>0?1.15:1,damageBonus=((p.raceId==="orc"&&lowHp)?1.08:1)*pathDamage*foodAttack*(p._combatAttackMultiplier||1);
@@ -151,7 +161,7 @@ io.on("connection",s=>{
  // can be interrupted. The boss resists subsequent interrupts briefly.
  if(["attack","skill","skill2","skill3","skill4","skill5","break"].includes(type)&&m.hp>0)
   combat.addStagger(r,p,type,combat.skillElement(p,type),say);
- if(m.hp<=0){finish(r);emit(r);return cb({ok:true})}combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status==="battle"&&r.turnIndex<=previousIndex)monsterStrike(r);skipFallenTurn(r);emit(r);cb({ok:true});});
+ if(m.hp<=0){finish(r);emit(r);return cb({ok:true})}combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status==="battle"&&r.turnIndex<=previousIndex){enemyCounterAfterBeat(r);emit(r);return cb({ok:true});}skipFallenTurn(r);emit(r);cb({ok:true});});
  s.on("openShop",({category}={},cb=()=>{})=>{
   const r=findRoom(s);
   if(!r)return cb({ok:false,error:"Room not found."});
