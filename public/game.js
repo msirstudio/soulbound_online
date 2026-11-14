@@ -324,7 +324,7 @@ $("bossTag").classList.toggle("v0484-boss",!!s.monster?.boss);const mh=s.monster
 const v562Alive=(s.enemies||[]).filter(e=>e.hp>0);
 if(!v562Alive.some(e=>e.enemyId===v562TargetId))v562TargetId=s.monster?.enemyId||v562Alive[0]?.enemyId||null;
 const v562Holder=$("v562EnemyChoices");
-v562Holder.hidden=v562Alive.length<=1||s.status!=="battle";
+v562Holder.hidden=true; // Large clickable enemy sprites replace thumbnail selectors.
 v562Holder.innerHTML=v562Holder.hidden?"":v562Alive.map(e=>{
  const isTarget=e.enemyId===v562TargetId,ratio=Math.max(0,Math.min(100,100*e.hp/Math.max(1,e.maxHp)));
  return '<button type="button" class="v562-target'+(isTarget?' selected':'')+'" data-v562-id="'+esc(e.enemyId)+'" aria-pressed="'+isTarget+'" title="Attack '+esc(e.name)+'">'+
@@ -336,6 +336,23 @@ v562Holder.querySelectorAll("[data-v562-id]").forEach(b=>b.onclick=()=>{
  v562Holder.querySelectorAll(".v562-target").forEach(x=>{
   const selected=x.dataset.v562Id===v562TargetId;
   x.classList.toggle("selected",selected);x.setAttribute("aria-pressed",String(selected));
+ });
+});
+const v563Field=$("v563EnemyField"),v563Multiple=v562Alive.length>1&&s.status==="battle";
+$("v563MonsterSide").classList.toggle("v563-multi",v563Multiple);
+v563Field.hidden=!v563Multiple;
+v563Field.innerHTML=v563Multiple?v562Alive.map((e,i)=>{
+ const selected=e.enemyId===v562TargetId,ratio=Math.max(0,Math.min(100,100*e.hp/Math.max(1,e.maxHp)));
+ return '<button class="v563-foe'+(selected?' selected':'')+'" type="button" data-v563-target="'+esc(e.enemyId)+'" aria-pressed="'+selected+'" aria-label="Attack '+esc(e.name)+'" title="Target '+esc(e.name)+'">'+
+ '<span class="v563-foe-name">'+esc(e.name)+'</span>'+
+ '<img class="v563-foe-sprite" src="assets/monsters/'+esc(e.sprite||"mossfang-wolf")+'.svg" alt="'+esc(e.name)+'" draggable="false">'+
+ '<span class="v563-foe-hp"><span class="v563-foe-meter"><i style="width:'+ratio+'%"></i></span>'+e.hp+' / '+e.maxHp+'</span></button>';
+}).join(""):"";
+v563Field.querySelectorAll("[data-v563-target]").forEach(btn=>btn.onclick=()=>{
+ v562TargetId=btn.dataset.v563Target;
+ v563Field.querySelectorAll("[data-v563-target]").forEach(other=>{
+  const selected=other.dataset.v563Target===v562TargetId;
+  other.classList.toggle("selected",selected);other.setAttribute("aria-pressed",String(selected));
  });
 });
 const rawCombatIntent=s.status==="battle"&&(s.monster?.boss||s.monster?.miniBoss)&&s.monster?.intent;
