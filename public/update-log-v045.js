@@ -2,6 +2,14 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.57",date:"2026-11-14",title:"Secure Save Backend & Two-Digit Versions",notes:[
+  "Signed-in hero saves use a server-controlled table with revision checks after Secure Save mode is activated on Render.",
+  "Server verifies Supabase login tokens and restores server-owned Level, ATK, DEF, Gold, equipment and world progress rather than trusting the browser.",
+  "New Game, Delete, and Save Slots 1–3 use authenticated backend routes in Secure Save mode; Guest mode remains local-only.",
+  "The visible version is now two digits (0.57), while internal npm package semver stays 0.57.0.",
+  "This upgrade requires a SQL migration and server-only Supabase secrets; without those, legacy mode is still insecure.",
+  "Old Supabase tables stay untouched for rollback; browser export/backups remain available."
+ ]},
  {version:"0.56.4",date:"2026-11-14",title:"System Foundation — Safer Saves & Versioning",notes:[
   "Added EXPORT HERO and LAST BACKUP buttons to the three character save slots. JSON downloads are user-controlled and exclude account credentials.",
   "Before deleting or replacing an existing hero, save an emergency backup in browser storage; if storage is full, cancel the destructive action.",
