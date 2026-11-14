@@ -147,7 +147,69 @@ document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{const 
 document.querySelectorAll("[data-stat]").forEach(b=>b.onclick=async()=>{const r=await call("allocateStat",{stat:b.dataset.stat});if(!r.ok)notice(r.error,true)});
 $("shopCategories")?.querySelectorAll("[data-shop-category]").forEach(b=>b.onclick=()=>{if(cityShopScope&&!cityShopScope.includes(b.dataset.shopCategory))return;activeShopCategory=b.dataset.shopCategory;if(gameState)render()});$("chatSend").onclick=sendChat;$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat()});function sendChat(){const input=$("chatInput"),message=input.value.trim();if(!message)return;call("partyChat",{message}).then(r=>{if(!r.ok)notice(r.error,true);else input.value=""})};
 socket.on("connect",()=>{myId=socket.id});socket.on("disconnect",()=>{$("status").textContent="Connection lost. Refresh to reconnect."});
-socket.on("state",s=>{const last=gameState;gameState=s;render();if(last?.players&&s?.players){for(const p of s.players){const old=last.players.find(x=>x.id===p.id);if(old&&Number.isFinite(Number(p.hp))&&Number(p.hp)<Number(old.hp))window.SoulboundSprite?.hit?.(p.id);}}window.SoulboundRewardV411?.show(last,s,myId);if(restoreComplete){
+
+// v0.56.0 presentation-only combat beat choreography.
+// The server remains authoritative and sends one complete state update.
+// Show its events in sequence so the player can see the enemy counterattack.
+const v0560Timers=new Set();
+let v0560BattleKey="";
+let v0560BeatEnd=0;
+const v0560After=(ms,fn)=>{
+ const timer=setTimeout(()=>{v0560Timers.delete(timer);fn()},ms);
+ v0560Timers.add(timer);return timer;
+};
+function v0560Clear(){
+ for(const timer of v0560Timers)clearTimeout(timer);
+ v0560Timers.clear();document.getElementById("monsterSprite")?.classList.remove("v0560-enemy-attacking");
+ v0560BeatEnd=0;
+}
+function v0560AddedLog(previous,current){
+ const a=Array.isArray(previous)?previous:[],b=Array.isArray(current)?current:[];
+ for(let n=Math.min(a.length,b.length);n>0;n--){
+  if(a.slice(-n).every((line,i)=>line===b[i]))return b.slice(n);
+ }
+ return b.slice(Math.max(0,b.length-8));
+}
+function v0560OnState(last,s){
+ const key=s.status==="battle"&&s.monster?(s.code+"|"+s.stage+"|"+s.monster.name):"";
+ if(!key||key!==v0560BattleKey){
+  v0560Clear();v0560BattleKey=key;
+  if(!key||!last||last.status!=="battle"||last.stage!==s.stage)return;
+ }
+ if(!last||last.status!=="battle"||!Array.isArray(last.players)||!Array.isArray(s.players))return;
+ const newLog=v0560AddedLog(last.log,s.log),name=String(s.monster?.name||"");
+ const lost=s.players.filter(p=>{
+  const old=last.players.find(x=>x.id===p.id);
+  return old&&Number(p.hp)<Number(old.hp);
+ });
+ const enemyUsedMove=newLog.some(line=>name&&String(line).startsWith(name+" uses ")&&String(line).includes(" damage"));
+ const enemyAttacked=lost.length>0||enemyUsedMove;
+ if(!enemyAttacked)return;
+ // Delay the enemy lunge until the player's attack pose has been readable.
+ // If a second network state arrives, the next beat starts after the active one.
+ const now=performance.now(),start=Math.max(now+520,v0560BeatEnd);
+ v0560BeatEnd=start+1150;
+ v0560After(Math.max(0,start-now),()=>{
+  if(v0560BattleKey!==key)return;
+  const el=document.getElementById("monsterSprite");
+  if(!el)return;
+  el.classList.remove("v0560-enemy-attacking");void el.offsetWidth;
+  el.classList.add("v0560-enemy-attacking");
+  v0560After(660,()=>el.classList.remove("v0560-enemy-attacking"));
+ });
+ for(const p of lost){
+  v0560After(Math.max(0,start-now)+420,()=>{
+   if(v0560BattleKey!==key)return;
+   window.SoulboundSprite?.hit?.(p.id);
+   const figure=Array.from(document.querySelectorAll("#partySprites .hero-figure")).find(x=>x.querySelector(".v311-hero")?.dataset.v311Player===String(p.id));
+   if(!figure)return;
+   figure.classList.remove("v0560-hero-hurt");void figure.offsetWidth;
+   figure.classList.add("v0560-hero-hurt");
+   v0560After(780,()=>figure.classList.remove("v0560-hero-hurt"));
+  });
+ }
+}
+socket.on("state",s=>{const last=gameState;gameState=s;render();v0560OnState(last,s);window.SoulboundRewardV411?.show(last,s,myId);if(restoreComplete){
  const p=s.players.find(x=>x.id===myId);if(p){clearTimeout(saveTimer);
  const justCleared=s.status==="regionClear"&&last?.status!=="regionClear";
  if(justCleared)saveProfile(p);else saveTimer=setTimeout(()=>saveProfile(p),500)
