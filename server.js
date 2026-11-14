@@ -5,8 +5,16 @@ app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:APP
 const credential=req=>String(req.headers.authorization||"").replace(/^Bearer\s+/i,"");
 const endpoint=fn=>async(req,res)=>{try{const result=await fn(req);res.json(result)}catch(e){res.status(e.status||500).json({error:e.message&&e.status?e.message:"Save request failed"})}};
 if(secure.enabled)app.get("/api/secure-saves",endpoint(req=>secure.list(credential(req))));
-if(secure.enabled)app.post("/api/secure-saves/:slot/new",endpoint(req=>secure.newGame(credential(req),req.params.slot,req.body?.classId,req.body?.name,req.body?.revision??null)));
-if(secure.enabled)app.delete("/api/secure-saves/:slot",endpoint(req=>secure.remove(credential(req),req.params.slot,req.body?.revision)));
+if(secure.enabled)app.post("/api/secure-saves/:slot/new",endpoint(async req=>{
+ const token=credential(req),userId=await secure.authenticate(token);
+ if(secureQueue.isActive(userId,Number(req.params.slot))){const e=new Error("Leave the active game before replacing this slot.");e.status=409;throw e}
+ return secure.newGame(token,req.params.slot,req.body?.classId,req.body?.name,req.body?.revision??null);
+}));
+if(secure.enabled)app.delete("/api/secure-saves/:slot",endpoint(async req=>{
+ const token=credential(req),userId=await secure.authenticate(token);
+ if(secureQueue.isActive(userId,Number(req.params.slot))){const e=new Error("Leave the active game before deleting this slot.");e.status=409;throw e}
+ return secure.remove(token,req.params.slot,req.body?.revision);
+}));
 const verifiedCharacters=new Map();
 const secureQueue=secure.createQueue((error,claim)=>console.error("[SAVE-CONFLICT]",{slot:claim.slot,code:error.status||500,message:error.message}));
 function saveVerifiedRoom(r){
@@ -157,7 +165,7 @@ io.on("connection",s=>{
  if(p.raceId)p.worldProgress.raceSeen=[...new Set([...(p.worldProgress.raceSeen||[]),p.raceId])];
  if(claim){verifiedCharacters.set(s.id,claim);p.verified=true}
  emit(r);cb({ok:true});
-  }catch(e){cb({ok:false,error:e.status?e.message:"Unable to verify character save."})}
+  }catch(e){if(claim)secureQueue.release(claim);cb({ok:false,error:e.status?e.message:"Unable to verify character save."})}
   finally{restoring=false}
  });
  s.on("rollRace",(_,cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if((p.racePoints||0)<1)return cb({ok:false,error:"You need 1 Race Point."});p.racePoints--;const total=races.reduce((n,x)=>n+x.weight,0);let roll=Math.random()*total,chosen=races[0];for(const x of races){roll-=x.weight;if(roll<=0){chosen=x;break}}applyRace(p,chosen.id);p.worldProgress=world.normalizeProgress(p.worldProgress);
