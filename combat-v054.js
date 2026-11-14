@@ -109,7 +109,11 @@ function hitTarget(r,p,move,ctx){
  const debuffs=m.statusEffects||[];
  const enemyWeak=debuffs.some(e=>e.id==="chill")?.8:debuffs.some(e=>e.id==="weaken")?.88:1;
  const elemental=ctx.elementDamageMultiplier?ctx.elementDamageMultiplier(move.element,p,m):1;
- const raw=Math.max(1,Math.round(m.atk*(move.power||1)*enemyWeak*elemental)-p.def);
+ // Diminishing-return armour: high DEF remains valuable, but cannot nullify boss hits.
+ // DEF 77 now mitigates ~39% of an incoming hit rather than subtracting all 77.
+ const armor=Math.max(0,Number(p.def)||0);
+ const mitigation=100/(100+armor*.85);
+ const raw=Math.max(1,Math.round(m.atk*(move.power||1)*enemyWeak*elemental*mitigation));
  const foodGuard=p.foodBuffs?.def>0?.8:1;
  const classReduction=p.classPath==="knight"?.9:p.classPath==="guardian"?.88:1;
  const reduction=(p.damageReductionTurns>0?.8:1)*classReduction;
