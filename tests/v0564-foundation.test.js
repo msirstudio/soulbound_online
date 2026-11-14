@@ -50,7 +50,7 @@ test("destructive operations keep existing data when browser backup is unavailab
  const guard=sandbox.window.SoulboundSaveGuardV564;
  assert.equal(guard.snapshot("guest",1,{class_id:"swordsman"},"before-delete"),false);
  const game=read("public/game.js");
- assert.ok(game.includes('if(!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),n,v561Slots[n-1],"before-delete"))return notice('));
+ assert.ok(game.includes('if(!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),n,v564SnapshotData(n,v561Slots[n-1]),"before-delete"))return notice('));
  assert.ok(game.includes('if(savedCharacter?.class_id&&!window.SoulboundSaveGuardV564?.snapshot('));
 });
 test("server releases canonical package version and UI fallback agrees",()=>{
@@ -59,4 +59,31 @@ test("server releases canonical package version and UI fallback agrees",()=>{
  assert.ok(server.includes('readFileSync(path.join(__dirname,"package.json"),"utf8")'));
  assert.ok(html.includes("v0.56.4"));
  assert.ok(html.includes('version-v0564.js?v=0.56.4'));
+});
+
+test("pre-change backup merges the correct world-progress slot and never uses freshWorld early",()=>{
+ const game=read("public/game.js");
+ const begin=game.indexOf("function v564SnapshotData("),end=game.indexOf("async function v561Delete(",begin);
+ assert.ok(begin>=0&&end>begin);
+ const cache=new Map([
+  ["world_1",JSON.stringify({bossDefeats:{region1:1}})],
+  ["world_2",JSON.stringify({bossDefeats:{region2:3}})],
+  ["world_3",JSON.stringify({bossDefeats:{region3:2}})]
+ ]);
+ const extract=new Function("localStorage","v40WorldKeyFor","v40MergeWorld",
+   game.slice(begin,end)+";return v564SnapshotData");
+ const backup=extract(
+  {getItem:key=>cache.get(key)||null},
+  slot=>"world_"+slot,
+  (cloud,local)=>({bossDefeats:{...(cloud?.bossDefeats||{}),...(local?.bossDefeats||{})}})
+ );
+ const saved=backup(2,{class_id:"mage",world_progress:{bossDefeats:{earlier:1}}});
+ assert.equal(saved.world_progress.bossDefeats.region2,3);
+ assert.equal(saved.world_progress.bossDefeats.earlier,1);
+ assert.equal(saved.world_progress.bossDefeats.region1,undefined);
+ const start=game.indexOf('$("newGame").onclick=async()=>{');
+ const fresh=game.indexOf("const freshWorld=",start);
+ assert.ok(start>=0&&fresh>start);
+ assert.ok(!game.slice(start,fresh).includes("world_progress:freshWorld"));
+ assert.ok(game.slice(start,fresh).includes("v564SnapshotData(v561Slot,savedCharacter)"));
 });
