@@ -21,7 +21,7 @@ function catalog(){
 }
 test("index serves exact scaled values for 40 stages and all eight bosses",()=>{
  const data=catalog();
- assert.equal(data.version,"0.57");
+ assert.equal(data.version,"0.58");
  assert.equal(data.monsters.length,40);
  assert.equal(data.monsters.filter(x=>x.boss).length,8);
  assert.equal(data.monsters.filter(x=>!x.boss).length,32);
