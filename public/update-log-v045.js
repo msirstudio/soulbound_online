@@ -2,6 +2,14 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.56.0",date:"2026-11-14",title:"Combat Pacing & Visible Hit Reactions",notes:[
+  "Enemy counterattacks now occur after a 760ms server-controlled pause rather than simultaneously with player actions.",
+  "New enemy lunge and hero hit presentation makes each exchange easier to read. The Swordsman and Mage use their separate hit PNGs when available.",
+  "Combat commands are temporarily locked during the enemy response, preventing overlapping turns in online parties.",
+  "The game's global displayed version, package version and API health/version responses now agree.",
+  "Boss special attack telegraphs and earlier audio/viewport improvements remain in place.",
+  "No changes to saved characters, equipment, Gold, EXP, combat damage formulas or reward rates."
+ ]},
  {version:"0.55.2",date:"2026-11-14",title:"Elemental Rules — Water, Lightning & Clear Matchups",notes:[
   "The game now has 10 damage types: Physical plus nine elements (including new Water and Lightning).",
   "The Adventure INDEX shows a single consistent elemental matchup table: strong ×1.20, resisted/same type ×0.80, neutral/Physical ×1.00.",
