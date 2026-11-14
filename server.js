@@ -136,6 +136,24 @@ io.on("connection",s=>{
  let restoring=false;
  s.on("createRoom",({name,classId,gender,guest}={},cb=()=>{})=>{const code=Math.random().toString(36).slice(2,7).toUpperCase(),r=createRoom(code);r.players.set(s.id,player(s.id,name,classId,gender));r.players.get(s.id).guest=!!guest;r.accountMode=secure.enabled?(guest?"guest":"account"):"legacy";s.join(code);const ticket=multi.issue(r,s.id);say(r,cleanName(name)+" founded the party.");emit(r);cb({ok:true,code,ticket})});
  s.on("joinRoom",({code,name,classId,gender,guest}={},cb=()=>{})=>{code=String(code||"").trim().toUpperCase();const r=rooms.get(code);if(!r)return cb({ok:false,error:"Room not found. Check the code."});if(r.players.size>=4)return cb({ok:false,error:"Party full (maximum 4)."});if(secure.enabled&&r.accountMode!==(guest?"guest":"account"))return cb({ok:false,error:"Secure account heroes and Guest heroes must use separate party rooms."});if(r.status!=="city")return cb({ok:false,error:"Adventure already started."});const p=player(s.id,name,classId,gender);p.guest=!!guest;r.players.set(s.id,p);s.join(code);const ticket=multi.issue(r,s.id);say(r,p.name+" joined the party.");emit(r);cb({ok:true,code,ticket})});
+ s.on("resumeRoom",async({code,ticket,accessToken}={},cb=()=>{})=>{
+  if(findRoom(s))return cb({ok:false,error:"Already connected to a party."});
+  const match=multi.find(rooms,String(code||"").trim().toUpperCase(),ticket);
+  if(!match)return cb({ok:false,error:"Reconnect expired or invalid. Return to the lobby."});
+  const claim=verifiedCharacters.get(match.id);
+  if(secure.enabled&&!match.player.guest){
+   if(!claim)return cb({ok:false,error:"Verified character session is missing."});
+   try{const id=await secure.authenticate(accessToken);if(id!==claim.userId)return cb({ok:false,error:"This account does not own the reconnecting hero."})}
+   catch(e){return cb({ok:false,error:e.status?e.message:"Unable to authenticate reconnect."})}
+  }
+  const result=multi.resume(match,s.id);
+  if(!result)return cb({ok:false,error:"Reconnect expired. Join a new party."});
+  if(claim){verifiedCharacters.delete(result.oldId);claim.socketId=s.id;verifiedCharacters.set(s.id,claim)}
+  s.join(result.room.code);
+  say(result.room,result.player.name+" returned to the party.");
+  cb({ok:true,code:result.room.code,ticket:result.ticket,resumed:true});
+  emit(result.room);
+ });
  s.on("restoreCharacter",async(v={},cb=()=>{})=>{
   let r=findRoom(s);
   if(!r||r.status!=="city")return cb({ok:false,error:"Restore only works in the waiting room."});
@@ -300,6 +318,32 @@ combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status
  s.on("chooseClassPath",({path:chosen}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if(p.level<15)return cb({ok:false,error:"Class specialization unlocks at level 15."});const choices={swordsman:["berserker","knight"],mage:["archmage","warlock"],tank:["guardian","paladin"]};if(!choices[p.classId]?.includes(chosen))return cb({ok:false,error:"Invalid specialization for this class."});if(p.classPath)return cb({ok:false,error:"You have already chosen your path."});p.classPath=chosen;p.className=({berserker:"Berserker",knight:"Knight",archmage:"Archmage",warlock:"Warlock",guardian:"Guardian",paladin:"Paladin"})[chosen];if(chosen==="guardian"){p.maxHp+=50;p.hp+=50;p.def+=6}else if(chosen==="paladin"){p.maxHp+=25;p.hp+=25;p.def+=3;p.atk+=6;p.maxMp+=10;p.mp+=10}else if(chosen==="berserker"){p.atk+=6;p.def=Math.max(1,p.def-2)}else if(chosen==="knight"){p.def+=5;p.maxHp+=20;p.hp+=20}else if(chosen==="archmage"){p.maxMp+=30;p.mp+=30;p.atk+=4}else if(chosen==="warlock"){p.atk+=6;p.maxHp+=10;p.hp+=10}say(r,p.name+" chose the "+p.className+" path!");emit(r);cb({ok:true})});
  s.on("allocateStat",({stat}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if((p.statPoints||0)<1)return cb({ok:false,error:"No stat points available."});const key=String(stat||"");if(!["strength","vitality","intelligence","agility"].includes(key))return cb({ok:false,error:"Unknown stat."});p.statPoints--;p[key]=(p[key]||0)+1;if(key==="strength")p.atk+=2;if(key==="vitality"){p.maxHp+=12;p.hp+=12}if(key==="intelligence"){p.maxMp+=10;p.mp+=10}if(key==="agility")p.speed=(p.speed||10)+2;say(r,p.name+" increased "+key.toUpperCase()+".");emit(r);cb({ok:true})});
  s.on("partyChat",({message}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});const body=String(message||"").replace(/[<>]/g,"").trim().slice(0,180);if(!body)return cb({ok:false,error:"Message is empty."});r.chat=r.chat||[];r.chat.push({name:p.name,id:p.id,message:body,time:Date.now()});if(r.chat.length>60)r.chat.shift();emit(r);cb({ok:true})});
- s.on("disconnect",()=>{const claim=verifiedCharacters.get(s.id);verifiedCharacters.delete(s.id);if(claim)secureQueue.release(claim);for(const r of rooms.values())if(r.players.has(s.id)){const p=r.players.get(s.id);r.players.delete(s.id);say(r,p.name+" disconnected.");if(!r.players.size)rooms.delete(r.code);else{r.turnIndex=0;skipFallenTurn(r);emit(r)}}});
+ s.on("disconnect",()=>{
+  const r=findRoom(s);
+  if(r&&multi.markDisconnected(r,s.id,{onExpire:(room,id,p)=>{
+   const claim=verifiedCharacters.get(id);
+   verifiedCharacters.delete(id);
+   if(claim){secureQueue.persist(claim,p).finally(()=>secureQueue.release(claim))}
+   const keys=[...room.players.keys()],index=keys.indexOf(id);
+   if(index<0)return;
+   room.players.delete(id);
+   if(!room.players.size){rooms.delete(room.code);return}
+   if(index<room.turnIndex)room.turnIndex--;
+   else if(index===room.turnIndex)room.turnIndex%=room.players.size;
+   if(room.status==="battle"){
+    if(!alive(room).length){room.status="defeat";combat.applyDefeatPenalty(room,say)}
+    else skipFallenTurn(room);
+   }
+   say(room,p.name+" did not reconnect; the party continues.");
+   emit(room);
+  }})){
+   say(r,r.players.get(s.id).name+" disconnected. Battle paused for up to 2 minutes.");
+   emit(r);return;
+  }
+  const claim=verifiedCharacters.get(s.id);
+  verifiedCharacters.delete(s.id);
+  if(claim)secureQueue.release(claim);
+ });
+
 });
 server.listen(PORT,()=>console.log("SOULBOUND Online v0.40.0 running on "+PORT));
