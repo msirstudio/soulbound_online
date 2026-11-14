@@ -5,7 +5,7 @@ test("v0.55 is displayed in header, title screen, server health, and package",()
  const html=read("public/index.html"),server=read("server.js"),pkg=require("../package.json");
  assert.equal(pkg.version,"0.56.3");
  assert.match(html,/VERSION 0\.56\.3 · COMBAT REBALANCE/);
- assert.match(html,/ONLINE RPG · v0\.56\.2 HARDCORE ENCOUNTERS/);
+ assert.match(html,/ONLINE RPG · v0\.56\.3 COMBAT REBALANCE/);
  assert.match(server,/version:"0\.56\.3"/);
 });
 test("Update Log opens from main menu and is loaded once",()=>{
