@@ -19,7 +19,7 @@ function token(){
 }
 function issue(room,id){
  ensure(room);
- const entry={ticket:token(),until:0,timer:null};
+ const entry={ticket:token(),identity:randomBytes(16).toString("hex"),until:0,timer:null};
  room.reconnectSessions.set(id,entry);
  return entry.ticket;
 }
@@ -59,7 +59,7 @@ function resume(match,newId,{cancel=clearTimeout,now=Date.now()}={}){
  for(const [key,item] of room.players)updated.set(key===id?newId:key,item);
  room.players=updated;
  room.reconnectSessions.delete(id);
- room.reconnectSessions.set(newId,{ticket:nextTicket,until:0,timer:null});
+ room.reconnectSessions.set(newId,{ticket:nextTicket,identity:entry.identity,until:0,timer:null});
  player.id=newId;player.disconnected=false;
  return{oldId:id,newId,ticket:nextTicket,player,room};
 }
