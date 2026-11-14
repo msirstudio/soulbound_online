@@ -3,7 +3,6 @@
  * Never expose service credentials to the browser or the Socket payload.
  * A deployment MUST apply the SQL migration before enabling this service.
  */
-const crypto=require("node:crypto");
 const VALID_SLOT=slot=>Number.isInteger(slot)&&slot>=1&&slot<=3;
 const SAFE_UUID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const CHARACTER_FIELDS=Object.freeze([
@@ -11,7 +10,7 @@ const CHARACTER_FIELDS=Object.freeze([
  "attack","defense","potions","mana_potions","small_health","medium_health","large_health",
  "small_mana","medium_mana","large_mana","weapon","armor","inventory","weapon_item",
  "armor_item","food_items","food_buffs","race_id","race_points","strength","vitality",
- "intelligence","agility","stat_points","speed","world_progress"
+ "intelligence","agility","stat_points","speed","world_progress","deleted"
 ]);
 const sanitize=raw=>{
  if(!raw||typeof raw!=="object"||Array.isArray(raw))return null;
