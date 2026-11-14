@@ -79,8 +79,12 @@ async function ensureContext(){
  }
  if(ctx.state==="suspended")await ctx.resume();
 }
+function themeStatus(){
+ const el=document.getElementById("audioStatus");
+ if(el)el.textContent=enabled?"♫ Original soundtrack · "+themes[key].name:"Music OFF";
+}
 function resetSequence(){
- step=0;nextAt=ctx?ctx.currentTime+.07:0;
+ step=0;nextAt=ctx?ctx.currentTime+.07:0;themeStatus();
 }
 function select(next){
  if(!themes[next])next="city";
@@ -99,12 +103,12 @@ function setMusic(on){
  enabled=!!on;
  // Pause the previous streamed soundtrack, preserving its SFX handling.
  original.setMusic(false);
- if(!enabled){if(interval){clearInterval(interval);interval=null}return false}
+ if(!enabled){if(interval){clearInterval(interval);interval=null}themeStatus();return false}
  ensureContext().then(()=>{
   if(!enabled)return;
   resetSequence();
   if(!interval)interval=setInterval(scheduler,100);
-  scheduler();
+  themeStatus();scheduler();
  }).catch(()=>{enabled=false});
  return enabled;
 }
