@@ -1,0 +1,26 @@
+name: SOULBOUND v0.55.6 Mage pose checks
+on:
+  push:
+    branches: [v0.55.6-mage-poses]
+  pull_request:
+    branches: [v0.55.5-css-consolidation]
+permissions:
+  contents: read
+jobs:
+  art-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check JS syntax
+        run: |
+          node --check public/game.js
+          node --check public/sprite-animation-v0311.js
+          node --check public/adventure-index-v0552.js
+      - name: Test new Mage sprite integration and existing systems
+        run: npm test
