@@ -1,0 +1,51 @@
+/* v0.56.3 - All enemies are displayed at battle size, not thumbnail tokens. */
+#game .monster-side.v563-multi #monsterSprite,
+#game .monster-side.v563-multi #monsterName,
+#game .monster-side.v563-multi .monster-vitals,
+#game .monster-side.v563-multi #v562EnemyChoices{display:none!important}
+#game .v563-enemy-field:not([hidden]){
+ display:flex!important;justify-content:center;align-items:flex-end;gap:clamp(3px,.6vw,12px);
+ width:100%;max-width:100%;height:min(31dvh,290px);
+ min-height:140px;overflow:visible;position:relative;
+}
+#game .v563-foe{
+ --foe-height:clamp(100px,17dvh,205px);
+ display:flex!important;flex-direction:column;justify-content:flex-end;align-items:center;
+ flex:1 1 0!important;min-width:0!important;max-width:210px;
+ height:100%;padding:4px 3px!important;margin:0!important;
+ position:relative!important;background:transparent!important;
+ border:2px solid transparent!important;border-radius:9px!important;
+ box-shadow:none!important;color:#ffe1aa!important;cursor:pointer;
+ transition:filter .12s ease,transform .12s ease;
+}
+#game .v563-foe:hover{filter:brightness(1.17);transform:translateY(-3px)}
+#game .v563-foe.selected{
+ border-color:#e8ba65!important;
+ background:linear-gradient(180deg,transparent 35%,#352c3e99 92%)!important;
+ box-shadow:inset 0 -2px 0 #d4a45d!important;
+}
+#game .v563-foe-name{
+ font:700 clamp(9px,.85vw,12px) Georgia,serif!important;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ max-width:100%;text-shadow:1px 2px 3px #000;
+}
+#game .v563-foe-sprite{
+ display:block;flex:1 1 auto;
+ width:100%;min-height:0;max-height:var(--foe-height);
+ object-fit:contain;image-rendering:pixelated;
+ filter:drop-shadow(0 8px 4px #09060688);
+}
+#game .v563-foe-hp{
+ display:flex;flex-direction:column;align-items:center;gap:3px;
+ font:700 10px Georgia,serif;white-space:nowrap;
+ color:#fff3dc;text-shadow:0 1px 3px #000;
+ width:94%;padding:3px;background:#131622cf;border-radius:4px;
+}
+#game .v563-foe-meter{width:100%;height:7px;background:#352837;border:1px solid #a67b4e;border-radius:3px;overflow:hidden}
+#game .v563-foe-meter i{height:100%;display:block;background:linear-gradient(#e85c75,#9c1c3d)}
+@media(max-width:900px){
+ #game .v563-enemy-field:not([hidden]){height:min(26dvh,210px);min-height:100px;gap:2px}
+ #game .v563-foe{--foe-height:clamp(75px,14dvh,155px)}
+ #game .v563-foe-hp{font-size:9px}
+}
+@media(prefers-reduced-motion:reduce){#game .v563-foe{transition:none!important}}
