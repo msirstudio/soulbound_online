@@ -44,7 +44,7 @@ async function v57Discover(){
   const health=await res.json();v57Mode=!!health.secureSavesEnabled&&!guestMode;
   if(!v57Mode&&!guestMode)authNotice("Legacy saves are not anti-cheat protected. Configure Secure Saves before public release.",true);
   return v57Mode;
- }catch(e){v57Mode=false;return false}
+ }catch(e){v57Mode=false;if(!guestMode)throw Error("Cannot verify server security status. Check your connection before loading a cloud hero.");return false}
 }
 async function v57Api(method,route,payload){
  if(!supabaseClient||!currentUser)throw Error("Sign in to access secure character saves.");
@@ -292,7 +292,7 @@ $("openGacha").onclick=openGacha;$("skipGacha").onclick=revealGacha;$("closeGach
 document.querySelectorAll("[data-action]").forEach(b=>b.onclick=async()=>{const r=await call("action",{type:b.dataset.action,targetId:v562TargetId});if(!r.ok)alert(r.error);else{const a=b.dataset.action;const hero=gameState?.players?.find(p=>p.id===myId);const sound=({attack:"attack",skill:"skill",skill2:"skill",skill3:"skill",skill4:"skill",skill5:"skill",skill6:"skill",skill7:"skill",heal:"heal",healSmall:"heal",healMedium:"heal",healLarge:"heal",mana:"mana",manaSmall:"mana",manaMedium:"mana",manaLarge:"mana",guard:"guard",break:"attack",cleanse:"skill"})[a]||"attack";window.SoulboundAudio?.sfx(sound,{weapon:hero?.weapon||"",classId:hero?.classId||""});if(["attack","skill","skill2","skill3","skill4","skill5","skill6","skill7"].includes(a)){if(window.SoulboundSprite?.canDraw(hero)){window.SoulboundSprite.attack(myId)}else requestAnimationFrame(()=>{const figure=Array.from(document.querySelectorAll("#partySprites .hero-figure")).find(el=>el.querySelector(".v17-nameplate")?.textContent.includes(" · YOU"))?.querySelector(".sprite-img");if(figure){figure.classList.remove("v30-attacking");void figure.offsetWidth;figure.classList.add("v30-attacking");setTimeout(()=>figure.classList.remove("v30-attacking"),500)}})}}});
 document.querySelectorAll("[data-stat]").forEach(b=>b.onclick=async()=>{const r=await call("allocateStat",{stat:b.dataset.stat});if(!r.ok)notice(r.error,true)});
 $("shopCategories")?.querySelectorAll("[data-shop-category]").forEach(b=>b.onclick=()=>{if(cityShopScope&&!cityShopScope.includes(b.dataset.shopCategory))return;activeShopCategory=b.dataset.shopCategory;if(gameState)render()});$("chatSend").onclick=sendChat;$("chatInput").addEventListener("keydown",e=>{if(e.key==="Enter")sendChat()});function sendChat(){const input=$("chatInput"),message=input.value.trim();if(!message)return;call("partyChat",{message}).then(r=>{if(!r.ok)notice(r.error,true);else input.value=""})};
-socket.on("connect",()=>{myId=socket.id});socket.on("disconnect",()=>{$("status").textContent="Connection lost. Refresh to reconnect."});
+socket.on("connect",()=>{myId=socket.id});socket.on("disconnect",()=>{$("status").textContent="Connection lost. Refresh to reconnect."});socket.on("saveError",info=>{const msg=String(info?.message||"Cloud save failed.").slice(0,240);authNotice(msg,true);notice(msg,true)});
 
 // v0.56.0 presentation-only combat beat choreography.
 // The server remains authoritative and sends one complete state update.
