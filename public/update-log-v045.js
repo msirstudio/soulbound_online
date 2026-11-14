@@ -2,6 +2,14 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.56.4",date:"2026-11-14",title:"System Foundation — Safer Saves & Versioning",notes:[
+  "Added EXPORT HERO and LAST BACKUP buttons to the three character save slots. JSON downloads are user-controlled and exclude account credentials.",
+  "Before deleting or replacing an existing hero, save an emergency backup in browser storage; if storage is full, cancel the destructive action.",
+  "NEW GAME now resets its cached world progress only after the fresh save succeeds instead of before the cloud request.",
+  "Health/API version numbers derive from package.json; title and hero-screen version labels stay synchronized.",
+  "Added a read-only foundation audit and regression checks. No changes to combat balance, server trust model, save database schema or multiplayer flow.",
+  "Important: a JSON export cannot yet be imported in-game. Account verification, revision-safe saves and full recovery will be addressed in the next phase."
+ ]},
  {version:"0.56.3",date:"2026-11-14",title:"Full Combat Rebalance & Visible Enemy Packs",notes:[
   "Every monster in a group now appears as a large, selectable creature on the actual battlefield instead of only as tiny HP buttons.",
   "Mage METEOR/FROST NOVA/TIDAL SURGE and Swordsman WHIRLWIND attack all living enemies; players do not need to select targets for area spells.",
