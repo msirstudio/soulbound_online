@@ -12,7 +12,7 @@ function harness(){
  const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:
   name==="socket.io"?{Server}:name==="path"?path:
   name==="./loot-v034"?require("../loot-v034"):name==="./world-v040"?world:
-  name==="./combat-v055"?combat:require(name);
+  name==="./combat-v055"?combat:(String(name).startsWith("./")?require(path.join(__dirname,"..",name)):require(name));
  const runtime=new Function("require","process","console","__dirname","setTimeout",source+
   ";return {rooms,start,combat};")(deps,{env:{}},{log(){}},path.join(__dirname,".."),fn=>{fn();return 0;});
  const connect=id=>{
