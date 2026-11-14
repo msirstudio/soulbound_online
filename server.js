@@ -320,7 +320,7 @@ combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status
  s.on("partyChat",({message}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});const body=String(message||"").replace(/[<>]/g,"").trim().slice(0,180);if(!body)return cb({ok:false,error:"Message is empty."});r.chat=r.chat||[];r.chat.push({name:p.name,id:p.id,message:body,time:Date.now()});if(r.chat.length>60)r.chat.shift();emit(r);cb({ok:true})});
  s.on("disconnect",()=>{
   const r=findRoom(s);
-  if(r&&multi.markDisconnected(r,s.id,{onExpire:(room,id,p)=>{
+  if(r&&multi.markDisconnected(r,s.id,{schedule:setTimeout,onExpire:(room,id,p)=>{
    const claim=verifiedCharacters.get(id);
    verifiedCharacters.delete(id);
    if(claim){secureQueue.persist(claim,p).finally(()=>secureQueue.release(claim))}
