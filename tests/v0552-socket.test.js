@@ -49,7 +49,7 @@ test("live Socket: LV9 Thunderbolt hits Water mini boss harder than Lightning mi
 });
 test("API INDEX reports all ten types, both mini-boss elements and boss-only exceptions",()=>{
  const d=harness().catalog();
- assert.equal(d.version,"0.59");
+ assert.equal(d.version,"0.60");
  assert.equal(d.codex.elements.length,10);
  const guardian=d.monsters.find(m=>m.stage===4),executioner=d.monsters.find(m=>m.stage===9);
  assert.equal(guardian.element,"water");

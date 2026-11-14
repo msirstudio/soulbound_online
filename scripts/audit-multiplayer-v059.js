@@ -5,8 +5,8 @@ function audit(){
  const pkg=JSON.parse(read("package.json")),server=read("server.js"),client=read("public/game.js"),html=read("public/index.html");
  const reconnect=read("multiplayer/session-v059.js");
  const checks={
-  npmSemver:pkg.version==="0.59.0",
-  visibleVersion:html.includes("<small>v0.59</small>")&&html.includes("v0.59 MULTIPLAYER"),
+  npmSemver:pkg.version==="0.60.0",
+  visibleVersion:html.includes("<small>v0.60</small>")&&html.includes("v0.60 WEAPON SHOP"),
   actionReceipts:server.includes("multi.lookup(")&&server.includes("multi.remember(")&&client.includes("actionId:"),
   reconnectToken:server.includes("multi.issue(r,s.id)")&&server.includes('s.on("resumeRoom"')&&client.includes("sessionStorage.setItem(v59StorageKey()"),
   secureIdentityOnResume:server.includes("secure.authenticate(accessToken)")&&server.includes("id!==claim.userId"),
@@ -16,7 +16,7 @@ function audit(){
   safePersistence:server.includes("secureQueue.persist(claim,p)")&&server.includes("secure.load(v.accessToken,v.slot)"),
   pureDamagePreserved:server.includes("formulas.basicAttack(")&&server.includes("skillCore.definition(")
  };
- return{version:"0.59",passed:Object.values(checks).every(Boolean),checks,knownLimitations:[
+ return{version:"0.60",passed:Object.values(checks).every(Boolean),checks,knownLimitations:[
   "Tickets and action receipts live in one Node process; a Render instance restart cannot restore active battles",
   "Duplicate action IDs are rejected inside one running room; use durable transaction IDs to guarantee exactly-once rewards across crashes",
   "Browser and live multiplayer staging tests are still necessary before production deployment",

@@ -77,7 +77,7 @@ test("Actual server and boss pipeline call central formulas rather than using co
  assert.ok(enemy.includes("formulas.enemyRaw")&&enemy.includes("formulas.enemyFinal"));
  assert.ok(advanced.includes("const SKILL_COSTS=skillCore.SKILL_COSTS;"));
  const pkg=require("../package.json"),html=read("public/index.html");
- assert.equal(pkg.version,"0.59.0");
- assert.ok(html.includes("<small>v0.59</small>"));
- assert.ok(html.includes('game.js?v=0.59'));
+ assert.equal(pkg.version,"0.60.0");
+ assert.ok(html.includes("<small>v0.60</small>"));
+ assert.ok(html.includes('game.js?v=0.60'));
 });
