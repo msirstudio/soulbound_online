@@ -1,5 +1,5 @@
 const express=require("express"),http=require("http"),path=require("path");
-const {Server}=require("socket.io");const loot=require("./loot-v034");const secure=require("./persistence/secure-saves-v057");const APP_VERSION=JSON.parse(require("fs").readFileSync(path.join(__dirname,"package.json"),"utf8")).version.replace(/\.0$/,"");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
+const {Server}=require("socket.io");const loot=require("./loot-v034");const secure=require(path.join(__dirname,"persistence","secure-saves-v057.js"));const APP_VERSION=JSON.parse(require("fs").readFileSync(path.join(__dirname,"package.json"),"utf8")).version.replace(/\.0$/,"");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
 app.use(express.static(path.join(__dirname,"public")));if(secure.enabled)app.use(express.json({limit:"8kb"}));
 app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:APP_VERSION,secureSavesEnabled:secure.enabled}));
 const credential=req=>String(req.headers.authorization||"").replace(/^Bearer\s+/i,"");
