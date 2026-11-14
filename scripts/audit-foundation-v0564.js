@@ -15,9 +15,9 @@ function audit(){
  check("menu version matches package",html.includes("v"+pkg.version.replace(/\.0$/,"")+" MULTIPLAYER"));
  check("API version uses canonical package value",server.includes('readFileSync(path.join(__dirname,"package.json")')&&
   (server.match(/version:APP_VERSION/g)||[]).length>=2);
- check("version sync client present",html.includes('version-v0564.js?v=0.59'));
+ check("version sync client present",html.includes('version-v0564.js?v=0.60'));
  check("save export controller loads before game.js",html.indexOf("save-guard-v0564.js")>=0&&
-  html.indexOf("save-guard-v0564.js")<html.indexOf("game.js?v=0.59"));
+  html.indexOf("save-guard-v0564.js")<html.indexOf("game.js?v=0.60"));
  check("all 3 save slots remain selectable",game.includes("v561Slots=[null,null,null]")&&
   game.includes('data-v561-pick'));
  check("pre-delete backup is required",game.includes('snapshot(v564Owner(),n,v564SnapshotData(n,v561Slots[n-1]),"before-delete")'));
