@@ -1,21 +1,25 @@
 "use strict";
 /* SOULBOUND 0.57 · authenticated, server-owned character saves.
  * Never expose SUPABASE_SERVICE_ROLE_KEY to the browser or logs.
- * Requires: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SERVICE_ROLE_KEY,
+ * Requires: SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, SUPABASE_SECRET_KEY (or legacy SUPABASE_SERVICE_ROLE_KEY),
  *           and the SQL migration SUPABASE-SECURE-SAVES-V057.sql.
  * Legacy mode is explicitly reported as insecure until these are configured.
  */
 const {randomUUID}=require("node:crypto");
 const url=String(process.env.SUPABASE_URL||"").replace(/\/+$/,"");
 const publicKey=String(process.env.SUPABASE_PUBLISHABLE_KEY||"");
-const secret=String(process.env.SUPABASE_SERVICE_ROLE_KEY||"");
+const secret=String(process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY||"");
 const enabled=!!(url&&publicKey&&secret);
 const USER_ID=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const slotId=x=>Number.isInteger(Number(x))&&Number(x)>=1&&Number(x)<=3?Number(x):null;
 function fail(message,code=400){const error=new Error(message);error.status=code;throw error}
 async function request(path,{method="GET",body=null,auth=null,prefer=""}={}){
  if(!enabled)fail("Secure Save backend not configured",503);
- const headers={apikey:auth?publicKey:secret,Authorization:"Bearer "+(auth||secret),Accept:"application/json"};
+ const headers={apikey:auth?publicKey:secret,Accept:"application/json"};
+ if(auth)headers.Authorization="Bearer "+auth;
+ // New sb_secret keys are application API keys, NOT JWTs. Use apikey only.
+ // Legacy service_role JWT is kept as a backwards-compatible fallback.
+ else if(!secret.startsWith("sb_secret_"))headers.Authorization="Bearer "+secret;
  if(body!==null)headers["Content-Type"]="application/json";
  if(prefer)headers.Prefer=prefer;
  let res;
