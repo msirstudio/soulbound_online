@@ -1,13 +1,14 @@
 {
   "name": "soulbound-online",
-  "version": "0.56.3",
+  "version": "0.56.4",
   "private": true,
-  "description": "SOULBOUND v0.55.1 Adventure Index Cache & Combat Status UI Fix",
+  "description": "SOULBOUND Online — system foundation, save-guard exports, automated safety checks",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test": "node --test tests/*.test.js"
+    "test": "node --test tests/*.test.js",
+    "audit:foundation": "node scripts/audit-foundation-v0564.js"
   },
   "engines": {
     "node": ">=20"
