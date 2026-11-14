@@ -24,5 +24,5 @@ test("Header is larger and Audio exists only in dedicated row BELOW command dock
  assert.ok(css.includes('min-height:54px!important'));
  assert.ok(css.includes('bottom:calc(100% + 8px)!important'));
  assert.ok(html.includes('v0559-header-audio.css?v=0.55.9'));
- assert.ok(html.includes('game.js?v=0.58'));
+ assert.ok(html.includes('game.js?v=0.59'));
 });

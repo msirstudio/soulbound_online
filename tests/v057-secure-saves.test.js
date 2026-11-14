@@ -66,8 +66,8 @@ test("Server-created fresh characters do not accept client-supplied statistics",
 });
 test("Display version uses two parts while package remains valid npm semver",()=>{
  const packageJson=JSON.parse(read("package.json"));
- assert.equal(packageJson.version,"0.58.0");
+ assert.equal(packageJson.version,"0.59.0");
  assert.ok(server.includes('.version.replace(/\\.0$/,"")'));
- assert.ok(read("public/index.html").includes("<small>v0.58</small>"));
+ assert.ok(read("public/index.html").includes("<small>v0.59</small>"));
  assert.ok(read("public/version-v0564.js").includes('version=version.replace(/\\.0$/,"")'));
 });

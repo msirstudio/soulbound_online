@@ -2,6 +2,15 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.59",date:"2026-11-15",title:"Multiplayer Stability — Reconnect and Safe Turns",notes:[
+  "A disconnect reserves a hero's room and exact turn state for 120 seconds rather than immediately deleting the player.",
+  "Reconnecting requires a private, rotating 256-bit token; signed-in players also reverify their Supabase session in Secure Save mode.",
+  "A disconnected member pauses the encounter and enemy counterattacks until that member returns or the reconnect window expires.",
+  "Combat action IDs are server-deduplicated, preventing one repeated action request from striking or consuming MP twice.",
+  "Winning an encounter is guarded by a unique encounter ID to prevent repeat EXP/Gold/loot grants in the same running room.",
+  "The browser remembers the room ticket in sessionStorage and attempts to resume on socket reconnect and page reload.",
+  "Important: reconnection and action receipts are stored in the running Node process. Render restarts, multiple server instances, and distributed persistence still need additional work."
+ ]},
  {version:"0.58",date:"2026-11-14",title:"Unified Combat Core — Formula Parity Refactor",notes:[
   "All main damage calculations now use shared pure combat formulas for player attack, skills, BREAK, area splash and enemy hits.",
   "Skill MP costs, unlock levels, cooldowns, class names and area-of-effect flags are centralized in a canonical skill catalog.",

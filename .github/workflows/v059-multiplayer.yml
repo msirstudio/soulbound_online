@@ -1,0 +1,21 @@
+name: SOULBOUND 0.59 Multiplayer Stability
+on:
+  push:
+    branches: [v0.59-multiplayer-stability]
+  pull_request:
+    branches: [v0.58-unified-combat-engine]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: node --check server.js && node --check multiplayer/session-v059.js && node --check public/game.js
+      - run: npm test
+      - run: npm run audit:multiplayer

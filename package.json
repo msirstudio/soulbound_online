@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.58.0",
+  "version": "0.59.0",
   "private": true,
-  "description": "SOULBOUND 0.58 — shared combat formulas, authoritative skill catalog, balance parity tests",
+  "description": "SOULBOUND 0.59 — multiplayer reconnect, action idempotency and once-only rewards",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -10,7 +10,8 @@
     "test": "node --test tests/*.test.js",
     "audit:foundation": "node scripts/audit-foundation-v0564.js",
     "audit:secure": "node scripts/audit-secure-v057.js",
-    "audit:combat": "node scripts/audit-combat-v058.js"
+    "audit:combat": "node scripts/audit-combat-v058.js",
+    "audit:multiplayer": "node scripts/audit-multiplayer-v059.js"
   },
   "engines": {
     "node": ">=20"
