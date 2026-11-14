@@ -6,8 +6,8 @@ const read=p=>fs.readFileSync(path.join(root,p),"utf8");
 test("foundation audit detects version and save safety invariants without claiming security fixes",()=>{
  const result=audit();
  assert.equal(result.pass,true,result.failed.join("; "));
- assert.ok(result.passed.length>=10);
- assert.ok(result.risks.some(r=>r.includes("P0 OPEN: restoreCharacter")));
+ assert.ok(result.passed.length>=14);
+ assert.ok(result.risks.some(r=>r.includes("P0 ROLLOUT: secure restores")));
  assert.equal(result.version,"0.56.5");
 });
 test("slot-specific local recovery snapshots never include account secrets",()=>{
