@@ -253,7 +253,7 @@ function v0560AddedLog(previous,current){
  return b.slice(Math.max(0,b.length-8));
 }
 function v0560OnState(last,s){
- const key=(s.status==="battle"||s.status==="defeat")&&s.monster?(s.code+"|"+s.stage+"|"+s.monster.name):"";
+ const key=(s.status==="battle"||s.status==="defeat")&&s.monster?(s.code+"|"+s.stage):"";
  if(!key||key!==v0560BattleKey){
   v0560Clear();v0560BattleKey=key;
   if(!key||!last||last.status!=="battle"||last.stage!==s.stage)return;
@@ -264,7 +264,7 @@ function v0560OnState(last,s){
   const old=last.players.find(x=>x.id===p.id);
   return old&&Number(p.hp)<Number(old.hp);
  });
- const enemyUsedMove=newLog.some(line=>name&&String(line).startsWith(name+" uses ")&&String(line).includes(" damage"));
+ const enemyUsedMove=newLog.some(line=>(s.enemies||[s.monster]).some(e=>String(line).startsWith(String(e.name)+" uses ")&&String(line).includes(" damage")));
  const enemyAttacked=lost.length>0||enemyUsedMove;
  if(!enemyAttacked)return;
  // Delay the enemy lunge until the player's attack pose has been readable.
@@ -273,7 +273,10 @@ function v0560OnState(last,s){
  v0560BeatEnd=start+1000;
  v0560After(Math.max(0,start-now),()=>{
   if(v0560BattleKey!==key)return;
-  const el=document.getElementById("monsterSprite");
+  const activePack=Array.from(document.querySelectorAll("#v563EnemyField .v563-foe"));
+  const attackerLog=[...newLog].reverse().find(line=>String(line).includes(" uses ")&&String(line).includes(" damage"));
+  const attackerName=attackerLog?String(attackerLog).split(" uses ")[0]:"";
+  const el=activePack.length?(activePack.find(x=>x.querySelector(".v563-foe-name")?.textContent===attackerName)||activePack[0]):document.getElementById("monsterSprite");
   if(!el)return;
   el.classList.remove("v0560-enemy-attacking");void el.offsetWidth;
   el.classList.add("v0560-enemy-attacking");
