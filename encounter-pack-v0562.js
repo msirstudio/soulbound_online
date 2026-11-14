@@ -7,9 +7,11 @@ const world=require("./world-v040");
 const difficulty=(stage,partySize,kind)=>{
  const region=Math.max(0,Math.min(7,Math.floor((stage-1)/5)));
  const extra=Math.max(0,partySize-1);
- if(kind==="boss")return {hp:1.6*(1+extra*.8),atk:(2.15+region*.05)*(1+extra*.06)};
- if(kind==="mini")return {hp:1.35*(1+extra*.7),atk:(1.75+region*.04)*(1+extra*.05)};
- return {hp:1+extra*.075,atk:(1.55+region*.015)*(1+extra*.025)};
+ // HP grows with region threat, while party multipliers reward coordination.
+ // Unlike a flat ATK-DEF subtraction, damage uses diminishing-returns armour.
+ if(kind==="boss")return {hp:(1.9+Math.min(region,4)*.3+Math.max(0,region-4)*.18)*(1+extra*.62),atk:(2.2+region*.12)*(1+extra*.055)};
+ if(kind==="mini")return {hp:(1.55+Math.min(region,4)*.22+Math.max(0,region-4)*.12)*(1+extra*.56),atk:(1.9+region*.10)*(1+extra*.045)};
+ return {hp:(1.10+region*.11)*(1+extra*.06),atk:(1.62+region*.095)*(1+extra*.025)};
 };
 const baseCount=(stage,random=Math.random)=>{
  const slot=(stage-1)%5+1;
