@@ -60,8 +60,8 @@ test("Full-sized monsters, individual selection and version 0.56.3 are in the cl
  assert.ok(game.includes('v563-foe-sprite'));
  assert.ok(game.includes('targetId:v562TargetId'));
  assert.ok(server.includes('if(aoe)r.monster=pack.alive(r)[0]'));
- assert.ok(html.includes('game.js?v=0.56.3'));
- assert.equal(require("../package.json").version,"0.56.3");
+ assert.ok(html.includes('game.js?v=0.56.4'));
+ assert.equal(require("../package.json").version,"0.56.4");
 });
 
 test("Region 3 boss vs LV27 / DEF77 is no longer a four-hit or negligible-damage encounter",()=>{
