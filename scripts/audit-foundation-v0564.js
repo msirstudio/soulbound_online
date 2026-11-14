@@ -20,14 +20,17 @@ function audit(){
   html.indexOf("save-guard-v0564.js")<html.indexOf("game.js?v=0.56.4"));
  check("all 3 save slots remain selectable",game.includes("v561Slots=[null,null,null]")&&
   game.includes('data-v561-pick'));
- check("pre-delete backup is required",game.includes('snapshot(v564Owner(),n,v561Slots[n-1],"before-delete")'));
+ check("pre-delete backup is required",game.includes('snapshot(v564Owner(),n,v564SnapshotData(n,v561Slots[n-1]),"before-delete")'));
  check("pre-new-game backup is required",game.includes('"before-new-game"'));
+ check("world progress is read from the correct slot",game.includes("localStorage.getItem(v40WorldKeyFor(slot))")&&game.includes("v40MergeWorld(data?.world_progress,localWorld)"));
+ check("new game backs up old world, not a future uninitialized value",game.includes('v564SnapshotData(v561Slot,savedCharacter),"before-new-game"'));
  const start=game.indexOf('$("newGame").onclick=async()=>{');
  const end=game.indexOf("/* Character appearance",start);
  const section=game.slice(start,end);
  check("world cache reset happens only after successful new-game cloud write",
   start>=0&&section.includes("const freshWorld=")&&section.includes("if(error)return notice")&&
   section.indexOf("v40CacheWorld(freshWorld)")>section.indexOf("if(error)return notice")&&
+  !section.slice(0,section.indexOf("const freshWorld=")).includes("freshWorld")&&
   !section.includes("v40CacheWorld({version:40"));
  check("RLS migration is present (not applied here)",read("SUPABASE-SAVE-SLOTS-V0561.sql").includes("enable row level security"));
  check("regression tests remain enabled",pkg.scripts.test.includes("tests/*.test.js"));
