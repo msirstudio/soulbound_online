@@ -1,0 +1,29 @@
+name: SOULBOUND v0.56.4 Foundation and Save Safety
+on:
+  push:
+    branches: [v0.56.4-system-foundation]
+  pull_request:
+    branches: [v0.56.3-combat-rebalance-visible-packs]
+permissions:
+  contents: read
+jobs:
+  foundation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Verify JavaScript
+        run: |
+          node --check server.js
+          node --check public/game.js
+          node --check public/save-guard-v0564.js
+          node --check public/version-v0564.js
+      - name: Audit release and save-guard invariants
+        run: npm run audit:foundation
+      - name: Run entire historic and current test suite
+        run: npm test

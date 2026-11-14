@@ -1,0 +1,14 @@
+/* SOULBOUND v0.56.4 · unobtrusive export controls for recovery.
+   The exported file is JSON; importing is intentionally not supported yet. */
+#lobby .v564-backup-actions{
+ display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:5px 0 9px;
+}
+#lobby .v564-backup-actions button{
+ flex:1 1 145px;min-height:29px;padding:5px 8px;
+ background:#252439;border:1px solid #766045;border-radius:4px;
+ color:#e9d2a7;font:700 10px Georgia,serif;
+}
+#lobby .v564-backup-actions button:hover{border-color:#d6ad65}
+#lobby .v564-backup-note{
+ margin:2px 0 7px;font:10px Georgia,serif;color:#c6b8a7;line-height:1.4;
+}
