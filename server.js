@@ -1,12 +1,12 @@
 const express=require("express"),http=require("http"),path=require("path");
 const {Server}=require("socket.io");const loot=require("./loot-v034");const secure=require("./persistence/secure-saves-v057");const APP_VERSION=JSON.parse(require("fs").readFileSync(path.join(__dirname,"package.json"),"utf8")).version;const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
-app.use(express.static(path.join(__dirname,"public")));app.use(express.json({limit:"8kb"}));
+app.use(express.static(path.join(__dirname,"public")));if(secure.enabled)app.use(express.json({limit:"8kb"}));
 app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:APP_VERSION,secureSavesEnabled:secure.enabled}));
 const credential=req=>String(req.headers.authorization||"").replace(/^Bearer\s+/i,"");
 const endpoint=fn=>async(req,res)=>{try{const result=await fn(req);res.json(result)}catch(e){res.status(e.status||500).json({error:e.message&&e.status?e.message:"Save request failed"})}};
-app.get("/api/secure-saves",endpoint(req=>secure.list(credential(req))));
-app.post("/api/secure-saves/:slot/new",endpoint(req=>secure.newGame(credential(req),req.params.slot,req.body?.classId,req.body?.name,req.body?.revision??null)));
-app.delete("/api/secure-saves/:slot",endpoint(req=>secure.remove(credential(req),req.params.slot,req.body?.revision)));
+if(secure.enabled)app.get("/api/secure-saves",endpoint(req=>secure.list(credential(req))));
+if(secure.enabled)app.post("/api/secure-saves/:slot/new",endpoint(req=>secure.newGame(credential(req),req.params.slot,req.body?.classId,req.body?.name,req.body?.revision??null)));
+if(secure.enabled)app.delete("/api/secure-saves/:slot",endpoint(req=>secure.remove(credential(req),req.params.slot,req.body?.revision)));
 const verifiedCharacters=new Map();
 const secureQueue=secure.createQueue((error,claim)=>console.error("[SAVE-CONFLICT]",{slot:claim.slot,code:error.status||500,message:error.message}));
 function saveVerifiedRoom(r){
