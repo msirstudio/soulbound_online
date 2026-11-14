@@ -63,3 +63,15 @@ test("Full-sized monsters, individual selection and version 0.56.3 are in the cl
  assert.ok(html.includes('game.js?v=0.56.3'));
  assert.equal(require("../package.json").version,"0.56.3");
 });
+
+test("Region 3 boss vs LV27 / DEF77 is no longer a four-hit or negligible-damage encounter",()=>{
+ const stage=15,party=new Map([["solo",{id:"solo"}]]);
+ const r={stage,regionIndex:2,players:party};
+ pack.makeGroup(r,{name:"Ember Tyrant",hp:788,maxHp:788,atk:53,def:19,xp:240,gold:165,boss:true,regionId:"ember_caverns"},[],()=>0);
+ assert.ok(r.monster.hp>=1900&&r.monster.hp<=2200,"boss must survive multiple skills, HP="+r.monster.hp);
+ const d=Math.floor(214+4-r.monster.def);
+ assert.ok(Math.ceil(r.monster.hp/d)>=9,"basic attacks should require many hits without skills");
+ assert.ok(r.monster.atk>=125&&r.monster.atk<=140,"regional boss attack should be threatening");
+ const mitigated=Math.floor(r.monster.atk*100/(100+77*.85));
+ assert.ok(mitigated>=70&&mitigated<=90,"against 77 DEF, each boss hit should matter: "+mitigated);
+});
