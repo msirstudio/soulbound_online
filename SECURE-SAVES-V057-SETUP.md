@@ -30,7 +30,7 @@ Guest mode is by design **local-only and not anti-cheat authoritative**. Do not 
 
 ## 5. Deploy/rollback
 
-Branch \`v0.57-core-hardening\` is a staging branch. Retain 0.56.4 and legacy Supabase rows as a rollback. Test the client, Socket and API integration in an isolated Render test service first.
+Branch \`v0.57-core-hardening\` is a staging branch. Retain 0.56.4 and legacy Supabase rows as a rollback. **Important:** once players progress in Secure Save mode, switching back to 0.56.4 will show the older legacy records. To roll back without losing newer progress, the authoritative rows must first be exported and reconciled carefully by an administrator. Do not simply switch branches expecting cloud saves to migrate backward. Test the client, Socket and API integration in an isolated Render test service first.
 
 ## 6. Known remaining risks
 
@@ -39,3 +39,11 @@ Branch \`v0.57-core-hardening\` is a staging branch. Retain 0.56.4 and legacy Su
 - Guest saves are not secure; Guest mode is not appropriate for competitive economy.
 - Slot 1–3 pre-change JSON export is still a manual backup; automated import restore is not yet exposed.
 - Player reconnection mid-battle and resilient distributed session hand-off remain separate multiplayer tasks.
+
+## Testing gates before production
+
+- GitHub Actions unit/integration tests are necessary but insufficient: test a new authenticated account, migrated old account, Guest-only room, solo boss, 4-player battle, corrupted session, expired token, two browser tabs and a forced database outage.
+- Confirm `/health` reports `secureSavesEnabled: true`. If false, **the old insecure restore path still exists and must not be described as anti-cheat protected**.
+- Verify the first server save increments `hero_secure_saves.revision`; refresh and confirm HP/Gold/XP match. Verify a failed save produces a visible `saveError` warning, not a fake success.
+- In Secure Save mode, Guest players cannot join a signed-in-only party, protecting account-backed progression from unverified Guest stats. Guest-only parties remain available.
+- For production use, perform a staging cutover and keep backups. This PR does not itself apply SQL or change Render environment variables.
