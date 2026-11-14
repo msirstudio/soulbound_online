@@ -43,11 +43,11 @@ test("Hit pose takes precedence over attack, with visible length",()=>{
  assert.ok(game.includes("v0560-hero-hurt"));
  assert.ok(game.includes("!s.enemyWindup"));
 });
-test("All visible game and API version identifiers advance to v0.56.0",()=>{
- assert.ok(html.includes("<small>v0.56.0</small>"));
- assert.ok(html.includes("VERSION 0.56.0"));
- assert.ok(html.includes('game.js?v=0.56.0'));
+test("All visible game and API version identifiers advance to v0.56.1",()=>{
+ assert.ok(html.includes("<small>v0.56.1</small>"));
+ assert.ok(html.includes("VERSION 0.56.1"));
+ assert.ok(html.includes('game.js?v=0.56.1'));
  assert.ok(html.includes("v0560-combat-pacing.css?v=0.56.0"));
- assert.ok(server.includes('version:"0.56.0"'));
- assert.equal(require("../package.json").version,"0.56.0");
+ assert.ok(server.includes('version:"0.56.1"'));
+ assert.equal(require("../package.json").version,"0.56.1");
 });

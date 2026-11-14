@@ -1,0 +1,59 @@
+/* SOULBOUND v0.56.1: audio inside existing toolbar, not a standalone row. */
+#game .v22-command-dock{
+ display:flex!important;align-items:center!important;justify-content:space-between!important;
+ gap:8px!important;min-height:37px!important;flex-wrap:nowrap!important;
+ overflow:visible!important;z-index:200!important;
+}
+#game .v22-command-dock .stage-actions{flex:1 1 auto!important;min-width:0}
+#game .v22-command-dock .loadout-tools{
+ display:flex!important;flex:0 1 auto!important;align-items:center!important;
+ gap:7px!important;flex-wrap:nowrap!important;
+}
+#game .v22-command-dock .v0484-audio-anchor{position:relative!important;display:inline-flex!important;flex:0 0 auto!important}
+#game .v22-command-dock #audioSettingsToggle{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ min-height:30px!important;margin:0!important;padding:5px 11px!important;
+ font:700 11px Georgia,serif!important;
+ color:#ffe5ad!important;border:1px solid #b99661!important;
+ border-radius:5px!important;background:linear-gradient(#493a37,#2a2330)!important;
+}
+#game .v22-command-dock #audioSettings.audio-settings-pop:not([hidden]){
+ position:absolute!important;top:auto!important;bottom:calc(100% + 8px)!important;
+ left:auto!important;right:0!important;z-index:2600!important;
+ width:min(305px,calc(100vw - 24px))!important;
+ max-height:min(390px,70dvh)!important;overflow-y:auto!important;
+}
+#game .v22-command-dock #audioSettings[hidden]{display:none!important}
+@media(min-width:1060px) and (min-height:700px){
+ #game .v22-command-dock{flex:0 0 38px!important;padding:3px 8px!important}
+ #game .arena:not([hidden]){height:min(39dvh,440px)!important;max-height:39dvh!important;flex-basis:39dvh!important}
+}
+@media(max-width:700px){
+ #game .v22-command-dock{flex-wrap:wrap!important;min-height:34px!important}
+ #game .v22-command-dock .loadout-tools{width:100%;justify-content:flex-end!important}
+}
+/* Save slots in the lobby, with a separate destructive action per slot. */
+#lobby .v561-slots{display:grid;gap:7px;margin:9px 0 6px}
+#lobby .v561-slot{
+ display:grid;grid-template-columns:minmax(0,1fr) 34px;align-items:stretch;gap:5px;
+ padding:3px;border:1px solid #665471;border-radius:6px;
+ background:linear-gradient(120deg,#1b1d32,#222033);
+}
+#lobby .v561-slot.selected{
+ border-color:#ebc57f;box-shadow:0 0 0 1px #a9894b66;
+ background:linear-gradient(120deg,#30273b,#29243b)
+}
+#lobby .v561-slot .v561-select{
+ min-width:0;min-height:43px;padding:6px 10px;
+ display:flex;align-items:center;gap:8px;
+ text-align:left;font-size:12px;white-space:normal;
+}
+#lobby .v561-slot .v561-select b{flex:0 0 57px;color:#ffe0a6}
+#lobby .v561-slot .v561-select span{min-width:0;overflow-wrap:anywhere;font:11px Georgia,serif;color:#e5d5bb}
+#lobby .v561-slot .v561-delete{
+ display:flex;align-items:center;justify-content:center;padding:0;
+ min-width:30px;min-height:36px;color:#f2b8b5;
+ background:#35232b;border:1px solid #82545e;border-radius:4px;
+}
+#lobby .v561-slot .v561-delete:disabled{opacity:.3;cursor:not-allowed}
+#lobby .v561-slot-notice{font:11px Georgia,serif;line-height:1.4;color:#cbbd9e;margin:4px 0 11px}
