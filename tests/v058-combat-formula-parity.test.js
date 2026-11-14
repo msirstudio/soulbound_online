@@ -42,7 +42,7 @@ test("Enemy DEF/Guard/ward/race reductions preserve 0.57 exactly, including DEF 
  for(const atk of [28,53,129,450])for(const def of [0,18,77,180,600])
   for(const power of [.56,.85,1,1.28])for(const elemental of [.85,1,1.2])
    for(const weakened of [.8,.88,1]){
-    const raw=Math.max(1,Math.round(atk*power*weakened*elemental*100/(100+Math.max(0,def)*.85)));
+    const raw=Math.max(1,Math.round(atk*power*weakened*elemental*(100/(100+Math.max(0,def)*.85))));
     same(f.enemyRaw({attack:atk,power,debuffMultiplier:weakened,elementMultiplier:elemental,defense:def}),raw,"enemy raw parity");
     for(const guard of [.55,1]){
      const expected=Math.max(1,Math.floor(raw*.8*.8*(1-.08)*.75*guard));
