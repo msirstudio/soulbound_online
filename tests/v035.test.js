@@ -10,7 +10,7 @@ function catalog(){
  class Server{on(){}to(){return{emit(){}}}}
  const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:
   name==="path"?path:name==="socket.io"?{Server}:
-  name==="node:crypto"?require("node:crypto"):name==="./combat-v055"?require("../combat-v055"):name==="./loot-v034"?loot:name==="./world-v040"?require("../world-v040"):require(name);
+  name==="node:crypto"?require("node:crypto"):name==="./combat-v055"?require("../combat-v055"):name==="./loot-v034"?loot:name==="./world-v040"?require("../world-v040"):(String(name).startsWith("./")?require(path.join(__dirname,"..",name)):require(name));
  new Function("require","process","console","__dirname",src+";")(
   deps,{env:{}},{log(){}},path.join(__dirname,".."));
  const handler=routes.get("/api/index");
@@ -21,7 +21,7 @@ function catalog(){
 }
 test("index serves exact scaled values for 40 stages and all eight bosses",()=>{
  const data=catalog();
- assert.equal(data.version,"0.56.4");
+ assert.equal(data.version,"0.56.5");
  assert.equal(data.monsters.length,40);
  assert.equal(data.monsters.filter(x=>x.boss).length,8);
  assert.equal(data.monsters.filter(x=>!x.boss).length,32);

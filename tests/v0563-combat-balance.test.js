@@ -7,7 +7,7 @@ function socketHarness(){
  let connect;const events=[];
  const app={use(){},get(){}},express=()=>app;express.static=()=>()=>{};
  class Server{on(event,fn){if(event==="connection")connect=fn}to(room){return{emit:(name,state)=>events.push({room,name,state})}}}
- const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:name==="socket.io"?{Server}:name==="path"?path:name==="./loot-v034"?require("../loot-v034"):name==="./world-v040"?world:name==="./combat-v055"?combat:require(name);
+ const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:name==="socket.io"?{Server}:name==="path"?path:name==="./loot-v034"?require("../loot-v034"):name==="./world-v040"?world:name==="./combat-v055"?combat:(String(name).startsWith("./")?require(path.join(__dirname,"..",name)):require(name));
  const rt=new Function("require","process","console","__dirname","setTimeout",server+";return {rooms};")(deps,{env:{}},{log(){}},base,fn=>{fn();return 0});
  const session=id=>{
   let handlers={};connect({id,join(){},on:(name,cb)=>handlers[name]=cb});
@@ -60,8 +60,8 @@ test("Full-sized monsters, individual selection and version 0.56.3 are in the cl
  assert.ok(game.includes('v563-foe-sprite'));
  assert.ok(game.includes('targetId:v562TargetId'));
  assert.ok(server.includes('if(aoe)r.monster=pack.alive(r)[0]'));
- assert.ok(html.includes('game.js?v=0.56.4'));
- assert.equal(require("../package.json").version,"0.56.4");
+ assert.ok(html.includes('game.js?v=0.56.5'));
+ assert.equal(require("../package.json").version,"0.56.5");
 });
 
 test("Region 3 boss vs LV27 / DEF77 is no longer a four-hit or negligible-damage encounter",()=>{

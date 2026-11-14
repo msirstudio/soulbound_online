@@ -12,12 +12,12 @@ function audit(){
  const check=(label,test)=>(test?passed:failed).push(label);
  check("package version is semver",/^\d+\.\d+\.\d+$/.test(pkg.version));
  check("visible game version matches package",html.includes("<small>v"+pkg.version+"</small>"));
- check("menu version matches package",html.includes("v"+pkg.version+" SYSTEM FOUNDATION"));
+ check("menu version matches package",html.includes("v"+pkg.version+" SECURE FOUNDATION"));
  check("API version uses canonical package value",server.includes('readFileSync(path.join(__dirname,"package.json")')&&
   (server.match(/version:APP_VERSION/g)||[]).length>=2);
- check("version sync client present",html.includes('version-v0564.js?v=0.56.4'));
+ check("version sync client present",html.includes('version-v0564.js?v=0.56.5'));
  check("save export controller loads before game.js",html.indexOf("save-guard-v0564.js")>=0&&
-  html.indexOf("save-guard-v0564.js")<html.indexOf("game.js?v=0.56.4"));
+  html.indexOf("save-guard-v0564.js")<html.indexOf("game.js?v=0.56.5"));
  check("all 3 save slots remain selectable",game.includes("v561Slots=[null,null,null]")&&
   game.includes('data-v561-pick'));
  check("pre-delete backup is required",game.includes('snapshot(v564Owner(),n,v564SnapshotData(n,v561Slots[n-1]),"before-delete")'));
@@ -33,12 +33,18 @@ function audit(){
   !section.slice(0,section.indexOf("const freshWorld=")).includes("freshWorld")&&
   !section.includes("v40CacheWorld({version:40"));
  check("RLS migration is present (not applied here)",read("SUPABASE-SAVE-SLOTS-V0561.sql").includes("enable row level security"));
+ check("secure Socket APIs reject raw stats from logged-in users",
+ server.includes('if(secureStore.enabled&&v.guest!==true)')&&server.includes('secureRuntime.register(s)')&&game.includes('call("secureRestoreCharacter"'));
+ check("verified revisions are only committed server-side",read("persistence/secure-save-v0565.js").includes("secure_hero_commit_v0565")&&read("SUPABASE-SECURE-SAVES-V0565.sql").includes("p_expected_revision"));
+ check("duplicate secure action identifiers are checked",server.includes("Duplicate action ignored")&&game.includes("v565ActionId()"));
  check("regression tests remain enabled",pkg.scripts.test.includes("tests/*.test.js"));
  const risks=[
-  "P0 OPEN: restoreCharacter still trusts some client-supplied stats; harden in v0.56.5",
-  "P0 OPEN: profile/slot writes lack server-side revision conflict control; harden in v0.56.5",
-  "P1 OPEN: browser backups are device-local JSON exports, not verified cloud recovery",
-  "P1 OPEN: actual Render/Supabase restore and multiplayer stress tests need manual verification"
+  "P0 ROLLOUT: secure restores and revision-safe saves require a Supabase migration plus Render service secrets",
+  "P0 ROLLOUT: revoke legacy browser-write grants only during planned cutover; they remain writable until then",
+  "P1 OPEN: production Supabase save/load and real multiplayer stress testing have not been performed",
+  "P1 OPEN: exported JSON is not yet an automated restore workflow",
+  "P1 OPEN: combat damage formulas still span multiple modules"
+
  ];
  return{version:pkg.version,pass:failed.length===0,passed,failed,risks};
 }

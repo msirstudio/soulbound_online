@@ -8,7 +8,7 @@ function harness(){
  class Server{on(n,fn){if(n==="connection")onConnect=fn}to(code){return{emit:(name,s)=>emits.push({code,name,s})}}}
  const dep=n=>n==="express"?express:n==="http"?{createServer:()=>({listen(){}})}:
   n==="socket.io"?{Server}:n==="path"?path:n==="./loot-v034"?require("../loot-v034"):
-  n==="./world-v040"?world:n==="./combat-v055"?combat:require(n);
+  n==="./world-v040"?world:n==="./combat-v055"?combat:(String(n).startsWith("./")?require(path.join(__dirname,"..",n)):require(n));
  const runtime=new Function("require","process","console","__dirname","setTimeout",serverText+";return {rooms,start};")(
   dep,{env:{}},{log(){}},path.join(__dirname,".."),fn=>{fn();return 0;});
  const connect=id=>{
@@ -49,7 +49,7 @@ test("live Socket: LV9 Thunderbolt hits Water mini boss harder than Lightning mi
 });
 test("API INDEX reports all ten types, both mini-boss elements and boss-only exceptions",()=>{
  const d=harness().catalog();
- assert.equal(d.version,"0.56.4");
+ assert.equal(d.version,"0.56.5");
  assert.equal(d.codex.elements.length,10);
  const guardian=d.monsters.find(m=>m.stage===4),executioner=d.monsters.find(m=>m.stage===9);
  assert.equal(guardian.element,"water");

@@ -42,3 +42,7 @@ This branch is based on `v0.56.3-combat-rebalance-visible-packs` and is for **pr
 ## Next step: v0.56.5 — Secure Saves
 
 Prioritize server-side authentication for restored characters, whitelisted and validated persisted stats, slot-specific concurrency/version control, atomic progression updates and idempotent rewards. Current local snapshot/export features are a safety net only, not a substitute for a secure persistence service.
+
+## v0.56.5 secure rollout supersedes legacy direct cloud saving
+
+See `SECURE-FOUNDATION-V0565-SETUP.md` for migration, credentials and maintenance window. The previous export/rollback actions remain in place.

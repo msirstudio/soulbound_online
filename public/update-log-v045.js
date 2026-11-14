@@ -2,6 +2,14 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.56.5",date:"2026-11-14",title:"Secure Foundation — Signed Hero Data & Revisioned Slots",notes:[
+  "Signed-in heroes can now load their character from the server rather than sending combat stats through the browser.",
+  "Three slots can be migrated to a private server-controlled save table with revision checks, preventing stale-tab overwrites.",
+  "New Game and Delete use verified Socket requests when secure mode is enabled on Render.",
+  "Server writes hero progression after state changes; duplicate reward grants are prevented for a completed stage.",
+  "Server audit logs and conflict messages added; game combat formulas and class skills remain unchanged.",
+  "Secure mode requires Supabase SQL migration plus Render environment variables. Legacy mode remains for rollback until cutover."
+ ]},
  {version:"0.56.4",date:"2026-11-14",title:"System Foundation — Safer Saves & Versioning",notes:[
   "Added EXPORT HERO and LAST BACKUP buttons to the three character save slots. JSON downloads are user-controlled and exclude account credentials.",
   "Before deleting or replacing an existing hero, save an emergency backup in browser storage; if storage is full, cancel the destructive action.",

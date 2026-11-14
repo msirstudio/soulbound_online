@@ -9,7 +9,7 @@ function harness(){
  class Server{on(ev,fn){if(ev==="connection")onConnect=fn}to(code){return{emit:(event,state)=>emits.push({code,event,state})}}}
  const fakeTimer=(fn,ms)=>{scheduled.push({fn,ms});return scheduled.length};
  const dep=n=>n==="express"?express:n==="http"?{createServer:()=>({listen(){}})}:n==="socket.io"?{Server}:
-  n==="path"?path:n==="./loot-v034"?require("../loot-v034"):n==="./world-v040"?world:n==="./combat-v055"?combat:require(n);
+  n==="path"?path:n==="./loot-v034"?require("../loot-v034"):n==="./world-v040"?world:n==="./combat-v055"?combat:(String(n).startsWith("./")?require(path.join(__dirname,"..",n)):require(n));
  const rt=new Function("require","process","console","__dirname","setTimeout",server+";return {rooms,start};")(
   dep,{env:{}},{log(){}},path.join(__dirname,".."),fakeTimer);
  const handlers={};onConnect({id:"solo",join(){},on:(ev,fn)=>handlers[ev]=fn});
@@ -46,10 +46,10 @@ test("Hit pose takes precedence over attack, with visible length",()=>{
  assert.ok(game.includes("!s.enemyWindup"));
 });
 test("All visible game and API version identifiers advance to v0.56.1",()=>{
- assert.ok(html.includes("<small>v0.56.4</small>"));
- assert.ok(html.includes("VERSION 0.56.4"));
- assert.ok(html.includes('game.js?v=0.56.4'));
+ assert.ok(html.includes("<small>v0.56.5</small>"));
+ assert.ok(html.includes("VERSION 0.56.5"));
+ assert.ok(html.includes('game.js?v=0.56.5'));
  assert.ok(html.includes("v0560-combat-pacing.css?v=0.56.0"));
  assert.ok(server.includes("version:APP_VERSION"));
- assert.equal(require("../package.json").version,"0.56.4");
+ assert.equal(require("../package.json").version,"0.56.5");
 });

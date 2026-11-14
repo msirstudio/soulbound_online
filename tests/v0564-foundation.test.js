@@ -6,9 +6,9 @@ const read=p=>fs.readFileSync(path.join(root,p),"utf8");
 test("foundation audit detects version and save safety invariants without claiming security fixes",()=>{
  const result=audit();
  assert.equal(result.pass,true,result.failed.join("; "));
- assert.ok(result.passed.length>=10);
- assert.ok(result.risks.some(r=>r.includes("P0 OPEN: restoreCharacter")));
- assert.equal(result.version,"0.56.4");
+ assert.ok(result.passed.length>=14);
+ assert.ok(result.risks.some(r=>r.includes("P0 ROLLOUT: secure restores")));
+ assert.equal(result.version,"0.56.5");
 });
 test("slot-specific local recovery snapshots never include account secrets",()=>{
  const saved=new Map();
@@ -57,8 +57,8 @@ test("server releases canonical package version and UI fallback agrees",()=>{
  const server=read("server.js"),html=read("public/index.html");
  assert.ok(server.includes('version:APP_VERSION'));
  assert.ok(server.includes('readFileSync(path.join(__dirname,"package.json"),"utf8")'));
- assert.ok(html.includes("v0.56.4"));
- assert.ok(html.includes('version-v0564.js?v=0.56.4'));
+ assert.ok(html.includes("v0.56.5"));
+ assert.ok(html.includes('version-v0564.js?v=0.56.5'));
 });
 
 test("pre-change backup merges the correct world-progress slot and never uses freshWorld early",()=>{
