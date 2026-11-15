@@ -154,7 +154,9 @@ function v59RememberRoom(reply){
 function v59PendingRoom(){
  try{
   const item=JSON.parse(sessionStorage.getItem(v59StorageKey())||"null");
-  if(item?.code&&item?.ticket&&Date.now()-(item.at||0)<120000)return item;
+  // The server starts its 120-second reservation when the socket disconnects.
+  // A ticket may have been issued hours earlier during an uninterrupted game.
+  if(item?.code&&item?.ticket)return item;
  }catch(e){}
  return null;
 }
@@ -260,7 +262,7 @@ document.querySelectorAll('input[name="heroGender"]').forEach(b=>b.onchange=()=>
 $("classId").onchange=()=>{classInfo();v30UpdatePreview()};
 v30UpdatePreview();$("guestPlay").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));guestMode=true;currentUser=null;showAccount({email:"Guest Player"});$("accountEmail").textContent="GUEST · LOCAL SAVE";$("signup").hidden=true;$("signin").hidden=true;$("email").hidden=true;$("password").hidden=true;$("guestPlay").hidden=true;await prepare();authNotice("Guest mode ready. Friends can join your room with its code.")};
 $("create").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("createRoom",{name:$("name").value,classId:$("classId").value,gender:v30SelectedGender(),guest:guestMode});if(r.ok){v59RememberRoom(r);v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
-$("join").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value,classId:$("classId").value,gender:v30SelectedGender(),guest:guestMode});if(r.ok){v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
+$("join").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value,classId:$("classId").value,gender:v30SelectedGender(),guest:guestMode});if(r.ok){v59RememberRoom(r);v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
 function syncMusicUI(on){["musicToggle","musicQuick"].forEach(id=>{const b=$(id);if(!b)return;b.textContent="♫ MUSIC · "+(on?"ON":"OFF");b.classList.toggle("music-on",on);b.setAttribute("aria-pressed",String(on))})}function toggleMusic(){const on=window.SoulboundAudio.setMusic(!window.SoulboundAudio.musicOn);syncMusicUI(on)}$("musicToggle").onclick=toggleMusic;$("musicQuick").onclick=toggleMusic;$("musicVolume").oninput=e=>{window.SoulboundAudio.setVolume(Number(e.target.value)/100);if($("gameMusicVolume"))$("gameMusicVolume").value=e.target.value};
 const sfxSlider=$("sfxVolume");
 if(sfxSlider)sfxSlider.oninput=e=>{window.SoulboundAudio.setSfxVolume(Number(e.target.value)/100);if($("gameSfxVolume"))$("gameSfxVolume").value=e.target.value};
