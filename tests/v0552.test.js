@@ -113,6 +113,6 @@ test("INDEX includes clearly explained strong, weak and resisted pairs plus boss
  for(const label of ["STRONG AGAINST","WEAK TO","RESISTS ATTACKS FROM","BOSS-ONLY EXCEPTIONS"])
   assert.ok(index.includes(label),label);
  assert.ok(index.includes("INDEX UI v0.60"));
- assert.ok(index.includes("/api/index?codex=0.55.2"));
+ assert.ok(index.includes("/api/index?codex=0.60"));
  assert.ok(read("public/index.html").includes('adventure-index-v0552.js'));
 });
