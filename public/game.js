@@ -412,7 +412,7 @@ function render(){const s=gameState;if(!s)return;
   if(!cityShopScope.includes(activeShopCategory))activeShopCategory=cityShopScope[0];
  }else if(s.status==="city")cityShopScope=null;
 const v040Me=s.players.find(p=>p.id===myId);
-window.SoulboundIndex?.updateHero(v040Me);
+window.SoulboundIndex?.updateHero(v040Me,s);
 window.SoulboundUIV41?.updateGame(s,v040Me);
 window.SoulboundWorldV40?.render(s,v040Me,s.players[0]?.id===myId,{
  travel:async regionIndex=>call("travelRegion",{regionIndex}),
