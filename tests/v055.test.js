@@ -138,13 +138,13 @@ test("invalid action requests reject before DOT tick, and Cleanse has a usable p
  assert.equal(combat.validateAction(p,"cleanse",r),"No ally needs cleansing.");
 });
 test("Codex and gameplay integration keep Phase 2 exclusive and preserve existing save schema",()=>{
- const js=read("server.js"),html=read("public/index.html"),index=read("public/adventure-index-v035.js");
+ const js=read("server.js"),indexApi=read("api/adventure-index-v062.js"),html=read("public/index.html"),index=read("public/adventure-index-v035.js");
  assert.ok(js.includes('require("./combat-v055")'));
  assert.ok(js.includes("combat.validateAction(p,type,r)"));
  assert.ok(js.includes("combat.applyDefeatPenalty(r,say)"));
  assert.ok(js.includes("combat.addStagger(r,p,type"));
- assert.ok(js.includes("combat.enemyCodex({...foe,stage})"));
- assert.ok(js.includes("codex:combat.codexData()"));
+ assert.ok(indexApi.includes("combat.enemyCodex({...foe,stage})"));
+ assert.ok(indexApi.includes("codex:combat.codexData()"));
  assert.ok(html.includes('data-action="break"')&&html.includes('data-action="cleanse"'));
  for(const t of ['ELEMENTS','STATUS','COMBAT RULES','ATTACK MOVES / STATUS CHANCES','ELEMENT / RESISTANCES','PHASE 2'])
   assert.ok(index.includes(t),t);

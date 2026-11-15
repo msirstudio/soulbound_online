@@ -14,7 +14,7 @@ function audit(){
  check("visible game version matches package",html.includes("<small>v"+pkg.version.replace(/\.0$/,"")+"</small>"));
  check("menu version matches package",html.includes("VERSION "+pkg.version.replace(/\.0$/,"")+" · ARCHER CLASS"));
  check("API version uses canonical package value",server.includes('readFileSync(path.join(__dirname,"package.json")')&&
-  (server.match(/version:APP_VERSION/g)||[]).length>=2);
+  server.includes("version:APP_VERSION")&&server.includes("adventureIndex.buildIndex(APP_VERSION)"));
  check("version sync client present",html.includes('version-v0564.js?v=0.62'));
  check("save export controller loads before game.js",html.indexOf("save-guard-v0564.js")>=0&&
   html.indexOf("save-guard-v0564.js")<html.indexOf("game.js?v=0.62"));
