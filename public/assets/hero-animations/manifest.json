@@ -3,17 +3,23 @@
   "character": "female_swordsman",
   "states": {
     "idle": {
-      "src": "assets/hero-animations/female_swordsman_idle_8f.png",
+      "src": "assets/hero-animations/female_swordsman_idle_12f.png",
       "frameWidth": 256,
       "frameHeight": 256,
-      "columns": 8,
+      "columns": 12,
       "rows": 1,
-      "frames": 8,
-      "fps": 8,
+      "frames": 12,
+      "fps": 12,
       "loop": true,
       "anchor": {
         "x": 128,
-        "y": 232
+        "y": 254
+      },
+      "sourceSheet": {
+        "width": 2048,
+        "height": 260,
+        "frames": 12,
+        "note": "12 original frames were cropped/padded into equal 256x256 slots without resizing artwork"
       }
     },
     "attack": {
@@ -21,12 +27,27 @@
     },
     "hit": {
       "fallback": "assets/hero-poses/swordsman/female_hit.png"
+    },
+    "idleFallback": {
+      "src": "assets/hero-animations/female_swordsman_idle_8f.png",
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 8,
+      "rows": 1,
+      "frames": 8,
+      "fps": 12,
+      "loop": true,
+      "anchor": {
+        "x": 128,
+        "y": 232
+      }
     }
   },
   "notes": [
     "Idle overrides artwork only for female swordsman.",
     "Attack and Hit use existing pose assets.",
     "If the optional PNG is missing or invalid, game automatically falls back to original artwork.",
-    "The provided animated sprite is a fixed sword and armor appearance; per-equipment art layers are a future extension."
+    "The provided animated sprite is a fixed sword and armor appearance; per-equipment art layers are a future extension.",
+    "The original 12-frame asset must be uploaded to this branch separately; the 8-frame fallback runs at 12 FPS until it is available."
   ]
 }
