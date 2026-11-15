@@ -53,7 +53,7 @@ test("Female-only custom idle animates at 8 FPS, while attack and hit still use 
  assert.equal(flags.get("v311-custom-idle-active"),true);
  assert.equal(custom.style.backgroundPosition,"0% 0%");
  clock=125;tick(clock);
- assert.equal(custom.style.backgroundPosition,(100/7)+"% 0%");
+ assert.equal(custom.style.backgroundPosition,(1/7*100)+"% 0%");
  window.SoulboundSprite.attack("p1");clock=150;tick(clock);
  assert.equal(flags.get("v311-custom-idle-active"),false);
  assert.equal(pose.src,"/assets/hero-poses/swordsman/female_attack.png");
