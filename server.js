@@ -266,7 +266,12 @@ io.on("connection",s=>{
   const cost=p.raceId==="elf"?11:12;p.mp-=cost;p.cooldowns=p.cooldowns||{};p.cooldowns.cleanse=3;
   combat.cleanse(r,p,say);
  }else return cb({ok:false,error:"Unknown action."});
- if(archerCrit.critical&&d>0)say(r,"🎯 CRITICAL HIT! "+p.name+" lands a precision shot.");
+ if(archerCrit.critical&&d>0){
+  say(r,"🎯 CRITICAL HIT! "+p.name+" lands a precision shot.");
+  r.weaponFxSeq=(r.weaponFxSeq||0)+1;
+  r.weaponFx=(r.weaponFx||[]).concat([{id:r.weaponFxSeq,enemyId:m.enemyId||null,
+   element:"physical",kind:"critical",label:"CRITICAL SHOT",amount:d}]).slice(-16);
+ }
  if(d>0&&["attack","skill","skill2","skill3","skill4","skill5","skill6","skill7"].includes(type))
   weaponPassives.applyPassive({room:r,player:p,target:m,baseDamage:d,action:type,random:Math.random,say,combat});
  // Server-authoritative AoE: primary full damage, other living enemies
