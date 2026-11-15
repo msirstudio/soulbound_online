@@ -1,5 +1,5 @@
 const express=require("express"),http=require("http"),path=require("path");
-const {Server}=require("socket.io");const weaponCatalog=require(path.join(__dirname,"items","weapon-shop-v060.js"));const multi=require(path.join(__dirname,"multiplayer","session-v059.js"));const {randomUUID}=require("node:crypto");const formulas=require(path.join(__dirname,"combat","formulas.js"));const skillCore=require(path.join(__dirname,"combat","skills.js"));const loot=require("./loot-v034");const secure=require(path.join(__dirname,"persistence","secure-saves-v057.js"));const APP_VERSION=JSON.parse(require("fs").readFileSync(path.join(__dirname,"package.json"),"utf8")).version.replace(/\.0$/,"");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
+const {Server}=require("socket.io");const weaponCatalog=require(path.join(__dirname,"items","weapon-shop-v060.js"));const weaponPassives=require(path.join(__dirname,"items","weapon-passives-v061.js"));const multi=require(path.join(__dirname,"multiplayer","session-v059.js"));const {randomUUID}=require("node:crypto");const formulas=require(path.join(__dirname,"combat","formulas.js"));const skillCore=require(path.join(__dirname,"combat","skills.js"));const loot=require("./loot-v034");const secure=require(path.join(__dirname,"persistence","secure-saves-v057.js"));const APP_VERSION=JSON.parse(require("fs").readFileSync(path.join(__dirname,"package.json"),"utf8")).version.replace(/\.0$/,"");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
 app.use(express.static(path.join(__dirname,"public")));if(secure.enabled)app.use(express.json({limit:"8kb"}));
 app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:APP_VERSION,secureSavesEnabled:secure.enabled}));
 const credential=req=>String(req.headers.authorization||"").replace(/^Bearer\s+/i,"");
@@ -79,12 +79,24 @@ app.get("/api/index",(_,res)=>{
   races:races.map(({id,name,rarity,icon,weight,passive,buffs})=>({id,name,rarity:rarity==="legend"?"legendary":rarity,icon,chance:weight,passive,buffs})),
   monsters:enemies,items:[...goods,...drops],zones:world.regions.map(r=>({name:r.name,css:r.css,hint:r.hint,stages:r.firstStage+"–"+r.bossStage}))});
 });
-function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,enemies:pack.publicEnemies(r),partyWardReduction:r.partyWardReduction||0,enemyWindup:!!r.pendingEnemy,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,partyWardTurns:r.partyWardTurns||0,shopCategory:r.shopCategory||null,shopOrigin:r.shopOrigin||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),log:r.log.slice(-40),chat:(r.chat||[]).slice(-40)}}
+function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,enemies:pack.publicEnemies(r),partyWardReduction:r.partyWardReduction||0,enemyWindup:!!r.pendingEnemy,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0})),turnIndex:r.turnIndex,status:r.status,partyWardTurns:r.partyWardTurns||0,shopCategory:r.shopCategory||null,shopOrigin:r.shopOrigin||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),weaponFx:(r.weaponFx||[]).slice(-16),log:r.log.slice(-40),chat:(r.chat||[]).slice(-40)}}
 function emit(r){io.to(r.code).emit("state",publicRoom(r));saveVerifiedRoom(r)}function say(r,m){r.log.push(m);if(r.log.length>40)r.log.shift()}
 function createRoom(code){const r={code,stage:1,regionIndex:0,monster:null,enemies:[],players:new Map(),turnIndex:0,status:"city",log:[],chat:[],reconnectPaused:false};rooms.set(code,r);return r}
 function findRoom(s){return [...rooms.values()].find(r=>r.players.has(s.id))}function current(r){const a=[...r.players.values()];return a.length?a[r.turnIndex%a.length]:null}function alive(r){return [...r.players.values()].filter(p=>p.hp>0)}
 function player(id,name,c="swordsman",gender="male"){const mage=c==="mage",tank=c==="tank";return{id,name:cleanName(name),gender:gender==="female"?"female":"male",inventory:[],weaponItem:null,armorItem:null,foodItems:{roast_meat:0,herb_stew:0,mana_tart:0},foodBuffs:{atk:0,def:0,skill:0},classId:tank?"tank":mage?"mage":"swordsman",className:tank?"Tank":mage?"Mage":"Swordsman",hp:tank?180:mage?120:130,maxHp:tank?180:mage?120:130,mp:tank?55:mage?65:40,maxMp:tank?55:mage?65:40,level:1,xp:0,gold:80,potions:3,manaPotions:2,smallHealth:3,mediumHealth:0,largeHealth:0,smallMana:2,mediumMana:0,largeMana:0,classPath:null,tauntTurns:0,damageAmpTurns:0,damageReductionTurns:0,atk:tank?16:mage?25:22,def:tank?16:mage?8:10,weapon:tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",armor:tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",raceId:"human",racePoints:0,raceName:"Human",raceRarity:"common",racePassive:races[0].passive,raceBuffs:races[0].buffs,strength:0,vitality:0,intelligence:0,agility:0,statPoints:0,speed:10,cooldowns:{},worldProgress:world.normalizeProgress(null)}}
-function monsterStrike(r){combat.monsterStrike(r,{say,raceById,random:Math.random})}
+function monsterStrike(r){
+ const m=r.monster,fire=weaponPassives.tickBurn(m);
+ if(fire.damage){
+  say(r,"🔥 "+m.name+" takes "+fire.damage+" Burn damage ("+fire.remaining+" turns remaining).");
+  weaponPassives.recordBurn(r,m,fire.damage);
+  if(fire.defeated){
+   m.defeatAnnounced=true;say(r,"☠ "+m.name+" is defeated by Burn.");
+   if(pack.deadTarget(r))finish(r);
+   return false;
+  }
+ }
+ combat.monsterStrike(r,{say,raceById,random:Math.random});return true;
+}
 function enemyCounterAfterBeat(r){
  const token={stage:r.stage,enemies:pack.alive(r),selected:r.monster};
  r.pendingEnemy=token;
@@ -98,9 +110,9 @@ function enemyCounterAfterBeat(r){
   }
   const attacker=token.enemies[index];
   if(attacker?.hp>0){
-   r.monster=attacker;monsterStrike(r);
+   r.monster=attacker;const struck=monsterStrike(r);
    r.monster=pack.select(r,token.selected?.enemyId)||pack.alive(r)[0]||r.monster;
-   say(r,"⚔ "+attacker.name+" finishes its attack.");
+   if(struck)say(r,"⚔ "+attacker.name+" finishes its attack.");
    emit(r);
   }
   if(r.status!=="battle"){r.pendingEnemy=null;combat.applyDefeatPenalty(r,say);emit(r);return}
@@ -111,7 +123,7 @@ function enemyCounterAfterBeat(r){
 function skipFallenTurn(r){if(r.status!=="battle")return;const players=[...r.players.values()];if(!players.length||!alive(r).length)return;let i=0;while(current(r)?.hp<=0&&i<players.length){r.turnIndex=(r.turnIndex+1)%players.length;i++}if(i>0)say(r,"Fallen party members are skipped until victory or defeat.")}
 function start(r){
  const first=encounter(r.stage);r.status="battle";r.shopOrigin=null;r.shopCategory=null;r.encounterId=randomUUID();r.rewardedEncounter=null;
- r.enemies=[];r.monster=first;
+ r.enemies=[];r.monster=first;r.weaponFx=[];
  pack.makeGroup(r,first,normal,Math.random);
  r.defeatPenaltyApplied=false;r.turnSerial=1;r.partyWardTurns=0;r.partyWardReduction=0;
  for(const foe of r.enemies){foe.stage=r.stage;combat.beginEncounter(foe,r);foe.staggerThreshold=combat.staggerThreshold(foe)}
@@ -239,8 +251,8 @@ io.on("connection",s=>{
   skipFallenTurn(r);combat.applyDefeatPenalty(r,say);emit(r);return cb({ok:true,skipped:true});
  }
  let d=0;const race=raceById(p.raceId),lowHp=p.hp/p.maxHp<=.5,pathDamage=p.classPath==="berserker"&&lowHp?1.1:1,foodAttack=p.foodBuffs?.atk>0?1.15:1,damageBonus=((p.raceId==="orc"&&lowHp)?1.08:1)*pathDamage*foodAttack*(p._combatAttackMultiplier||1);
- if(type==="attack"){d=formulas.basicAttack({attack:p.atk,defense:m.def,randomRoll:Math.floor(Math.random()*8),attackMultiplier:damageBonus,elementMultiplier:combat.elementMultiplier(m,"physical"),vulnerable:m.vulnerableTurns>0});m.hp=Math.max(0,m.hp-d);if(p.foodBuffs?.atk>0)p.foodBuffs.atk--;say(r,p.name+" attacks for "+d+" damage.");if(p.raceId==="beastkin"&&Math.random()<.1){p.mp=Math.min(p.maxMp,p.mp+3);say(r,p.name+" triggers Predator Instinct and recovers 3 MP!")}}
- else if(skillCore.SKILL_TYPES.includes(type)){const sk=skillCore.definition(p,type),cost=p.raceId==="elf"?Math.floor(sk.cost*.95):sk.cost;if((p.cooldowns?.[type]||0)>0)return cb({ok:false,error:"Skill is on cooldown for "+p.cooldowns[type]+" more round(s)."});if(p.level<sk.unlock)return cb({ok:false,error:"Unlocks at level "+sk.unlock+"."});if(p.mp<cost)return cb({ok:false,error:"Not enough MP."});p.mp-=cost;if(p.foodBuffs?.skill>0)sk.mult*=1.1;p.cooldowns=p.cooldowns||{};p.cooldowns[type]=sk.cd;if(p.foodBuffs?.skill>0)p.foodBuffs.skill--;if(p.classPath==="warlock"){const leech=Math.max(1,Math.ceil(p.maxMp*.05));p.mp=Math.min(p.maxMp,p.mp+leech);say(r,p.name+" leeches "+leech+" MP through Soul Leech.")}if(p.classPath==="paladin"){const holy=Math.max(1,Math.ceil(p.maxHp*.05));p.hp=Math.min(p.maxHp,p.hp+holy);say(r,p.name+" restores "+holy+" HP through Holy Vigor.")}d=formulas.skillAttack({attack:p.atk,defense:m.def,skillMultiplier:sk.mult,randomRoll:Math.floor(Math.random()*12),attackMultiplier:damageBonus,elementMultiplier:combat.elementMultiplier(m,combat.skillElement(p,type)),vulnerable:m.vulnerableTurns>0,archmage:p.classPath==="archmage"});m.hp=Math.max(0,m.hp-d);if(p.foodBuffs?.atk>0)p.foodBuffs.atk--;if(type==="skill3"&&p.classId==="tank"){p.tauntTurns=3;say(r,p.name+" uses PROVOKE! Monsters will target the Tank for 3 enemy turns.")}else if(type==="skill5"){if(p.classId==="tank"){p.damageReductionTurns=3;say(r,p.name+" activates AEGIS PACT: damage taken reduced by 20% for 3 enemy turns.");combat.aegis(r,p,say)}else{m.vulnerableTurns=3;say(r,p.name+" uses "+sk.name+"! The monster takes 20% more damage for 3 rounds.")}}if(type==="skill3"&&p.classId==="mage"){combat.debuffMonster(m,"chill",1);say(r,p.name+" chills the enemy, reducing its next attack.");const heal=Math.ceil(p.maxHp*.1);p.hp=Math.min(p.maxHp,p.hp+heal);say(r,p.name+" uses FROST NOVA for "+d+" damage and restores "+heal+" HP!")}else{if(type==="skill3"&&p.classId==="swordsman"){p.damageReductionTurns=Math.max(p.damageReductionTurns||0,2);combat.debuffMonster(m,"weaken",2);say(r,p.name+" breaks the enemy rhythm: weaker damage for two attacks.")}say(r,p.name+" uses "+sk.name+" for "+d+" damage!"+(type==="skill3"&&p.classId==="swordsman"?" DEFENSE UP for two enemy attacks.":""))}}
+ if(type==="attack"){d=formulas.basicAttack({attack:p.atk,defense:m.def,randomRoll:Math.floor(Math.random()*8),attackMultiplier:damageBonus,elementMultiplier:combat.elementMultiplier(m,weaponPassives.attackElement(p,type,"physical")),vulnerable:m.vulnerableTurns>0});m.hp=Math.max(0,m.hp-d);if(p.foodBuffs?.atk>0)p.foodBuffs.atk--;say(r,p.name+" attacks for "+d+" damage.");if(p.raceId==="beastkin"&&Math.random()<.1){p.mp=Math.min(p.maxMp,p.mp+3);say(r,p.name+" triggers Predator Instinct and recovers 3 MP!")}}
+ else if(skillCore.SKILL_TYPES.includes(type)){const sk=skillCore.definition(p,type),cost=p.raceId==="elf"?Math.floor(sk.cost*.95):sk.cost;if((p.cooldowns?.[type]||0)>0)return cb({ok:false,error:"Skill is on cooldown for "+p.cooldowns[type]+" more round(s)."});if(p.level<sk.unlock)return cb({ok:false,error:"Unlocks at level "+sk.unlock+"."});if(p.mp<cost)return cb({ok:false,error:"Not enough MP."});p.mp-=cost;if(p.foodBuffs?.skill>0)sk.mult*=1.1;p.cooldowns=p.cooldowns||{};p.cooldowns[type]=sk.cd;if(p.foodBuffs?.skill>0)p.foodBuffs.skill--;if(p.classPath==="warlock"){const leech=Math.max(1,Math.ceil(p.maxMp*.05));p.mp=Math.min(p.maxMp,p.mp+leech);say(r,p.name+" leeches "+leech+" MP through Soul Leech.")}if(p.classPath==="paladin"){const holy=Math.max(1,Math.ceil(p.maxHp*.05));p.hp=Math.min(p.maxHp,p.hp+holy);say(r,p.name+" restores "+holy+" HP through Holy Vigor.")}d=formulas.skillAttack({attack:p.atk,defense:m.def,skillMultiplier:sk.mult,randomRoll:Math.floor(Math.random()*12),attackMultiplier:damageBonus,elementMultiplier:combat.elementMultiplier(m,weaponPassives.attackElement(p,type,combat.skillElement(p,type))),vulnerable:m.vulnerableTurns>0,archmage:p.classPath==="archmage"});m.hp=Math.max(0,m.hp-d);if(p.foodBuffs?.atk>0)p.foodBuffs.atk--;if(type==="skill3"&&p.classId==="tank"){p.tauntTurns=3;say(r,p.name+" uses PROVOKE! Monsters will target the Tank for 3 enemy turns.")}else if(type==="skill5"){if(p.classId==="tank"){p.damageReductionTurns=3;say(r,p.name+" activates AEGIS PACT: damage taken reduced by 20% for 3 enemy turns.");combat.aegis(r,p,say)}else{m.vulnerableTurns=3;say(r,p.name+" uses "+sk.name+"! The monster takes 20% more damage for 3 rounds.")}}if(type==="skill3"&&p.classId==="mage"){combat.debuffMonster(m,"chill",1);say(r,p.name+" chills the enemy, reducing its next attack.");const heal=Math.ceil(p.maxHp*.1);p.hp=Math.min(p.maxHp,p.hp+heal);say(r,p.name+" uses FROST NOVA for "+d+" damage and restores "+heal+" HP!")}else{if(type==="skill3"&&p.classId==="swordsman"){p.damageReductionTurns=Math.max(p.damageReductionTurns||0,2);combat.debuffMonster(m,"weaken",2);say(r,p.name+" breaks the enemy rhythm: weaker damage for two attacks.")}say(r,p.name+" uses "+sk.name+" for "+d+" damage!"+(type==="skill3"&&p.classId==="swordsman"?" DEFENSE UP for two enemy attacks.":""))}}
  else if(["heal","healSmall","healMedium","healLarge"].includes(type)){const tier=type==="healLarge"?"large":type==="healMedium"?"medium":"small",key=tier+"Health",pct=tier==="large"?.5:tier==="medium"?.35:.2;if((p[key]||0)<1||p.hp===p.maxHp)return cb({ok:false,error:"No potion of this size or HP is full."});p[key]--;p.potions=Math.max(0,(p.potions||0)-(tier==="small"?1:0));const n=Math.min(Math.ceil(p.maxHp*pct),p.maxHp-p.hp);p.hp+=n;say(r,p.name+" uses "+tier.toUpperCase()+" Health Potion and restores "+n+" HP.")}
  else if(["mana","manaSmall","manaMedium","manaLarge"].includes(type)){const tier=type==="manaLarge"?"large":type==="manaMedium"?"medium":"small",key=tier+"Mana",pct=tier==="large"?.5:tier==="medium"?.35:.2;if((p[key]||0)<1||p.mp===p.maxMp)return cb({ok:false,error:"No mana potion of this size or MP is full."});p[key]--;p.manaPotions=Math.max(0,(p.manaPotions||0)-(tier==="small"?1:0));const n=Math.min(Math.ceil(p.maxMp*pct),p.maxMp-p.mp);p.mp+=n;say(r,p.name+" uses "+tier.toUpperCase()+" Mana Potion and restores "+n+" MP.")}
  else if(type==="food_roast"||type==="food_stew"||type==="food_tart"){const key=type==="food_roast"?"roast_meat":type==="food_stew"?"herb_stew":"mana_tart";if((p.foodItems?.[key]||0)<1)return cb({ok:false,error:"You do not have this food."});p.foodItems[key]--;p.foodBuffs=p.foodBuffs||{atk:0,def:0,skill:0};if(key==="roast_meat"){p.foodBuffs.atk=3;say(r,p.name+" eats Dragonpepper Roast: +15% damage for 3 attacks.")}else if(key==="herb_stew"){p.foodBuffs.def=3;say(r,p.name+" eats Guardian Herb Stew: -20% damage for the next 3 hits.")}else{const restored=Math.min(Math.ceil(p.maxMp*.3),p.maxMp-p.mp);p.mp+=restored;p.foodBuffs.skill=3;say(r,p.name+" eats Moonberry Tart: restores "+restored+" MP and boosts the next 3 skills by 10%.")}}else if(type==="guard"){p.mp=Math.min(p.maxMp,p.mp+8);combat.guard(r,p,say);say(r,p.name+" recovers 8 MP.")}
@@ -252,13 +264,15 @@ io.on("connection",s=>{
   const cost=p.raceId==="elf"?11:12;p.mp-=cost;p.cooldowns=p.cooldowns||{};p.cooldowns.cleanse=3;
   combat.cleanse(r,p,say);
  }else return cb({ok:false,error:"Unknown action."});
+ if(d>0&&["attack","skill","skill2","skill3","skill4","skill5","skill6","skill7"].includes(type))
+  weaponPassives.applyPassive({room:r,player:p,target:m,baseDamage:d,action:type,random:Math.random,say,combat});
  // Server-authoritative AoE: primary full damage, other living enemies
  // receive 65% with their individual armour and elemental resistance.
  if(aoe&&d>0){
   let struck=1;
   for(const other of pack.alive(r)){
    if(other===m)continue;
-   const element=combat.skillElement(p,type);
+   const element=weaponPassives.attackElement(p,type,combat.skillElement(p,type));
    const hit=formulas.areaSplash({primaryDamage:d,attack:p.atk,primaryDefense:m.def,secondaryDefense:other.def,
     primaryElement:combat.elementMultiplier(m,element),secondaryElement:combat.elementMultiplier(other,element),
     skillMultiplier:skillCore.areaMultiplier(type)});
@@ -271,7 +285,7 @@ io.on("connection",s=>{
  // All damaging actions build a persistent Stagger bar. Only a charged attack
  // can be interrupted. The boss resists subsequent interrupts briefly.
  if(["attack","skill","skill2","skill3","skill4","skill5","break"].includes(type)&&m.hp>0)
-  combat.addStagger(r,p,type,combat.skillElement(p,type),say);
+  combat.addStagger(r,p,type,weaponPassives.attackElement(p,type,combat.skillElement(p,type)),say);
  if(m.hp<=0||pack.alive(r).length===0){
  for(const fallen of r.enemies.filter(x=>x.hp<=0&&!x.defeatAnnounced)){fallen.defeatAnnounced=true;say(r,"☠ "+fallen.name+" defeated!");}
  if(pack.deadTarget(r)){finish(r);emit(r);return cb({ok:true})}
