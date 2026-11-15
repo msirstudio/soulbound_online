@@ -2,6 +2,15 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.60",date:"2026-11-15",title:"Expanded Weaponsmith — Five New Tiers for Every Class",notes:[
+  "Added 15 new shop weapons (five per Swordsman, Mage and Tank), bringing the merchant's total to 24 weapons.",
+  "New progression tiers unlock at Lv 15, 25, 40, 55 and 70, after defeating the corresponding previous region boss.",
+  "Fixed missing merchant category metadata that could reject valid purchases of existing weapons and armor.",
+  "Weaponsmith now lists only your class's weapons, sorted by required level, and displays boss/level/gold lock reasons before buying.",
+  "Purchased weapons can be equipped, swapped, saved, and reloaded using the existing inventory system with stable template IDs and per-copy UIDs.",
+  "No elemental damage or status procs are active on the new weapons yet; their names and icons are thematic only until the planned 0.61 elemental update.",
+  "No changes to combat formula, boss HP/ATK, potion prices or Supabase save schema."
+ ]},
  {version:"0.59",date:"2026-11-15",title:"Multiplayer Stability — Reconnect and Safe Turns",notes:[
   "A disconnect reserves a hero's room and exact turn state for 120 seconds rather than immediately deleting the player.",
   "Reconnecting requires a private, rotating 256-bit token; signed-in players also reverify their Supabase session in Secure Save mode.",

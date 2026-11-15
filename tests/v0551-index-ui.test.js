@@ -23,7 +23,7 @@ function browserHarness(){
    this.children.push(child);
    if(child.id)registry.set(child.id,child);
    if(child.id==="v035Index"){
-    for(const id of ["v035Exit","v035Search","v035Rarity","v035Tabs","v035Results",
+    for(const id of ["v035Exit","v035Search","v035Rarity","v060IndexParty","v035Tabs","v035Results",
       "v035Details","v035Status","v035CategoryTitle","v035Count","v035Close"]){
       const node=new Element();node.id=id;registry.set(id,node);
     }
@@ -31,6 +31,7 @@ function browserHarness(){
    return child;
   }
   querySelector(){return null}
+  closest(){return new Element("label")}
   querySelectorAll(){return []}
   getClientRects(){return [1]}
   focus(){}
@@ -55,7 +56,7 @@ test("browser loads a uniquely versioned INDEX script and not the old cached v03
  assert.match(html,/src="adventure-index-v0552[.]js[?]v=[^"]+"/);
  assert.ok(!html.includes('src="adventure-index-v035.js"'));
  assert.ok(html.includes('href="v0551-index-status-boss.css"'));
- assert.ok(html.includes("v0.59"));
+ assert.ok(html.includes("v0.60"));
 });
 test("interactive INDEX renders all 3 new guides and immediate boss affinity/attack summary",async()=>{
  const h=browserHarness();
@@ -71,9 +72,9 @@ test("interactive INDEX renders all 3 new guides and immediate boss affinity/att
  assert.ok(detail.includes("Briarstorm"));
  assert.ok(detail.includes("55%"));
  assert.ok(detail.includes("ATTACK MOVES / STATUS CHANCES"));
- assert.ok(h.requests[0].url.includes("codex=0.55.2"));
+ assert.ok(h.requests[0].url.includes("codex=0.60"));
  assert.equal(h.requests[0].options.cache,"no-store");
- assert.ok(h.element("v035Status").textContent.includes("INDEX UI v0.55.2"));
+ assert.ok(h.element("v035Status").textContent.includes("INDEX UI v0.60"));
  await h.context.window.SoulboundIndex.open("statuses");
  assert.equal(h.element("v035CategoryTitle").textContent,"STATUS");
  assert.ok(h.element("v035Results").innerHTML.includes("Chill"));

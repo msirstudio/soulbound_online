@@ -14,8 +14,8 @@ test("new title cover affects main-menu panel only and preserves actions",()=>{
 });
 test("v0.55 includes the earlier cover and updates the version",()=>{
  const html=read("public/index.html"),log=read("public/update-log-v045.js"),pkg=require("../package.json");
- assert.equal(pkg.version,"0.59.0");
- assert.ok(html.includes("VERSION 0.59 · MULTIPLAYER"));
- assert.ok(html.includes("ONLINE RPG · v0.59 MULTIPLAYER"));
+ assert.equal(pkg.version,"0.60.0");
+ assert.ok(html.includes("VERSION 0.60 · EXPANDED WEAPON SHOP"));
+ assert.ok(html.includes("ONLINE RPG · v0.60 WEAPON SHOP"));
  assert.ok(log.includes('version:"0.48.2"'));
 });

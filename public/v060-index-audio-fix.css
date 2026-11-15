@@ -1,0 +1,21 @@
+/* SOULBOUND 0.60 · INDEX accuracy and lower Audio dock hotfix.
+ * The actual audio controls keep their IDs, handlers and saved preferences. */
+#game .v0559-audio-row{width:100%;justify-content:flex-end!important;gap:8px!important}
+#game .v0559-audio-row::before{content:"♫ SOUND SETTINGS";margin-right:auto;color:#baa884;font:700 10px Georgia,serif;letter-spacing:.08em;pointer-events:none}
+#game .v0559-audio-row #audioSettings.audio-settings-pop:not([hidden]){
+ top:auto!important;bottom:calc(100% + 8px)!important;left:auto!important;right:0!important;
+ z-index:2900!important
+}
+#v035Index .v060-index-party{min-width:110px}
+#v035Index .v060-index-party[hidden]{display:none!important}
+#v035Index .v060-index-party select{min-width:95px;max-width:145px}
+#v035Index .v060-encounter-rules{margin:9px 0;padding:10px;border:1px solid #9b8664;border-radius:6px;background:#172034}
+#v035Index .v060-encounter-rules>strong{display:block;color:#f6d898;font:700 12px Georgia,serif;margin-bottom:7px}
+#v035Index .v060-spawn-line{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px 10px;padding:6px 0;border-top:1px solid #575768;color:#d7e0ee;font:12px/1.45 Georgia,serif}
+#v035Index .v060-spawn-line b{color:#f5d99e;min-width:80px}
+#v035Index .v060-encounter-rules small{display:block;margin-top:8px;color:#bac9da;font:11px/1.5 Georgia,serif}
+@media(max-width:650px){
+ #game .v0559-audio-row::before{font-size:9px}
+ #v035Index .v060-encounter-rules{padding:8px}
+ #v035Index .v060-spawn-line{font-size:11px}
+}

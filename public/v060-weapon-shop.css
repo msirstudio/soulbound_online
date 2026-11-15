@@ -1,0 +1,15 @@
+/* SOULBOUND 0.60 — compact, readable merchant progression. */
+#shopItems .v060-shop-item{display:flex;align-items:center;gap:8px;padding:8px 10px;min-width:0}
+#shopItems .v060-shop-text{display:flex;min-width:0;flex:1 1 auto;flex-direction:column;gap:3px}
+#shopItems .v060-shop-text strong{font-size:12px;line-height:1.35;white-space:normal}
+#shopItems .v060-shop-text small{font-size:10px;opacity:.85;line-height:1.4;white-space:normal}
+#shopItems .v060-price{color:#eac47e;font-size:11px;font-weight:700}
+#shopItems .v060-weapon-tier{align-self:flex-start;border:1px solid #88765b;border-radius:3px;padding:1px 5px;color:#d9c4a8;font:700 9px Georgia,serif;text-transform:uppercase;letter-spacing:.06em}
+#shopItems .v060-locked{opacity:.74}
+#shopItems .v060-shop-item button{flex:0 0 auto;max-width:170px;min-width:72px;white-space:normal;line-height:1.25;text-align:center}
+#shopItems .v060-shop-item button[disabled]{cursor:not-allowed;opacity:.65}
+@media(max-width:580px){
+ #shopItems .v060-shop-item{padding:7px 5px;gap:6px}
+ #shopItems .v060-shop-text strong{font-size:11px}
+ #shopItems .v060-shop-item button{min-width:66px;max-width:114px;font-size:9px}
+}
