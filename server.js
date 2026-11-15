@@ -22,7 +22,7 @@ function saveVerifiedRoom(r){
  for(const p of r.players.values()){const claim=verifiedCharacters.get(p.id);if(claim)secureQueue.persist(claim,p)}
 }
 const world=require("./world-v040");const combat=require("./combat-v055");const pack=world.encounterPack;const rooms=new Map();
-const catalog=require(path.join(__dirname,"data","game-catalog-v062.js"));const {normal,bosses,shopItems,races}=catalog;
+const adventureIndex=require(path.join(__dirname,"api","adventure-index-v062.js"));const catalog=require(path.join(__dirname,"data","game-catalog-v062.js"));const {normal,bosses,shopItems,races}=catalog;
 const scenes=[{name:"THE CURSED WILDS",hint:"Ancient trees whisper in the dark.",css:"wilds"},{name:"FALLEN KINGDOM",hint:"Broken towers watch your every move.",css:"ruins"},{name:"EMBER CAVERNS",hint:"Heat shimmers above the black stone.",css:"cavern"},{name:"FROSTBOUND PASS",hint:"A cold wind sweeps across the ice.",css:"frost"},{name:"THE VOID",hint:"Something stirs beyond the veil.",css:"abyss"},{name:"ECLIPSE CITADEL",hint:"The final kingdom lies ahead.",css:"castle"}];
 function raceById(id){return races.find(x=>x.id===id)||races[0]}
 function applyRace(p,newId){const old=raceById(p.raceId),next=raceById(newId),ratio=(v,a,b)=>Math.max(1,Math.round(v/a*b)),hpPct=p.hp/Math.max(1,p.maxHp),mpPct=p.mp/Math.max(1,p.maxMp);p.maxHp=ratio(p.maxHp,old.hp,next.hp);p.maxMp=ratio(p.maxMp,old.mp,next.mp);p.atk=ratio(p.atk,old.atk,next.atk);p.def=ratio(p.def,old.def,next.def);p.hp=Math.max(1,Math.round(p.maxHp*hpPct));p.mp=Math.min(p.maxMp,Math.round(p.maxMp*mpPct));p.raceId=next.id;p.raceName=next.name;p.raceRarity=next.rarity;p.racePassive=next.passive;p.raceBuffs=next.buffs}
@@ -31,40 +31,7 @@ function sceneFor(n){const r=world.regionForStage(n);return {name:r.name,hint:r.
 function encounter(n){return world.encounter(n,normal,bosses)}
 /* v0.35 in-game index: generated from the actual encounter, shop and boss loot rules.
    Read-only route: no player data, saves, combat state or database changes. */
-app.get("/api/index",(_,res)=>{
- const enemies=Array.from({length:world.totalStages},(_,index)=>{
-  const stage=index+1,foe=encounter(stage),zone=sceneFor(stage);
-   const partyPreview=pack.encounterPreview(stage,foe,normal),solo=partyPreview[0].variants[0];
-  return {id:"stage-"+stage,stage,name:foe.name,icon:foe.icon||"⚔",
-   sprite:foe.sprite,boss:!!foe.boss,miniBoss:!!foe.miniBoss,regionId:foe.regionId,zone:zone.name,hp:solo.hp,atk:solo.atk,def:solo.def,
-   xp:solo.xp,gold:solo.gold,partyPreview,...combat.enemyCodex({...foe,stage}),loot:foe.boss||foe.miniBoss?"Each possible item rolls separately by rarity; multiple drops can be won together.":"No random equipment drops"};
- });
- const goods=shopItems.map(it=>({...it,category:it.category==="food"?"food":it.slot==="weapon"?"weapons":it.slot==="armor"?"armor":"consumables"}));
- const drops=[],bossDropTables={},miniDropTables={};
- for(let i=1;i<=8;i++){
-  for(const type of ["boss","mini"]){
-   const isMini=type==="mini",stage=(i-1)*5+(isMini?4:5);
-   const name=isMini?world.regions[i-1].miniName:bosses[i-1].name;
-   const rows=(isMini?loot.miniDrops(i):loot.bossDrops(i)).map(it=>({
-    ...it,category:it.slot==="main"||it.slot==="offhand"?"weapons":["head","chest","pants","boots"].includes(it.slot)?"armor":"accessories",
-    source:name,sourceStage:stage,price:null
-   }));
-   drops.push(...rows);
-   (isMini?miniDropTables:bossDropTables)[stage]=rows.map(({id,name,rarity,chance,slot,icon,category})=>({id,name,rarity,chance,slot,icon,category}));
-  }
- }
- enemies.forEach(enemy=>{
-  if(enemy.boss||enemy.miniBoss){enemy.drops=(enemy.boss?bossDropTables:miniDropTables)[enemy.stage]||[];
-   enemy.loot="Each listed item is rolled independently for each player. Several items may drop on the same victory; bag capacity still applies.";}
- });
- res.set("Cache-Control","no-store, max-age=0");
- res.json({version:APP_VERSION,title:"SOULBOUND ADVENTURE INDEX",stageCount:world.totalStages,
-  categories:["bosses","monsters","races","weapons","armor","accessories","food","consumables","elements","statuses","combat"],
-  codex:combat.codexData(),
-  bossDropTables,miniDropTables,lootRule:"Each possible item has its own independent drop roll based on rarity. Multiple items may drop; inventory remains limited to 40 unequipped pieces.",
-  races:races.map(({id,name,rarity,icon,weight,passive,buffs})=>({id,name,rarity:rarity==="legend"?"legendary":rarity,icon,chance:weight,passive,buffs})),
-  monsters:enemies,items:[...goods,...drops],zones:world.regions.map(r=>({name:r.name,css:r.css,hint:r.hint,stages:r.firstStage+"–"+r.bossStage}))});
-});
+app.get("/api/index",(_,res)=>{res.set("Cache-Control","no-store, max-age=0");res.json(adventureIndex.buildIndex(APP_VERSION));});
 function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,enemies:pack.publicEnemies(r),partyWardReduction:r.partyWardReduction||0,enemyWindup:!!r.pendingEnemy,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0,...(p.classId==="archer"?{skillBook:archer.publicSkills()}:{})})),turnIndex:r.turnIndex,status:r.status,partyWardTurns:r.partyWardTurns||0,shopCategory:r.shopCategory||null,shopOrigin:r.shopOrigin||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),weaponFx:(r.weaponFx||[]).slice(-16),log:r.log.slice(-40),chat:(r.chat||[]).slice(-40)}}
 function emit(r){io.to(r.code).emit("state",publicRoom(r));saveVerifiedRoom(r)}function say(r,m){r.log.push(m);if(r.log.length>40)r.log.shift()}
 function createRoom(code){const r={code,stage:1,regionIndex:0,monster:null,enemies:[],players:new Map(),turnIndex:0,status:"city",log:[],chat:[],reconnectPaused:false};rooms.set(code,r);return r}
