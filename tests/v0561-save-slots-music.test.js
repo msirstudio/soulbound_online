@@ -51,8 +51,8 @@ test("Audio keeps original controls at bottom-right after the main HUD",()=>{
  assert.ok(lowerCss.includes("bottom:calc(100% + 8px)"));
 });
 test("Release and API versions agree",()=>{
- assert.ok(html.includes('<small>v0.61</small>'));
- assert.ok(html.includes('VERSION 0.61 · ELEMENTAL WEAPONS'));
- assert.equal(require("../package.json").version,"0.61.0");
+ assert.ok(html.includes('<small>v0.62</small>'));
+ assert.ok(html.includes('VERSION 0.62 · ARCHER CLASS'));
+ assert.equal(require("../package.json").version,"0.62.0");
  assert.ok(read("server.js").includes("version:APP_VERSION"));
 });

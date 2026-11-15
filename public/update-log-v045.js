@@ -2,6 +2,16 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.62",date:"2026-11-15",title:"Archer — The Fourth Playable Class",notes:[
+  "Added Archer, the first ranged class, with separate starter HP, MP, ATK, DEF, speed, a green hooded SVG character and a visible bow.",
+  "Seven skills: Quick Shot, Arrow Volley, Pinning Arrow, Piercing Shot, Hunter's Mark, Rain of Arrows and Heartseeker.",
+  "Arrow Volley and Rain of Arrows are server-authoritative AoE. Pinning Arrow weakens; Hunter's Mark exposes targets; Heartseeker is capped against wounded foes.",
+  "Archer basic attacks and damaging skills have a 12% critical chance for 35% additional damage, validated on the server and shown in battle FX.",
+  "The Weaponsmith has eight Archer weapons: three affordable early bows plus five boss-gated bows with bounded elemental passives.",
+  "Guest and Secure Save new game/restore support Archer; saved heroes from the original three classes remain unchanged.",
+  "Archer paths Sharpshooter and Beastmaster are planned for v0.65; do not yet appear as selectable specializations.",
+  "No SQL migration is required for server-side JSON secure slots. Verify actual browser, Render and connected Supabase restores before merging."
+ ]},
  {version:"0.61",date:"2026-11-15",title:"Elemental Weapons — 15 Unique Passives & Lower Audio Dock",notes:[
   "Added a server-authoritative elemental attunement and a distinct passive to each of the 15 v0.60 progression weapons.",
   "Weapon basic attacks use the canonical elemental chart: strong ×1.20, resisted ×0.80, neutral ×1.00. Existing Mage spell and Paladin Light elements are preserved.",

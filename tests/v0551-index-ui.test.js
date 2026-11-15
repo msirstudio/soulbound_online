@@ -56,7 +56,7 @@ test("browser loads a uniquely versioned INDEX script and not the old cached v03
  assert.match(html,/src="adventure-index-v0552[.]js[?]v=[^"]+"/);
  assert.ok(!html.includes('src="adventure-index-v035.js"'));
  assert.ok(html.includes('href="v0551-index-status-boss.css"'));
- assert.ok(html.includes("v0.61"));
+ assert.ok(html.includes("v0.62"));
 });
 test("interactive INDEX renders all 3 new guides and immediate boss affinity/attack summary",async()=>{
  const h=browserHarness();
@@ -72,9 +72,9 @@ test("interactive INDEX renders all 3 new guides and immediate boss affinity/att
  assert.ok(detail.includes("Briarstorm"));
  assert.ok(detail.includes("55%"));
  assert.ok(detail.includes("ATTACK MOVES / STATUS CHANCES"));
- assert.ok(h.requests[0].url.includes("codex=0.61"));
+ assert.ok(h.requests[0].url.includes("codex=0.62"));
  assert.equal(h.requests[0].options.cache,"no-store");
- assert.ok(h.element("v035Status").textContent.includes("INDEX UI v0.61"));
+ assert.ok(h.element("v035Status").textContent.includes("INDEX UI v0.62"));
  await h.context.window.SoulboundIndex.open("statuses");
  assert.equal(h.element("v035CategoryTitle").textContent,"STATUS");
  assert.ok(h.element("v035Results").innerHTML.includes("Chill"));

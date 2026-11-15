@@ -164,8 +164,8 @@ function equip(p,rawId,targetSlot,shopItems){
  if(item.equippedSlot){
   const originalSlot=item.equippedSlot;
   updateStats(p,item,null);
-  if(originalSlot==="main"){p.weaponItem=null;p.weapon=p.classId==="mage"?"Apprentice Staff":p.classId==="tank"?"Guardian Mace":"Training Sword"}
-  if(originalSlot==="chest"){p.armorItem=null;p.armor=p.classId==="mage"?"Novice Robe":p.classId==="tank"?"Guardian Armor":"Traveler Armor"}
+  if(originalSlot==="main"){p.weaponItem=null;p.weapon=p.classId==="archer"?"Oak Shortbow":p.classId==="mage"?"Apprentice Staff":p.classId==="tank"?"Guardian Mace":"Training Sword"}
+  if(originalSlot==="chest"){p.armorItem=null;p.armor=p.classId==="archer"?"Ranger Leathers":p.classId==="mage"?"Novice Robe":p.classId==="tank"?"Guardian Armor":"Traveler Armor"}
  }
  updateStats(p,prev,item);
  item.equippedSlot=targetSlot;
@@ -182,8 +182,8 @@ function unequip(p,slot){
   if(!legacy)return{ok:false,error:"This slot is already empty."};
   updateStats(p,legacy,null);
  }else{updateStats(p,old,null);delete old.equippedSlot}
- if(slot==="main"){p.weaponItem=null;p.weapon=p.classId==="mage"?"Apprentice Staff":p.classId==="tank"?"Guardian Mace":"Training Sword"}
- if(slot==="chest"){p.armorItem=null;p.armor=p.classId==="mage"?"Novice Robe":p.classId==="tank"?"Guardian Armor":"Traveler Armor"}
+ if(slot==="main"){p.weaponItem=null;p.weapon=p.classId==="archer"?"Oak Shortbow":p.classId==="mage"?"Apprentice Staff":p.classId==="tank"?"Guardian Mace":"Training Sword"}
+ if(slot==="chest"){p.armorItem=null;p.armor=p.classId==="archer"?"Ranger Leathers":p.classId==="mage"?"Novice Robe":p.classId==="tank"?"Guardian Armor":"Traveler Armor"}
  return{ok:true,slot};
 }
 module.exports={SLOTS,RARITIES,CHANCE_BANDS,canonical,normalizeInventory,dropBossLoot,dropEncounterLoot,encounterDrops,miniDrops,equip,unequip,equipped,slotOf,bagUsed,factory,BOSS_DROPS,MINI_DROPS,bossDrops};
