@@ -1,0 +1,10 @@
+/* SOULBOUND 0.62 — Archer class presentation. Keep the original creator
+ * and avoid vertically expanding the game HUD. */
+#lobby .v30-class-choices{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+#lobby .v30-class-choice[data-hero-class="archer"]{border-color:#668e6d;background:linear-gradient(150deg,#263a2e,#191d29);color:#c9f2c0}
+#lobby .v30-class-choice[data-hero-class="archer"].selected{border-color:#e2e9a1;box-shadow:0 0 14px #8bad624a,inset 0 0 20px #6a82411f}
+#lobby .v30-class-choice[data-hero-class="archer"] span{filter:drop-shadow(0 0 5px #a1e787b2)}
+#game .v062-archer-skill[data-action]{border-color:#69865b}
+#game .v062-archer-skill[data-action]:not(:disabled):hover{box-shadow:0 0 10px #b8e58f5e}
+@media(max-width:880px){#lobby .v30-class-choices{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:440px){#lobby .v30-class-choices{gap:5px}#lobby .v30-class-choice{padding:7px 3px;min-height:82px}}
