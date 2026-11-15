@@ -193,7 +193,7 @@ function validateAction(p,type,r){
  if(!p||typeof type!=="string")return "Invalid action.";
  if(type==="attack"||type==="guard")return null;
  if(SKILL_COSTS[type]){
-  if(["skill6","skill7"].includes(type)&&p.classId!=="mage")return "Only mages can cast this spell.";
+  if(["skill6","skill7"].includes(type)&&!["mage","archer"].includes(p.classId))return "Only mages can cast this spell.";
   const [baseCost,level]=SKILL_COSTS[type];
   const cost=p.raceId==="elf"?Math.floor(baseCost*.95):baseCost;
   if(p.level<level)return "Unlocks at level "+level+".";
@@ -217,6 +217,7 @@ function validateAction(p,type,r){
  return "Unknown action.";
 }
 function skillElement(p,type){
+ if(p.classId==="archer")return ({skill3:"nature",skill5:"nature",skill6:"nature"})[type]||"physical";
  if(p.classId==="mage")return ({skill:"arcane",skill2:"fire",skill3:"ice",skill4:"arcane",skill5:"arcane",skill6:"water",skill7:"lightning"})[type]||"physical";
  if(p.classPath==="paladin"&&type==="skill4")return "light";
  return "physical";
