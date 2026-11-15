@@ -120,7 +120,7 @@ function staggerThreshold(m){
 function addStagger(r,p,type="attack",element="physical",say=()=>{}){
  const m=r.monster;
  if(!m||!(m.boss||m.miniBoss)||m.hp<=0)return {gain:0,interrupted:false};
- const gains={attack:12,skill:24,skill2:27,skill3:30,skill4:37,skill5:27,break:42,perfectGuard:14};
+ const gains={attack:12,skill:24,skill2:27,skill3:30,skill4:37,skill5:27,break:42,perfectGuard:14,weapon_ironbreaker:6,weapon_earthshaker:18};
  const gain=Math.round((gains[type]||10)*(elementMultiplier(m,element)>1?1.2:1));
  if(m.interruptImmunityTurns>0)return {gain:0,interrupted:false};
  m.stagger=clamp((m.stagger||0)+gain,0,staggerThreshold(m));
