@@ -131,6 +131,7 @@ test("real Socket: level-7 Archer Rain of Arrows hits multiple foes using Nature
  const h=harness(),u=h.connectUser("bow");
  const made=await u.call("createRoom",{name:"Archer",classId:"archer",guest:true});assert.equal(made.ok,true);
  const r=h.rooms.get(made.code);
+ const partner=h.connectUser("partner");assert.equal((await partner.call("joinRoom",{code:made.code,name:"Ally",classId:"mage",guest:true})).ok,true);
  assert.equal((await u.call("restoreCharacter",{class_id:"archer",class_path:null,level:7,attack:54,speed:12,guest:true})).ok,true);
  assert.equal((await u.call("startBattle")).ok,true);
  assert.ok(r.enemies.length>=2,"deterministic encounter should spawn two normal enemies");
