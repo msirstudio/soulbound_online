@@ -103,3 +103,41 @@ test("passive proc and bottom dock are server/read-only UI additions, existing s
  assert.ok(!html.includes('class="v0559-audio-row"'));
  assert.ok(html.indexOf('class="v061-audio-dock"')>html.indexOf('class="game-layout"'));
 });
+
+test("live Socket battle uses the purchased Flamebrand passive, elemental weakness and authoritative FX",async()=>{
+ let connect;
+ const states=[];
+ const app={use(){},get(){}},express=()=>app;express.static=()=>()=>{};
+ class Server{on(name,fn){if(name==="connection")connect=fn}to(room){return{emit:(name,state)=>{if(name==="state")states.push(state)}}}}
+ const original=read("server.js"),loot=require("../loot-v034"),world=require("../world-v040"),formulas=require("../combat/formulas");
+ const deps=name=>name==="express"?express:name==="http"?{createServer:()=>({listen(){}})}:name==="socket.io"?{Server}:name==="path"?path:name==="./loot-v034"?loot:name==="./world-v040"?world:name==="./combat-v055"?combat:require(name);
+ const fakeMath=Object.create(Math);fakeMath.random=()=>.1;
+ const runtime=new Function("require","process","console","__dirname","setTimeout","Math",original+";return {rooms};")(
+  deps,{env:{}},{log(){},error(){}},root,fn=>{fn();return 0},fakeMath);
+ const handlers={};connect({id:"live-p1",join(){},on:(name,fn)=>handlers[name]=fn});
+ const call=(name,payload={})=>new Promise((resolve,reject)=>{try{handlers[name](payload,resolve)}catch(err){reject(err)}});
+ const made=await call("createRoom",{name:"Knight",classId:"swordsman",guest:true});
+ assert.ok(made.ok);const room=runtime.rooms.get(made.code);
+ await call("restoreCharacter",{class_id:"swordsman",level:25,gold:9000,attack:22,guest:true});
+ const hero=room.players.get("live-p1");
+ hero.worldProgress=world.markBossClear(hero.worldProgress,"dreadforge_bastion");
+ assert.equal((await call("openShop",{category:"weapon"})).ok,true);
+ assert.equal((await call("buyItem",{itemId:"flamebrand"})).ok,true);
+ const owned=hero.inventory.find(x=>x.id==="flamebrand");
+ assert.ok(owned?.uid);
+ assert.equal((await call("equipItem",{itemId:owned.uid,targetSlot:"main"})).ok,true);
+ assert.equal(engine.weaponFor(hero)?.id,"flamebrand");
+ room.status="city";
+ assert.equal((await call("startBattle")).ok,true);
+ const foe=room.enemies[0];
+ assert.ok(foe.hp>0);
+ const baseline=formulas.basicAttack({attack:hero.atk,defense:foe.def,randomRoll:0,attackMultiplier:1,elementMultiplier:1,vulnerable:false});
+ const elementalHit=formulas.basicAttack({attack:hero.atk,defense:foe.def,randomRoll:0,attackMultiplier:1,elementMultiplier:1.2,vulnerable:false});
+ assert.ok(elementalHit>baseline);
+ const action=await call("action",{type:"attack",targetId:foe.enemyId,actionId:"v061-live-attack-001"});
+ assert.equal(action.ok,true);
+ assert.ok(room.log.some(x=>x.includes("attacks for "+elementalHit+" damage")),room.log.join("; "));
+ assert.ok(room.log.some(x=>x.includes("Living Ember")),room.log.join("; "));
+ assert.ok(room.weaponFx.some(x=>x.kind==="passive"&&x.element==="fire"));
+ assert.ok(states.some(x=>Array.isArray(x.weaponFx)&&x.weaponFx.length>0));
+});
