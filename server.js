@@ -48,9 +48,10 @@ function encounter(n){return world.encounter(n,normal,bosses)}
 app.get("/api/index",(_,res)=>{
  const enemies=Array.from({length:world.totalStages},(_,index)=>{
   const stage=index+1,foe=encounter(stage),zone=sceneFor(stage);
+   const partyPreview=pack.encounterPreview(stage,foe,normal),solo=partyPreview[0].variants[0];
   return {id:"stage-"+stage,stage,name:foe.name,icon:foe.icon||"⚔",
-   sprite:foe.sprite,boss:!!foe.boss,miniBoss:!!foe.miniBoss,regionId:foe.regionId,zone:zone.name,hp:foe.maxHp,atk:foe.atk,def:foe.def,
-   xp:foe.xp,gold:foe.gold,...combat.enemyCodex({...foe,stage}),loot:foe.boss||foe.miniBoss?"Each possible item rolls separately by rarity; multiple drops can be won together.":"No random equipment drops"};
+   sprite:foe.sprite,boss:!!foe.boss,miniBoss:!!foe.miniBoss,regionId:foe.regionId,zone:zone.name,hp:solo.hp,atk:solo.atk,def:solo.def,
+   xp:solo.xp,gold:solo.gold,partyPreview,...combat.enemyCodex({...foe,stage}),loot:foe.boss||foe.miniBoss?"Each possible item rolls separately by rarity; multiple drops can be won together.":"No random equipment drops"};
  });
  const goods=shopItems.map(it=>({...it,category:it.category==="food"?"food":it.slot==="weapon"?"weapons":it.slot==="armor"?"armor":"consumables"}));
  const drops=[],bossDropTables={},miniDropTables={};
