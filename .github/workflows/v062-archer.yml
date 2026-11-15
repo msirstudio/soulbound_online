@@ -1,0 +1,34 @@
+name: SOULBOUND v0.62 Archer Class
+on:
+  push:
+    branches: [v0.62-archer-class]
+  pull_request:
+    branches: [v0.61-elemental-weapon-passives]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check Archer and existing core JavaScript syntax
+        run: |
+          node --check server.js
+          node --check classes/archer-v062.js
+          node --check combat/skills.js
+          node --check combat-v055.js
+          node --check persistence/secure-saves-v057.js
+          node --check loot-v034.js
+          node --check items/archer-shop-v062.js
+          node --check items/weapon-passives-v061.js
+          node --check public/game.js
+          node --check public/hero-art-v030.js
+          node --check public/adventure-index-v0552.js
+          node --check tests/v062-archer.test.js
+      - name: Test Archer integration and all legacy gameplay
+        run: npm test
