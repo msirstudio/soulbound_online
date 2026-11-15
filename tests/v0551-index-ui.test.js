@@ -23,7 +23,7 @@ function browserHarness(){
    this.children.push(child);
    if(child.id)registry.set(child.id,child);
    if(child.id==="v035Index"){
-    for(const id of ["v035Exit","v035Search","v035Rarity","v035Tabs","v035Results",
+    for(const id of ["v035Exit","v035Search","v035Rarity","v060IndexParty","v035Tabs","v035Results",
       "v035Details","v035Status","v035CategoryTitle","v035Count","v035Close"]){
       const node=new Element();node.id=id;registry.set(id,node);
     }
@@ -31,6 +31,7 @@ function browserHarness(){
    return child;
   }
   querySelector(){return null}
+  closest(){return new Element("label")}
   querySelectorAll(){return []}
   getClientRects(){return [1]}
   focus(){}
