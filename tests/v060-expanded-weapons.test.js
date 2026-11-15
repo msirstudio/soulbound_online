@@ -73,7 +73,7 @@ test("Real Socket shop sells valid progression weapons, blocks premature unlocks
  const r=h.rooms.get(room.code),p=r.players.get("hero"),gold=p.gold;
  assert.equal(r.status,"shop");
  assert.equal(r.shopCategory,"weapon");
- assert.equal(h.last().shopItems.filter(i=>i.slot==="weapon").length,24);
+ assert.equal(h.last().shopItems.filter(i=>i.slot==="weapon").length,32);
  assert.equal(h.last().shopItems.find(i=>i.id==="flamebrand").category,"weapon");
  assert.equal((await u.call("buyItem",{itemId:"iron_sword"})).ok,true,"fix legacy weapon category buy bug");
  assert.equal(p.gold,gold-120);
@@ -112,7 +112,7 @@ test("Shop UI shows class filtering, locks and precise per-copy equip and releas
  assert.ok(client.includes('data-equip="\'+esc(it.uid||it.id)+\'"'));
  assert.ok(server.includes("weaponCatalog.checkPurchase(p,it)"));
  assert.ok(server.includes('it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion"'));
- assert.equal(JSON.parse(read("package.json")).version,"0.61.0");
- assert.ok(html.includes("<small>v0.61</small>"));
- assert.ok(html.includes('game.js?v=0.61'));
+ assert.equal(JSON.parse(read("package.json")).version,"0.62.0");
+ assert.ok(html.includes("<small>v0.62</small>"));
+ assert.ok(html.includes('game.js?v=0.62'));
 });
