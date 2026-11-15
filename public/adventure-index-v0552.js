@@ -231,6 +231,7 @@ function itemDetail(e){
  (e.rarity?'<strong>RARITY</strong><p>'+esc(e.rarity.toUpperCase())+'</p>':'')+
  (e.source?'<strong>ACQUIRED FROM</strong><p><button type="button" class="v037-source-link" data-v037-boss="'+esc(e.sourceStage||e.bossStage)+'">👑 '+esc(e.source)+' · Stage '+esc(e.sourceStage||e.bossStage)+' →</button></p><strong>DROP CHANCE</strong><p>'+esc(e.chance)+'% per victory (independent item roll)</p>':'')+
  (e.price!=null?'<strong>MERCHANT PRICE</strong><p>'+esc(e.price)+' gold</p>':'')+
+ (e.passive?'<section class="v061-element-line"><strong>'+esc((e.element||"physical").toUpperCase())+' ELEMENT</strong><span>'+esc(e.passive.name)+' · '+Math.round(e.passive.chance*100)+'% activation</span></section><p class="v061-passive-desc">'+esc(e.passive.description)+'</p>':'')+
  '<strong>DESCRIPTION</strong><p>'+esc(e.description||"Equipment with fixed stats.")+'</p></div>';
 }
 function renderSelection(){
