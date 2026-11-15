@@ -39,13 +39,16 @@ test("Nine original compositions are distinct, with city + eight region keys",()
  assert.ok(music.includes('original.setMusic(false)'));
  assert.ok(!music.includes('old.setMusic(false)'));
 });
-test("Audio shares Equipment/INDEX toolbar instead of taking a standalone row",()=>{
+test("Audio keeps its original controls in a new row below Equipment/INDEX",()=>{
  const dock=html.indexOf('class="v22-command-dock"'),audio=html.indexOf('id="audioSettingsToggle"'),layout=html.indexOf('class="game-layout"');
  assert.ok(dock>=0&&dock<audio&&audio<layout);
  assert.equal((html.match(/id="audioSettingsToggle"/g)||[]).length,1);
- assert.ok(!html.includes('v0559-audio-row'));
- assert.ok(css.includes('#game .v22-command-dock #audioSettingsToggle'));
- assert.ok(css.includes('bottom:calc(100% + 8px)'));
+ assert.ok(html.includes('class="v0559-audio-row"'));
+ assert.ok(html.indexOf('class="v0559-audio-row"')<audio);
+ assert.ok(html.indexOf('id="toggleEquipment"')<html.indexOf('class="v0559-audio-row"'));
+ const lowerCss=read("public/v060-index-audio-fix.css");
+ assert.ok(lowerCss.includes("#game .v0559-audio-row"));
+ assert.ok(lowerCss.includes("bottom:calc(100% + 8px)"));
 });
 test("Release and API versions agree",()=>{
  assert.ok(html.includes('<small>v0.60</small>'));
