@@ -8,9 +8,15 @@
 "use strict";
 const sheetRoot="assets/sprites/swordsman/";
 const poseRoot="/assets/hero-poses/";
-/* Optional art-only override; 8 frames x 256 px at 8 FPS. */
-const femaleIdle={src:"assets/hero-animations/female_swordsman_idle_8f.png?v=0.62.1",frames:8,frameWidth:256,frameHeight:256,fps:8,baselineY:232};
-let femaleIdleReady=false;
+/* v0.62.2 — original 12-frame Female Knight sheet, 12 FPS. Art-only.
+ * Keep an older file as fallback until the 12-frame PNG is uploaded.
+ * Once present, the 12-frame original always takes priority. */
+const femaleIdle=Object.freeze({src:"assets/hero-animations/female_swordsman_idle_12f.png?v=0.62.2",frames:12,frameWidth:256,frameHeight:256,fps:12,baselineY:254});
+const legacyFemaleIdle=Object.freeze({src:"assets/hero-animations/female_swordsman_idle_8f.png?v=0.62.1",frames:8,frameWidth:256,frameHeight:256,fps:12,baselineY:232});
+let femaleIdleReady=false,activeFemaleIdle=null;
+function isValidFemaleIdleImage(img,config){
+ return img.naturalWidth===config.frames*config.frameWidth && img.naturalHeight===config.frameHeight;
+}
 const assets={
  male:{idle:sheetRoot+"male_idle.png",attack:sheetRoot+"male_attack.png"},
  female:{idle:sheetRoot+"female_idle.png",attack:sheetRoot+"female_attack.png"}
@@ -35,7 +41,7 @@ function spriteMarkup(p){
  const fallback=window.SoulboundHeroArt?.render(p)||"";
  return '<span class="v311-hero" data-v311-class="'+cls+'" data-v311-gender="'+g+'" data-v311-player="'+id+'">'+
  '<span class="v311-sheet" role="img" aria-label="'+esc(g+' swordsman animated')+'" style="background-image:url(&quot;'+assets[g].idle+'&quot;)"></span>'+
- '<span class="v311-custom-idle" aria-hidden="true" style="background-image:url(&quot;'+femaleIdle.src+'&quot;)"></span>'+
+ '<span class="v311-custom-idle" aria-hidden="true"></span>'+
  '<img class="v311-pose" alt="'+esc(g+' '+cls+' sprite')+'" src="'+poseAssets[cls][g].idle+'">'+
  '<img class="sprite-img v311-fallback" alt="'+esc(g+' '+cls)+'" src="'+fallback+'">'+
  '</span>';
@@ -48,11 +54,19 @@ function fetchImage(src){
  });
 }
 function preload(){
- fetchImage(femaleIdle.src).then(img=>{
-  if(img.naturalWidth!==femaleIdle.frames*femaleIdle.frameWidth||img.naturalHeight!==femaleIdle.frameHeight)
-   throw new Error("Female Knight Idle sheet must be 2048x256");
-  femaleIdleReady=true;refresh();
- }).catch(()=>{/* Existing poses and SVG remain available if optional art is absent. */});
+ function tryFemaleIdle(config){
+  return fetchImage(config.src).then(img=>{
+   if(!isValidFemaleIdleImage(img,config))throw new Error("Incorrect Female Knight sheet dimensions");
+   return config;
+  });
+ }
+ // Both loads are independent: original 12-frame art wins regardless of network timing.
+ tryFemaleIdle(legacyFemaleIdle).then(config=>{
+  if(!femaleIdleReady){activeFemaleIdle=config;femaleIdleReady=true;refresh();}
+ }).catch(()=>{/* High-resolution poses and SVG fallback stay intact. */});
+ tryFemaleIdle(femaleIdle).then(config=>{
+  activeFemaleIdle=config;femaleIdleReady=true;refresh();
+ }).catch(()=>{/* Use previous artwork until the 12-frame file is present. */});
  for(const cls of classes)for(const g of genders){
   Promise.all(Object.values(poseAssets[cls][g]).map(fetchImage)).then(()=>{
    poseReady[cls][g]=true;refresh();
@@ -71,7 +85,16 @@ function refresh(){
   const g=basename(el.dataset.v311Gender),cls=el.dataset.v311Class==="mage"?"mage":"swordsman";
   el.classList.toggle("v311-pose-ready",poseReady[cls][g]);
   el.classList.toggle("v311-ready",cls==="swordsman"&&!poseReady[cls][g]&&sheetReady[g]);
-  el.classList.toggle("v311-custom-idle-available",cls==="swordsman"&&g==="female"&&femaleIdleReady);
+  const customReady=cls==="swordsman"&&g==="female"&&femaleIdleReady&&activeFemaleIdle;
+  el.classList.toggle("v311-custom-idle-available",!!customReady);
+  if(customReady){
+   const custom=el.querySelector(".v311-custom-idle");
+   if(custom&&custom.dataset.url!==activeFemaleIdle.src){
+    custom.dataset.url=activeFemaleIdle.src;
+    custom.style.backgroundImage='url("'+activeFemaleIdle.src+'")';
+    custom.style.backgroundSize=(activeFemaleIdle.frames*100)+"% 100%";
+   }
+  }
  });
  syncPreview();
  if(!started){started=true;requestAnimationFrame(tick);}
@@ -108,20 +131,20 @@ function tick(now){
    el.classList.toggle("v311-attacking",attacking);
    el.classList.toggle("v311-hit",damaged);
   }
-  const customIdle=cls==="swordsman"&&g==="female"&&femaleIdleReady&&!attacking&&!damaged;
+  const customIdle=cls==="swordsman"&&g==="female"&&!!activeFemaleIdle&&!attacking&&!damaged;
   el.classList.toggle("v311-custom-idle-active",customIdle);
   if(customIdle){
    const custom=el.querySelector(".v311-custom-idle");
    if(custom){
-    const f=Math.floor(now*femaleIdle.fps/1000)%femaleIdle.frames;
-    custom.style.backgroundPosition=(f/(femaleIdle.frames-1)*100)+"% 0%";
+    const f=Math.floor(now*activeFemaleIdle.fps/1000)%activeFemaleIdle.frames;
+    custom.style.backgroundPosition=(f/(activeFemaleIdle.frames-1)*100)+"% 0%";
    }
   }
  });
  const preview=document.getElementById("v311PreviewSprite");
- if(preview&&previewActive&&previewClass==="swordsman"&&previewGender==="female"&&femaleIdleReady){
-  const f=Math.floor(now*femaleIdle.fps/1000)%femaleIdle.frames;
-  preview.style.backgroundPosition=(f/(femaleIdle.frames-1)*100)+"% 0%";
+ if(preview&&previewActive&&previewClass==="swordsman"&&previewGender==="female"&&!!activeFemaleIdle){
+  const f=Math.floor(now*activeFemaleIdle.fps/1000)%activeFemaleIdle.frames;
+  preview.style.backgroundPosition=(f/(activeFemaleIdle.frames-1)*100)+"% 0%";
  }else if(preview&&previewActive&&previewClass==="swordsman"&&sheetReady[previewGender]&&!poseReady[previewClass][previewGender]){
   preview.style.backgroundPosition=((Math.floor(now/1000*idleFps)%idleCount)/(idleCount-1)*100)+"% 0%";
  }
@@ -137,13 +160,13 @@ function syncPreview(){
  let pose=document.getElementById("v311PreviewPose");
  if(!pose){pose=document.createElement("img");pose.id="v311PreviewPose";pose.className="v311-preview-pose";pose.alt="Hero idle pose";sheet.insertAdjacentElement("afterend",pose);}
  const readyPose=previewActive&&poseReady[previewClass][previewGender];
- const readyCustom=previewActive&&previewClass==="swordsman"&&previewGender==="female"&&femaleIdleReady;
+ const readyCustom=previewActive&&previewClass==="swordsman"&&previewGender==="female"&&!!activeFemaleIdle;
  const readySheet=previewActive&&previewClass==="swordsman"&&!readyPose&&sheetReady[previewGender];
  const parent=img.closest(".v30-preview");
  if(parent){parent.classList.toggle("v311-preview-pose-ready",readyPose);parent.classList.toggle("v311-preview-ready",readySheet);parent.classList.toggle("v311-preview-custom-ready",readyCustom);}
  pose.src=poseAssets[previewClass][previewGender].idle;
- sheet.style.backgroundImage='url("'+(readyCustom?femaleIdle.src:assets[previewGender].idle)+'")';
- sheet.style.backgroundSize=(readyCustom?femaleIdle.frames*100:600)+"% 100%";
+ sheet.style.backgroundImage='url("'+(readyCustom?activeFemaleIdle.src:assets[previewGender].idle)+'")';
+ sheet.style.backgroundSize=(readyCustom?activeFemaleIdle.frames*100:600)+"% 100%";
 }
 function preview(cls,gender){
  previewActive=classes.includes(cls);
@@ -154,7 +177,7 @@ function preview(cls,gender){
 function hasAssets(gender,cls="swordsman"){const g=basename(gender),c=cls==="mage"?"mage":"swordsman";return poseReady[c][g]||(c==="swordsman"&&(sheetReady[g]||(g==="female"&&femaleIdleReady)));}
 window.SoulboundSprite={
  canDraw,spriteMarkup,attack,hit,preview,refresh,hasAssets,paths:assets,posePaths:poseAssets,
- meta:{width:192,height:256,idle:idleCount,attack:attackCount,staticPoses:3,femaleIdle:{...femaleIdle}}
+ meta:{width:192,height:256,idle:idleCount,attack:attackCount,staticPoses:3,femaleIdle:{...femaleIdle},getActiveFemaleIdle:()=>activeFemaleIdle?{...activeFemaleIdle}:null}
 };
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>{preload();refresh()},{once:true});
 else{preload();refresh();}
