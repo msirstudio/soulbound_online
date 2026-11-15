@@ -506,57 +506,27 @@ $("v28XpFill").style.width=xpPercent.toFixed(2)+"%";
 $("v28XpMeter").setAttribute("aria-valuenow",String(xpValue));
 $("v28XpMeter").setAttribute("aria-valuemax",String(xpGoal));
 if(me){$("statPoints").textContent="AVAILABLE POINTS: "+(me.statPoints||0);$("statValues").textContent="STR "+(me.strength||0)+" · VIT "+(me.vitality||0)+" · INT "+(me.intelligence||0)+" · AGI "+(me.agility||0)+" · SPEED "+(me.speed||10);document.querySelectorAll("[data-stat]").forEach(b=>b.disabled=(me.statPoints||0)<1)}const gearInfo={"Training Sword":"+0 ATK · Starter weapon","Apprentice Staff":"+0 ATK · Starter weapon","Guardian Mace":"+0 ATK · Starter weapon","Oak Shortbow":"+0 ATK · Starter weapon","Iron Mace":"+8 ATK","Iron Sword":"+8 ATK","Arcane Staff":"+8 ATK","Steel Blade":"+16 ATK","Crystal Staff":"+17 ATK","Warhammer":"+16 ATK","Knight Greatsword":"+28 ATK","Starweave Staff":"+30 ATK","Titan Maul":"+29 ATK","Iron Armor":"+5 DEF · +20 Max HP","Sage Robe":"+3 DEF · +20 Max MP","Guardian Plate":"+12 DEF · +55 Max HP","Archmage Raiment":"+8 DEF · +65 Max MP","Dragon Scale Armor":"+20 DEF · +100 Max HP","Void Mantle":"+16 DEF · +110 Max MP",...Object.fromEntries((s.shopItems||[]).filter(it=>it.slot==="weapon").map(it=>[it.name,it.description]))};$("myGear").innerHTML=me?'<div class="gear-slot" data-tooltip="'+esc(gearInfo[me.weapon]||"Equipped weapon")+'" title="'+esc(gearInfo[me.weapon]||"Equipped weapon")+'"><span>⚔ WEAPON</span><strong>'+esc(me.weapon)+'</strong><small>'+esc(gearInfo[me.weapon]||"Weapon equipped")+"</small></div><div class=\"gear-slot\" data-tooltip=\""+esc(gearInfo[me.armor]||"Equipped armor")+"\" title=\""+esc(gearInfo[me.armor]||"Equipped armor")+"\"><span>🛡 ARMOR</span><strong>"+esc(me.armor)+"</strong><small>"+esc(gearInfo[me.armor]||"Armor equipped")+"</small></div>":"";if(me){const pct=(v,m)=>Math.max(0,Math.min(100,v/Math.max(1,m)*100));$("heroIdentity").textContent=me.name.toUpperCase()+" · "+me.className.toUpperCase();$("heroLevel").textContent="LV "+me.level;$("heroHpText").textContent=me.hp+" / "+me.maxHp;$("heroMpText").textContent=me.mp+" / "+me.maxMp;$("myHpBar").style.width=pct(me.hp,me.maxHp)+"%";$("myMpBar").style.width=pct(me.mp,me.maxMp)+"%";$("heroMeta").textContent="ATK "+me.atk+" · DEF "+me.def+" · 🧪 "+(me.smallHealth||me.potions||0)+"/"+(me.mediumHealth||0)+"/"+(me.largeHealth||0)+" · 🔷 "+(me.smallMana||me.manaPotions||0)+"/"+(me.mediumMana||0)+"/"+(me.largeMana||0)+" · 🪙 "+me.gold;const rn=raceNames[me.raceId]||"Human";$("raceName").textContent=rn;$("raceRarity").textContent=(me.raceRarity||"common").toUpperCase();$("raceRarity").className="rarity "+rarityClass(me.raceRarity);$("racePassive").textContent=me.racePassive||"Balanced and adaptable.";$("raceBuffs").textContent=(me.raceBuffs||[]).join(" · ");$("racePoints").textContent=me.racePoints||0;$("openGacha").disabled=(me.racePoints||0)<1;$("openGacha").textContent=(me.racePoints||0)>0?"SUMMON RACE · 1 PT":"NEED 1 POINT";}$("healthCount").textContent="OWNED: "+(me?.potions||0);$("manaCount").textContent="OWNED: "+(me?.manaPotions||0);
-const mage=me?.classId==="mage",bow=me?.classId==="archer";const elf=me?.raceId==="elf";const skillCost=elf?11:12,skill2Cost=elf?23:25,skill3Cost=elf?19:20,skill4Cost=elf?28:30,skill5Cost=elf?22:24;
-const tank=me?.classId==="tank";const skillTips=tank?["SHIELD BASH\nDamage: 0.9× ATK\nMana: 12 MP\nCooldown: 2 rounds\nA sturdy frontline strike.","IRON WALL\nDamage: 1.3× ATK\nMana: 25 MP\nUnlocks at Level 3 · Cooldown: 3 rounds\nA defensive blow.","PROVOKE\nDamage: 1.4× ATK\nMana: 20 MP\nUnlocks at Level 5 · Cooldown: 3 rounds\nForces enemies to target you for 3 enemy turns.","FORTRESS STRIKE\nDamage: 3× ATK\nMana: 30 MP\nUnlocks at Level 8 · Cooldown: 4 rounds\nA heavy crushing blow.","AEGIS PACT\nDamage: 0.8× ATK\nMana: 24 MP\nUnlocks at Level 5 · Cooldown: 4 rounds\nReduce damage taken by 20% for 3 enemy turns."]:mage?[
-"ARCANE BOLT\nDamage: 1.9× ATK\nMana: "+skillCost+" MP\nCooldown: 1 round\nA focused bolt of arcane energy.",
-"METEOR\nDamage: 2.5× ATK\nMana: "+skill2Cost+" MP\nUnlocks at Level 3 · Cooldown: 2 rounds\nCalls down a crushing meteor.",
-"FROST NOVA\nDamage: 1.6× ATK\nMana: "+skill3Cost+" MP\nUnlocks at Level 5 · Cooldown: 2 rounds\nAlso restores 10% of your Max HP.",
-"ARCANE SURGE\nDamage: 3× ATK\nMana: "+skill4Cost+" MP\nUnlocks at Level 8 · Cooldown: 3 rounds\nUnleashes overwhelming arcane force.",
-"ARCANE MARK\nDamage: 1.25× ATK\nMana: "+skill5Cost+" MP\nUnlocks at Level 5 · Cooldown: 4 rounds\nMarks the monster, making it take 20% more damage for 3 rounds."
-]:[
-"POWER STRIKE\nDamage: 1.8× ATK\nMana: "+skillCost+" MP\nCooldown: 1 round\nA powerful single-target strike.",
-"WHIRLWIND\nDamage: 2.5× ATK\nMana: "+skill2Cost+" MP\nUnlocks at Level 3 · Cooldown: 2 rounds\nA sweeping spinning attack.",
-"SHIELD BREAKER\nDamage: 2× ATK\nMana: "+skill3Cost+" MP\nUnlocks at Level 5 · Cooldown: 2 rounds\nAlso grants +3 DEF for this battle.",
-"RALLYING SLASH\nDamage: 3× ATK\nMana: "+skill4Cost+" MP\nUnlocks at Level 8 · Cooldown: 3 rounds\nA devastating finishing slash."
-,
-"ARMOR REND\nDamage: 1.25× ATK\nMana: "+skill5Cost+" MP\nUnlocks at Level 5 · Cooldown: 4 rounds\nMakes the monster take 20% more damage for 3 rounds."
-];
-if(mage){
- skillTips.push("TIDAL SURGE\nWater spell · Damage: 1.8× ATK\nMana: "+(elf?20:22)+" MP\nUnlocks at Level 7 · Cooldown: 3 rounds\nStrong against Fire and Earth.");
- skillTips.push("THUNDERBOLT\nLightning spell · Damage: 1.95× ATK\nMana: "+(elf?24:26)+" MP\nUnlocks at Level 9 · Cooldown: 3 rounds\nStrong against Water and Ice.");
-}
-if(bow&&Array.isArray(me.skillBook)){
- skillTips.length=0;
- for(const sk of me.skillBook){
-  skillTips.push(sk.name+"\nDamage: "+sk.mult+"× ATK\nMana: "+(elf?Math.floor(sk.cost*.95):sk.cost)+" MP\nLevel "+sk.unlock+" · Cooldown "+sk.cd+" rounds\n"+sk.description);
- }
-}
-const skillButtons=[$("skillButton"),$("skill2Button"),$("skill3Button"),$("skill4Button"),$("skill5Button"),...((mage||bow)?[$("skill6Button"),$("skill7Button")]:[])];
-skillButtons.forEach((b,i)=>{b.dataset.tooltip=skillTips[i];b.removeAttribute("title");b.setAttribute("aria-label",b.title)});
-$("skillButton").textContent=mage?"🔮 ARCANE BOLT":tank?"🛡 SHIELD BASH":"🔥 POWER STRIKE";
-$("skill2Button").textContent=mage?"☄ METEOR":tank?"🧱 IRON WALL":"✴ WHIRLWIND";
-$("skill3Button").textContent=mage?"❄ FROST NOVA":tank?"📣 PROVOKE":"🛡 SHIELD BREAKER";
-$("skill4Button").textContent=mage?"🌠 ARCANE SURGE":tank?"🏰 FORTRESS STRIKE":"⚡ RALLYING SLASH";$("skill5Button").textContent=mage?"✦ ARCANE MARK":tank?"🛡 AEGIS PACT":"⚔ ARMOR REND";
-$("skill6Button").textContent="💧 TIDAL SURGE";$("skill7Button").textContent="⚡ THUNDERBOLT";
-for(const b of document.querySelectorAll('[data-action^="skill"]'))b.classList.toggle("v062-archer-skill",bow);
-if(bow&&Array.isArray(me.skillBook)){
- for(const sk of me.skillBook){
-  const button=document.querySelector('[data-action="'+sk.type+'"]');
-  if(button){
-   button.textContent=(sk.icon||"🏹")+" "+sk.name;
-   button.dataset.tooltip=sk.name+"\nDamage: "+sk.mult+"× ATK\nMana: "+(elf?Math.floor(sk.cost*.95):sk.cost)+" MP\nLevel "+sk.unlock+" · Cooldown "+sk.cd+" rounds\n"+sk.description;
-   button.setAttribute("aria-label",sk.name+" Level "+sk.unlock);
-  }
- }
-}
+const skillView=window.SoulboundSkillViewV062;
+skillView?.render(me);
 $("skillGuide").textContent="Hover over a skill to view its damage, mana cost and effects.";
 $("partyChatMessages").innerHTML=(s.chat||[]).map(m=>"<div class=\"chat-line\"><b>"+esc(m.name)+"</b> <span>"+esc(m.message)+"</span></div>").join("");$("partyChatMessages").scrollTop=$("partyChatMessages").scrollHeight;const turn=!!me&&active?.id===myId&&s.status==="battle"&&!s.enemyWindup&&!s.players.some(x=>x.disconnected)&&me.hp>0;$("healthMediumCount").textContent="OWNED: "+(me?.mediumHealth||0);$("healthLargeCount").textContent="OWNED: "+(me?.largeHealth||0);$("manaMediumCount").textContent="OWNED: "+(me?.mediumMana||0);$("manaLargeCount").textContent="OWNED: "+(me?.largeMana||0);
-document.querySelectorAll("[data-action]").forEach(b=>{const c=b.dataset.action==="skill"?(me.raceId==="elf"?11:12):b.dataset.action==="skill2"?(me.raceId==="elf"?23:25):b.dataset.action==="skill3"?(me.raceId==="elf"?19:20):b.dataset.action==="skill4"?(me.raceId==="elf"?28:30):b.dataset.action==="skill5"?(me.raceId==="elf"?22:24):b.dataset.action==="skill6"?(me.raceId==="elf"?20:22):b.dataset.action==="skill7"?(me.raceId==="elf"?24:26):b.dataset.action==="break"?(me.raceId==="elf"?14:15):b.dataset.action==="cleanse"?(me.raceId==="elf"?11:12):0;b.disabled=!turn||(c>0&&me.mp<c)||((me.cooldowns?.[b.dataset.action]||0)>0)||(b.dataset.action==="skill2"&&me.level<3)||(b.dataset.action==="skill3"&&me.level<5)||(b.dataset.action==="skill4"&&me.level<8)||((b.dataset.action.startsWith("heal"))&&(!(me[{healSmall:"smallHealth",healMedium:"mediumHealth",healLarge:"largeHealth"}[b.dataset.action]]||0)||me.hp===me.maxHp))||((b.dataset.action.startsWith("mana"))&&(!(me[{manaSmall:"smallMana",manaMedium:"mediumMana",manaLarge:"largeMana"}[b.dataset.action]]||0)||me.mp===me.maxMp))||(b.dataset.action==="skill5"&&me.level<5)||(b.dataset.action==="skill6"&&(me.level<7||!["mage","archer"].includes(me.classId)))||(b.dataset.action==="skill7"&&(me.level<9||!["mage","archer"].includes(me.classId)))||
- (b.dataset.action==="cleanse"&&!s.players.some(x=>x.hp>0&&x.statusEffects?.length))});
+document.querySelectorAll("[data-action]").forEach(b=>{
+ const type=b.dataset.action,sk=skillView?.skill(me,type),isSkill=/^skill[2-7]?$/.test(type);
+ const specialCost=type==="break"?15:type==="cleanse"?12:0;
+ const cost=isSkill?(sk?skillView.cost(me,sk):Infinity)
+  :specialCost?(me?.raceId==="elf"?Math.floor(specialCost*.95):specialCost):0;
+ const needsHealth=/^heal/.test(type),needsMana=/^mana/.test(type);
+ const unavailableSkill=isSkill&&(!sk||Number(me?.level)<Number(sk.unlock));
+ const missingHealth=needsHealth&&(!(me?.[{healSmall:"smallHealth",healMedium:"mediumHealth",healLarge:"largeHealth"}[type]]||0)||me?.hp===me?.maxHp);
+ const missingMana=needsMana&&(!(me?.[{manaSmall:"smallMana",manaMedium:"mediumMana",manaLarge:"largeMana"}[type]]||0)||me?.mp===me?.maxMp);
+ b.disabled=!turn||unavailableSkill||(cost>0&&Number(me?.mp||0)<cost)
+  ||Number(me?.cooldowns?.[type]||0)>0||missingHealth||missingMana
+  ||(type==="cleanse"&&!s.players.some(x=>x.hp>0&&x.statusEffects?.length));
+});
 for(const id of ["v055Break","v055Cleanse"]){const button=$(id);if(button){const cd=me?.cooldowns?.[button.dataset.action]||0;
  button.title=(button.dataset.action==="break"?"Heavy Stagger · ":"Remove party ailment · ")+(cd>0?"Cooldown "+cd+" turns":"Available");
  button.textContent=(button.dataset.action==="break"?"💥 BREAK STRIKE":"✨ CLEANSE")+(cd>0?" · CD "+cd:"");
-}}$("skill2Button").hidden=!me||me.level<3;$("skill3Button").hidden=!me||me.level<5;$("skill4Button").hidden=!me||me.level<8;$("skill5Button").hidden=!me||me.level<5;$("skill6Button").hidden=!(mage||bow)||!me||me.level<7;$("skill7Button").hidden=!(mage||bow)||!me||me.level<9;skillButtons.forEach(b=>{const cd=me?.cooldowns?.[b.dataset.action]||0;if(cd>0)b.textContent+=" · CD "+cd});
+}}
 $("start").hidden=s.status!=="city";$("start").disabled=s.players[0]?.id!==myId;$("next").hidden=!(s.status==="victory"&&s.stage%5!==0);$("next").disabled=s.players[0]?.id!==myId;$("openShop").hidden=!(s.status==="victory"&&s.stage%5===4&&!!s.monster?.miniBoss);$("openShop").textContent="🏕 TRAVELING MERCHANT";$("openShop").disabled=s.players[0]?.id!==myId;$("continueShop").textContent="✕ CLOSE SHOP";$("continueShop").hidden=true;$("continueShop").disabled=s.players[0]?.id!==myId;$("restart").textContent="🏰 RETURN TO CITY";$("restart").hidden=!["regionClear","defeat"].includes(s.status);$("restart").disabled=s.players[0]?.id!==myId;$("shopPanel").hidden=s.status!=="shop"||v23ShopCollapsed;
 $("v23ShopToggle").hidden=s.status!=="shop";
 $("v23ShopToggle").setAttribute("aria-expanded",String(s.status==="shop"&&!v23ShopCollapsed));
