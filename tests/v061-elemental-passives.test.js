@@ -90,7 +90,7 @@ test("ELEMENTAL damage is the existing chart (20% stronger, 20% resisted) only o
  const f=fixture("flamebrand");f.enemy.regionId="cursed_wilds";
  assert.equal(elemental.multiplier(f.enemy,engine.attackElement(f.hero,"attack","physical")),1.2);
  const mage=fixture("frost_scepter");mage.enemy.regionId="ember_caverns";
- assert.equal(elemental.multiplier(mage.enemy,engine.attackElement(mage.hero,"attack","physical")),1);
+ assert.equal(elemental.multiplier(mage.enemy,engine.attackElement(mage.hero,"attack","physical")),.8);
  assert.equal(engine.attackElement(mage.hero,"skill3",combat.skillElement(mage.hero,"skill3")),"ice");
 });
 test("passive proc and bottom dock are server/read-only UI additions, existing save is not reset",()=>{
