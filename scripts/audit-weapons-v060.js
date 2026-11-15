@@ -7,7 +7,7 @@ function audit(){
  const counts=Object.fromEntries(["swordsman","mage","tank"].map(c=>[c,weapons.WEAPONS.filter(i=>i.class===c).length]));
  const checks={
   npmVersion:pkg.version==="0.61.0",
-  visibleVersion:html.includes("<small>v0.61</small>")&&html.includes("v0.61 ELEMENTAL WEAPONS"),
+  visibleVersion:html.includes("<small>v0.61</small>")&&html.includes("VERSION 0.61 · ELEMENTAL WEAPONS"),
   fifteenNew:weapons.WEAPONS.length===15&&Object.values(counts).every(n=>n===5),
   realShopCatalog:server.includes("...weaponCatalog.WEAPONS"),
   categoryFix:server.includes('it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion"'),
