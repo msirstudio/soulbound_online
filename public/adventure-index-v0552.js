@@ -99,13 +99,13 @@ async function open(section){
  if(!data&&!loading){
   loading=true;$("v035Status").textContent="Reading live game catalog...";
   try{
-   const response=await fetch("/api/index?codex=0.55.2",{cache:"no-store"});
+   const response=await fetch("/api/index?codex=0.60",{cache:"no-store"});
    if(!response.ok)throw Error("Server returned "+response.status);
    data=await response.json();
    if(!data.codex||!Array.isArray(data.codex.elements)||!Array.isArray(data.codex.statusEffects)){
-    throw Error("Outdated /api/index response: ELEMENTS and STATUS rules not available. Verify server v0.55.2 is deployed.");
+    throw Error("Outdated /api/index response: ELEMENTS and STATUS rules not available. Verify that the current server build is deployed.");
    }
-   $("v035Status").textContent="INDEX UI v0.55.2 · API v"+data.version+" · "+data.codex.elements.length+" elements · "+data.codex.statusEffects.length+" status effects";
+   $("v035Status").textContent="INDEX UI v0.60 · API v"+data.version+" · "+data.codex.elements.length+" elements · "+data.codex.statusEffects.length+" status effects";
   }catch(err){
    $("v035Status").textContent="Index unavailable: "+err.message+". Retry by closing and reopening.";
    $("v035Results").innerHTML='<div class="v035-empty">Cannot load the encyclopedia. Check the deployment and try again.</div>';
@@ -169,7 +169,7 @@ function enemyDetail(e){
  const conditions='<section class="v060-encounter-rules"><strong>ACTUAL SPAWN STATS · '+partySize+' PLAYER'+(partySize===1?'':'S')+'</strong>'+
   variants.map(v=>'<div class="v060-spawn-line"><b>'+v.count+' ENEM'+(v.count===1?'Y':'IES')+'</b><span>HP '+v.hp+' / EACH · ATK '+v.atk+' / EACH · DEF '+v.def+
    ' · EXP '+v.xp+' · GOLD '+v.gold+(v.phase2Atk?' · PHASE 2 ATK '+v.phase2Atk:'')+'</span></div>').join('')+
-  '<small>HP/ATK/DEF are spawn stats of each enemy. Normal stages may roll different enemy counts. ATK is not final damage: move power, target DEF, buffs, Guard, resistance and statuses change hits. Boss Phase 2 raises ATK by 12%.</small></section>';
+  '<small>HP/ATK/DEF are spawn stats of each enemy. Normal stages may roll different enemy counts. ATK is not final damage: move power, target DEF, buffs, Guard, resistance and statuses change hits. Boss Phase 2 raises ATK by 12%. EXP and GOLD are granted once per cleared encounter, not for every spawned enemy.</small></section>';
 
  const fallback=e.boss?"/assets/bosses/"+e.sprite+".svg":"/assets/monsters/"+e.sprite+".svg";
  const miniKeys=["rootbound_guardian","ironbound_executioner","molten_behemoth","sanctum_keeper","frosthorn_colossus","titans_sentinel","abyss_watcher","twilight_regent"];
