@@ -570,7 +570,8 @@ $("shopItems").innerHTML=visibleItems.map(it=>{
  return '<div class="shop-item v060-shop-item'+(canBuy?"":" v060-locked")+'" data-category="'+esc(it.category)+'">'+
  '<div class="v060-shop-text"><strong>'+esc(it.icon||"⚔")+" "+esc(it.name)+'</strong>'+
  (it.shopTier?'<span class="v060-weapon-tier">'+esc(it.shopTier)+'</span>':"")+
- '<small>'+esc(it.description||"")+'</small>'+\n(it.passive?'<small class="v061-weapon-fx-label"><strong>'+esc(String(it.element||"physical").toUpperCase())+'</strong> · '+esc(it.passive.name)+' · '+Math.round(it.passive.chance*100)+'% — '+esc(it.passive.description)+'</small>':"')+
+ '<small>'+esc(it.description||"")+'</small>'+
+ (it.passive?'<small class="v061-weapon-fx-label"><strong>'+esc(String(it.element||"physical").toUpperCase())+'</strong> · '+esc(it.passive.name)+' · '+Math.round(it.passive.chance*100)+'% — '+esc(it.passive.description)+'</small>':"')+
  '<span class="v060-price">'+Number(it.price).toLocaleString()+' G</span></div>'+
  '<button data-buy="'+esc(it.id)+'" '+(canBuy?"":"disabled")+' title="'+esc(canBuy?"Buy "+it.name:reason)+'">'+esc(reason)+'</button></div>';
 }).join("")||'<p class="small">No items in this category for your class.</p>';
