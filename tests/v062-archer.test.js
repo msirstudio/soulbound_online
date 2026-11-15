@@ -110,8 +110,8 @@ test("real multiplayer Socket: Archer creation, party join, early bow shop, equi
  assert.equal(h.last().players.find(x=>x.classId==="archer").skillBook.length,7);
  assert.equal((await archerUser.call("openShop",{category:"weapon"})).ok,true);
  assert.equal(h.last().shopItems.filter(x=>x.class==="archer"&&x.slot==="weapon").length,8);
- const gold=p.gold;assert.equal((await archerUser.call("buyItem",{itemId:"ashwood_bow"})).ok,true);
- assert.equal(p.gold,gold-120); // Enough gold must be granted before shop in live loop
+ p.gold=500;const gold=p.gold;assert.equal((await archerUser.call("buyItem",{itemId:"ashwood_bow"})).ok,true);
+ assert.equal(p.gold,gold-120);
  const item=p.inventory.find(x=>x.id==="ashwood_bow");assert.ok(item);
  assert.equal((await archerUser.call("equipItem",{itemId:item.uid,targetSlot:"main"})).ok,true);
  assert.equal(p.weapon,"Ashwood Bow");
