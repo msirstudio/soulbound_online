@@ -12,7 +12,7 @@ test("15 genuinely distinct new weapons, 5 per class, one every progression tier
   assert.deepEqual(group.map(i=>i.level),[15,25,40,55,70]);
   assert.ok(group.every(i=>i.slot==="weapon"&&i.category==="weapon"&&i.price>0&&i.value>28&&i.requiredBoss));
   assert.ok(group.every((i,n)=>!n||(i.price>group[n-1].price&&i.value>group[n-1].value)));
-  assert.ok(group.every(i=>!i.element&&!i.onHit&&!i.statusEffect),"Elemental procs are intentionally reserved for 0.61");
+  assert.ok(group.every(i=>!!i.element&&!!i.passive&&i.passive.chance>0),"All 15 weapons expose real authoritative passives");
  }
 });
 test("Boss clear and character level are both required; wrong class is never allowed",()=>{
@@ -112,7 +112,7 @@ test("Shop UI shows class filtering, locks and precise per-copy equip and releas
  assert.ok(client.includes('data-equip="\'+esc(it.uid||it.id)+\'"'));
  assert.ok(server.includes("weaponCatalog.checkPurchase(p,it)"));
  assert.ok(server.includes('it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion"'));
- assert.equal(JSON.parse(read("package.json")).version,"0.60.0");
- assert.ok(html.includes("<small>v0.60</small>"));
- assert.ok(html.includes('game.js?v=0.60'));
+ assert.equal(JSON.parse(read("package.json")).version,"0.61.0");
+ assert.ok(html.includes("<small>v0.61</small>"));
+ assert.ok(html.includes('game.js?v=0.61'));
 });
