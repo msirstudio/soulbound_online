@@ -12,17 +12,19 @@ test("Normal Strike monster intent is hidden without removing ability to warn fo
  assert.equal(visible(" STRIKE "),false);
  for(const s of ["Briarstorm","Monsoon Surge","Oracle's Curse","Lesser Stormhammer","Staggered — attack interrupted"])assert.equal(visible(s),true,s);
 });
-test("Header is larger and Audio exists only in dedicated row BELOW command dock",()=>{
+test("Header remains readable and Audio docks after main game layout",()=>{
  const banner=html.indexOf('class="roomline panel"');
  const dock=html.indexOf('class="v22-command-dock"');
  const row=html.indexOf('class="loadout-tools"');
  const layout=html.indexOf('class="game-layout"');
  assert.ok(banner>=0&&banner<dock&&dock<row&&row<layout);
- assert.ok(html.slice(row,layout).includes('id="audioSettingsToggle"'));
+ assert.ok(!html.slice(row,layout).includes('id="audioSettingsToggle"'));
+ assert.ok(html.indexOf('class="v061-audio-dock"')>layout);
+ assert.ok(html.indexOf('id="audioSettingsToggle"')>layout);
  assert.equal((html.match(/id="audioSettingsToggle"/g)||[]).length,1);
  assert.equal((html.match(/id="audioSettings"/g)||[]).length,1);
  assert.ok(css.includes('min-height:54px!important'));
  assert.ok(css.includes('bottom:calc(100% + 8px)!important'));
  assert.ok(html.includes('v0559-header-audio.css?v=0.55.9'));
- assert.ok(html.includes('game.js?v=0.60'));
+ assert.ok(html.includes('game.js?v=0.61'));
 });
