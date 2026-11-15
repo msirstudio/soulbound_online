@@ -2,6 +2,15 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.61",date:"2026-11-15",title:"Elemental Weapons — 15 Unique Passives & Lower Audio Dock",notes:[
+  "Added a server-authoritative elemental attunement and a distinct passive to each of the 15 v0.60 progression weapons.",
+  "Weapon basic attacks use the canonical elemental chart: strong ×1.20, resisted ×0.80, neutral ×1.00. Existing Mage spell and Paladin Light elements are preserved.",
+  "Passives include two-turn Burn damage, Chill, Weaken, Stagger, team warding, healing, MP recovery, bounded damage boosts and chain hits.",
+  "Activation rates and effects are documented in the Weaponsmith, Equipment and Adventure INDEX, and appear as server-confirmed visual battle notifications.",
+  "Moved AUDIO to a small dock at the bottom-right of the game, removing the intrusive extra middle row and retired redundant 0.60 audio CSS.",
+  "Keeps existing item IDs and per-item unique IDs, save schemas, secure restores, shop unlock gates, combat formulas and multiplayer deduplication.",
+  "Automatic regression tests cover all 15 weapons plus an actual Socket purchase/equip/elemental battle; inspect audio position manually in browser after deploying."
+ ]},
  {version:"0.60",date:"2026-11-15",title:"Expanded Weaponsmith — Five New Tiers for Every Class",notes:[
   "Added 15 new shop weapons (five per Swordsman, Mage and Tank), bringing the merchant's total to 24 weapons.",
   "New progression tiers unlock at Lv 15, 25, 40, 55 and 70, after defeating the corresponding previous region boss.",
