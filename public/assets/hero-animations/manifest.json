@@ -1,0 +1,32 @@
+{
+  "format": "SOULBOUND Hero Animation Manifest v1",
+  "character": "female_swordsman",
+  "states": {
+    "idle": {
+      "src": "assets/hero-animations/female_swordsman_idle_8f.png",
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 8,
+      "rows": 1,
+      "frames": 8,
+      "fps": 8,
+      "loop": true,
+      "anchor": {
+        "x": 128,
+        "y": 232
+      }
+    },
+    "attack": {
+      "fallback": "assets/hero-poses/swordsman/female_attack.png"
+    },
+    "hit": {
+      "fallback": "assets/hero-poses/swordsman/female_hit.png"
+    }
+  },
+  "notes": [
+    "Idle overrides artwork only for female swordsman.",
+    "Attack and Hit use existing pose assets.",
+    "If the optional PNG is missing or invalid, game automatically falls back to original artwork.",
+    "The provided animated sprite is a fixed sword and armor appearance; per-equipment art layers are a future extension."
+  ]
+}

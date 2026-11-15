@@ -1,0 +1,25 @@
+name: SOULBOUND Female Knight Idle Sprite
+on:
+  push:
+    branches: [v0.62-female-knight-idle]
+  pull_request:
+    branches: [v0.62-archer-class]
+permissions:
+  contents: read
+jobs:
+  animation-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Validate sprite renderer and 8-FPS animation
+        run: |
+          node --check public/sprite-animation-v0311.js
+          node --check tests/v062-female-idle.test.js
+          node --test tests/v062-female-idle.test.js
+      - name: Full gameplay regression
+        run: npm test

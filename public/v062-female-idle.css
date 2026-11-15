@@ -1,0 +1,27 @@
+/* v0.62.1 — isolated Female Swordsman idle, 8x256 @ 8fps. No HUD layout shifts.
+ * Attack/Hit continue to render their existing high-resolution images. */
+#game .v311-hero .v311-custom-idle{
+ display:none;position:absolute;left:50%;bottom:0;top:auto;
+ height:100%;width:auto;aspect-ratio:1/1;
+ transform:translateX(-50%);pointer-events:none;
+ background-repeat:no-repeat;background-position:0 0;background-size:800% 100%;
+ image-rendering:pixelated;filter:drop-shadow(0 5px 5px #000b);
+}
+#game .v311-hero.v311-custom-idle-active .v311-custom-idle{display:block!important}
+#game .v311-hero.v311-custom-idle-active .v311-pose,
+#game .v311-hero.v311-custom-idle-active .v311-sheet,
+#game .v311-hero.v311-custom-idle-active .v311-fallback{display:none!important}
+#game .v311-hero.v311-custom-idle-active{transform:none!important;animation:none!important}
+#lobby .v30-preview.v311-preview-custom-ready #v30HeroPreview,
+#lobby .v30-preview.v311-preview-custom-ready #v311PreviewPose{display:none!important}
+#lobby .v30-preview.v311-preview-custom-ready #v311PreviewSprite{
+ display:block!important;width:208px;height:208px;flex:0 0 208px;
+ image-rendering:pixelated;background-repeat:no-repeat;background-size:800% 100%;
+ filter:drop-shadow(0 8px 8px #0008)
+}
+@media(max-width:699px){
+ #lobby .v30-preview.v311-preview-custom-ready #v311PreviewSprite{width:174px;height:174px;flex-basis:174px}
+}
+@media(prefers-reduced-motion:reduce){
+ #game .v311-hero .v311-custom-idle{animation:none!important}
+}
