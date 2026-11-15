@@ -76,4 +76,20 @@ function publicEnemies(room){
   atk:x.atk,def:x.def,boss:!!x.boss,miniBoss:!!x.miniBoss
  }));
 }
-module.exports={difficulty,baseCount,makeGroup,alive,select,deadTarget,publicEnemies};
+
+/* Exact, read-only INDEX projection. Reuses live makeGroup rather than a
+ * second, potentially diverging HP / ATK balancing formula. */
+function encounterPreview(stage,first,normal){
+ const scenario=(partySize,roll)=>{
+  const room={stage,players:{size:partySize},enemies:[],monster:null};
+  const group=makeGroup(room,first,normal,()=>roll),foe=group[0];
+  return {count:group.length,hp:foe.maxHp,atk:foe.atk,def:foe.def,
+   xp:foe.xp,gold:foe.gold,
+   ...(foe.boss?{phase2Atk:Math.max(1,Math.round(foe.atk*1.12))}:{})};
+ };
+ return [1,2,3,4].map(partySize=>{
+  const fewer=scenario(partySize,.999999),more=scenario(partySize,0);
+  return {partySize,variants:fewer.count===more.count?[fewer]:[fewer,more]};
+ });
+}
+module.exports={difficulty,baseCount,makeGroup,alive,select,deadTarget,publicEnemies,encounterPreview};
