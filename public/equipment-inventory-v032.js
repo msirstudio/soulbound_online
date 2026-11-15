@@ -178,9 +178,14 @@ function onSlot(slot,itemId=selected){
   else{selected=null;notify(item.name+" equipped successfully.");}
  }).catch(e=>notify(e?.message||"Equipment change failed.",true)).finally(()=>{busy=false});
 }
+function v061Trait(item){
+ const live=(room?.shopItems||[]).find(x=>x.id===item?.id);
+ const passive=live?.passive;
+ return passive?String(live.element||"physical").toUpperCase()+" · "+passive.name+" ("+Math.round(passive.chance*100)+"%) · "+passive.description:"";
+}
 function slotMarkup(key,emoji,label,item,active){
- const name=item?.name||"EMPTY";
- return '<button type="button" draggable="'+(item?"true":"false")+'" class="v032-slot '+(item?"filled":"")+'" data-v032-slot="'+key+'" aria-label="'+esc(label+": "+name)+'">'+
+ const name=item?.name||"EMPTY",trait=v061Trait(item);
+ return '<button type="button" draggable="'+(item?"true":"false")+'" class="v032-slot '+(item?"filled":"")+'" data-v032-slot="'+key+'" aria-label="'+esc(label+": "+name+(trait?" · "+trait:""))+'" title="'+esc(trait||name)+'" data-tooltip="'+esc(trait||name)+'">'+
  '<span class="v032-slot-icon">'+emoji+'</span><strong>'+esc(label)+'</strong><small title="'+esc(name)+'">'+esc(name)+'</small></button>';
 }
 function draw(){
@@ -235,9 +240,9 @@ function draw(){
   const key=displaySlot(it),icon=it.icon||(key==="main"?"⚔":key==="chest"?"🛡":key.includes("ring")?"💍":key==="boots"?"🥾":"✦");
   const stats=["value","defense","maxHp","maxMp"].map((k,j)=>Number(it[k])>0?"+"+it[k]+" "+["ATK","DEF","HP","MP"][j]:"").filter(Boolean).join(" · ")||key.toUpperCase();
   const id=itemKey(it),rarity=["common","uncommon","rare","epic","legendary"].includes(it.rarity)?it.rarity:"common";
-  const compatible=allowed(it);
-  return '<button type="button" draggable="true" class="v032-item v044-bag-cell v034-rarity-'+rarity+' '+(compatible?"v044-compatible":"v044-incompatible")+' '+(id===selected?"selected":"")+'" data-v032-item="'+esc(id)+'" title="'+esc(it.name)+' · '+esc(stats)+'">'+
-   '<span class="v032-item-icon">'+esc(icon)+'</span><strong>'+esc(it.name)+'</strong><small>'+esc(stats)+'</small><span class="v034-rarity-name">'+rarity.toUpperCase()+'</span>'+(it.class?'<em>'+esc(it.class.toUpperCase())+'</em>':'')+'</button>';
+  const compatible=allowed(it),trait=v061Trait(it);
+  return '<button type="button" draggable="true" class="v032-item v044-bag-cell v034-rarity-'+rarity+' '+(compatible?"v044-compatible":"v044-incompatible")+' '+(id===selected?"selected":"")+'" data-v032-item="'+esc(id)+'" title="'+esc(it.name)+' · '+esc(stats)+(trait?" · "+esc(trait):"")+'" data-tooltip="'+esc(it.name)+" · "+esc(stats)+(trait?" · "+esc(trait):"")+'">'+
+   '<span class="v032-item-icon">'+esc(icon)+'</span><strong>'+esc(it.name)+'</strong><small>'+esc(stats)+'</small>'+(trait?'<small class="v061-weapon-fx-label">'+esc(trait)+'</small>':'')+'<span class="v034-rarity-name">'+rarity.toUpperCase()+'</span>'+(it.class?'<em>'+esc(it.class.toUpperCase())+'</em>':'')+'</button>';
  });
  const empty=Array.from({length:Math.max(0,40-bag.length)},(_,i)=>'<div class="v044-empty-cell" aria-label="Empty inventory slot">+</div>');
  modal.querySelector("#v032Bag").innerHTML=[...safe,...empty].join("");

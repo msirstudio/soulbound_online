@@ -99,13 +99,13 @@ async function open(section){
  if(!data&&!loading){
   loading=true;$("v035Status").textContent="Reading live game catalog...";
   try{
-   const response=await fetch("/api/index?codex=0.60",{cache:"no-store"});
+   const response=await fetch("/api/index?codex=0.61",{cache:"no-store"});
    if(!response.ok)throw Error("Server returned "+response.status);
    data=await response.json();
    if(!data.codex||!Array.isArray(data.codex.elements)||!Array.isArray(data.codex.statusEffects)){
     throw Error("Outdated /api/index response: ELEMENTS and STATUS rules not available. Verify that the current server build is deployed.");
    }
-   $("v035Status").textContent="INDEX UI v0.60 · API v"+data.version+" · "+data.codex.elements.length+" elements · "+data.codex.statusEffects.length+" status effects";
+   $("v035Status").textContent="INDEX UI v0.61 · API v"+data.version+" · "+data.codex.elements.length+" elements · "+data.codex.statusEffects.length+" status effects";
   }catch(err){
    $("v035Status").textContent="Index unavailable: "+err.message+". Retry by closing and reopening.";
    $("v035Results").innerHTML='<div class="v035-empty">Cannot load the encyclopedia. Check the deployment and try again.</div>';
@@ -231,6 +231,7 @@ function itemDetail(e){
  (e.rarity?'<strong>RARITY</strong><p>'+esc(e.rarity.toUpperCase())+'</p>':'')+
  (e.source?'<strong>ACQUIRED FROM</strong><p><button type="button" class="v037-source-link" data-v037-boss="'+esc(e.sourceStage||e.bossStage)+'">👑 '+esc(e.source)+' · Stage '+esc(e.sourceStage||e.bossStage)+' →</button></p><strong>DROP CHANCE</strong><p>'+esc(e.chance)+'% per victory (independent item roll)</p>':'')+
  (e.price!=null?'<strong>MERCHANT PRICE</strong><p>'+esc(e.price)+' gold</p>':'')+
+ (e.passive?'<section class="v061-element-line"><strong>'+esc((e.element||"physical").toUpperCase())+' ELEMENT</strong><span>'+esc(e.passive.name)+' · '+Math.round(e.passive.chance*100)+'% activation</span></section><p class="v061-passive-desc">'+esc(e.passive.description)+'</p>':'')+
  '<strong>DESCRIPTION</strong><p>'+esc(e.description||"Equipment with fixed stats.")+'</p></div>';
 }
 function renderSelection(){

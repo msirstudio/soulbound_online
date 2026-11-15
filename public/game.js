@@ -399,7 +399,7 @@ function v0560OnState(last,s){
   });
  }
 }
-socket.on("state",s=>{const last=gameState;gameState=s;render();v0560OnState(last,s);window.SoulboundRewardV411?.show(last,s,myId);if(restoreComplete){
+socket.on("state",s=>{const last=gameState;gameState=s;render();v0560OnState(last,s);window.SoulboundWeaponFxV61?.onState(last,s);window.SoulboundRewardV411?.show(last,s,myId);if(restoreComplete){
  const p=s.players.find(x=>x.id===myId);if(p){clearTimeout(saveTimer);
  const justCleared=s.status==="regionClear"&&last?.status!=="regionClear";
  if(justCleared)saveProfile(p);else saveTimer=setTimeout(()=>saveProfile(p),500)
@@ -485,6 +485,7 @@ const teamConditions=s.players.flatMap(p=>(p.statusEffects||[]).map(effect=>icon
 $("v054PartyStatuses").hidden=!teamConditions.length&&!(s.partyWardTurns>0);
 $("v054PartyStatuses").innerHTML=(s.partyWardTurns>0?'<span class="v0551-ward-icon" title="Party Guard active · '+Math.max(0,s.partyWardTurns)+' turns · See INDEX → COMBAT RULES" aria-label="Party Guard">🛡️<small>'+Math.max(0,s.partyWardTurns)+'</small></span>':"")+teamConditions.join("");
 const monsterConditions=(s.monster?.statusEffects||[]).map(effect=>iconFor(s.monster.name||"Enemy",effect));
+if(s.monster?.weaponBurn?.turns>0)monsterConditions.push('<span class="v0551-status-icon" title="Weapon Burn · loses HP before next enemy turns">🔥<small>'+Math.floor(s.monster.weaponBurn.turns)+'</small></span>');
 $("v0551MonsterStatuses").hidden=!monsterConditions.length;
 $("v0551MonsterStatuses").innerHTML=monsterConditions.join("");
 $("partySprites").innerHTML=s.players.map(p=>'<div class="hero-figure"><div class="v17-nameplate">'+esc(p.name)+(p.id===myId?" · YOU":"")+(p.disconnected?" · OFFLINE":"")+'</div>'+(window.SoulboundSprite?.canDraw(p)?window.SoulboundSprite.spriteMarkup(p):'<img class="sprite-img" title="'+esc(p.name)+'" alt="'+(p.classId==="mage"?"Mage":p.classId==="tank"?"Tank":"Swordsman")+'" src="'+heroArt(p)+'">')+'<div class="figure-vitals"><strong>'+esc(p.name)+(p.id===myId?" · YOU":"")+'</strong><div class="figure-meter hp-meter"><i style="width:'+Math.max(0,Math.min(100,100*p.hp/Math.max(1,p.maxHp)))+'%"></i></div><small>'+p.hp+' / '+p.maxHp+' HP</small><div class="figure-meter mp-meter"><i style="width:'+Math.max(0,Math.min(100,100*p.mp/Math.max(1,p.maxMp)))+'%"></i></div><small>'+p.mp+' / '+p.maxMp+' MP</small></div></div>').join("");window.SoulboundSprite?.refresh();$("players").innerHTML=s.players.map(p=>'<div class="player"><div class="player-head"><strong>'+esc(p.name)+" · "+p.className+(p.id===myId?" (YOU)":"")+(p.hp<=0?" · DOWN":"")+'</strong><span>LV '+p.level+'</span></div><div class="player-bars">HP '+p.hp+"/"+p.maxHp+" · MP "+p.mp+"/"+p.maxMp+"<br>ATK "+p.atk+" · DEF "+p.def+" · 🧪 "+(p.smallHealth||p.potions||0)+"/"+(p.mediumHealth||0)+"/"+(p.largeHealth||0)+" · 🔷 "+(p.smallMana||p.manaPotions||0)+"/"+(p.mediumMana||0)+"/"+(p.largeMana||0)+" · 🪙 "+p.gold+"<br>⚔ "+esc(p.weapon)+" · 🛡 "+esc(p.armor)+"</div></div>").join("");
@@ -570,13 +571,19 @@ $("shopItems").innerHTML=visibleItems.map(it=>{
  '<div class="v060-shop-text"><strong>'+esc(it.icon||"⚔")+" "+esc(it.name)+'</strong>'+
  (it.shopTier?'<span class="v060-weapon-tier">'+esc(it.shopTier)+'</span>':"")+
  '<small>'+esc(it.description||"")+'</small>'+
+ (it.passive?'<small class="v061-weapon-fx-label"><strong>'+esc(String(it.element||"physical").toUpperCase())+'</strong> · '+esc(it.passive.name)+' · '+Math.round(it.passive.chance*100)+'% — '+esc(it.passive.description)+'</small>':'')+
  '<span class="v060-price">'+Number(it.price).toLocaleString()+' G</span></div>'+
  '<button data-buy="'+esc(it.id)+'" '+(canBuy?"":"disabled")+' title="'+esc(canBuy?"Buy "+it.name:reason)+'">'+esc(reason)+'</button></div>';
 }).join("")||'<p class="small">No items in this category for your class.</p>';
 document.querySelectorAll("[data-buy]").forEach(b=>b.onclick=async()=>{const r=await call("buyItem",{itemId:b.dataset.buy});if(!r.ok)alert(r.error)});
 window.SoulboundV32?.render(me,s,(itemId,slot)=>call("equipItem",{itemId,targetSlot:slot}),slot=>call("unequipItem",{slot}),uid=>call("discardItem",{uid}));
 $("inventorySummary").textContent="GEAR ITEMS · "+(me?.inventory?.length||0)+"   |   GOLD · "+(me?.gold||0);
-$("inventoryItems").innerHTML=(me?.inventory||[]).map(it=>'<div class="inventory-row"><div><strong>'+esc(it.name)+'</strong><small>'+(it.slot==="weapon"?"Weapon · +"+(it.value||0)+" ATK":"Armor · +"+(it.defense||0)+" DEF")+'</small></div><button data-equip="'+esc(it.uid||it.id)+'">EQUIP</button></div>').join("")||'<small class="small">Buy weapons or armor from the merchant to collect them here.</small>';
+$("inventoryItems").innerHTML=(me?.inventory||[]).map(it=>{
+ const trait=(s.shopItems||[]).find(x=>x.id===it.id);
+ const bonus=trait?.passive?" · "+String(trait.element||"physical").toUpperCase()+" · "+trait.passive.name:"";
+ return '<div class="inventory-row"><div><strong>'+esc(it.name)+'</strong><small>'+
+  (it.slot==="weapon"?"Weapon · +"+(it.value||0)+" ATK":"Armor · +"+(it.defense||0)+" DEF")+esc(bonus)+'</small></div><button data-equip="'+esc(it.uid||it.id)+'">EQUIP</button></div>';
+}).join("")||'<small class="small">Buy weapons or armor from the merchant to collect them here.</small>';
 $("foodInventory").innerHTML='<div class="food-title">CAMP FOOD · ACTIVE BUFFS</div><div class="food-actions"><button data-eat-food="food_roast" '+(!(me?.foodItems?.roast_meat)||!turn?"disabled":"")+'>🍖 ROAST × '+(me?.foodItems?.roast_meat||0)+'</button><button data-eat-food="food_stew" '+(!(me?.foodItems?.herb_stew)||!turn?"disabled":"")+'>🍲 STEW × '+(me?.foodItems?.herb_stew||0)+'</button><button data-eat-food="food_tart" '+(!(me?.foodItems?.mana_tart)||!turn?"disabled":"")+'>🥧 TART × '+(me?.foodItems?.mana_tart||0)+'</button></div><small>ATK buff: '+(me?.foodBuffs?.atk||0)+' attacks · DEF buff: '+(me?.foodBuffs?.def||0)+' hits · Skill buff: '+(me?.foodBuffs?.skill||0)+' skills</small>';document.querySelectorAll("[data-eat-food]").forEach(b=>b.onclick=async()=>{const r=await call("action",{type:b.dataset.eatFood});if(!r.ok)alert(r.error);else window.SoulboundAudio?.sfx("heal")});
 document.querySelectorAll("[data-equip]").forEach(b=>b.onclick=async()=>{const r=await call("equipItem",{itemId:b.dataset.equip});if(!r.ok)alert(r.error)});
 $("game").classList.toggle("v0483-camp-shop",s.status==="shop"&&s.shopOrigin==="camp");

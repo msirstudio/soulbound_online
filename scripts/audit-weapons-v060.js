@@ -6,8 +6,8 @@ function audit(){
  const pkg=JSON.parse(read("package.json")),server=read("server.js"),client=read("public/game.js"),html=read("public/index.html");
  const counts=Object.fromEntries(["swordsman","mage","tank"].map(c=>[c,weapons.WEAPONS.filter(i=>i.class===c).length]));
  const checks={
-  npmVersion:pkg.version==="0.60.0",
-  visibleVersion:html.includes("<small>v0.60</small>")&&html.includes("v0.60 WEAPON SHOP"),
+  npmVersion:pkg.version==="0.61.0",
+  visibleVersion:html.includes("<small>v0.61</small>")&&html.includes("VERSION 0.61 · ELEMENTAL WEAPONS"),
   fifteenNew:weapons.WEAPONS.length===15&&Object.values(counts).every(n=>n===5),
   realShopCatalog:server.includes("...weaponCatalog.WEAPONS"),
   categoryFix:server.includes('it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion"'),
@@ -19,8 +19,8 @@ function audit(){
   damagePreserved:server.includes("formulas.basicAttack("),
   reconnectPreserved:server.includes('s.on("resumeRoom"')
  };
- return {version:"0.60",passed:Object.values(checks).every(Boolean),counts,checks,
- limitations:["Elemental damage begins in planned 0.61","Manual browser and real Render staging checks remain required"]};
+ return {version:"0.61",passed:Object.values(checks).every(Boolean),counts,checks,
+ limitations:["Elemental damage and passives handled by 0.61 authoritative engine","Manual browser and real Render staging checks remain required"]};
 }
 if(require.main===module){
  const result=audit();

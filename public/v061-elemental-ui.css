@@ -1,0 +1,76 @@
+/* SOULBOUND 0.61 — bottom-right Audio dock, Elemental combat VFX, accurate INDEX.
+   Legacy v0559/060 middle audio-row rules are unused, not carried forward. */
+#game:not([hidden]){position:relative!important}
+#game .v061-audio-dock{
+ position:absolute!important;right:10px;bottom:7px;z-index:2600!important;
+ width:auto!important;min-height:0!important;height:auto!important;
+ display:flex!important;align-items:center!important;justify-content:flex-end!important;
+ padding:0!important;margin:0!important;background:transparent!important;border:0!important;
+ overflow:visible!important;pointer-events:none;
+}
+#game .v061-audio-dock .v0484-audio-anchor{position:relative!important;display:inline-flex!important;pointer-events:auto}
+#game .v061-audio-dock #audioSettingsToggle{
+ display:inline-flex!important;align-items:center!important;justify-content:center!important;
+ min-width:91px!important;min-height:30px!important;
+ padding:6px 12px!important;margin:0!important;
+ border-radius:5px!important;border:1px solid #c09b5f!important;
+ box-shadow:0 2px 12px #060812b9!important;
+ background:linear-gradient(140deg,#3a3042,#1c2838)!important;
+ font:700 11px Georgia,serif!important;color:#ffe8ba!important
+}
+#game .v061-audio-dock #audioSettings.audio-settings-pop:not([hidden]){
+ position:absolute!important;top:auto!important;bottom:calc(100% + 8px)!important;
+ left:auto!important;right:0!important;
+ width:min(315px,calc(100vw - 24px))!important;max-height:min(390px,65dvh)!important;
+ overflow-y:auto!important;z-index:3001!important
+}
+#game .v061-audio-dock #audioSettings[hidden]{display:none!important}
+@media(max-width:1059px),(max-height:690px){
+ #game .v061-audio-dock{position:sticky!important;right:auto!important;bottom:4px!important;
+  margin-left:auto!important;margin-right:8px!important;align-self:flex-end!important;
+  flex:0 0 30px!important;z-index:2600!important}
+ #game .v061-audio-dock #audioSettings.audio-settings-pop:not([hidden]){max-height:60dvh!important}
+}
+/* INDEX counts now reflect canonical live spawn formulas; old 0.60 styles were retired. */
+#v035Index .v060-index-party{min-width:110px}
+#v035Index .v060-index-party[hidden]{display:none!important}
+#v035Index .v060-index-party select{min-width:95px;max-width:145px}
+#v035Index .v060-encounter-rules{margin:9px 0;padding:10px;border:1px solid #9b8664;border-radius:6px;background:#172034}
+#v035Index .v060-encounter-rules>strong{display:block;color:#f6d898;font:700 12px Georgia,serif;margin-bottom:7px}
+#v035Index .v060-spawn-line{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px 10px;padding:6px 0;border-top:1px solid #575768;color:#d7e0ee;font:12px/1.45 Georgia,serif}
+#v035Index .v060-spawn-line b{color:#f5d99e;min-width:80px}
+#v035Index .v060-encounter-rules small{display:block;margin-top:8px;color:#bac9da;font:11px/1.5 Georgia,serif}
+#v035Index .v061-element-line{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 10px;margin:7px 0;
+ border:1px solid #675f83;border-radius:6px;color:#e5dff9;background:#1b2135;font:12px/1.5 Georgia,serif}
+#v035Index .v061-element-line strong{color:#ffdaa3}
+#v035Index .v061-passive-desc{line-height:1.55;color:#e5ecf8}
+#game .v061-fx-anchor{position:relative!important}
+#game .v061-combat-fx{
+ position:absolute;left:50%;top:32%;z-index:35;
+ display:block;max-width:min(240px,90%);min-width:60px;
+ padding:5px 9px;border:1px solid var(--v061-fx,#d3c5a2);border-radius:8px;
+ background:#151323ec;color:var(--v061-fx,#ffedbb);font:800 12px/1.2 Georgia,serif;
+ text-align:center;text-shadow:0 1px 2px #000;
+ white-space:normal;overflow-wrap:break-word;pointer-events:none;
+ box-shadow:0 0 22px color-mix(in srgb,var(--v061-fx,#ffecb2),transparent 68%);
+ transform:translate(-50%,-20%);animation:v061-burst 950ms ease-out both;
+}
+#game .v061-fx--fire{--v061-fx:#ff9d51}
+#game .v061-fx--ice{--v061-fx:#9ceafa}
+#game .v061-fx--lightning{--v061-fx:#e0bfff}
+#game .v061-fx--earth{--v061-fx:#d9c18a}
+#game .v061-fx--void{--v061-fx:#cd9cff}
+#game .v061-fx--light{--v061-fx:#fff4aa}
+#game .v061-fx--arcane{--v061-fx:#b3e7ff}
+#game .v061-fx--physical{--v061-fx:#d8e4e9}
+@keyframes v061-burst{
+ 0%{opacity:0;transform:translate(-50%,12%) scale(.7);filter:brightness(2)}
+ 22%{opacity:1;transform:translate(-50%,-12%) scale(1.1)}
+ 70%{opacity:1;transform:translate(-50%,-45%) scale(1)}
+ 100%{opacity:0;transform:translate(-50%,-90%) scale(.95)}
+}
+#game .v061-weapon-fx-label{display:inline-block;color:#c5d8ed;font-size:10px}
+#game .v061-weapon-fx-label strong{color:#eac881}
+@media(prefers-reduced-motion:reduce){#game .v061-combat-fx{animation:none!important;opacity:1!important}}
+@media(max-width:650px){#v035Index .v060-encounter-rules{padding:8px}#v035Index .v060-spawn-line{font-size:11px}
+ #game .v061-combat-fx{font-size:10px;padding:3px 5px}}

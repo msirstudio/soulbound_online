@@ -34,9 +34,9 @@ test("client displays camp button only after mini-boss victory and keeps city me
 test("audio popup is single home for music mute, sfx mute, both volumes and test sound",()=>{
  const html=read("public/index.html"),game=read("public/game.js");
  const start=html.indexOf('id="audioSettingsToggle"');
- const end=html.indexOf('<div class="game-layout">',start);
+ const end=html.indexOf('<div id="shopPanel"',start);
  const region=html.slice(start,end);
- assert.ok(start>=0&&end>start&&start>html.indexOf('class="v22-command-dock"'));
+ assert.ok(start>=0&&end>start&&start>html.indexOf('class="game-layout"'));
  for(const id of ['id="audioSettings"','id="musicQuick"','id="sfxQuick"','id="gameMusicVolume"','id="gameSfxVolume"','id="audioTest"'])assert.ok(region.includes(id),id);
  const preceding=html.slice(Math.max(0,start-260),start);
  assert.ok(!preceding.includes('id="musicQuick"'));
@@ -66,8 +66,8 @@ test("log scroll box is stretched to the bottom edge of its panel",()=>{
 });
 test("v0.55 resources and release log are linked",()=>{
  const html=read("public/index.html"),pkg=require("../package.json"),log=read("public/update-log-v045.js");
- assert.equal(pkg.version,"0.60.0");
+ assert.equal(pkg.version,"0.61.0");
  assert.ok(html.includes('href="v0484-audio-boss-log.css"'));
- assert.ok(html.includes('VERSION 0.60 · EXPANDED WEAPON SHOP'));
+ assert.ok(html.includes('VERSION 0.61 · ELEMENTAL WEAPONS'));
  assert.ok(log.includes('version:"0.48.4"'));
 });

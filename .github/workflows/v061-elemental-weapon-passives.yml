@@ -1,0 +1,31 @@
+name: SOULBOUND v0.61 Elemental Weapons + Audio Dock
+on:
+  push:
+    branches: [v0.61-elemental-weapon-passives]
+  pull_request:
+    branches: [v0.60-expanded-weapon-shop]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Validate authoritative server and browser JS
+        run: |
+          node --check server.js
+          node --check combat-v055.js
+          node --check items/weapon-shop-v060.js
+          node --check items/weapon-passives-v061.js
+          node --check public/game.js
+          node --check public/adventure-index-v0552.js
+          node --check public/equipment-inventory-v032.js
+          node --check public/weapon-effects-v061.js
+      - name: Run complete regression suite
+        run: npm test

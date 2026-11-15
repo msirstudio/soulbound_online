@@ -2,12 +2,14 @@
 const test=require("node:test"),assert=require("node:assert/strict"),fs=require("node:fs"),path=require("node:path");
 const read=p=>fs.readFileSync(path.join(__dirname,"..",p),"utf8");
 const html=read("public/index.html"),css=read("public/v0557-compact-battle.css");
-test("Audio button retains one original ID but lives in the lower command dock",()=>{
+test("Audio button retains original IDs at bottom-right after main game layout",()=>{
  const start=html.indexOf('<div class="v22-command-dock"');
- const end=html.indexOf('<div class="game-layout">',start);
+ const end=html.indexOf('<div id="shopPanel"',start);
  const room=html.substring(html.indexOf('<div class="roomline panel">'),start);
  const dock=html.substring(start,end);
  assert.ok(start>=0&&end>start);
+ assert.ok(!html.slice(start,html.indexOf('<div class="game-layout">',start)).includes('id="audioSettingsToggle"'));
+ assert.ok(dock.includes('class="v061-audio-dock"'));
  assert.ok(dock.includes('id="audioSettingsToggle"'));
  assert.ok(dock.includes('id="audioSettings"'));
  assert.equal((html.match(/id="audioSettingsToggle"/g)||[]).length,1);

@@ -39,20 +39,20 @@ test("Nine original compositions are distinct, with city + eight region keys",()
  assert.ok(music.includes('original.setMusic(false)'));
  assert.ok(!music.includes('old.setMusic(false)'));
 });
-test("Audio keeps its original controls in a new row below Equipment/INDEX",()=>{
+test("Audio keeps original controls at bottom-right after the main HUD",()=>{
  const dock=html.indexOf('class="v22-command-dock"'),audio=html.indexOf('id="audioSettingsToggle"'),layout=html.indexOf('class="game-layout"');
- assert.ok(dock>=0&&dock<audio&&audio<layout);
+ assert.ok(dock>=0&&dock<layout&&audio>layout);
  assert.equal((html.match(/id="audioSettingsToggle"/g)||[]).length,1);
- assert.ok(html.includes('class="v0559-audio-row"'));
- assert.ok(html.indexOf('class="v0559-audio-row"')<audio);
- assert.ok(html.indexOf('id="toggleEquipment"')<html.indexOf('class="v0559-audio-row"'));
- const lowerCss=read("public/v060-index-audio-fix.css");
- assert.ok(lowerCss.includes("#game .v0559-audio-row"));
+ assert.ok(html.includes('class="v061-audio-dock"'));
+ assert.ok(html.indexOf('class="v061-audio-dock"')<audio);
+ assert.ok(html.indexOf('id="toggleEquipment"')<html.indexOf('class="v061-audio-dock"'));
+ const lowerCss=read("public/v061-elemental-ui.css");
+ assert.ok(lowerCss.includes("#game .v061-audio-dock"));
  assert.ok(lowerCss.includes("bottom:calc(100% + 8px)"));
 });
 test("Release and API versions agree",()=>{
- assert.ok(html.includes('<small>v0.60</small>'));
- assert.ok(html.includes('VERSION 0.60 · EXPANDED WEAPON SHOP'));
- assert.equal(require("../package.json").version,"0.60.0");
+ assert.ok(html.includes('<small>v0.61</small>'));
+ assert.ok(html.includes('VERSION 0.61 · ELEMENTAL WEAPONS'));
+ assert.equal(require("../package.json").version,"0.61.0");
  assert.ok(read("server.js").includes("version:APP_VERSION"));
 });

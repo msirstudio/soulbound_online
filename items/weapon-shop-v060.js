@@ -1,10 +1,11 @@
 "use strict";
 /**
- * SOULBOUND 0.60 — 15 new non-elemental progression weapons.
+ * SOULBOUND 0.61 — 15 progression weapons with authoritative elemental passives.
  * Level + completed-region-boss gating is checked by the server.
  * Item IDs and stats are stable save identifiers. No damage/element code here.
- * Elemental effects are a separate planned 0.61 release.
+ * Elemental effects are resolved from the stable item ID at attack time.
  */
+const passives=require("./weapon-passives-v061");
 const TIERS=Object.freeze([
  {level:15,boss:"cursed_wilds",bossName:"Briarfang Alpha",label:"Refined"},
  {level:25,boss:"dreadforge_bastion",bossName:"Dreadforge Champion",label:"Masterwork"},
@@ -40,7 +41,8 @@ const WEAPONS=Object.freeze(Object.entries(TEMPLATES).flatMap(([cls,entries])=>
   const gate=TIERS[tier];
   return Object.freeze({
    id,name,icon,description:"+"+value+" ATK · "+cls[0].toUpperCase()+cls.slice(1)+" · Lv "+gate.level+
-    " · Clear "+gate.bossName+" first",
+    " · Clear "+gate.bossName+" first · "+passives.spec[id].name+" ("+Math.round(passives.spec[id].chance*100)+"%)",
+   element:passives.spec[id].element,passive:{name:passives.spec[id].name,chance:passives.spec[id].chance,description:passives.spec[id].description},
    price,class:cls,slot:"weapon",category:"weapon",
    value,level:gate.level,requiredBoss:gate.boss,unlockBossName:gate.bossName,
    shopTier:gate.label
