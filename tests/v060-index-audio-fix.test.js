@@ -34,7 +34,7 @@ test("INDEX preview equals the real server spawn formula: 40 stages x 4 party si
  assert.equal(checks,320);
 });
 test("INDEX API uses exact enemy spawn preview, including party sizing, and never stale base values",()=>{
- const server=read("server.js"),index=read("public/adventure-index-v0552.js"),game=read("public/game.js");
+ const server=read("api/adventure-index-v062.js"),index=read("public/adventure-index-v0552.js"),game=read("public/game.js");
  assert.ok(server.includes("pack.encounterPreview(stage,foe,normal)"));
  assert.ok(server.includes("hp:solo.hp,atk:solo.atk,def:solo.def"));
  assert.ok(server.includes("partyPreview,...combat.enemyCodex"));
