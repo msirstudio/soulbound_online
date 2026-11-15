@@ -1,0 +1,22 @@
+name: SOULBOUND Female Knight 12 Frames at 12 FPS
+on:
+  push:
+    branches: [v0.62-female-knight-idle-12fps]
+  pull_request:
+    branches: [v0.62-female-knight-idle]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: node --check public/sprite-animation-v0311.js
+      - run: node --test tests/v062-female-idle-12fps.test.js tests/v062-female-idle.test.js
+      - name: Complete gameplay regression
+        run: npm test
