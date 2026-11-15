@@ -1,7 +1,7 @@
 "use strict";
 const test=require("node:test"),assert=require("node:assert/strict");
 const fs=require("node:fs"),path=require("node:path");
-const loot=require("../loot-v034");
+const loot=require("../loot-v034"),pack=require("../encounter-pack-v0562");
 function catalog(){
  const src=fs.readFileSync(path.join(__dirname,"..","server.js"),"utf8");
  const routes=new Map();
@@ -26,10 +26,12 @@ test("index serves exact scaled values for 40 stages and all eight bosses",()=>{
  assert.equal(data.monsters.filter(x=>x.boss).length,8);
  assert.equal(data.monsters.filter(x=>!x.boss).length,32);
  const stage3=data.monsters.find(x=>x.stage===5);
- assert.deepEqual([stage3.hp,stage3.atk,stage3.def],[260,22,7]);
+ assert.deepEqual([stage3.hp,stage3.atk,stage3.def],[Math.round(260*pack.difficulty(5,1,"boss").hp),Math.round(22*pack.difficulty(5,1,"boss").atk),7]);
+ assert.equal(stage3.partyPreview.length,4);
+ assert.equal(stage3.partyPreview[3].variants[0].count,1);
  const stage24=data.monsters.find(x=>x.stage===40);
  const scale=1+7*.23;
- assert.deepEqual([stage24.hp,stage24.atk,stage24.def],[Math.round(1500*scale),Math.round(72*scale),Math.round(29*scale)]);
+ assert.deepEqual([stage24.hp,stage24.atk,stage24.def],[Math.round(Math.round(1500*scale)*pack.difficulty(40,1,"boss").hp),Math.round(Math.round(72*scale)*pack.difficulty(40,1,"boss").atk),Math.round(29*scale)]);
 });
 test("wiki lists boss and mini-boss loot, shop gear and food",()=>{
  const data=catalog();
