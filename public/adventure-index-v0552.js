@@ -34,7 +34,7 @@ const opts=[
  {id:"statuses",label:"STATUS",icon:"☠️"},
  {id:"combat",label:"COMBAT RULES",icon:"📜"}
 ];
-let data=null,category="bosses",search="",rarity="all",selectedId="",lastFocus=null,loading=false,hero=null;
+let data=null,category="bosses",search="",rarity="all",selectedId="",lastFocus=null,loading=false,hero=null,partySize=1,currentPartySize=1;
 const discoveries=()=>hero?.worldProgress||{};
 function acquired(item){
  if(item.kind==="race")return (discoveries().raceSeen||[]).includes(item.id)||hero?.raceId===item.id;
@@ -57,7 +57,7 @@ function init(){
  node.innerHTML='<div class="v035-scrim" data-v035-dismiss></div><section class="v035-window" role="dialog" aria-modal="true" aria-labelledby="v035Heading" tabindex="-1">'+
  '<header class="v035-title"><div><small>THE FORGOTTEN KINGDOM · FIELD ARCHIVE</small><h2 id="v035Heading">📖 ADVENTURE INDEX</h2><span class="v035-subtitle">Boss Skills · Element Weaknesses · Status Effects · Combat Rules · Equipment</span></div><button type="button" id="v035Exit" aria-label="Close index">✕</button></header>'+
  '<div class="v035-toolbar"><label class="v035-search">⌕ <input id="v035Search" type="search" placeholder="Search names, items, stage, boss..." autocomplete="off"></label>'+
- '<label class="v035-filter">RARITY <select id="v035Rarity"><option value="all">All rarities</option><option value="common">Common</option><option value="uncommon">Uncommon</option><option value="rare">Rare</option><option value="epic">Epic</option><option value="legendary">Legendary</option></select></label></div>'+
+ '<label class="v035-filter">RARITY <select id="v035Rarity"><option value="all">All rarities</option><option value="common">Common</option><option value="uncommon">Uncommon</option><option value="rare">Rare</option><option value="epic">Epic</option><option value="legendary">Legendary</option></select></label><label class="v035-filter v060-index-party">PARTY <select id="v060IndexParty" aria-label="Preview party size"><option value="1">1 PLAYER</option><option value="2">2 PLAYERS</option><option value="3">3 PLAYERS</option><option value="4">4 PLAYERS</option></select></label></div>'+
  '<div class="v035-body"><nav id="v035Tabs" class="v035-tabs" aria-label="Index categories"></nav><main class="v035-main"><div class="v035-list-head"><strong id="v035CategoryTitle">BOSSES</strong><small id="v035Count">Loading...</small></div><div class="v035-results" id="v035Results"></div></main><aside id="v035Details" class="v035-details"><p>Select an entry to see its stats and origin.</p></aside></div>'+
  '<footer class="v035-footer"><span id="v035Status" role="status" aria-live="polite">Loading game records...</span><button id="v035Close" type="button">CLOSE INDEX</button></footer></section>';
  document.body.appendChild(node);
@@ -73,6 +73,7 @@ function init(){
  });
  $("v035Search").addEventListener("input",event=>{search=event.target.value.trim().toLowerCase();selectedId="";render()});
  $("v035Rarity").addEventListener("change",event=>{rarity=event.target.value;selectedId="";render()});
+ $("v060IndexParty").addEventListener("change",event=>{partySize=Math.max(1,Math.min(4,Number(event.target.value)||1));render()});
  document.addEventListener("keydown",event=>{
   if(node.hidden)return;
   if(event.key==="Escape"){event.preventDefault();event.stopImmediatePropagation();close();return}
@@ -92,6 +93,7 @@ async function open(section){
   if($("v035Rarity"))$("v035Rarity").value="all";
  }
  if(!$("v035Index"))init();
+ partySize=currentPartySize;$("v060IndexParty").value=String(partySize);
  const root=$("v035Index");lastFocus=document.activeElement;root.hidden=false;document.body.classList.add("v035-modal-open");
  $("v035Open")?.setAttribute("aria-expanded","true");$("v035Exit").focus();
  if(!data&&!loading){
@@ -131,10 +133,17 @@ function entries(){
  return out;
 }
 function uid(it){return String(it.recordId||it.id)}
+function enemyScenarios(e){
+ const match=e.partyPreview?.find(row=>row.partySize===partySize);
+ return match?.variants?.length?match.variants:[{count:1,hp:e.hp,atk:e.atk,def:e.def,xp:e.xp,gold:e.gold}];
+}
+function enemyMetric(e,key){
+ return [...new Set(enemyScenarios(e).map(v=>Number(v[key])||0))].sort((a,b)=>a-b).join("–");
+}
 function entryMarkup(item){
  const isEnemy=item.kind==="enemy",isZone=item.kind==="zone",isRace=item.kind==="race",got=acquired(item);
  const sub=isEnemy?"STAGE "+item.stage+" · "+(item.miniBoss?"MINI-BOSS · ":"")+esc(item.zone):item.kind==="element"?"ELEMENT · WEAKNESS & RESISTANCE":item.kind==="status"?"STATUS EFFECT · COUNTERS":item.kind==="rule"?"HARDCORE COMBAT GUIDE":isZone?"STAGES "+esc(item.stages):isRace?"RACE · "+esc(item.chance)+"% SUMMON RATE":item.source?"DROP · "+esc(item.source):item.price!=null?"MERCHANT · "+item.price+" GOLD":"ITEM";
- const stat=isEnemy?"HP "+item.hp+" · ATK "+item.atk+" · DEF "+item.def+(item.element?" · "+item.element.toUpperCase():""):item.kind==="status"?esc(item.effect):isRace?esc(item.passive):!isZone&&item.description?esc(item.description):"";
+ const stat=isEnemy?"HP "+enemyMetric(item,"hp")+" · ATK "+enemyMetric(item,"atk")+" · DEF "+enemyMetric(item,"def")+" · "+enemyMetric(item,"count")+" FOE(S)"+(item.element?" · "+item.element.toUpperCase():""):item.kind==="status"?esc(item.effect):isRace?esc(item.passive):!isZone&&item.description?esc(item.description):"";
  const rarityTag=item.rarity?'<span class="v035-rarity v035-'+esc(item.rarity)+'">'+esc(item.rarity.toUpperCase())+'</span>':"";
  return '<button type="button" data-v035-entry="'+esc(uid(item))+'" class="v035-entry '+(uid(item)===selectedId?"active ":"")+(got?"v044-discovered":"")+'">'+
  '<span class="v035-entry-icon">'+(item.kind==="element"?pixelIcon("element",item.id):item.kind==="status"?pixelIcon("status",item.id):esc(item.icon|| (isZone?"🗺️":"✦")))+'</span>'+(got?'<span class="v044-found-tag">✓ OWNED</span>':'')+'<span class="v035-entry-text"><strong>'+esc(item.name)+'</strong><small>'+sub+'</small><em>'+stat+'</em></span>'+rarityTag+'</button>';
@@ -150,11 +159,18 @@ function render(){
  $("v035CategoryTitle").textContent=current?.label||"INDEX";
  $("v035Count").textContent=filtered.length+" RECORDS";
  $("v035Rarity").disabled=["bosses","monsters","zones","elements","statuses","combat"].includes(category);
+ $("v060IndexParty").closest("label").hidden=!["bosses","monsters"].includes(category);
  $("v035Results").innerHTML=filtered.map(entryMarkup).join("")||'<div class="v035-empty">No entries match your filters.</div>';
  if(!filtered.some(x=>uid(x)===selectedId))selectedId=filtered[0]?uid(filtered[0]):"";
  renderSelection();
 }
 function enemyDetail(e){
+ const variants=enemyScenarios(e);
+ const conditions='<section class="v060-encounter-rules"><strong>ACTUAL SPAWN STATS · '+partySize+' PLAYER'+(partySize===1?'':'S')+'</strong>'+
+  variants.map(v=>'<div class="v060-spawn-line"><b>'+v.count+' ENEM'+(v.count===1?'Y':'IES')+'</b><span>HP '+v.hp+' / EACH · ATK '+v.atk+' / EACH · DEF '+v.def+
+   ' · EXP '+v.xp+' · GOLD '+v.gold+(v.phase2Atk?' · PHASE 2 ATK '+v.phase2Atk:'')+'</span></div>').join('')+
+  '<small>HP/ATK/DEF are spawn stats of each enemy. Normal stages may roll different enemy counts. ATK is not final damage: move power, target DEF, buffs, Guard, resistance and statuses change hits. Boss Phase 2 raises ATK by 12%.</small></section>';
+
  const fallback=e.boss?"/assets/bosses/"+e.sprite+".svg":"/assets/monsters/"+e.sprite+".svg";
  const miniKeys=["rootbound_guardian","ironbound_executioner","molten_behemoth","sanctum_keeper","frosthorn_colossus","titans_sentinel","abyss_watcher","twilight_regent"];
  const miniArt=e.miniBoss?"/assets/minibosses/v043/"+miniKeys[Math.ceil(e.stage/5)-1]+"_normal.svg":null;
@@ -170,7 +186,7 @@ function enemyDetail(e){
  (e.phase2?'<p>⚠ PHASE 2 AT 50% HP · '+pixelIcon("element",e.phase2Affinity?.element||e.element||"physical")+' · WEAK: '+pixelList(e.phase2Affinity?.weak)+'</p>':"")+
  '</section>';
  return quick+'<div class="v035-enemy-art"><img alt="'+esc(e.name)+'" src="'+esc(img)+'" loading="lazy" data-v039-fallback="'+esc(fallback)+'" onerror="if(this.dataset.v039Fallback && this.src.indexOf(this.dataset.v039Fallback)===-1){this.src=this.dataset.v039Fallback}else{this.style.display=\'none\'}"></div>'+
- '<div class="v035-stats"><span>❤️ HP <b>'+e.hp+'</b></span><span>⚔ ATK <b>'+e.atk+'</b></span><span>🛡 DEF <b>'+e.def+'</b></span><span>✧ EXP <b>'+e.xp+'</b></span><span>🪙 GOLD <b>'+e.gold+'</b></span><span>🗺 STAGE <b>'+e.stage+'</b></span></div>'+
+ '<div class="v035-stats"><span>❤️ HP <b>'+enemyMetric(e,"hp")+'</b></span><span>⚔ ATK <b>'+enemyMetric(e,"atk")+'</b></span><span>🛡 DEF <b>'+enemyMetric(e,"def")+'</b></span><span>✧ EXP <b>'+enemyMetric(e,"xp")+'</b></span><span>🪙 GOLD <b>'+enemyMetric(e,"gold")+'</b></span><span>🗺 STAGE <b>'+e.stage+'</b></span></div>'+conditions+
  '<div class="v035-detail-info"><strong>LOCATION</strong><p>'+esc(e.zone)+'</p>'+
  '<strong>ELEMENT / RESISTANCES</strong><p>'+esc((e.element||"physical").toUpperCase())+' · Weak to: '+esc((e.weak||[]).join(", ")||"None")+' (×'+esc(data?.codex?.combatRules?.weaknessMultiplier||1.2)+') · Resists: '+esc((e.resist||[]).join(", ")||"None")+' (×'+esc(data?.codex?.combatRules?.resistanceMultiplier||.8)+')</p>'+
  (e.phase2?'<p>⚠ PHASE 2 at 50% HP · Element '+esc(e.phase2Affinity?.element||e.element)+' · Weak: '+esc((e.phase2Affinity?.weak||[]).join(", "))+' · Resists: '+esc((e.phase2Affinity?.resist||[]).join(", "))+'</p>':"")+
@@ -226,6 +242,6 @@ function renderSelection(){
  (entry.kind==="enemy"?enemyDetail(entry):["element","status","rule"].includes(entry.kind)?guideDetail(entry):entry.kind==="race"?raceDetail(entry):entry.kind==="zone"?'<div class="v035-item-art">🗺️</div><div class="v035-detail-info"><strong>STAGES</strong><p>'+esc(entry.stages)+'</p><strong>ZONE</strong><p>'+esc(entry.hint)+'</p></div>':itemDetail(entry));
 }
 window.SoulboundIndex={open,close,refresh:()=>{data=null;if(!$("v035Index")?.hidden)open()},
- updateHero(p){hero=p||null;if(data&&$("v035Index")&&!$("v035Index").hidden)render()} };
+ updateHero(p,state){hero=p||null;currentPartySize=Math.max(1,Math.min(4,state?.players?.length||1));if($("v035Index")?.hidden!==false)partySize=currentPartySize;if(data&&$("v035Index")&&!$("v035Index").hidden)render()} };
 if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",init,{once:true});else init();
 })();
