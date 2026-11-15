@@ -6,6 +6,7 @@ const world=require("../world-v040");
 const combat=require("../combat-v055");
 const loot=require("../loot-v034");
 const pack=world.encounterPack;
+const publicSkills=require("../combat/public-skill-catalog-v062");
 const {normal,bosses,shopItems,races}=require("../data/game-catalog-v062");
 function buildIndex(APP_VERSION){
  const enemies=Array.from({length:world.totalStages},(_,index)=>{
@@ -35,10 +36,11 @@ function buildIndex(APP_VERSION){
  });
  
  return {version:APP_VERSION,title:"SOULBOUND ADVENTURE INDEX",stageCount:world.totalStages,
-  categories:["bosses","monsters","races","weapons","armor","accessories","food","consumables","elements","statuses","combat"],
+  categories:["bosses","monsters","skills","races","weapons","armor","accessories","food","consumables","elements","statuses","combat"],
   codex:combat.codexData(),
   bossDropTables,miniDropTables,lootRule:"Each possible item has its own independent drop roll based on rarity. Multiple items may drop; inventory remains limited to 40 unequipped pieces.",
   races:races.map(({id,name,rarity,icon,weight,passive,buffs})=>({id,name,rarity:rarity==="legend"?"legendary":rarity,icon,chance:weight,passive,buffs})),
+  skills:publicSkills.CLASSES.flatMap(id=>publicSkills.skillsFor(id)),
   monsters:enemies,items:[...goods,...drops],zones:world.regions.map(r=>({name:r.name,css:r.css,hint:r.hint,stages:r.firstStage+"–"+r.bossStage}))};
 }
 module.exports={buildIndex};
