@@ -23,6 +23,7 @@ function pixelList(ids){return Array.isArray(ids)&&ids.length?ids.map(id=>pixelI
 const opts=[
  {id:"bosses",label:"BOSSES",icon:"👑"},
  {id:"monsters",label:"MONSTERS",icon:"🐺"},
+ {id:"skills",label:"CLASS SKILLS",icon:"✨"},
  {id:"races",label:"BLOODLINES",icon:"🧬"},
  {id:"weapons",label:"WEAPONS",icon:"⚔️"},
  {id:"armor",label:"ARMOR",icon:"🛡️"},
@@ -122,14 +123,15 @@ function entries(){
  let out=[];
  if(category==="bosses")out=(data.monsters||[]).filter(x=>x.boss).map(x=>({...x,kind:"enemy"}));
  else if(category==="monsters")out=(data.monsters||[]).filter(x=>!x.boss).map(x=>({...x,kind:"enemy"}));
+ else if(category==="skills")out=(data.skills||[]).map(x=>({...x,id:x.classId+":"+x.type,kind:"skill"}));
  else if(category==="races")out=(data.races||[]).map(x=>({...x,kind:"race"}));
  else if(category==="zones")out=(data.zones||[]).map((x,i)=>({...x,id:"zone-"+i,kind:"zone"}));
  else if(category==="elements")out=(data.codex?.elements||[]).map(x=>({...x,kind:"element"}));
  else if(category==="statuses")out=(data.codex?.statusEffects||[]).map(x=>({...x,kind:"status"}));
  else if(category==="combat")out=Object.entries(data.codex?.combatRules||{}).map(([id,description])=>({id,name:id.replace(/([A-Z])/g," $1").toUpperCase(),description,icon:"📜",kind:"rule"}));
  else out=(data.items||[]).filter(x=>x.category===category).map((x,i)=>({...x,kind:"item",recordId:x.uid||[x.id,x.rarity||"shop",x.source||"shop",i].join("::")}));
- if(!["bosses","monsters","zones","elements","statuses","combat"].includes(category)&&rarity!=="all")out=out.filter(x=>(x.rarity||"common")===rarity);
- if(search)out=out.filter(x=>[x.name,x.source,x.zone,x.stage,x.slot,x.description,x.rarity,x.stages,x.hint,x.passive,x.effect,x.counter,x.element,...(x.strongAgainst||[]),...(x.weakTo||[]),...(x.weak||[]),...(x.resist||[]),...(x.buffs||[])].some(v=>String(v||"").toLowerCase().includes(search)));
+ if(!["bosses","monsters","skills","zones","elements","statuses","combat"].includes(category)&&rarity!=="all")out=out.filter(x=>(x.rarity||"common")===rarity);
+ if(search)out=out.filter(x=>[x.name,x.source,x.zone,x.stage,x.slot,x.description,x.rarity,x.stages,x.hint,x.passive,x.effect,x.counter,x.element,x.classId,x.type,...(x.strongAgainst||[]),...(x.weakTo||[]),...(x.weak||[]),...(x.resist||[]),...(x.buffs||[])].some(v=>String(v||"").toLowerCase().includes(search)));
  return out;
 }
 function uid(it){return String(it.recordId||it.id)}
@@ -142,8 +144,8 @@ function enemyMetric(e,key){
 }
 function entryMarkup(item){
  const isEnemy=item.kind==="enemy",isZone=item.kind==="zone",isRace=item.kind==="race",got=acquired(item);
- const sub=isEnemy?"STAGE "+item.stage+" · "+(item.miniBoss?"MINI-BOSS · ":"")+esc(item.zone):item.kind==="element"?"ELEMENT · WEAKNESS & RESISTANCE":item.kind==="status"?"STATUS EFFECT · COUNTERS":item.kind==="rule"?"HARDCORE COMBAT GUIDE":isZone?"STAGES "+esc(item.stages):isRace?"RACE · "+esc(item.chance)+"% SUMMON RATE":item.source?"DROP · "+esc(item.source):item.price!=null?"MERCHANT · "+item.price+" GOLD":"ITEM";
- const stat=isEnemy?"HP "+enemyMetric(item,"hp")+" · ATK "+enemyMetric(item,"atk")+" · DEF "+enemyMetric(item,"def")+" · "+enemyMetric(item,"count")+" FOE(S)"+(item.element?" · "+item.element.toUpperCase():""):item.kind==="status"?esc(item.effect):isRace?esc(item.passive):!isZone&&item.description?esc(item.description):"";
+ const sub=item.kind==="skill"?"CLASS "+esc(item.classId.toUpperCase())+" · LV "+esc(item.unlock)+" · "+esc(item.cost)+" MP":isEnemy?"STAGE "+item.stage+" · "+(item.miniBoss?"MINI-BOSS · ":"")+esc(item.zone):item.kind==="element"?"ELEMENT · WEAKNESS & RESISTANCE":item.kind==="status"?"STATUS EFFECT · COUNTERS":item.kind==="rule"?"HARDCORE COMBAT GUIDE":isZone?"STAGES "+esc(item.stages):isRace?"RACE · "+esc(item.chance)+"% SUMMON RATE":item.source?"DROP · "+esc(item.source):item.price!=null?"MERCHANT · "+item.price+" GOLD":"ITEM";
+ const stat=item.kind==="skill"?"×"+esc(item.mult)+" ATK · CD "+esc(item.cd)+" · "+esc((item.element||"physical").toUpperCase())+(item.area?" · AOE":""):isEnemy?"HP "+enemyMetric(item,"hp")+" · ATK "+enemyMetric(item,"atk")+" · DEF "+enemyMetric(item,"def")+" · "+enemyMetric(item,"count")+" FOE(S)"+(item.element?" · "+item.element.toUpperCase():""):item.kind==="status"?esc(item.effect):isRace?esc(item.passive):!isZone&&item.description?esc(item.description):"";
  const rarityTag=item.rarity?'<span class="v035-rarity v035-'+esc(item.rarity)+'">'+esc(item.rarity.toUpperCase())+'</span>':"";
  return '<button type="button" data-v035-entry="'+esc(uid(item))+'" class="v035-entry '+(uid(item)===selectedId?"active ":"")+(got?"v044-discovered":"")+'">'+
  '<span class="v035-entry-icon">'+(item.kind==="element"?pixelIcon("element",item.id):item.kind==="status"?pixelIcon("status",item.id):esc(item.icon|| (isZone?"🗺️":"✦")))+'</span>'+(got?'<span class="v044-found-tag">✓ OWNED</span>':'')+'<span class="v035-entry-text"><strong>'+esc(item.name)+'</strong><small>'+sub+'</small><em>'+stat+'</em></span>'+rarityTag+'</button>';
@@ -151,14 +153,14 @@ function entryMarkup(item){
 function render(){
  const nav=$("v035Tabs");if(!nav||!data)return;
  nav.innerHTML=opts.map(opt=>{
-  const count=opt.id==="bosses"?data.monsters.filter(x=>x.boss).length:opt.id==="monsters"?data.monsters.filter(x=>!x.boss).length:opt.id==="zones"?(data.zones||[]).length:opt.id==="races"?(data.races||[]).length:opt.id==="elements"?(data.codex?.elements||[]).length:opt.id==="statuses"?(data.codex?.statusEffects||[]).length:opt.id==="combat"?Object.keys(data.codex?.combatRules||{}).length:data.items.filter(x=>x.category===opt.id).length;
+  const count=opt.id==="skills"?(data.skills||[]).length:opt.id==="bosses"?data.monsters.filter(x=>x.boss).length:opt.id==="monsters"?data.monsters.filter(x=>!x.boss).length:opt.id==="zones"?(data.zones||[]).length:opt.id==="races"?(data.races||[]).length:opt.id==="elements"?(data.codex?.elements||[]).length:opt.id==="statuses"?(data.codex?.statusEffects||[]).length:opt.id==="combat"?Object.keys(data.codex?.combatRules||{}).length:data.items.filter(x=>x.category===opt.id).length;
   return '<button type="button" class="v035-tab '+(category===opt.id?"active":"")+'" data-v035-tab="'+opt.id+'" aria-pressed="'+(category===opt.id)+'"><span>'+(opt.id==="elements"?pixelIcon("element","fire"):opt.id==="statuses"?pixelIcon("status","poison"):opt.icon)+'</span><strong>'+opt.label+'</strong><small>'+count+'</small></button>';
  }).join("");
  const filtered=entries();
  const current=opts.find(x=>x.id===category);
  $("v035CategoryTitle").textContent=current?.label||"INDEX";
  $("v035Count").textContent=filtered.length+" RECORDS";
- $("v035Rarity").disabled=["bosses","monsters","zones","elements","statuses","combat"].includes(category);
+ $("v035Rarity").disabled=["bosses","monsters","skills","zones","elements","statuses","combat"].includes(category);
  $("v060IndexParty").closest("label").hidden=!["bosses","monsters"].includes(category);
  $("v035Results").innerHTML=filtered.map(entryMarkup).join("")||'<div class="v035-empty">No entries match your filters.</div>';
  if(!filtered.some(x=>uid(x)===selectedId))selectedId=filtered[0]?uid(filtered[0]):"";
@@ -234,13 +236,22 @@ function itemDetail(e){
  (e.passive?'<section class="v061-element-line"><strong>'+esc((e.element||"physical").toUpperCase())+' ELEMENT</strong><span>'+esc(e.passive.name)+' · '+Math.round(e.passive.chance*100)+'% activation</span></section><p class="v061-passive-desc">'+esc(e.passive.description)+'</p>':'')+
  '<strong>DESCRIPTION</strong><p>'+esc(e.description||"Equipment with fixed stats.")+'</p></div>';
 }
+function skillDetail(sk){
+ const displayCost=Number(sk.cost)||0;
+ return '<div class="v035-item-art">'+esc(sk.icon||"✨")+'</div>'+
+ '<div class="v035-stats"><span>⚔ BASE DAMAGE <b>×'+esc(sk.mult)+' ATK</b></span><span>🔷 MP <b>'+displayCost+'</b></span><span>⏳ COOLDOWN <b>'+esc(sk.cd)+'</b></span></div>'+
+ '<div class="v035-detail-info"><strong>CLASS / UNLOCK</strong><p>'+esc(sk.classId.toUpperCase())+' · LEVEL '+esc(sk.unlock)+'</p>'+
+ '<strong>ELEMENT / TARGET</strong><p>'+esc((sk.element||"physical").toUpperCase())+' · '+(sk.area?'ALL ENEMIES (AoE)':'SINGLE TARGET')+'</p>'+
+ '<strong>DESCRIPTION</strong><p>'+esc(sk.description||"Class-specific combat skill")+'</p>'+
+ '<small>Values are read directly from the server\'s executable skill catalog. Final damage also depends on DEF, elements, equipment, buffs and random rolls. High Elf skill costs are reduced by 5% (rounded down).</small></div>';
+}
 function renderSelection(){
  if(!data)return;
  const list=entries(),entry=list.find(x=>uid(x)===selectedId);
  $("v035Results")?.querySelectorAll(".v035-entry").forEach(el=>el.classList.toggle("active",el.dataset.v035Entry===selectedId));
  if(!entry){$("v035Details").innerHTML='<div class="v035-empty">Choose an entry to view details.</div>';return}
  $("v035Details").innerHTML='<div class="v035-detail-heading"><small>FIELD NOTES · '+esc(category.toUpperCase())+'</small><h3>'+esc(entry.name)+'</h3></div>'+
- (entry.kind==="enemy"?enemyDetail(entry):["element","status","rule"].includes(entry.kind)?guideDetail(entry):entry.kind==="race"?raceDetail(entry):entry.kind==="zone"?'<div class="v035-item-art">🗺️</div><div class="v035-detail-info"><strong>STAGES</strong><p>'+esc(entry.stages)+'</p><strong>ZONE</strong><p>'+esc(entry.hint)+'</p></div>':itemDetail(entry));
+ (entry.kind==="skill"?skillDetail(entry):entry.kind==="enemy"?enemyDetail(entry):["element","status","rule"].includes(entry.kind)?guideDetail(entry):entry.kind==="race"?raceDetail(entry):entry.kind==="zone"?'<div class="v035-item-art">🗺️</div><div class="v035-detail-info"><strong>STAGES</strong><p>'+esc(entry.stages)+'</p><strong>ZONE</strong><p>'+esc(entry.hint)+'</p></div>':itemDetail(entry));
 }
 window.SoulboundIndex={open,close,refresh:()=>{data=null;if(!$("v035Index")?.hidden)open()},
  updateHero(p,state){hero=p||null;currentPartySize=Math.max(1,Math.min(4,state?.players?.length||1));if($("v035Index")?.hidden!==false)partySize=currentPartySize;if(data&&$("v035Index")&&!$("v035Index").hidden)render()} };
