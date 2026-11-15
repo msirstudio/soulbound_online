@@ -81,3 +81,42 @@ test("server and browser no longer contain competing enemy templates or skill nu
  assert.ok(html.includes("skill-view-v062.js?v=foundation-1"));
  assert.ok(indexUi.includes("skillDetail(sk)"));
 });
+
+test("skill-view uses the exact server snapshot for each class, including true mage cooldowns",()=>{
+ const vm=require("node:vm");
+ const buttons=new Map();
+ for(const type of core.SKILL_TYPES){
+  buttons.set(type,{
+   dataset:{action:type},classList:{toggle(){}},hidden:false,disabled:false,
+   removeAttribute(){},setAttribute(name,value){this[name]=value}
+  });
+ }
+ const document={querySelector(sel){const hit=sel.match(/data-action="([^"]+)"/);return hit?buttons.get(hit[1]):null}};
+ const sandbox={window:{},document};
+ vm.runInNewContext(read("public/skill-view-v062.js"),sandbox);
+ const view=sandbox.window.SoulboundSkillViewV062;
+ assert.ok(view);
+ const mage={classId:"mage",level:80,mp:120,raceId:"elf",cooldowns:{skill2:2},skillBook:book.skillsFor("mage")};
+ view.render(mage);
+ const meteor=buttons.get("skill2");
+ assert.ok(meteor.textContent.includes("METEOR"));
+ assert.ok(meteor.textContent.includes("CD 2"));
+ assert.ok(meteor.dataset.tooltip.includes("Cooldown: 3 rounds"),"use real core cooldown, not obsolete UI constant");
+ assert.ok(meteor.dataset.tooltip.includes("Mana: 23 MP"));
+ assert.equal(view.cost(mage,view.skill(mage,"skill2")),23);
+ const archer={classId:"archer",level:1,raceId:"human",cooldowns:{},skillBook:book.skillsFor("archer")};
+ view.render(archer);
+ assert.ok(buttons.get("skill").textContent.includes("QUICK SHOT"));
+ assert.equal(buttons.get("skill2").hidden,true);
+ const tank={classId:"tank",level:80,raceId:"human",cooldowns:{},skillBook:book.skillsFor("tank")};
+ view.render(tank);
+ assert.equal(buttons.get("skill6").hidden,true);
+ assert.equal(buttons.get("skill7").hidden,true);
+});
+test("equipment HUD no longer carries a second independent shop stat table",()=>{
+ const game=read("public/game.js");
+ assert.ok(game.includes('["weapon","armor"].includes(it.slot)'));
+ assert.ok(game.includes('me?.inventory||[]'));
+ assert.ok(!game.includes('"Iron Armor":"+5 DEF'));
+ assert.ok(!game.includes('"Steel Blade":"+16 ATK'));
+});
