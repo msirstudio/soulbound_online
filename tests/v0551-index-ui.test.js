@@ -72,9 +72,9 @@ test("interactive INDEX renders all 3 new guides and immediate boss affinity/att
  assert.ok(detail.includes("Briarstorm"));
  assert.ok(detail.includes("55%"));
  assert.ok(detail.includes("ATTACK MOVES / STATUS CHANCES"));
- assert.ok(h.requests[0].url.includes("codex=0.60"));
+ assert.ok(h.requests[0].url.includes("codex=0.61"));
  assert.equal(h.requests[0].options.cache,"no-store");
- assert.ok(h.element("v035Status").textContent.includes("INDEX UI v0.60"));
+ assert.ok(h.element("v035Status").textContent.includes("INDEX UI v0.61"));
  await h.context.window.SoulboundIndex.open("statuses");
  assert.equal(h.element("v035CategoryTitle").textContent,"STATUS");
  assert.ok(h.element("v035Results").innerHTML.includes("Chill"));
