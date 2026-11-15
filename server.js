@@ -1,5 +1,6 @@
 const express=require("express"),http=require("http"),path=require("path");
-const {Server}=require("socket.io");const archer=require(path.join(__dirname,"classes","archer-v062.js"));const weaponPassives=require(path.join(__dirname,"items","weapon-passives-v061.js"));const multi=require(path.join(__dirname,"multiplayer","session-v059.js"));const {randomUUID}=require("node:crypto");const formulas=require(path.join(__dirname,"combat","formulas.js"));const skillCore=require(path.join(__dirname,"combat","skills.js"));const loot=require("./loot-v034");const secure=require(path.join(__dirname,"persistence","secure-saves-v057.js"));const APP_VERSION=JSON.parse(require("fs").readFileSync(path.join(__dirname,"package.json"),"utf8")).version.replace(/\.0$/,"");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
+const {bindSocket}=require(path.join(__dirname,"multiplayer","socket-boundary.js"));
+const {Server}=require("socket.io");const archer=require(path.join(__dirname,"classes","archer-v062.js"));const weaponPassives=require(path.join(__dirname,"items","weapon-passives-v061.js"));const multi=require(path.join(__dirname,"multiplayer","session-v059.js"));const {randomUUID,randomInt}=require("node:crypto");const formulas=require(path.join(__dirname,"combat","formulas.js"));const skillCore=require(path.join(__dirname,"combat","skills.js"));const loot=require("./loot-v034");const secure=require(path.join(__dirname,"persistence","secure-saves-v057.js"));const APP_VERSION=JSON.parse(require("fs").readFileSync(path.join(__dirname,"package.json"),"utf8")).version.replace(/\.0$/,"");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
 app.use(express.static(path.join(__dirname,"public")));if(secure.enabled)app.use(express.json({limit:"8kb"}));
 app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:APP_VERSION,secureSavesEnabled:secure.enabled}));
 const credential=req=>String(req.headers.authorization||"").replace(/^Bearer\s+/i,"");
@@ -99,11 +100,38 @@ function nextTurn(r){const a=[...r.players.values()],living=alive(r);if(!living.
 function finish(r){if(r.encounterId&&r.rewardedEncounter===r.encounterId)return; if(r.encounterId)r.rewardedEncounter=r.encounterId;const m=r.monster;r.status=r.stage%5===0?"regionClear":"victory";for(const p of r.players.values()){if(p.hp<=0){p.hp=Math.max(1,Math.ceil(p.maxHp*.3));p.mp=Math.ceil(p.maxMp*.2);say(r,p.name+" is revived after the victory with 30% HP and 20% MP.")}p.xp+=m.xp;p.gold+=m.gold;if(m.boss){p.worldProgress=world.markBossClear(p.worldProgress,m.regionId);p.racePoints=(p.racePoints||0)+1;say(r,p.name+" earned 1 Race Point for defeating a boss!");}if(m.boss||m.miniBoss)loot.dropEncounterLoot(p,r.stage,msg=>say(r,msg),world.regionForStage(r.stage).index+1,!!m.miniBoss);if(p.raceId==="human")p.xp+=Math.ceil(m.xp*.05);if(p.raceId==="sylvan")p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*.03));while(p.xp>=p.level*100){p.xp-=p.level*100;p.level++;p.statPoints=(p.statPoints||0)+3;p.maxHp+=p.classId==="tank"?22:p.classId==="swordsman"?16:p.classId==="archer"?14:10;p.maxMp+=p.classId==="mage"?12:p.classId==="tank"?8:p.classId==="archer"?8:6;p.atk+=p.classId==="mage"?3:p.classId==="tank"?2:p.classId==="archer"?3:4;p.def+=p.classId==="tank"?4:p.classId==="swordsman"?2:p.classId==="archer"?2:1;p.hp=p.maxHp;p.mp=p.maxMp;say(r,p.name+" reached level "+p.level+"! +3 STAT POINTS. Allocate them in the character panel.")}}say(r,"Victory! "+m.name+" defeated. +"+m.xp+" EXP · +"+m.gold+" GOLD.");if(r.stage===40)say(r,"THE ECLIPSE SOVEREIGN HAS FALLEN. THE KINGDOM IS FREE! All regions can be replayed.")}
 function valid(s,r){const p=r.players.get(s.id);return r.status==="battle"&&!r.pendingEnemy&&!multi.hasMissing(r)&&p&&(!secure.enabled||p.verified||p.guest)&&p.hp>0&&current(r)?.id===s.id}
 io.on("connection",s=>{
- let restoring=false;
- s.on("createRoom",({name,classId,gender,guest}={},cb=()=>{})=>{const code=Math.random().toString(36).slice(2,7).toUpperCase(),r=createRoom(code);r.players.set(s.id,player(s.id,name,classId,gender));r.players.get(s.id).guest=!!guest;r.accountMode=secure.enabled?(guest?"guest":"account"):"legacy";s.join(code);const ticket=multi.issue(r,s.id);say(r,cleanName(name)+" founded the party.");emit(r);cb({ok:true,code,ticket})});
- s.on("joinRoom",({code,name,classId,gender,guest}={},cb=()=>{})=>{code=String(code||"").trim().toUpperCase();const r=rooms.get(code);if(!r)return cb({ok:false,error:"Room not found. Check the code."});if(r.players.size>=4)return cb({ok:false,error:"Party full (maximum 4)."});if(secure.enabled&&r.accountMode!==(guest?"guest":"account"))return cb({ok:false,error:"Secure account heroes and Guest heroes must use separate party rooms."});if(r.status!=="city")return cb({ok:false,error:"Adventure already started."});const p=player(s.id,name,classId,gender);p.guest=!!guest;r.players.set(s.id,p);s.join(code);const ticket=multi.issue(r,s.id);say(r,p.name+" joined the party.");emit(r);cb({ok:true,code,ticket})});
+ s.on=bindSocket(s);
+ let restoring=false,resuming=false,disconnected=false;
+ const sessionBusy=()=>restoring||resuming||disconnected||!!findRoom(s);
+ s.on("createRoom",({name,classId,gender,guest}={},cb=()=>{})=>{
+  if(sessionBusy())return cb({ok:false,error:"Already connected to a party or session operation in progress."});
+  const p=player(s.id,name,classId,gender);
+  let code;
+  do{code=randomInt(36**5).toString(36).padStart(5,"0").toUpperCase()}while(rooms.has(code));
+  const r=createRoom(code);
+  p.guest=!!guest;r.players.set(s.id,p);
+  r.accountMode=secure.enabled?(guest?"guest":"account"):"legacy";
+  s.join(code);
+  const ticket=multi.issue(r,s.id);
+  say(r,p.name+" founded the party.");emit(r);cb({ok:true,code,ticket});
+ });
+ s.on("joinRoom",({code,name,classId,gender,guest}={},cb=()=>{})=>{
+  if(sessionBusy())return cb({ok:false,error:"Already connected to a party or session operation in progress."});
+  code=String(code||"").trim().toUpperCase();
+  const r=rooms.get(code);
+  if(!r)return cb({ok:false,error:"Room not found. Check the code."});
+  if(r.players.size>=4)return cb({ok:false,error:"Party full (maximum 4)."});
+  if(secure.enabled&&r.accountMode!==(guest?"guest":"account"))return cb({ok:false,error:"Secure account heroes and Guest heroes must use separate party rooms."});
+  if(r.status!=="city")return cb({ok:false,error:"Adventure already started."});
+  const p=player(s.id,name,classId,gender);p.guest=!!guest;
+  r.players.set(s.id,p);s.join(code);
+  const ticket=multi.issue(r,s.id);
+  say(r,p.name+" joined the party.");emit(r);cb({ok:true,code,ticket});
+ });
  s.on("resumeRoom",async({code,ticket,accessToken}={},cb=()=>{})=>{
-  if(findRoom(s))return cb({ok:false,error:"Already connected to a party."});
+  if(sessionBusy())return cb({ok:false,error:"Already connected to a party or session operation in progress."});
+  resuming=true;
+  try{
   const match=multi.find(rooms,String(code||"").trim().toUpperCase(),ticket);
   if(!match)return cb({ok:false,error:"Reconnect expired or invalid. Return to the lobby."});
   const claim=verifiedCharacters.get(match.id);
@@ -112,6 +140,7 @@ io.on("connection",s=>{
    try{const id=await secure.authenticate(accessToken);if(id!==claim.userId)return cb({ok:false,error:"This account does not own the reconnecting hero."})}
    catch(e){return cb({ok:false,error:e.status?e.message:"Unable to authenticate reconnect."})}
   }
+  if(disconnected||findRoom(s))return cb({ok:false,error:"Party changed during reconnect."});
   const result=multi.resume(match,s.id);
   if(!result)return cb({ok:false,error:"Reconnect expired. Join a new party."});
   if(claim){verifiedCharacters.delete(result.oldId);claim.socketId=s.id;verifiedCharacters.set(s.id,claim)}
@@ -119,8 +148,10 @@ io.on("connection",s=>{
   say(result.room,result.player.name+" returned to the party.");
   cb({ok:true,code:result.room.code,ticket:result.ticket,resumed:true});
   emit(result.room);
+  }finally{resuming=false}
  });
  s.on("restoreCharacter",async(v={},cb=()=>{})=>{
+  if(disconnected||resuming||verifiedCharacters.has(s.id))return cb({ok:false,error:"Character session is already restored or reconnecting."});
   let r=findRoom(s);
   if(!r||r.status!=="city")return cb({ok:false,error:"Restore only works in the waiting room."});
   if(restoring)return cb({ok:false,error:"Character restore already in progress."});if(secure.enabled&&!!v.guest!==!!r.players.get(s.id)?.guest)return cb({ok:false,error:"Character auth mode does not match party."});
@@ -130,7 +161,7 @@ io.on("connection",s=>{
    if(secure.enabled&&!v.guest){
     const record=await secure.load(v.accessToken,v.slot);
     r=findRoom(s);
-    if(!r||r.status!=="city")return cb({ok:false,error:"Party changed during restore."});
+    if(disconnected||!r||r.status!=="city"||verifiedCharacters.has(s.id))return cb({ok:false,error:"Party changed during restore."});
     v={...record.data,gender:v.gender};
     claim=secureQueue.register({userId:record.userId,slot:record.slot,revision:record.revision,socketId:s.id});
    }else if(secure.enabled&&!r.players.get(s.id)?.guest){return cb({ok:false,error:"Authenticated restore requires a verified account."})}
@@ -295,6 +326,7 @@ combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status
  s.on("allocateStat",({stat}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if((p.statPoints||0)<1)return cb({ok:false,error:"No stat points available."});const key=String(stat||"");if(!["strength","vitality","intelligence","agility"].includes(key))return cb({ok:false,error:"Unknown stat."});p.statPoints--;p[key]=(p[key]||0)+1;if(key==="strength")p.atk+=2;if(key==="vitality"){p.maxHp+=12;p.hp+=12}if(key==="intelligence"){p.maxMp+=10;p.mp+=10}if(key==="agility")p.speed=(p.speed||10)+2;say(r,p.name+" increased "+key.toUpperCase()+".");emit(r);cb({ok:true})});
  s.on("partyChat",({message}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});const body=String(message||"").replace(/[<>]/g,"").trim().slice(0,180);if(!body)return cb({ok:false,error:"Message is empty."});r.chat=r.chat||[];r.chat.push({name:p.name,id:p.id,message:body,time:Date.now()});if(r.chat.length>60)r.chat.shift();emit(r);cb({ok:true})});
  s.on("disconnect",()=>{
+  disconnected=true;
   const r=findRoom(s);
   if(r&&multi.markDisconnected(r,s.id,{schedule:setTimeout,onExpire:(room,id,p)=>{
    const claim=verifiedCharacters.get(id);
