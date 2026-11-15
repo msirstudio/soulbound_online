@@ -4,8 +4,8 @@ const read=p=>fs.readFileSync(path.join(__dirname,"..",p),"utf8");
 test("v0.55 is displayed in header, title screen, server health, and package",()=>{
  const html=read("public/index.html"),server=read("server.js"),pkg=require("../package.json");
  assert.equal(pkg.version,"0.62.0");
- assert.match(html,/VERSION 0\.61 · ELEMENTAL WEAPONS/);
- assert.match(html,/ONLINE RPG · v0\.61 ELEMENTAL WEAPONS/);
+ assert.match(html,/VERSION 0\.62 · ARCHER CLASS/);
+ assert.match(html,/ONLINE RPG · v0\.62 ARCHER CLASS/);
  assert.match(server,/version:APP_VERSION/);
 });
 test("Update Log opens from main menu and is loaded once",()=>{
