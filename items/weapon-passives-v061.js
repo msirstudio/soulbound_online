@@ -18,7 +18,12 @@ const spec=Object.freeze({
  earthshaker:{element:"earth",name:"Quake Impact",chance:.25,kind:"quake",description:"25%: gain 18 additional Stagger against bosses and mini-bosses."},
  runic_hammer:{element:"arcane",name:"Runic Suppression",chance:.20,kind:"weaken",description:"20%: Weaken reduces the target's next hit by 12%."},
  titan_crusher:{element:"earth",name:"Titan Finisher",chance:.17,kind:"execute",description:"17%: +9% damage, or +18% below 50% enemy HP (max 90)."},
- divine_aegis:{element:"light",name:"Sacred Bulwark",chance:.18,kind:"ward",description:"18%: protect the party from its next enemy attack (18% reduction)."}
+ divine_aegis:{element:"light",name:"Sacred Bulwark",chance:.18,kind:"ward",description:"18%: protect the party from its next enemy attack (18% reduction)."},
+ verdant_bow:{element:"nature",name:"Woodsong Echo",chance:.18,kind:"chain",description:"18%: ricochet arrow to another foe (max 55), or bonus hit on the target."},
+ stormstring_bow:{element:"lightning",name:"Storm Quiver",chance:.20,kind:"chain",description:"20%: lightning ricochet to another foe (max 55)."},
+ glacier_recurve:{element:"ice",name:"Frost Quill",chance:.22,kind:"chill",description:"22%: Chill reduces the enemy's next attack."},
+ shadowpiercer:{element:"void",name:"Shade Mark",chance:.19,kind:"mark",description:"19%: mark foe for 20% more damage on subsequent hits."},
+ sunseeker_bow:{element:"light",name:"Dawn Flight",chance:.18,kind:"radiance",description:"18%: light bonus (max 80) plus small self-heal."}
 });
 const rows=Object.freeze(Object.fromEntries(Object.entries(spec).map(([id,detail])=>[id,Object.freeze({...detail,id})])));
 const clamp=(n,lo,hi)=>Math.max(lo,Math.min(hi,Number(n)||0));
@@ -27,7 +32,7 @@ function weaponFor(player){
  const equipped=player.inventory.find(it=>it?.equippedSlot==="main"&&it.uid&&it.uid===player.weaponItem?.uid);
  if(!equipped||!rows[equipped.id])return null;
  // The authoritative catalog, not untrusted inventory metadata, determines stats/passive.
- const item=require("./weapon-shop-v060").WEAPONS.find(it=>it.id===equipped.id);
+ const item=[...require("./weapon-shop-v060").WEAPONS,...require("./archer-shop-v062").WEAPONS].find(it=>it.id===equipped.id);
  if(!item||item.class!==player.classId||Number(player.level)<item.level)return null;
  return rows[equipped.id];
 }
