@@ -41,9 +41,9 @@ function event(room,data){
  room.weaponFxSeq=(room.weaponFxSeq||0)+1;
  room.weaponFx=(room.weaponFx||[]).concat([{id:room.weaponFxSeq,...data}]).slice(-16);
 }
-function visual(room,target,weapon,kind,value=0){
+function visual(room,target,weapon,kind,value=0,element=weapon.element){
  if(!room||!target||!weapon)return;
- event(room,{enemyId:target.enemyId||null,element:weapon.element,kind,
+ event(room,{enemyId:target.enemyId||null,element,kind,
   label:weapon.name,amount:Math.floor(value)||0});
 }
 function applyPassive({room,player,target,baseDamage,action,random=Math.random,say=()=>{},combat}){
@@ -52,7 +52,7 @@ function applyPassive({room,player,target,baseDamage,action,random=Math.random,s
  const weapon=weaponFor(player);
  if(!weapon)return {triggered:false,bonus:0};
  const element=attackElement(player,action,combat.skillElement(player,action));
- if(element!=="physical")visual(room,target,weapon,"hit");
+ if(element!=="physical")visual(room,target,weapon,"hit",0,element);
  const roll=clamp(random(),0,1);
  if(roll>=weapon.chance)return {triggered:false,bonus:0};
  let bonus=0,detail="",kind=weapon.kind;
@@ -93,8 +93,8 @@ function applyPassive({room,player,target,baseDamage,action,random=Math.random,s
    detail="party ward 18%";break;
  }
  if(bonus)target.hp=Math.max(0,target.hp-bonus);
- say(room,"✦ "+player.name+"'s "+weapon.name+" activates "+weapon.name+" passive: "+detail+(bonus?" · +"+bonus+" damage":"")+".");
- visual(room,target,weapon,"passive",bonus);
+ say(room,"✦ "+player.name+"'s "+weapon.name+" activates "+detail+(bonus?" · +"+bonus+" damage":"")+".");
+ visual(room,target,weapon,"passive",bonus,element);
  return {triggered:true,bonus,weaponId:weapon.id,kind};
 }
 function tickBurn(monster){
@@ -106,4 +106,5 @@ function tickBurn(monster){
  if(fire.turns<=0)monster.weaponBurn=null;
  return {damage:amount,defeated:monster.hp<=0,remaining:Math.max(0,fire.turns)};
 }
-module.exports={spec:rows,weaponFor,attackElement,applyPassive,tickBurn};
+function recordBurn(room,target,amount){visual(room,target,rows.flamebrand,"burn",amount)}
+module.exports={spec:rows,weaponFor,attackElement,applyPassive,tickBurn,recordBurn};
