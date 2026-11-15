@@ -45,15 +45,15 @@ test("INDEX API uses exact enemy spawn preview, including party sizing, and neve
  assert.ok(index.includes("updateHero(p,state)"));
  assert.ok(game.includes("window.SoulboundIndex?.updateHero(v040Me,s)"));
 });
-test("Audio is now below command dock with original controls, no duplicated input handlers or IDs",()=>{
+test("Audio has one bottom-right dock after game layout with all original control IDs",()=>{
  const html=read("public/index.html");
- const dock=html.indexOf('class="v22-command-dock"'),audio=html.indexOf('class="v0559-audio-row"'),layout=html.indexOf('class="game-layout"');
- assert.ok(dock>=0&&audio>dock&&layout>audio);
+ const dock=html.indexOf('class="v22-command-dock"'),audio=html.indexOf('class="v061-audio-dock"'),layout=html.indexOf('class="game-layout"');
+ assert.ok(dock>=0&&layout>dock&&audio>layout);
  assert.ok(html.slice(dock,audio).includes('id="toggleEquipment"'));
  assert.equal(html.slice(dock,audio).includes('id="audioSettingsToggle"'),false);
- assert.ok(html.slice(audio,layout).includes('id="audioSettingsToggle"'));
+ assert.ok(html.slice(audio,html.indexOf('<div id="shopPanel"',audio)).includes('id="audioSettingsToggle"'));
  for(const id of ["audioSettingsToggle","audioSettings","musicQuick","sfxQuick","gameMusicVolume","gameSfxVolume","audioTest","audioStatus"])
   assert.equal(html.split('id="'+id+'"').length-1,1,id);
- assert.ok(html.includes("v060-index-audio-fix.css?v=0.60-indexfix"));
- assert.ok(html.includes("adventure-index-v0552.js?v=0.60-indexfix"));
+ assert.ok(html.includes("v061-elemental-ui.css?v=0.61"));
+ assert.ok(html.includes("adventure-index-v0552.js?v=0.61"));
 });
