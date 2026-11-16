@@ -12,7 +12,7 @@
  const tip=(player,sk)=>{
   const cost=effectiveCost(player,sk);
   const rows=[sk.name,
-   "Base skill multiplier: "+sk.mult+"× ATK (before DEF and combat modifiers)",
+   sk.utility?"Support skill · no direct damage":"Base skill multiplier: "+sk.mult+"× ATK (before DEF and combat modifiers)",
    "Mana: "+cost+" MP",
    "Unlocks at Level "+sk.unlock+" · Cooldown: "+sk.cd+" rounds",
    "Element: "+String(sk.element||"physical").toUpperCase()+(sk.area?" · AREA":" · SINGLE TARGET")];
@@ -26,6 +26,8 @@
    const sk=byType(player,type);
    btn.hidden=!sk||!player||Number(player.level)<Number(sk.unlock);
    btn.classList.toggle("v062-archer-skill",player?.classId==="archer");
+   btn.classList.toggle("v063-class-assassin",player?.classId==="assassin");
+   btn.classList.toggle("v063-class-priest",player?.classId==="priest");
    if(!sk){btn.textContent="SKILL UNAVAILABLE";btn.disabled=true;btn.dataset.tooltip="No skill data from server";btn.setAttribute("aria-label","Unavailable skill");continue;}
    const cd=Math.max(0,Math.floor(Number(player?.cooldowns?.[type])||0));
    btn.textContent=(sk.icon||"✦")+" "+sk.name+(cd>0?" · CD "+cd:"");
