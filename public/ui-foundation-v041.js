@@ -16,6 +16,7 @@ function selectView(next){
  visible("v041Front",next==="menu");
  visible("account",next==="account");
  visible("lobby",next==="lobby");
+ if(next==="lobby")window.SoulboundCharacterSelectV064?.open();
  // Do not unhide #game: it is controlled by successful server create/join responses.
  if(next!=="game")closeDrawer();
 }

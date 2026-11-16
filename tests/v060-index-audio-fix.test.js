@@ -55,5 +55,5 @@ test("Audio has one bottom-right dock after game layout with all original contro
  for(const id of ["audioSettingsToggle","audioSettings","musicQuick","sfxQuick","gameMusicVolume","gameSfxVolume","audioTest","audioStatus"])
   assert.equal(html.split('id="'+id+'"').length-1,1,id);
  assert.ok(html.includes("v061-elemental-ui.css?v=0.61"));
- assert.ok(html.includes("adventure-index-v0552.js?v=0.63"));
+ assert.ok(html.includes("adventure-index-v0552.js?v=0.64"));
 });
