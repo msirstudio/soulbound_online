@@ -25,7 +25,7 @@ test("no duplicate hotspots, seven face/body assets and no hard-coded gameplay c
  assert.ok(html.includes("character-select-v064.css?v=0.65-portrait-fix"));
  assert.ok(html.includes("characters-v064.js?v=0.64"));
  assert.ok(html.includes("character-select-v064.js?v=0.65"));
- assert.ok(html.indexOf("characters-v064.js")<html.indexOf("game.js?v=0.67"));
+ assert.ok(html.indexOf("characters-v064.js")<html.indexOf("game.js?v=0.68"));
 });
 test("secure game saves preserve identity independently from class in JSON without SQL migration",()=>{
  const a=saves.starter("priest","My Hero","noct");

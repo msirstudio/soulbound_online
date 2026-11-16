@@ -25,5 +25,5 @@ test("email resend control is optional and confirmation remains enabled",()=>{
  assert.ok(game.includes("email_not_confirmed"));
  assert.ok(!game.includes("auth.admin.updateUserById"));
  assert.ok(!game.includes("disableEmailConfirmation"));
- assert.ok(html.includes('game.js?v=0.67-auth'));
+ assert.ok(html.includes('game.js?v=0.68'));
 });

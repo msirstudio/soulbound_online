@@ -84,5 +84,5 @@ test("GM records survive secure-save serialization; server never trusts names or
  assert.ok(frontend.includes('gmGrant'));
  assert.ok(frontend.includes('gmStatus'));
  assert.ok(html.includes("gm-panel-v067.js?v=0.67"));
- assert.equal(JSON.parse(read("package.json")).version,"0.67.0");
+ assert.equal(JSON.parse(read("package.json")).version,"0.68.0");
 });
