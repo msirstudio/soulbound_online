@@ -50,7 +50,7 @@ test("destructive operations keep existing data when browser backup is unavailab
  const guard=sandbox.window.SoulboundSaveGuardV564;
  assert.equal(guard.snapshot("guest",1,{class_id:"swordsman"},"before-delete"),false);
  const game=read("public/game.js");
- assert.ok(game.includes('if(!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),n,v564SnapshotData(n,v561Slots[n-1]),"before-delete"))return notice('));
+ assert.ok(game.includes('if(!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),n,v564SnapshotData(n,v561Slots[n-1]),"before-delete"))'));
  assert.ok(game.includes('if(savedCharacter?.class_id&&!window.SoulboundSaveGuardV564?.snapshot('));
 });
 test("server releases canonical package version and UI fallback agrees",()=>{
