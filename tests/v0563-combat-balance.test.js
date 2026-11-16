@@ -61,7 +61,7 @@ test("Full-sized monsters, individual selection and version 0.56.3 are in the cl
  assert.ok(game.includes('targetId:v562TargetId'));
  assert.ok(server.includes('if(aoe)r.monster=pack.alive(r)[0]'));
  assert.ok(html.includes('game.js?v=0.65'));
- assert.equal(require("../package.json").version,"0.64.0");
+ assert.equal(require("../package.json").version,"0.65.0");
 });
 
 test("Region 3 boss vs LV27 / DEF77 is no longer a four-hit or negligible-damage encounter",()=>{
