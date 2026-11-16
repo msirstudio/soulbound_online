@@ -1,0 +1,30 @@
+name: SOULBOUND v0.66 — Armor Classes
+on:
+  push:
+    branches: [v0.66-armor-classes]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check armor, store, save and UI JavaScript syntax
+        run: |
+          node --check server.js
+          node --check loot-v034.js
+          node --check data/game-catalog-v062.js
+          node --check items/armor-shop-v066.js
+          node --check public/game.js
+          node --check public/equipment-inventory-v032.js
+          node --check public/version-v0564.js
+          node --check tests/v066-armor.test.js
+      - name: Full SOULBOUND regression suite
+        run: npm test
