@@ -143,5 +143,5 @@ test("v0.66: merchant UI filters armor by class and shows weight labels without 
  assert.ok(html.includes('v066-armor.css?v=0.66'));
  assert.ok(server.includes("armorCatalog.checkPurchase(p,it)"));
  assert.ok(server.includes("loot.equip(p,itemId,targetSlot,shopItems)"));
- assert.equal(JSON.parse(read("package.json")).version,"0.66.0");
+ assert.equal(JSON.parse(read("package.json")).version,"0.67.0");
 });
