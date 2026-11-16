@@ -682,17 +682,20 @@ const titleBody=$("shopPanel")?.querySelector(".pixel-title.log-title");
 if(titleBar)titleBar.textContent="🏪 "+shopTitle;
 if(titleBody)titleBody.textContent=shopTitle;
 const visibleItems=s.shopItems.filter(it=>(!cityShopScope||cityShopScope.includes(it.category))&&it.category===activeShopCategory&&
- (it.category!=="weapon"||it.class===me?.classId)).sort((a,b)=>(a.level||1)-(b.level||1));
+ (it.category!=="weapon"||it.class===me?.classId)&&
+ (it.category!=="armor"||!it.allowedClasses||it.allowedClasses.includes(me?.classId))).sort((a,b)=>(a.level||1)-(b.level||1));
 const v060BossClear=it=>!it.requiredBoss||Number(me?.worldProgress?.bossDefeats?.[it.requiredBoss]||0)>0||
  (me?.worldProgress?.defeatedBossIds||[]).includes(it.requiredBoss);
 $("shopItems").innerHTML=visibleItems.map(it=>{
  const levelOK=!!me&&me.level>=(it.level||1),bossOK=v060BossClear(it),
   moneyOK=!!me&&me.gold>=it.price,classOK=!it.class||it.class===me?.classId,
-  canBuy=levelOK&&bossOK&&moneyOK&&classOK;
+  armorOK=!it.allowedClasses||it.allowedClasses.includes(me?.classId),
+  canBuy=levelOK&&bossOK&&moneyOK&&classOK&&armorOK;
  const reason=!levelOK?"LV "+(it.level||1)+" REQUIRED":!bossOK?"DEFEAT "+(it.unlockBossName||"REGION BOSS"):!moneyOK?"NEED "+Number(it.price).toLocaleString()+" G":"BUY";
  return '<div class="shop-item v060-shop-item'+(canBuy?"":" v060-locked")+'" data-category="'+esc(it.category)+'">'+
  '<div class="v060-shop-text"><strong>'+esc(it.icon||"⚔")+" "+esc(it.name)+'</strong>'+
  (it.shopTier?'<span class="v060-weapon-tier">'+esc(it.shopTier)+'</span>':"")+
+ (it.armorType?'<span class="v066-armor-chip v066-'+esc(it.armorType)+'">'+esc(String(it.armorType).toUpperCase())+' · '+esc((it.allowedClasses||[]).join(' / '))+'</span>':"")+
  '<small>'+esc(it.description||"")+'</small>'+
  (it.passive?'<small class="v061-weapon-fx-label"><strong>'+esc(String(it.element||"physical").toUpperCase())+'</strong> · '+esc(it.passive.name)+' · '+Math.round(it.passive.chance*100)+'% — '+esc(it.passive.description)+'</small>':'')+
  '<span class="v060-price">'+Number(it.price).toLocaleString()+' G</span></div>'+
