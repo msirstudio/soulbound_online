@@ -1,0 +1,31 @@
+name: SOULBOUND 0.63 — Assassin & Priest
+on:
+  push:
+    branches: [v0.63-assassin-priest]
+  pull_request:
+    branches: [v0.62-foundation-single-source]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Syntax check
+        run: |
+          node --check server.js
+          node --check combat-v055.js
+          node --check combat/skills.js
+          node --check classes/assassin-v063.js
+          node --check classes/priest-v063.js
+          node --check public/game.js
+          node --check public/hero-art-v030.js
+          node --check public/skill-view-v062.js
+          node --check public/adventure-index-v0552.js
+      - name: Test all regressions including class integration
+        run: npm test

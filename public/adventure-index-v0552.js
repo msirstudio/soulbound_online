@@ -145,7 +145,7 @@ function enemyMetric(e,key){
 function entryMarkup(item){
  const isEnemy=item.kind==="enemy",isZone=item.kind==="zone",isRace=item.kind==="race",got=acquired(item);
  const sub=item.kind==="skill"?"CLASS "+esc(item.classId.toUpperCase())+" · LV "+esc(item.unlock)+" · "+esc(item.cost)+" MP":isEnemy?"STAGE "+item.stage+" · "+(item.miniBoss?"MINI-BOSS · ":"")+esc(item.zone):item.kind==="element"?"ELEMENT · WEAKNESS & RESISTANCE":item.kind==="status"?"STATUS EFFECT · COUNTERS":item.kind==="rule"?"HARDCORE COMBAT GUIDE":isZone?"STAGES "+esc(item.stages):isRace?"RACE · "+esc(item.chance)+"% SUMMON RATE":item.source?"DROP · "+esc(item.source):item.price!=null?"MERCHANT · "+item.price+" GOLD":"ITEM";
- const stat=item.kind==="skill"?"×"+esc(item.mult)+" ATK · CD "+esc(item.cd)+" · "+esc((item.element||"physical").toUpperCase())+(item.area?" · AOE":""):isEnemy?"HP "+enemyMetric(item,"hp")+" · ATK "+enemyMetric(item,"atk")+" · DEF "+enemyMetric(item,"def")+" · "+enemyMetric(item,"count")+" FOE(S)"+(item.element?" · "+item.element.toUpperCase():""):item.kind==="status"?esc(item.effect):isRace?esc(item.passive):!isZone&&item.description?esc(item.description):"";
+ const stat=item.kind==="skill"?(item.utility?"HEAL / SUPPORT":"×"+esc(item.mult)+" ATK")+" · CD "+esc(item.cd)+" · "+esc((item.element||"physical").toUpperCase())+(item.area?" · AOE":""):isEnemy?"HP "+enemyMetric(item,"hp")+" · ATK "+enemyMetric(item,"atk")+" · DEF "+enemyMetric(item,"def")+" · "+enemyMetric(item,"count")+" FOE(S)"+(item.element?" · "+item.element.toUpperCase():""):item.kind==="status"?esc(item.effect):isRace?esc(item.passive):!isZone&&item.description?esc(item.description):"";
  const rarityTag=item.rarity?'<span class="v035-rarity v035-'+esc(item.rarity)+'">'+esc(item.rarity.toUpperCase())+'</span>':"";
  return '<button type="button" data-v035-entry="'+esc(uid(item))+'" class="v035-entry '+(uid(item)===selectedId?"active ":"")+(got?"v044-discovered":"")+'">'+
  '<span class="v035-entry-icon">'+(item.kind==="element"?pixelIcon("element",item.id):item.kind==="status"?pixelIcon("status",item.id):esc(item.icon|| (isZone?"🗺️":"✦")))+'</span>'+(got?'<span class="v044-found-tag">✓ OWNED</span>':'')+'<span class="v035-entry-text"><strong>'+esc(item.name)+'</strong><small>'+sub+'</small><em>'+stat+'</em></span>'+rarityTag+'</button>';
@@ -239,7 +239,7 @@ function itemDetail(e){
 function skillDetail(sk){
  const displayCost=Number(sk.cost)||0;
  return '<div class="v035-item-art">'+esc(sk.icon||"✨")+'</div>'+
- '<div class="v035-stats"><span>⚔ BASE DAMAGE <b>×'+esc(sk.mult)+' ATK</b></span><span>🔷 MP <b>'+displayCost+'</b></span><span>⏳ COOLDOWN <b>'+esc(sk.cd)+'</b></span></div>'+
+ '<div class="v035-stats"><span>⚔ EFFECT <b>'+(sk.utility?'SUPPORT':'×'+esc(sk.mult)+' ATK')+'</b></span><span>🔷 MP <b>'+displayCost+'</b></span><span>⏳ COOLDOWN <b>'+esc(sk.cd)+'</b></span></div>'+
  '<div class="v035-detail-info"><strong>CLASS / UNLOCK</strong><p>'+esc(sk.classId.toUpperCase())+' · LEVEL '+esc(sk.unlock)+'</p>'+
  '<strong>ELEMENT / TARGET</strong><p>'+esc((sk.element||"physical").toUpperCase())+' · '+(sk.area?'ALL ENEMIES (AoE)':'SINGLE TARGET')+'</p>'+
  '<strong>DESCRIPTION</strong><p>'+esc(sk.description||"Class-specific combat skill")+'</p>'+

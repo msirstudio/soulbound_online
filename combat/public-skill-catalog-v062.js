@@ -4,12 +4,14 @@
  * duplicated in the browser or Adventure INDEX. No game balance changes. */
 const core=require("./skills");
 const combat=require("../combat-v055");
-const CLASSES=Object.freeze(["swordsman","mage","tank","archer"]);
+const CLASSES=Object.freeze(["swordsman","mage","tank","archer","assassin","priest"]);
 const ICONS=Object.freeze({
  swordsman:["🔥","✴","🛡","⚡","⚔"],
  mage:["🔮","☄","❄","🌠","✦","💧","⚡"],
  tank:["🛡","🧱","📣","🏰","🛡"],
- archer:["🏹","🌧","🪢","🎯","🔍","🌿","🦅"]
+ archer:["🏹","🌧","🪢","🎯","🔍","🌿","🦅"],
+ assassin:["🗡️","🌀","🕸️","🎯","🔍","🌫️","🌑"],
+ priest:["✨","💚","☀️","🛡️","🌟","🌿","⚖️"]
 });
 /* Descriptions are qualitative-only. Numbers come from the executable combat
  * definitions so the UI cannot claim an outdated MP cost or multiplier. */
@@ -21,14 +23,14 @@ const DESCRIPTIONS=Object.freeze({
 });
 function skillsFor(classId="swordsman"){
  const cls=CLASSES.includes(classId)?classId:"swordsman",player={classId:cls};
- const types=cls==="mage"||cls==="archer"?core.SKILL_TYPES:core.SKILL_TYPES.slice(0,5);
+ const types=["mage","archer","assassin","priest"].includes(cls)?core.SKILL_TYPES:core.SKILL_TYPES.slice(0,5);
  return types.map((type,index)=>{
   const actual=core.definition(player,type);
   if(!actual)throw new Error("Missing authoritative skill definition "+cls+":"+type);
   return Object.freeze({
    type,classId:cls,name:actual.name,mult:actual.mult,cost:actual.cost,unlock:actual.unlock,
    cd:actual.cd,area:!!actual.area,element:combat.skillElement(player,type),
-   icon:ICONS[cls][index],description:DESCRIPTIONS[cls][index]
+   icon:actual.icon||ICONS[cls][index],description:actual.description||DESCRIPTIONS[cls][index],utility:!!actual.utility
   });
  });
 }

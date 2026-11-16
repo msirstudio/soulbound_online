@@ -193,13 +193,19 @@ function validateAction(p,type,r){
  if(!p||typeof type!=="string")return "Invalid action.";
  if(type==="attack"||type==="guard")return null;
  if(SKILL_COSTS[type]){
-  if(["skill6","skill7"].includes(type)&&!["mage","archer"].includes(p.classId))return "Only mages can cast this spell.";
-  const [baseCost,level]=SKILL_COSTS[type];
+  const standard=skillCore.SKILL_TYPES.includes(type);
+  const sk=standard?skillCore.definition(p,type):null;
+  // Keep the existing restriction message for legacy melee classes.
+  if(standard&&!sk)return "Skill unavailable for this class.";
+  if(["skill6","skill7"].includes(type)&&!["mage","archer","assassin","priest"].includes(p.classId))
+   return "Only mages can cast this spell.";
+  const [baseCost,level]=standard?[sk.cost,sk.unlock]:SKILL_COSTS[type];
   const cost=p.raceId==="elf"?Math.floor(baseCost*.95):baseCost;
   if(p.level<level)return "Unlocks at level "+level+".";
   if((p.cooldowns?.[type]||0)>0)return "Skill is on cooldown for "+p.cooldowns[type]+" more round(s).";
   if(p.mp<cost)return "Not enough MP.";
   if(type==="cleanse"&&![...r.players.values()].some(x=>x.hp>0&&x.statusEffects?.length))return "No ally needs cleansing.";
+  if(p.classId==="priest"&&sk?.utility)return require("./classes/priest-v063").validateUtility(type,r);
   return null;
  }
  if(["heal","healSmall","healMedium","healLarge"].includes(type)){
@@ -217,6 +223,8 @@ function validateAction(p,type,r){
  return "Unknown action.";
 }
 function skillElement(p,type){
+ if(p.classId==="assassin")return require("./classes/assassin-v063").definition(type)?.element||"physical";
+ if(p.classId==="priest")return require("./classes/priest-v063").definition(type)?.element||"light";
  if(p.classId==="archer")return ({skill3:"nature",skill5:"nature",skill6:"nature"})[type]||"physical";
  if(p.classId==="mage")return ({skill:"arcane",skill2:"fire",skill3:"ice",skill4:"arcane",skill5:"arcane",skill6:"water",skill7:"lightning"})[type]||"physical";
  if(p.classPath==="paladin"&&type==="skill4")return "light";

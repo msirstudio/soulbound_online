@@ -7,7 +7,7 @@ const core=require("../combat/skills"),pack=world.encounterPack;
 const catalog=require("../data/game-catalog-v062");
 const book=require("../combat/public-skill-catalog-v062");
 const api=require("../api/adventure-index-v062");
-const index=api.buildIndex("0.62");
+const index=api.buildIndex("0.63");
 test("authoritative catalogs contain all 40 stages, 8 bosses and 8 named minis",()=>{
  assert.equal(catalog.normal.length,5);
  assert.equal(catalog.bosses.length,8);
@@ -53,10 +53,10 @@ test("INDEX shop items use same names, stats, gates, costs and passive data as l
  }
 });
 test("every client skill and INDEX skill is projected directly from executable core",()=>{
- assert.equal(index.skills.length,24);
+ assert.equal(index.skills.length,38);
  for(const cls of book.CLASSES){
   const list=book.skillsFor(cls),inIndex=index.skills.filter(s=>s.classId===cls);
-  assert.equal(list.length,cls==="mage"||cls==="archer"?7:5);
+  assert.equal(list.length,["mage","archer","assassin","priest"].includes(cls)?7:5);
   assert.deepEqual(inIndex,list);
   for(const shown of list){
    const real=core.definition({classId:cls},shown.type);
@@ -78,7 +78,7 @@ test("server and browser no longer contain competing enemy templates or skill nu
  assert.ok(!game.includes("const skillTips=tank?"));
  assert.ok(!game.includes("skill3Cost=elf?"));
  assert.ok(game.includes("SoulboundSkillViewV062"));
- assert.ok(html.includes("skill-view-v062.js?v=foundation-1"));
+ assert.ok(html.includes("skill-view-v062.js?v=0.63"));
  assert.ok(indexUi.includes("skillDetail(sk)"));
 });
 

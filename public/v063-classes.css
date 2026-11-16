@@ -1,0 +1,10 @@
+/* v0.63: 6-class responsive selector; colors only, no new HUD rows. */
+#lobby .v30-class-choices{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+#lobby .v30-class-choice[data-hero-class="assassin"]{border-color:#835d9b;background:linear-gradient(160deg,#30213c,#161827);color:#e7d5ff}
+#lobby .v30-class-choice[data-hero-class="priest"]{border-color:#bca76d;background:linear-gradient(160deg,#41382b,#201e29);color:#faeac4}
+#lobby .v30-class-choice[data-hero-class="assassin"].selected{box-shadow:0 0 13px #9f67d977}
+#lobby .v30-class-choice[data-hero-class="priest"].selected{box-shadow:0 0 13px #f2ce7c77}
+#game .v063-class-assassin[data-action]{border-color:#9a71c2}
+#game .v063-class-priest[data-action]{border-color:#b9a264}
+@media(max-width:700px){#lobby .v30-class-choices{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:440px){#lobby .v30-class-choice{min-height:78px}}
