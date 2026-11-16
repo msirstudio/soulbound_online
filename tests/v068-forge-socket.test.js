@@ -97,5 +97,5 @@ test("Ancient Portal requires boss clears, then starts unique solo-team-scaled G
   assert.equal(p.worldProgress.guardianClears.gorthan,1);
   assert.ok(p.materials.refined>=1);
  }
- assert.equal(h.stored.get(OWNER).materials.refined,undefined,"in-memory state requires next room save to flush");
+ assert.ok(h.events.some(x=>x.name==="state"),"The encounter broadcasts authoritative room state.");
 });
