@@ -19,7 +19,7 @@ test("no duplicate hotspots, seven face/body assets and no hard-coded gameplay c
   for(const n of ["x","y","w","h"])assert.ok(h.hotspot[n]>=0&&h.hotspot[n]<=100);
   assert.ok(h.hotspot.x+h.hotspot.w<=100);
   assert.ok(h.hotspot.y+h.hotspot.h<=100);
-  assert.ok(h.hotspot.shape.startsWith("polygon("));
+  assert.ok(h.shape.startsWith("polygon("));
  }
  const html=read("public/index.html");
  assert.ok(html.includes("character-select-v064.css?v=0.64"));
