@@ -51,7 +51,7 @@
 .v068-guardian h3{font:700 13px Cinzel,Georgia,serif;margin:4px 0;color:#f4d9a4}
 .v068-guardian p{font-size:11px;line-height:1.5;color:#bfbaa7;margin:6px 0}
 .v068-window button:disabled{opacity:.48;cursor:default}
-#v040City .v068-city-action{position:absolute;z-index:30;bottom:9%;min-width:130px;max-width:38%;padding:7px 8px;border:2px solid #e6be76;background:linear-gradient(110deg,#393040ee,#7b552edc);color:#fff1bd;font:700 clamp(9px,1.1vw,14px) Cinzel,Georgia,serif;box-shadow:0 3px 8px #0009;cursor:pointer}
+#v040City .v068-city-action{pointer-events:auto;position:absolute;z-index:30;bottom:9%;min-width:130px;max-width:38%;padding:7px 8px;border:2px solid #e6be76;background:linear-gradient(110deg,#393040ee,#7b552edc);color:#fff1bd;font:700 clamp(9px,1.1vw,14px) Cinzel,Georgia,serif;box-shadow:0 3px 8px #0009;cursor:pointer}
 #v040City .v068-city-action:hover{transform:translateY(-2px);background:#68422b}
 #v040City #v068CityForge{left:3%}#v040City #v068CityPortal{right:3%}
 #v040City .v068-city-action:disabled{opacity:.5;cursor:default}

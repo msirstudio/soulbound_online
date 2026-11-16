@@ -319,6 +319,7 @@ combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status
   forgePending.add(s.id);
   try{
    if(claim&&!await secureQueue.persist(claim,p))return cb({ok:false,error:"Cloud save unavailable."});
+   if(findRoom(s)!==r||r.status!=="city")return cb({ok:false,error:"Party departed the Central City. Purchase cancelled."});
    const old={gold:p.gold,materials:{...forge.normalizeMaterials(p.materials)}};
    const result=forge.buyBasic(p,quantity);
    if(!result.ok)return cb(result);
@@ -333,6 +334,7 @@ combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status
   forgePending.add(s.id);
   try{
    if(claim&&!await secureQueue.persist(claim,p))return cb({ok:false,error:"Cloud save unavailable; no stones spent."});
+   if(findRoom(s)!==r||r.status!=="city")return cb({ok:false,error:"Party departed the Central City. Forge attempt cancelled."});
    const result=forge.attempt(p,input,gear=>loot.canonical({...gear,enhanceLevel:0},shopItems));
    if(!result.ok||result.duplicate)return cb(result);
    if(claim&&!await secureQueue.persist(claim,p)){result.undo();return cb({ok:false,error:"Cloud save failed. Stones and Gold restored."})}
@@ -344,6 +346,9 @@ combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status
  s.on("ancientGuardian",({id}={},cb=()=>{})=>{
   const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a party first."});
   if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can open the Ancient Portal."});
+  if(secure.enabled&&[...r.players.values()].some(p=>!p.guest&&!p.verified))return cb({ok:false,error:"All signed-in heroes must finish secure restore first."});
+  if(multi.hasMissing(r))return cb({ok:false,error:"Wait for disconnected heroes to return."});
+  if([...r.players.keys()].some(k=>forgePending.has(k)))return cb({ok:false,error:"Wait for ongoing Blacksmith saves before opening the portal."});
   const check=guardians.eligible(r,id);if(!check.ok)return cb(check);
   startGuardian(r,check.boss);emit(r);cb({ok:true,bossId:id});
  });
