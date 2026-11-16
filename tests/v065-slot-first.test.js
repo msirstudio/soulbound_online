@@ -23,7 +23,7 @@ test("title -> slot cards -> guild class popup -> direct game, no second old cre
  assert.ok(ui.includes("SoulboundV065?.showSlots()"));
  assert.ok(html.includes("slot-first-v065.js?v=0.65"));
  assert.ok(html.includes("slot-first-v065.css?v=0.65"));
- assert.ok(html.indexOf("slot-first-v065.js")<html.indexOf("game.js?v=0.65"));
+ assert.ok(html.indexOf("slot-first-v065.js")<html.indexOf("game.js?v=0.66"));
  assert.ok(flow.includes("CHOOSE YOUR SAVE SLOT"));
  assert.ok(flow.includes('data-v065-slot'));
  assert.ok(flow.includes("function showGuild()"));
