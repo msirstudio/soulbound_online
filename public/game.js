@@ -56,6 +56,17 @@ async function v57Api(method,route,payload){
  return output;
 }
 
+/* v0.64 · Class-independent hero identities; legacy profile columns remain unchanged. */
+function v064Key(slot=v561Slot){return 'soulbound_character_v064_'+(guestMode?'guest':currentUser?.id||'unknown')+'_'+slot}
+function v064SelectedId(){return window.SoulboundCharacterSelectV064?.getSelectedId()||null}
+function v064RememberId(id,slot=v561Slot){const v=window.SoulboundCharactersV064?.normalize(id);if(v)try{localStorage.setItem(v064Key(slot),v)}catch(e){}return v||null}
+function v064SavedId(slot=v561Slot,data=savedCharacter){return window.SoulboundCharactersV064?.normalize(data?.character_id)||window.SoulboundCharactersV064?.normalize(localStorage.getItem(v064Key(slot)))||null}
+document.addEventListener('soulbound:v064-hero-selected',event=>{
+ const d=event.detail||{},identity=window.SoulboundCharactersV064?.byId(d.characterId);if(!identity)return;
+ $('classId').value=d.classId;$('name').value=identity.name;
+ const radio=document.querySelector('input[name="heroGender"][value="'+identity.gender+'"]');if(radio)radio.checked=true;
+ classInfo();v30UpdatePreview();
+});
 function v561Key(slot){return "soulbound_hero_slot_v561_"+(guestMode?"guest":currentUser?.id||"unknown")+"_"+slot}
 function v561ReadLocal(slot){try{return JSON.parse(localStorage.getItem(slot===1&&guestMode?"soulbound_guest_save_v1":v561Key(slot))||"null")}catch{return null}}
 function v561WriteLocal(slot,data){try{localStorage.setItem(slot===1&&guestMode?"soulbound_guest_save_v1":v561Key(slot),JSON.stringify(data))}catch(e){authNotice("Browser storage is full. Export your hero before leaving.",true)}}
@@ -110,6 +121,7 @@ function v561Select(n){
  const has=!!savedCharacter.class_id;
  if(has){$("name").value=savedCharacter.username||"Adventurer";$("classId").value=savedCharacter.class_id}
  else {$("name").value="Adventurer";$("classId").value="swordsman"}
+ const id=v064SavedId(n,savedCharacter);if(id){savedCharacter.character_id=id;window.SoulboundCharacterSelectV064?.setSelected(id)}
  const g=localStorage.getItem(v30GenderKey())||"male",radio=document.querySelector('input[name="heroGender"][value="'+(g==="female"?"female":"male")+'"]');
  if(radio)radio.checked=true;
  classInfo();v30UpdatePreview();v561Render();
@@ -139,7 +151,7 @@ async function v561Delete(n){
   }
   if(n===1){localStorage.removeItem(v40WorldKeyFor(1));if(guestMode)localStorage.removeItem("soulbound_guest_save_v1")}
   else{localStorage.removeItem(v561Key(n));localStorage.removeItem(v40WorldKeyFor(n))}
-  v561Slots[n-1]=null;
+  v561Slots[n-1]=null;localStorage.removeItem(v064Key(n));
  }catch(e){notice("Cannot delete Slot "+n+": "+e.message,true)}
  finally{v561SlotBusy=false;v561Select(n)}
 }
