@@ -8,7 +8,7 @@ test("Three independent save slot buttons and scoped delete controls render in t
  assert.ok(game.includes('v561Slots=[null,null,null]'));
  assert.ok(game.includes('data-v561-pick'));
  assert.ok(game.includes('data-v561-delete'));
- assert.ok(game.includes('Delete SLOT '));
+ assert.ok(game.includes('DELETE SLOT '),"delete confirmation includes exact slot identity");
  assert.ok(game.includes('v561Slot!==1'));
  assert.ok(game.includes('localStorage.removeItem(v561Key(n))'));
  assert.ok(game.includes('localStorage.removeItem(v40WorldKeyFor(n))'));
