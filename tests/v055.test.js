@@ -150,6 +150,6 @@ test("Codex and gameplay integration keep Phase 2 exclusive and preserve existin
   assert.ok(index.includes(t),t);
  assert.deepEqual(base.PHASE_TWO_STAGES,[35,40]);
  assert.ok(!js.includes("ADD COLUMN")&&!js.includes("DROP TABLE"));
- const pkg=require("../package.json");assert.equal(pkg.version,"0.62.0");
- assert.ok(html.includes("VERSION 0.62 · ARCHER CLASS"));
+ const pkg=require("../package.json");assert.equal(pkg.version,"0.63.0");
+ assert.ok(html.includes("VERSION 0.63 · ASSASSIN + PRIEST"));
 });
