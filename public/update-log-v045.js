@@ -2,6 +2,15 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.66",date:"2026-11-16",title:"Armor & Equipment — Heavy / Medium / Light",notes:[
+  "Added three armor identities across all six classes: Heavy (Swordsman and Tank), Medium (Archer and Assassin), and Light (Mage and Priest).",
+  "The Armor Shop now offers 18 chest armors total including six existing items and twelve new armors, with different DEF, HP and MP profiles.",
+  "Shop entries are filtered to the chosen class and marked with their armor category; the existing Equipment & Inventory panel rejects incompatible class equipment.",
+  "The server validates both purchase and equip requests before spending gold or applying gear stats.",
+  "New boss and mini-boss helmet, chest, pants and boots are weighted for the receiving player's class with canonical bonuses; historical untyped boss armor remains usable.",
+  "Existing save slots, item UIDs, 40-slot inventory, weapon shops, elemental passives and combat pacing are preserved. No SQL changes are required.",
+  "This is a safe branch release: verify tests, merchant UI, existing saves, party combat and Render deployment before pointing production at the new branch."
+ ]},
  {version:"0.62",date:"2026-11-15",title:"Archer — The Fourth Playable Class",notes:[
   "Added Archer, the first ranged class, with separate starter HP, MP, ATK, DEF, speed, a green hooded SVG character and a visible bow.",
   "Seven skills: Quick Shot, Arrow Volley, Pinning Arrow, Piercing Shot, Hunter's Mark, Rain of Arrows and Heartseeker.",
