@@ -79,5 +79,5 @@ test("Actual server and boss pipeline call central formulas rather than using co
  const pkg=require("../package.json"),html=read("public/index.html");
  assert.equal(pkg.version,"0.64.0");
  assert.ok(html.includes("<small>v0.64</small>"));
- assert.ok(html.includes('game.js?v=0.64'));
+ assert.ok(html.includes('game.js?v=0.65'));
 });
