@@ -240,18 +240,19 @@ async function prepare(){
 }
 async function afterJoin(){
  restoreComplete=false;
- if(!savedCharacter?.class_id)return notice("Select an existing hero or create a new game first.",true);
+ if(!savedCharacter?.class_id){notice("Select an existing hero or create a new game first.",true);return false;}
  let accessToken=null;
  if(v57Mode&&!guestMode){
   const result=await supabaseClient.auth.getSession();
   accessToken=result.data?.session?.access_token||null;
-  if(!accessToken)return notice("Session expired. Sign in again.",true);
+  if(!accessToken){notice("Session expired. Sign in again.",true);return false;}
  }
  const r=await call("restoreCharacter",{...savedCharacter,world_progress:v57Mode?savedCharacter.world_progress:savedCharacter.world_progress||v40SavedWorld(),
   accessToken,slot:v561Slot,guest:guestMode,gender:v30SelectedGender()});
- if(!r.ok)return notice("Character restore blocked: "+r.error,true);
+ if(!r.ok){notice("Character restore blocked: "+r.error,true);return false;}
  restoreComplete=true;
  const p=gameState?.players.find(x=>x.id===myId);if(p)saveProfile(p);
+ return true;
 }
 function classInfo(){
  const info={
@@ -305,8 +306,68 @@ document.querySelectorAll("[data-hero-class]").forEach(b=>b.onclick=()=>{$("clas
 document.querySelectorAll('input[name="heroGender"]').forEach(b=>b.onchange=()=>{v30UpdatePreview();v30SaveGender()});
 $("classId").onchange=()=>{classInfo();v30UpdatePreview()};
 v30UpdatePreview();$("guestPlay").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));guestMode=true;currentUser=null;showAccount({email:"Guest Player"});$("accountEmail").textContent="GUEST · LOCAL SAVE";$("signup").hidden=true;$("signin").hidden=true;$("email").hidden=true;$("password").hidden=true;$("guestPlay").hidden=true;await prepare();authNotice("Guest mode ready. Friends can join your room with its code.")};
-$("create").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("createRoom",{name:$("name").value,classId:$("classId").value,gender:v30SelectedGender(),characterId:v064SavedId()||v064SelectedId(),guest:guestMode});if(r.ok){v59RememberRoom(r);v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
-$("join").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value,classId:$("classId").value,gender:v30SelectedGender(),characterId:v064SavedId()||v064SelectedId(),guest:guestMode});if(r.ok){v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
+async function v065RecoverFromFailedRestore(){
+ try{sessionStorage.removeItem(v59StorageKey())}catch(e){}
+ socket.disconnect();socket.connect();
+ restoreComplete=false;
+ $("game").hidden=true;$("lobby").hidden=false;
+ window.SoulboundUIV41?.selectView("lobby");
+}
+async function v065EnterRoom(join){
+ if(!selectedGameMode){notice("Choose a Save Slot first.",true);return false}
+ const eventName=join?"joinRoom":"createRoom",payload={
+  name:$("name").value,classId:$("classId").value,gender:v30SelectedGender(),
+  characterId:v064SavedId()||v064SelectedId(),guest:guestMode
+ };
+ if(join)payload.code=$("roomCode").value;
+ let r;
+ try{r=await call(eventName,payload)}
+ catch(e){notice(e.message||"Cannot connect to party.",true);return false}
+ if(!r.ok){notice(r.error||"Cannot enter party.",true);return false}
+ v59RememberRoom(r);v30SaveGender();
+ $("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;
+ window.SoulboundUIV41?.enterGame();
+ try{
+  const restored=await afterJoin();
+  if(!restored){await v065RecoverFromFailedRestore();return false}
+  return true;
+ }catch(e){
+  notice("Hero restore failed: "+e.message,true);
+  await v065RecoverFromFailedRestore();return false;
+ }
+}
+$("create").onclick=()=>v065EnterRoom(false);
+$("join").onclick=()=>v065EnterRoom(true);
+if(window.SoulboundV065){
+ window.SoulboundV065.onSlotSelected=async(n,exists)=>{
+  v561Select(n);
+  if(exists){
+   $("continueGame").onclick();
+   const code=window.SoulboundV065.getRoomCode();
+   if(code&&code.length!==5){window.SoulboundV065.setStatus("Enter a valid five-character party code.",true);return false}
+   $("roomCode").value=code;
+   const ok=await v065EnterRoom(!!code);
+   if(!ok)window.SoulboundV065.setStatus($("notice").textContent||"Could not continue.",true);
+   return ok;
+  }
+  window.SoulboundV065.showGuild();
+  return true;
+ };
+ window.SoulboundV065.onConfirmed=async()=>{
+  window.SoulboundV065.loading(true,"Creating your beginner hero…");
+  try{
+   const created=await $("newGame").onclick();
+   if(created!==true){window.SoulboundV065.setStatus($("notice").textContent||"Could not create your save.",true);window.SoulboundV065.showGuild();return}
+   const code=window.SoulboundV065.getRoomCode();
+   if(code&&code.length!==5){window.SoulboundV065.setStatus("Invalid room invite code.",true);window.SoulboundV065.showSlots();return}
+   $("roomCode").value=code;
+   const ok=await v065EnterRoom(!!code);
+   if(!ok){window.SoulboundV065.setStatus($("notice").textContent||"Unable to enter party.",true);window.SoulboundV065.showSlots()}
+  }catch(e){window.SoulboundV065.setStatus(e.message||"Unable to start new game.",true);window.SoulboundV065.showSlots()}
+  finally{window.SoulboundV065.loading(false)}
+ };
+}
+
 function syncMusicUI(on){["musicToggle","musicQuick"].forEach(id=>{const b=$(id);if(!b)return;b.textContent="♫ MUSIC · "+(on?"ON":"OFF");b.classList.toggle("music-on",on);b.setAttribute("aria-pressed",String(on))})}function toggleMusic(){const on=window.SoulboundAudio.setMusic(!window.SoulboundAudio.musicOn);syncMusicUI(on)}$("musicToggle").onclick=toggleMusic;$("musicQuick").onclick=toggleMusic;$("musicVolume").oninput=e=>{window.SoulboundAudio.setVolume(Number(e.target.value)/100);if($("gameMusicVolume"))$("gameMusicVolume").value=e.target.value};
 const sfxSlider=$("sfxVolume");
 if(sfxSlider)sfxSlider.oninput=e=>{window.SoulboundAudio.setSfxVolume(Number(e.target.value)/100);if($("gameSfxVolume"))$("gameSfxVolume").value=e.target.value};
