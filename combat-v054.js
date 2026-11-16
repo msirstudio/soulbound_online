@@ -1,7 +1,7 @@
 "use strict";
 /* SOULBOUND v0.54 — authoritative, transient combat expansion.
  * Combat state is attached to live room/character objects. No schema changes.
- * Only the Void Reaper (stage 35) and Eclipse Sovereign (stage 40) use Phase 2.
+ * Story Phase 2 remains restricted to stages 35/40. Optional Ancient Guardians each have independent Phase 2.
  */
 const formulas=require("./combat/formulas");
 const PHASE_TWO_STAGES=Object.freeze([35,40]);
@@ -19,15 +19,19 @@ const PHASE_TWO_SPECIALS=Object.freeze({
  abyssal_rift:{name:"Oblivion's Grasp",scope:"single",element:"void",power:1.28,effect:"stun",chance:.37},
  eclipse_throne:{name:"Sovereign Judgment",scope:"all",element:"void",power:.92,effect:"weaken",chance:.65}
 });
+const GUARDIAN_PHASE_SPECIALS=Object.freeze({
+ gorthan:{name:"Cataclysm Shatter",scope:"all",element:"earth",power:.91,effect:"weaken",chance:.40},
+ selunara:{name:"Lunar Eclipse",scope:"all",element:"arcane",power:.82,effect:"weaken",chance:.50}
+});
 const STATUS_NAMES=Object.freeze({
  burn:"Burn",poison:"Poison",bleed:"Bleed",weaken:"Weaken",freeze:"Freeze",stun:"Stun"
 });
 const max=(n,lo,hi)=>Math.min(hi,Math.max(lo,n));
-const canPhaseTwo=m=>!!m?.boss&&PHASE_TWO_STAGES.includes(m?.stage);
+const canPhaseTwo=m=>!!m?.boss&&(PHASE_TWO_STAGES.includes(m?.stage)||Object.prototype.hasOwnProperty.call(GUARDIAN_PHASE_SPECIALS,m?.guardianId||""));
 const moveFor=m=>{
  const phase2=canPhaseTwo(m)&&m.phase===2;
  const specials=phase2?PHASE_TWO_SPECIALS:BOSS_SPECIALS;
- const special=specials[m.regionId]||BOSS_SPECIALS.cursed_wilds;
+ const special=(phase2&&GUARDIAN_PHASE_SPECIALS[m.guardianId])||specials[m.regionId]||BOSS_SPECIALS[m.regionId]||BOSS_SPECIALS.cursed_wilds;
  const signature=!!(m.boss||m.miniBoss)&&m.combatTurn%(phase2?2:3)===(phase2?0:1);
  if(!signature)return {name:"Strike",scope:"single",element:"physical",power:1,charge:false};
  const base=m.miniBoss?{...special,name:"Lesser "+special.name,power:Math.min(.8,special.power),chance:special.chance*.65}:special;
@@ -44,7 +48,7 @@ function checkPhase(r,say){
  const m=r?.monster;
  if(!canPhaseTwo(m)||m.phase!==1||m.hp<=0||m.hp>m.maxHp*.5)return false;
  m.phase=2;m.atk=Math.max(1,Math.round(m.atk*1.12));
- m.queuedMove=null;m.intent={...PHASE_TWO_SPECIALS[m.regionId],charge:true};
+ m.queuedMove=null;m.intent={...(GUARDIAN_PHASE_SPECIALS[m.guardianId]||PHASE_TWO_SPECIALS[m.regionId]||BOSS_SPECIALS[m.regionId]||BOSS_SPECIALS.cursed_wilds),charge:true};
  say(r,"⚠ "+m.name+" enters PHASE 2! Its power surges. Prepare for "+m.intent.name+"!");
  return true;
 }
@@ -165,6 +169,6 @@ function monsterStrike(r,ctx){
  }
 }
 module.exports={
- PHASE_TWO_STAGES,BOSS_SPECIALS,PHASE_TWO_SPECIALS,STATUS_NAMES,
+ PHASE_TWO_STAGES,BOSS_SPECIALS,PHASE_TWO_SPECIALS,GUARDIAN_PHASE_SPECIALS,STATUS_NAMES,
  canPhaseTwo,beginEncounter,checkPhase,effectFor,debuffMonster,beforeAction,guard,aegis,monsterStrike,moveFor
 };
