@@ -105,3 +105,23 @@ test("Guardian boss dynamically scales for 1–4 and remains distinct from the n
  assert.equal(first.enemyId,"ancient-gorthan");
  assert.equal(world.totalStages,40);
 });
+
+test("Gorthan phase 2 breaks stone shell exactly once and boosts attack",()=>{
+ const g=guardians.createEnemy(guardians.byId("gorthan"),1),room={monster:g,players:new Map(),status:"battle"};
+ g.hp=Math.floor(g.maxHp/2);g.phase=2;
+ const def=g.def,atk=g.atk,log=[];
+ assert.equal(guardians.onPhase(room,(_room,line)=>log.push(line)),true);
+ assert.ok(g.def<def);assert.ok(g.atk>atk);
+ assert.equal(guardians.onPhase(room),false);assert.equal(log.length,1);
+});
+test("Selunara phase 2 applies a Moonlit Curse and recurring MP drain",()=>{
+ const m=guardians.createEnemy(guardians.byId("selunara"),1),p={name:"Mage",hp:100,maxHp:100,mp:100,maxMp:100};
+ const room={monster:m,players:new Map([["mage",p]]),status:"battle"};
+ m.phase=2;const before=p.mp;
+ assert.equal(guardians.onPhase(room),true);
+ assert.equal(p.mp,before-12);
+ assert.equal(guardians.onAttack(room),false);
+ assert.equal(guardians.onAttack(room),false);
+ assert.equal(guardians.onAttack(room),true);
+ assert.equal(p.mp,before-20);
+});
