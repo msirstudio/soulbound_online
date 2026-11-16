@@ -2,6 +2,15 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.67",date:"2026-11-16",title:"GM Foundation — Verified Owner Party Gifts",notes:[
+  "Added a server-authorized, owner-only Game Master panel for verified Supabase accounts.",
+  "The GM may grant Gold (1–100,000), Race Points (1–20), or one registered weapon/chest armor at a time to an online verified member in the same party.",
+  "The server re-verifies the GM access token and its active Secure Save claim on every request. GM is disabled without secure saves or SOULBOUND_GM_OWNER_ID configured on Render.",
+  "Rewards apply only outside battles. Equipment gifts obey class and armor-weight restrictions and the recipient 40-slot inventory cap.",
+  "Unique gift receipts are stored with secure saves to prevent duplicate requests. Successful actions are recorded in Render logs.",
+  "Existing character slots and multiplayer combat stay unchanged. Guest and legacy saves cannot use GM grants.",
+  "Set SOULBOUND_GM_OWNER_ID to the sole GM Supabase Auth user UUID and restart Render. Test with two verified accounts."
+ ]},
  {version:"0.66",date:"2026-11-16",title:"Armor & Equipment — Heavy / Medium / Light",notes:[
   "Added three armor identities across all six classes: Heavy (Swordsman and Tank), Medium (Archer and Assassin), and Light (Mage and Priest).",
   "The Armor Shop now offers 18 chest armors total including six existing items and twelve new armors, with different DEF, HP and MP profiles.",
