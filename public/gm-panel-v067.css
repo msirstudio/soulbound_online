@@ -1,0 +1,19 @@
+/* v0.67 GM panel: only displayed after a verified owner-only response. */
+#v067GMOpen[hidden],#v067GMModal[hidden],#v067GMItemWrap[hidden],#v067GMAmountWrap[hidden]{display:none!important}
+#v067GMOpen{padding:7px 12px;border:1px solid #bfa16e;border-radius:4px;background:#332435;color:#ffdfa3;font:700 11px Cinzel,Georgia,serif;cursor:pointer;white-space:nowrap}
+#v067GMOpen:hover,#v067GMOpen:focus-visible{outline:1px solid #ffe6bc;background:#55384d}
+.v067-gm-overlay{position:fixed;inset:0;display:grid;place-items:center;z-index:100000;background:rgba(7,7,11,.83);padding:16px;overflow:auto}
+.v067-gm-window{box-sizing:border-box;width:min(540px,100%);max-height:calc(100dvh - 32px);overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:24px;border:2px solid #b59261;background:linear-gradient(130deg,#29232c,#121319);color:#f8e4b8;box-shadow:0 20px 80px #000}
+.v067-gm-window header{display:flex;align-items:center;justify-content:space-between;gap:12px;color:#f3d39d;font:700 17px Cinzel,Georgia,serif}
+.v067-gm-window header button,.v067-gm-actions button{color:#f4deb1;border:1px solid #987647;border-radius:3px;background:#3a2d30;padding:8px 12px;cursor:pointer;font:700 12px Cinzel,Georgia,serif}
+.v067-gm-window header button:hover,.v067-gm-actions button:hover{background:#584147}
+.v067-gm-window label{color:#dbb981;font:700 11px Cinzel,Georgia,serif;letter-spacing:1px}
+.v067-gm-window input,.v067-gm-window select{box-sizing:border-box;width:100%;min-height:42px;padding:8px 10px;border:1px solid #b38d58;border-radius:3px;background:#1b1a23;color:#fbe4b8;font:13px Georgia,serif}
+.v067-gm-window small,.v067-gm-sub{color:#baa88e;font:12px/1.5 Georgia,serif;margin:0}
+#v067GMItemWrap,#v067GMAmountWrap{display:flex;flex-direction:column;gap:6px}
+.v067-gm-status{min-height:32px;padding:9px;border:1px solid #675a4a;background:#28252c;color:#e2ceab;font:12px/1.5 Georgia,serif}
+.v067-gm-status.error{color:#ffb9b9;border-color:#aa6969}
+.v067-gm-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:7px}
+#v067GMGive{background:#684f27;color:#ffe2aa}
+#v067GMGive:disabled{opacity:.45;cursor:default}
+@media(max-width:590px){.v067-gm-window{padding:15px}.v067-gm-window header{font-size:14px}.v067-gm-actions button{flex:1}}
