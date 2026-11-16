@@ -31,7 +31,7 @@ function harness({ownerConfigured=true}={}){
   name==="http"?{createServer:()=>({listen(){}})}:
   name==="socket.io"?{Server}:
   name==="path"?path:
-  String(name).endsWith("/persistence/secure-saves-v057.js")?fakeSecure:require(name);
+  String(name).endsWith("/persistence/secure-saves-v057.js")?fakeSecure:(String(name).startsWith("./")?require(path.join(root,name)):require(name));
  const runtime=new Function("require","process","console","__dirname","setTimeout",source+";return {rooms,verifiedCharacters,gmConfig};")(
   requireMock,{env:{SOULBOUND_GM_OWNER_ID:ownerConfigured?OWNER:""}},{log(){},error(){},info:(...args)=>audit.push(args)},root,()=>0);
  const user=id=>{
