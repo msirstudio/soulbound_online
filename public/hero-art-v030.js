@@ -6,13 +6,13 @@
  "use strict";
  const E=s=>String(s??"").replace(/[<>&"']/g,c=>({"<":"&lt;",">":"&gt;","&":"&amp;",'"':"&quot;","'":"&#39;"}[c]));
  function art(p={}){
-  const cls=["mage","tank","archer"].includes(p.classId)?p.classId:"swordsman";
+  const cls=["mage","tank","archer","assassin","priest"].includes(p.classId)?p.classId:"swordsman";
   const gender=p.gender==="female"?"female":"male";
   const armor=String(p.armor||"").toLowerCase(),weapon=String(p.weapon||"").toLowerCase();
-  let main=cls==="archer"?"#426e49":cls==="mage"?"#5145a2":cls==="tank"?"#5a748e":"#a23746";
-  let shadow=cls==="archer"?"#263c32":cls==="mage"?"#302c65":cls==="tank"?"#354354":"#622d38";
-  let accent=cls==="archer"?"#b7e58f":cls==="mage"?"#71b8f8":cls==="tank"?"#f4cf84":"#ffcb76";
-  let cloak=cls==="archer"?"#2c523b":cls==="mage"?"#2d2658":cls==="tank"?"#35445d":"#8f2d3b";
+  let main=cls==="assassin"?"#493c5c":cls==="priest"?"#b5a47d":cls==="archer"?"#426e49":cls==="mage"?"#5145a2":cls==="tank"?"#5a748e":"#a23746";
+  let shadow=cls==="assassin"?"#272039":cls==="priest"?"#574936":cls==="archer"?"#263c32":cls==="mage"?"#302c65":cls==="tank"?"#354354":"#622d38";
+  let accent=cls==="assassin"?"#d1a0ff":cls==="priest"?"#fff5bd":cls==="archer"?"#b7e58f":cls==="mage"?"#71b8f8":cls==="tank"?"#f4cf84":"#ffcb76";
+  let cloak=cls==="assassin"?"#211d38":cls==="priest"?"#87775a":cls==="archer"?"#2c523b":cls==="mage"?"#2d2658":cls==="tank"?"#35445d":"#8f2d3b";
   if(/dragon/.test(armor)){main="#9e3838";shadow="#591f31";accent="#f4b463";cloak="#51213b"}
   else if(/void/.test(armor)){main="#44346e";shadow="#1d173b";accent="#ad75ef";cloak="#1c1643"}
   else if(/guardian|steel|iron|plate/.test(armor)){main="#627e9a";shadow="#394a61";accent="#eac88e";cloak="#263a56"}
@@ -30,7 +30,7 @@
    square(50,171,17,6,accent)+square(87,171,15,6,accent)+square(40,186,30,4,"#6e5b65")+square(84,186,28,4,"#6e5b65");
   const cape=`<path d="M53 82Q34 85 28 103L20 177L46 169L59 143Z" fill="${cloak}" stroke="${outline}" stroke-width="5"/>
   <path d="M44 93L32 164L48 154" fill="none" stroke="${accent}" stroke-width="4" opacity=".65"/>`;
-  const skirt=cls==="mage"?`<path d="M43 126L35 167L113 168L103 125Z" fill="${main}" stroke="${outline}" stroke-width="4"/>${square(47,145,53,6,accent)}${square(69,135,7,31,shadow)}`:"";
+  const skirt=cls==="mage"||cls==="priest"?`<path d="M43 126L35 167L113 168L103 125Z" fill="${main}" stroke="${outline}" stroke-width="4"/>${square(47,145,53,6,accent)}${square(69,135,7,31,shadow)}`:"";
   const torso=`<path d="M51 80L92 80L111 143L41 143Z" fill="${main}" stroke="${outline}" stroke-width="6"/>
    <path d="M63 83H83L87 132L56 132Z" fill="${shadow}" stroke="${accent}" stroke-width="3"/>
    <path d="M56 92L78 114L95 90" fill="none" stroke="${accent}" stroke-width="5"/>
@@ -65,7 +65,14 @@
     <path d="M140 90L130 84L130 96Z" fill="${bowTint}" stroke="${outline}" stroke-width="2"/>
     <path d="M102 88L95 84L95 96Z" fill="#f5e5c3"/>
    </g>`;
-  }else if(/staff|wand/.test(weapon)||cls==="mage"){
+  }else if(cls==="assassin"){
+   weaponArt=`<g stroke="${outline}" stroke-width="4">
+    <path d="M99 123L130 165L123 175L90 135Z" fill="#b8b7d0"/>
+    <path d="M118 172L135 180" stroke="${accent}" stroke-width="8"/>
+    <path d="M31 119L9 164L17 171L46 134Z" fill="#b8b7d0"/>
+    <path d="M8 172L26 178" stroke="${accent}" stroke-width="8"/>
+   </g>`;
+  }else if(/staff|wand|scepter|crook|rod/.test(weapon)||cls==="mage"||cls==="priest"){
    weaponArt=`<g transform="translate(10,-7)"><path d="M112 72L131 187" stroke="${outline}" stroke-width="13"/><path d="M112 72L131 187" stroke="#90643d" stroke-width="7"/>
    <path d="M113 27L134 40L135 66L115 77L98 63L97 44Z" fill="#55badf" stroke="#d7f3ff" stroke-width="5"/>
    <path d="M112 34L126 48L115 63L103 47Z" fill="#c8fbff"/>${square(121,80,13,7,accent)}${square(124,133,13,5,accent)}</g>`;
@@ -90,7 +97,7 @@
    </svg>`;
   return "data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
  }
- const initial={swordsman:{weapon:"Training Sword",armor:"Traveler Armor"},mage:{weapon:"Apprentice Staff",armor:"Novice Robe"},tank:{weapon:"Guardian Mace",armor:"Guardian Armor"},archer:{weapon:"Oak Shortbow",armor:"Ranger Leathers"}};
+ const initial={swordsman:{weapon:"Training Sword",armor:"Traveler Armor"},mage:{weapon:"Apprentice Staff",armor:"Novice Robe"},tank:{weapon:"Guardian Mace",armor:"Guardian Armor"},archer:{weapon:"Oak Shortbow",armor:"Ranger Leathers"},assassin:{weapon:"Training Daggers",armor:"Rogue Tunic"},priest:{weapon:"Novice Scepter",armor:"Pilgrim Robe"}};
  function preview(cls="swordsman",gender="male"){return art({classId:cls,gender,...(initial[cls]||initial.swordsman)})}
  window.SoulboundHeroArt={render:art,preview};
 })();
