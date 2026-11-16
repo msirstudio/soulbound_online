@@ -16,7 +16,7 @@ test("Strict mode verifies JWT via Auth, never through a client-supplied user id
  const urls=[],api=testBackend(async(url,opts)=>{
   urls.push({url,auth:opts.headers.Authorization,key:opts.headers.apikey});
   if(url.endsWith("/auth/v1/user"))return result(200,{id:uid});
-  return result(200,[{slot:1,revision:4,data:{class_id:"swordsman",attack:214,level:27}}]);
+  return result(200,[{slot:1,revision:4,data:{season_id:require("../public/season-v065").ID,class_id:"swordsman",attack:214,level:27}}]);
  });
  assert.equal(api.enabled,true);
  const saved=await api.load("valid-jwt-token-".padEnd(45,"x"),1);
@@ -66,8 +66,8 @@ test("Server-created fresh characters do not accept client-supplied statistics",
 });
 test("Display version uses two parts while package remains valid npm semver",()=>{
  const packageJson=JSON.parse(read("package.json"));
- assert.equal(packageJson.version,"0.64.0");
+ assert.equal(packageJson.version,"0.65.0");
  assert.ok(server.includes('.version.replace(/\\.0$/,"")'));
- assert.ok(read("public/index.html").includes("<small>v0.64</small>"));
+ assert.ok(read("public/index.html").includes("<small>v0.65</small>"));
  assert.ok(read("public/version-v0564.js").includes('version=version.replace(/\\.0$/,"")'));
 });

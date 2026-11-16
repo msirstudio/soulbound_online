@@ -93,3 +93,42 @@ body.v064-modal-open{overflow:hidden}
 #lobby.v064-setup-mode>#v064CharacterScene{display:none!important}
 #lobby.v064-setup-mode>.v041-lobby-grid{display:grid!important}
 #lobby.v064-setup-mode .v30-gender{display:none!important}
+
+/* Portrait / scene UI hotfix: never render global button shadows over guild art. */
+#v064SceneStage .v064-hotspot,
+#v064SceneStage .v064-hotspot:hover,
+#v064SceneStage .v064-hotspot:focus-visible,
+#v064SceneStage .v064-hotspot:active{
+  box-shadow:none!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  transform:none!important;
+  min-height:0;
+}
+/* Portrait sheet crops are almost square (152x142). A near-square viewport
+   keeps the forehead, eyes and chin inside the seven roster cards. */
+#v064Roster .v064-roster-image{
+  height:clamp(88px,12vh,116px);
+  aspect-ratio:auto;
+}
+#v064Roster .v064-roster-image img{
+  object-fit:cover;
+  object-position:center 22%;
+}
+/* Reserve extra vertical room for the taller roster on ordinary desktop screens. */
+#lobby.v064-scene-mode .v064-stage{
+  max-height:calc(100dvh - 300px);
+  width:min(100%,calc((100dvh - 300px) * 1672 / 941));
+}
+@media (max-width:700px){
+  #v064Roster .v064-roster-image{height:clamp(67px,10vh,90px)}
+  #lobby.v064-scene-mode .v064-stage{max-height:calc(100dvh - 260px);width:100%}
+}
+@media (max-height:640px) and (min-width:701px){
+  #v064Roster .v064-roster-image{height:clamp(54px,10vh,75px)}
+  #lobby.v064-scene-mode .v064-stage{
+    max-height:calc(100dvh - 202px);
+    width:min(100%,calc((100dvh - 202px) * 1672 / 941));
+  }
+}

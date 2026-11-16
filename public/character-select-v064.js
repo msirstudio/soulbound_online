@@ -130,8 +130,12 @@ function confirmChoice(){
  if(!h||!cls)return;
  selectedId=h.id;
  document.dispatchEvent(new CustomEvent("soulbound:v064-hero-selected",{detail:{characterId:h.id,gender:h.gender,name:h.name,classId:cls.id}}));
- closeModal();showSetup();
- $("v064BackToGuild").focus();
+ closeModal();
+ if(window.SoulboundV065?.onConfirmed){
+  window.SoulboundV065.onConfirmed({characterId:h.id,gender:h.gender,name:h.name,classId:cls.id});
+ }else{
+  showSetup();$("v064BackToGuild").focus();
+ }
 }
 $("v064ModalConfirm").addEventListener("click",confirmChoice);
 $("v064ModalClose").addEventListener("click",closeModal);

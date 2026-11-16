@@ -24,8 +24,8 @@ test("no duplicate hotspots, seven face/body assets and no hard-coded gameplay c
  const html=read("public/index.html");
  assert.ok(html.includes("character-select-v064.css?v=0.64"));
  assert.ok(html.includes("characters-v064.js?v=0.64"));
- assert.ok(html.includes("character-select-v064.js?v=0.64"));
- assert.ok(html.indexOf("characters-v064.js")<html.indexOf("game.js?v=0.64"));
+ assert.ok(html.includes("character-select-v064.js?v=0.65"));
+ assert.ok(html.indexOf("characters-v064.js")<html.indexOf("game.js?v=0.65"));
 });
 test("secure game saves preserve identity independently from class in JSON without SQL migration",()=>{
  const a=saves.starter("priest","My Hero","noct");
@@ -56,6 +56,6 @@ test("scene remains full uncropped and accessible, game remains on existing rout
  assert.ok(js.includes("assets/character-select/"));
  assert.ok(css.includes("aspect-ratio:1672/941"));assert.ok(css.includes("object-fit:fill"));
  assert.ok(css.includes("v064-scene-mode[hidden]{display:none!important}"));
- assert.ok(ui.includes("SoulboundCharacterSelectV064?.open()"));
+ assert.ok(ui.includes("SoulboundV065?.showSlots()"));
  assert.ok(!js.includes("game.html"));assert.ok(!js.includes("window.location.href"));
 });

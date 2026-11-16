@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.64.0",
+  "version": "0.65.0",
   "private": true,
-  "description": "SOULBOUND 0.64 — seven independent hero identities and interactive guild character select",
+  "description": "SOULBOUND 0.65 — slot-first seven-hero relaunch",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

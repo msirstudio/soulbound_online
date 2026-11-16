@@ -6,6 +6,7 @@
  * Legacy mode is explicitly reported as insecure until these are configured.
  */
 const {randomUUID}=require("node:crypto");
+const season=require("../public/season-v065.js");
 const url=String(process.env.SUPABASE_URL||"").replace(/\/+$/,"");
 const publicKey=String(process.env.SUPABASE_PUBLISHABLE_KEY||"");
 const secret=String(process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY||"");
@@ -38,14 +39,14 @@ async function authenticate(token){
 }
 const rows=async userId=>request("/rest/v1/hero_secure_saves?user_id=eq."+encodeURIComponent(userId)+"&select=slot,revision,data&order=slot.asc");
 async function list(token){const id=await authenticate(token);return{userId:id,slots:await rows(id)}}
-async function load(token,slot){slot=slotId(slot);if(!slot)fail("Invalid slot",400);const {userId,slots}=await list(token);const row=slots.find(x=>x.slot===slot);if(!row?.data?.class_id)fail("Slot is empty; create a hero first",404);return{userId,slot,revision:Number(row.revision),data:row.data}}
+async function load(token,slot){slot=slotId(slot);if(!slot)fail("Invalid slot",400);const {userId,slots}=await list(token);const row=slots.find(x=>x.slot===slot);if(!row?.data?.class_id||!season.isCurrent(row.data))fail("Slot is empty in the new season; create a hero first",404);return{userId,slot,revision:Number(row.revision),data:row.data}}
 function starter(cls,name,characterId=null){
  const identity=require("../public/characters-v064.js").byId(characterId);
  const mage=cls==="mage",tank=cls==="tank",bow=cls==="archer",archer=require("../classes/archer-v062").STARTER;
  const extra=cls==="assassin"?require("../classes/assassin-v063").STARTER:cls==="priest"?require("../classes/priest-v063").STARTER:null;
  if(!["swordsman","mage","tank","archer","assassin","priest"].includes(cls))fail("Invalid class",400);
  const username=String(name||"Adventurer").trim().replace(/[<>]/g,"").slice(0,16)||"Adventurer";
- return{username,character_id:identity?.id||null,gender:identity?.gender||null,class_id:cls,class_path:null,level:1,xp:0,gold:80,
+ return{username,season_id:season.ID,character_id:identity?.id||null,gender:identity?.gender||null,class_id:cls,class_path:null,level:1,xp:0,gold:80,
   hp:extra?extra.hp:bow?archer.hp:tank?180:mage?120:130,max_hp:extra?extra.hp:bow?archer.hp:tank?180:mage?120:130,
   mp:extra?extra.mp:bow?archer.mp:tank?55:mage?65:40,max_mp:extra?extra.mp:bow?archer.mp:tank?55:mage?65:40,
   attack:extra?extra.atk:bow?archer.atk:tank?16:mage?25:22,defense:extra?extra.def:bow?archer.def:tank?16:mage?8:10,
@@ -92,7 +93,7 @@ async function remove(token,slot,expectedRevision){
  return{deleted:true,slot};
 }
 const profileFromPlayer=p=>({
- username:p.name,character_id:require("../public/characters-v064.js").normalize(p.characterId),gender:p.gender,class_id:p.classId,class_path:p.classPath||null,
+ username:p.name,season_id:season.ID,character_id:require("../public/characters-v064.js").normalize(p.characterId),gender:p.gender,class_id:p.classId,class_path:p.classPath||null,
  level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,
  attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,
  small_health:p.smallHealth,medium_health:p.mediumHealth,large_health:p.largeHealth,
