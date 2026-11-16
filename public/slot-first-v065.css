@@ -1,0 +1,50 @@
+/* SOULBOUND 0.65 · Three Slots before Guild. Existing lobby grid stays hidden. */
+#v065SlotScreen[hidden],#v064CharacterScene[hidden],#v064ReturnStrip[hidden]{display:none!important}
+#lobby.v065-slots-mode{display:flex!important;flex-direction:column;min-height:0;max-height:calc(100dvh - 64px);background:radial-gradient(ellipse at 50% 50%,#39302d,#12121a 76%);overflow:hidden}
+#lobby.v065-slots-mode[hidden]{display:none!important}
+#lobby.v065-slots-mode>.v041-view-bar{flex:0 0 auto}
+#lobby.v065-slots-mode>.v041-lobby-header,#lobby.v065-slots-mode>.v041-lobby-grid{display:none!important}
+#lobby.v065-slots-mode>#v065SlotScreen{display:flex!important}
+#lobby.v064-scene-mode>.v041-lobby-header{display:none!important}
+#lobby.v064-scene-mode>.v041-lobby-grid{display:none!important}
+.v065-slot-screen{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:clamp(8px,2dvh,20px);padding:clamp(8px,3vh,28px) clamp(12px,3vw,44px);color:#f5e5c4}
+.v065-slot-title{text-align:center;flex:0 0 auto}
+.v065-eyebrow{font:10px Cinzel,serif;letter-spacing:3px;color:#b9a079}
+.v065-slot-title h2{font:700 clamp(23px,3.4vw,40px) Cinzel,serif;letter-spacing:2px;color:#ffe2a5;margin:4px 0 8px}
+.v065-slot-title p{font-size:clamp(12px,1.25vw,15px);color:#b9a999;line-height:1.4;margin:0}
+.v065-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:min(100%,1090px);gap:clamp(8px,1.4vw,22px);flex:0 0 auto}
+.v065-slot-card{min-width:0;min-height:clamp(174px,28vh,260px);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;padding:clamp(12px,2vw,24px);cursor:pointer;background:linear-gradient(150deg,#3b2e32,#171621);border:2px solid #987346;border-radius:5px;color:#f1dcb1;box-shadow:0 0 0 2px #171218,inset 0 0 0 1px #e2be8240;transition:transform .15s ease,box-shadow .15s ease,border-color .15s}
+.v065-slot-card:hover,.v065-slot-card:focus-visible{border-color:#fbe2ac;transform:translateY(-3px);box-shadow:0 0 18px #d0a05875,inset 0 0 0 1px #ffe6b650}
+.v065-slot-card:disabled{cursor:wait;opacity:.65;transform:none}
+.v065-slot-card .v065-number{font:700 14px Cinzel,serif;letter-spacing:2px;color:#c8a26c}
+.v065-slot-icon{display:grid;place-items:center;width:58px;height:58px;border:2px solid #a88758;border-radius:50%;font:38px Cinzel,serif;color:#edcca0;background:#271d22}
+.v065-slot-card.empty .v065-slot-icon{border-style:dashed}
+.v065-slot-information{text-align:center;display:flex;align-items:center;flex-direction:column;gap:5px;min-width:0}
+.v065-slot-information strong{font:700 clamp(17px,1.8vw,25px) Cinzel,serif;word-break:break-word}
+.v065-slot-information small{font:11px Cinzel,serif;color:#c9b5a2}
+.v065-slot-action{margin-top:auto;font:700 12px Cinzel,serif;color:#ffe1a6;border-top:1px solid #8c663d;padding-top:10px;letter-spacing:.7px}
+.v065-slot-bottom{width:min(100%,760px);display:flex;flex-direction:column;align-items:center;gap:7px;min-width:0}
+.v065-slot-bottom label{font:11px Cinzel,serif;color:#bf9a73;letter-spacing:1px}
+.v065-join-field{display:flex;align-items:center;gap:10px;width:100%}
+#v065RoomCode{width:100%;background:#16151e;border:1px solid #91714e;color:#fff2d5;font:13px Cinzel,serif;padding:11px 14px;text-align:center;border-radius:3px;letter-spacing:1px}
+.v065-join-field span{white-space:nowrap;color:#b6a595;font:10px Cinzel,serif}
+.v065-status{color:#c4af8b;text-align:center;font:12px Cinzel,serif;min-height:20px}
+.v065-status.error{color:#ff9b9b}
+@media(max-width:660px){
+ #lobby.v065-slots-mode{max-height:none;overflow:auto}
+ .v065-slots{grid-template-columns:1fr;gap:7px}
+ .v065-slot-card{min-height:80px;display:grid;grid-template-columns:65px 1fr auto;grid-template-rows:1fr 1fr;padding:12px;gap:3px 8px;text-align:left}
+ .v065-slot-card .v065-number{grid-column:1;grid-row:1;text-align:center;font-size:11px}
+ .v065-slot-icon{grid-column:1;grid-row:2;width:35px;height:35px;font-size:22px;justify-self:center}
+ .v065-slot-information{grid-column:2;grid-row:1/3;align-items:flex-start;text-align:left}
+ .v065-slot-action{grid-column:3;grid-row:1/3;border:0;padding:0;margin:auto 0;font-size:10px}
+ .v065-join-field span{display:none}
+}
+@media(max-height:580px) and (min-width:661px){
+ .v065-slot-screen{gap:6px;padding:6px}
+ .v065-slot-card{min-height:130px;padding:8px;gap:4px}
+ .v065-slot-icon{width:40px;height:40px;font-size:25px}
+ .v065-slot-title h2{font-size:19px;margin:0}
+ .v065-slot-title p,.v065-eyebrow{display:none}
+}
+@media(prefers-reduced-motion:reduce){.v065-slot-card{transition:none}}
