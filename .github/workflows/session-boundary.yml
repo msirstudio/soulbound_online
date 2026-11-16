@@ -3,7 +3,7 @@ on:
   pull_request:
     branches: [v0.62-foundation-single-source, audit/session-boundary-hardening]
   push:
-    branches: [audit/session-boundary-hardening, fix/party-leadership-readiness]
+    branches: [audit/session-boundary-hardening, fix/party-leadership-readiness, v0.63-multiplayer-fixes]
 permissions:
   contents: read
 jobs:

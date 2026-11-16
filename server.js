@@ -375,4 +375,4 @@ combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status
  });
 
 });
-server.listen(PORT,()=>console.log("SOULBOUND Online v0.40.0 running on "+PORT));
+server.listen(PORT,()=>console.log("SOULBOUND Online v"+APP_VERSION+" running on "+PORT));
