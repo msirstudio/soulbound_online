@@ -34,12 +34,20 @@ function render(){
   const n=i+1,exists=!!item?.exists;
   const title=exists?escapeHtml(item.name||"Adventurer"):"EMPTY SLOT";
   const detail=exists?escapeHtml(String(item.className||"UNKNOWN").toUpperCase())+" · LV "+Number(item.level||1):"Create a new level 1 adventurer";
-  return '<button type="button" class="v065-slot-card '+(exists?"occupied":"empty")+'" data-v065-slot="'+n+'">'+
+  const disabled=busy?' disabled':'';
+  return '<div class="v065-slot-entry '+(exists?"occupied":"empty")+'">'+
+   '<button type="button" class="v065-slot-card '+(exists?"occupied":"empty")+'" data-v065-slot="'+n+'"'+disabled+'>'+
    '<span class="v065-number">SLOT '+n+'</span><span class="v065-slot-icon">'+(exists?"⚔":"＋")+'</span>'+
    '<span class="v065-slot-information"><strong>'+title+'</strong><small>'+detail+'</small></span>'+
-   '<span class="v065-slot-action">'+(exists?"CONTINUE →":"CREATE HERO →")+'</span></button>';
+   '<span class="v065-slot-action">'+(exists?"CONTINUE →":"CREATE HERO →")+'</span></button>'+
+   (exists?'<button type="button" class="v065-slot-delete" data-v065-delete="'+n+'" aria-label="Delete Slot '+n+' save" title="Permanently delete only Slot '+n+'"'+disabled+'>🗑 DELETE</button>':'')+
+   '</div>';
  }).join("");
  screen.querySelectorAll("[data-v065-slot]").forEach(b=>b.addEventListener("click",()=>chooseSlot(Number(b.dataset.v065Slot))));
+ screen.querySelectorAll("[data-v065-delete]").forEach(b=>b.addEventListener("click",event=>{
+  event.stopPropagation();
+  deleteSlot(Number(b.dataset.v065Delete));
+ }));
 }
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function getRoomCode(){return $("v065RoomCode").value.trim().toUpperCase().replace(/[^A-Z0-9]/g,"").slice(0,5)}
@@ -71,6 +79,19 @@ async function chooseSlot(n){
  }catch(e){setStatus(e.message||"Could not open slot.",true);showSlots()}
  finally{loading(false)}
 }
-const api={setSlots,showSlots,showGuild,getRoomCode,setStatus,loading,getChosenSlot:()=>chosenSlot,onSlotSelected:null,onConfirmed:null};
+async function deleteSlot(n){
+ if(busy||!slotData?.[n-1]?.exists||n<1||n>3)return;
+ const api=window.SoulboundV065;
+ if(!api?.onSlotDelete){setStatus("Save deletion is not available yet.",true);return}
+ loading(true,"Checking deletion for Slot "+n+"…");
+ try{
+  const result=await api.onSlotDelete(n);
+  if(result?.ok){if(chosenSlot===n)chosenSlot=null;setStatus("Slot "+n+" deleted. Select the empty slot to create a new hero.")}
+  else if(result?.cancelled)setStatus("Deletion cancelled. Slot "+n+" is unchanged.");
+  else setStatus(result?.error||"Slot "+n+" could not be deleted. Your save is unchanged.",true);
+ }catch(e){setStatus(e?.message||"Could not delete Slot "+n+".",true)}
+ finally{loading(false);render()}
+}
+const api={setSlots,showSlots,showGuild,getRoomCode,setStatus,loading,getChosenSlot:()=>chosenSlot,onSlotSelected:null,onSlotDelete:null,onConfirmed:null};
 window.SoulboundV065=api;
 })();
