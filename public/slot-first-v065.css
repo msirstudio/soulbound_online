@@ -13,6 +13,11 @@
 .v065-slot-title h2{font:700 clamp(23px,3.4vw,40px) Cinzel,serif;letter-spacing:2px;color:#ffe2a5;margin:4px 0 8px}
 .v065-slot-title p{font-size:clamp(12px,1.25vw,15px);color:#b9a999;line-height:1.4;margin:0}
 .v065-slots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));width:min(100%,1090px);gap:clamp(8px,1.4vw,22px);flex:0 0 auto}
+.v065-slot-entry{position:relative;display:flex;min-width:0;min-height:0}
+.v065-slot-entry>.v065-slot-card{width:100%;height:100%}
+.v065-slot-delete{position:absolute;z-index:2;top:10px;right:10px;display:inline-flex;align-items:center;justify-content:center;gap:4px;min-height:30px;padding:5px 9px;border:1px solid #a66560;border-radius:4px;background:#291d24f2;color:#f6c3b9;font:700 10px Cinzel,Georgia,serif;letter-spacing:.5px;white-space:nowrap;cursor:pointer;box-shadow:0 1px 4px #0007}
+.v065-slot-delete:hover,.v065-slot-delete:focus-visible{border-color:#ffc1ac;background:#5a282d;color:#fff3e4;outline:2px solid #ffc1ac55;outline-offset:1px}
+.v065-slot-delete:disabled{cursor:wait;opacity:.55}
 .v065-slot-card{min-width:0;min-height:clamp(174px,28vh,260px);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:12px;padding:clamp(12px,2vw,24px);cursor:pointer;background:linear-gradient(150deg,#3b2e32,#171621);border:2px solid #987346;border-radius:5px;color:#f1dcb1;box-shadow:0 0 0 2px #171218,inset 0 0 0 1px #e2be8240;transition:transform .15s ease,box-shadow .15s ease,border-color .15s}
 .v065-slot-card:hover,.v065-slot-card:focus-visible{border-color:#fbe2ac;transform:translateY(-3px);box-shadow:0 0 18px #d0a05875,inset 0 0 0 1px #ffe6b650}
 .v065-slot-card:disabled{cursor:wait;opacity:.65;transform:none}
@@ -33,6 +38,10 @@
 @media(max-width:660px){
  #lobby.v065-slots-mode{max-height:none;overflow:auto}
  .v065-slots{grid-template-columns:1fr;gap:7px}
+ .v065-slot-entry{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:stretch;column-gap:7px}
+ .v065-slot-entry.occupied>.v065-slot-card{grid-column:1}
+ .v065-slot-entry.empty>.v065-slot-card{grid-column:1/-1}
+ .v065-slot-delete{position:static;grid-column:2;align-self:stretch;min-width:66px;max-width:74px;min-height:80px;padding:6px 4px;font-size:10px;flex-direction:column;white-space:normal;text-align:center}
  .v065-slot-card{min-height:80px;display:grid;grid-template-columns:65px 1fr auto;grid-template-rows:1fr 1fr;padding:12px;gap:3px 8px;text-align:left}
  .v065-slot-card .v065-number{grid-column:1;grid-row:1;text-align:center;font-size:11px}
  .v065-slot-icon{grid-column:1;grid-row:2;width:35px;height:35px;font-size:22px;justify-self:center}
