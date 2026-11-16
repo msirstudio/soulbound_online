@@ -6,7 +6,7 @@ function audit(){
  const pkg=JSON.parse(read("package.json")),html=read("public/index.html"),server=read("server.js"),game=read("public/game.js");
  const items=catalog.WEAPONS,ids=new Set(items.map(x=>x.id));
  const checks={
-  version:pkg.version==="0.66.0"&&html.includes("<small>v0.66</small>")&&html.includes("VERSION 0.66 · ARMOR SYSTEM"),
+  version:pkg.version==="0.67.0"&&html.includes("<small>v0.67</small>")&&html.includes("VERSION 0.67 · GM FOUNDATION"),
   fifteenRealPassives:items.length===15&&ids.size===15&&items.every(w=>effects.spec[w.id]?.element===w.element&&w.passive?.chance>0),
   originalIdPreservation:items.every(w=>w.slot==="weapon"&&w.requiredBoss&&w.price>0&&w.level>0),
   serverAuthoritative:server.includes("weaponPassives.applyPassive(")&&server.includes("weaponPassives.attackElement("),
