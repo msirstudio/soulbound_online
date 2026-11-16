@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.66.0",
+  "version": "0.67.0",
   "private": true,
-  "description": "SOULBOUND 0.66 — heavy, medium and light armor for six classes",
+  "description": "SOULBOUND v0.67 — secure owner GM panel and verified party gifts",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
