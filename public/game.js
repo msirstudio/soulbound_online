@@ -172,9 +172,13 @@ function v564SnapshotData(slot,data){
  return v57Mode&&!guestMode?{...data}:{...data,world_progress:v40MergeWorld(data?.world_progress,localWorld)};
 }
 async function v561Delete(n){
- if(v561SlotBusy||n<1||n>3||!v561Slots[n-1]?.class_id)return;
- if(!confirm("Delete SLOT "+n+" permanently? Its character, gear, gold and boss progress will be lost. Other slots are not affected."))return;
- if(!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),n,v564SnapshotData(n,v561Slots[n-1]),"before-delete"))return notice("Backup failed. Slot NOT deleted. Free browser storage, then try again.",true);
+ if(v561SlotBusy||n<1||n>3||!v561Slots[n-1]?.class_id)return{ok:false,error:"This slot is empty or busy."};
+ const heroName=String(v561Slots[n-1].username||"Adventurer").slice(0,40);
+ if(!confirm("DELETE SLOT "+n+" — "+heroName+"?\\n\\nLevel, gear, gold and boss progress in THIS SLOT will be deleted permanently. Other slots are safe.\\n\\nA local backup will be created first."))return{ok:false,cancelled:true};
+ if(!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),n,v564SnapshotData(n,v561Slots[n-1]),"before-delete")){
+  notice("Backup failed. Slot NOT deleted. Free browser storage, then try again.",true);
+  return{ok:false,error:"Backup failed; Slot "+n+" was NOT deleted."};
+ }
  v561SlotBusy=true;
  try{
   if(v57Mode&&!guestMode){
@@ -189,8 +193,13 @@ async function v561Delete(n){
   if(n===1){localStorage.removeItem(v40WorldKeyFor(1));localStorage.removeItem(v065LegacyMarker());if(guestMode)localStorage.removeItem("soulbound_guest_save_v1")}
   else{localStorage.removeItem(v561Key(n));localStorage.removeItem(v40WorldKeyFor(n))}
   v561Slots[n-1]=null;localStorage.removeItem(v064Key(n));
- }catch(e){notice("Cannot delete Slot "+n+": "+e.message,true)}
- finally{v561SlotBusy=false;v561Select(n)}
+  notice("Slot "+n+" deleted. Your other saves are unchanged.");
+  return{ok:true,slot:n};
+ }catch(e){
+  const message="Cannot delete Slot "+n+": "+(e?.message||"Unknown save error");
+  notice(message,true);
+  return{ok:false,error:message};
+ }finally{v561SlotBusy=false;v561Select(n)}
 }
 function authNotice(m,e=false){$("authNotice").textContent=m;$("authNotice").className=e?"notice error":"notice"}function notice(m,e=false){$("notice").textContent=m;$("notice").className=e?"notice error":"notice"}function call(ev,data={}){return new Promise(resolve=>socket.emit(ev,data,r=>resolve(r||{ok:false,error:"No response"})))}
 // 0.59: reconnect tokens are per-session secrets; never send them in public state.
@@ -356,6 +365,7 @@ async function v065EnterRoom(join){
 $("create").onclick=()=>v065EnterRoom(false);
 $("join").onclick=()=>v065EnterRoom(true);
 if(window.SoulboundV065){
+ window.SoulboundV065.onSlotDelete=n=>v561Delete(n);
  window.SoulboundV065.onSlotSelected=async(n,exists)=>{
   v561Select(n);
   if(exists){
