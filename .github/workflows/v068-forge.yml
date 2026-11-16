@@ -1,0 +1,30 @@
+name: SOULBOUND v0.68 — Ancient Forge
+on:
+  push:
+    branches: [v0.68-ancient-forge]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Syntax checks
+        run: |
+          node --check server.js
+          node --check forge/forge-v068.js
+          node --check forge/guardians-v068.js
+          node --check loot-v034.js
+          node --check public/game.js
+          node --check public/forge-ui-v068.js
+          node --check public/world-ui-v040.js
+          node --check public/gm-panel-v067.js
+          node --check tests/v068-forge.test.js
+      - name: All SOULBOUND tests
+        run: npm test
