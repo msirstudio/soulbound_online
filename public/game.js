@@ -306,7 +306,7 @@ function classInfo(){
 function v067AuthDeliveryError(error){
  const code=String(error?.code||"").toLowerCase(),message=String(error?.message||"");
  if(code==="email_address_not_authorized"||/email address not authorized/i.test(message))
-  return "Email delivery blocked by Supabase default SMTP. Configure Authentication > SMTP Settings with a custom email provider to send to non-team email addresses. (email_address_not_authorized)";
+  return "Email delivery blocked by Supabase default SMTP. Configure Custom SMTP under Supabase Authentication > SMTP Settings to send to non-team email addresses. (email_address_not_authorized)";
  if(code==="over_email_send_rate_limit"||error?.status===429||/email rate limit exceeded|too many requests/i.test(message))
   return "Supabase email sending limit reached. The default provider is limited to 2 emails per hour for the entire project. Wait before retrying or configure Custom SMTP. (email rate limit)";
  return message||"Supabase authentication request failed. Check Authentication > Logs for the error.";
