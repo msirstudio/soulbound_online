@@ -79,7 +79,7 @@ test("Secure Save starter and frontend fallback both recognize Archer; legacy sa
  assert.ok(read("data/game-catalog-v062.js").includes("...archerShop.WEAPONS"));
  assert.ok(client.includes('archer=cls==="archer"'));
  assert.ok(read("public/skill-view-v062.js").includes("player?.skillBook"));
- assert.ok(client.includes('me.classId==="archer"'));
+ assert.ok(client.includes('["archer","assassin","priest"].includes(me.classId)'));
  assert.ok(art.includes('cls==="archer"'));
  assert.ok(art.includes("Oak Shortbow"));
  assert.ok(html.includes('data-hero-class="archer"'));
