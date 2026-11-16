@@ -30,7 +30,7 @@ test("v0.46 resources load after earlier styles, all main interfaces remain wire
  const html=read("public/index.html"),p=require("../package.json"),log=read("public/update-log-v045.js");
  assert.equal(p.version,"0.68.0");
  assert.ok(html.includes('href="v046-atlas.css"'));
- assert.ok(html.includes('src="world-ui-v040.js"'));
+ assert.ok(html.includes('src="world-ui-v040.js?v=0.68"'));
  assert.ok(html.indexOf('href="v046-atlas.css"')>html.indexOf('href="v045.css"'));
  assert.ok(log.includes('version:"0.46"'));
  assert.ok(read("world-v040.js").includes('totalStages=regions.length*5'));
