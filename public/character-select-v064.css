@@ -86,3 +86,10 @@ body.v064-modal-open{overflow:hidden}
  .v064-modal-card{max-height:92dvh}
 }
 @media(prefers-reduced-motion:reduce){.v064-hotspot,.v064-roster-card{transition:none}}
+
+#lobby.v064-scene-mode[hidden]{display:none!important}
+#lobby.v064-scene-mode>.v041-lobby-header{display:none!important}
+#lobby.v064-scene-mode>.v041-lobby-grid{display:none!important}
+#lobby.v064-setup-mode>#v064CharacterScene{display:none!important}
+#lobby.v064-setup-mode>.v041-lobby-grid{display:grid!important}
+#lobby.v064-setup-mode .v30-gender{display:none!important}
