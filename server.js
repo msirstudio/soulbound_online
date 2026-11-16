@@ -16,6 +16,10 @@ if(secure.enabled)app.delete("/api/secure-saves/:slot",endpoint(async req=>{
  return secure.remove(token,req.params.slot,req.body?.revision);
 }));
 const verifiedCharacters=new Map();
+const gm=require("./gm/gm-v067");
+const gmConfig=gm.setup(process.env.SOULBOUND_GM_OWNER_ID,secure.enabled);
+const gmPending=new Set();
+if(gmConfig.enabled)console.info("[GM] Secure owner-only rewards enabled.");
 const secureQueue=secure.createQueue((error,claim)=>{console.error("[SAVE-ERROR]",{slot:claim.slot,code:error.status||500,message:error.message});if(claim.socketId)io.to(claim.socketId).emit("saveError",{message:"Cloud save failed for SLOT "+claim.slot+". "+error.message+". Stop playing and reload after verifying your save."})});
 function saveVerifiedRoom(r){
  if(!secure.enabled)return;
@@ -143,7 +147,7 @@ io.on("connection",s=>{
    if(!owned){owned={...p[key],uid:require("node:crypto").randomUUID()};p.inventory.push(owned)}
    owned.equippedSlot=slot;p[key]=owned;
   }
- }p.foodItems={roast_meat:bounded(v.food_items?.roast_meat,0,9999,0),herb_stew:bounded(v.food_items?.herb_stew,0,9999,0),mana_tart:bounded(v.food_items?.mana_tart,0,9999,0)};p.foodBuffs={atk:bounded(v.food_buffs?.atk,0,99,0),def:bounded(v.food_buffs?.def,0,99,0),skill:bounded(v.food_buffs?.skill,0,99,0)};p.worldProgress=world.normalizeProgress(v.world_progress);
+ }p.foodItems={roast_meat:bounded(v.food_items?.roast_meat,0,9999,0),herb_stew:bounded(v.food_items?.herb_stew,0,9999,0),mana_tart:bounded(v.food_items?.mana_tart,0,9999,0)};p.foodBuffs={atk:bounded(v.food_buffs?.atk,0,99,0),def:bounded(v.food_buffs?.def,0,99,0),skill:bounded(v.food_buffs?.skill,0,99,0)};p.worldProgress=world.normalizeProgress(v.world_progress);p.gmGrants=Array.isArray(v.gm_grants)?v.gm_grants.filter(x=>x&&typeof x.requestId==="string").slice(-50):[];
  // Existing owned items count as discovered even if the prior save predates v0.44.
  const seen=new Set(p.worldProgress.lootSeen);
  for(const it of p.inventory){if(it.id)seen.add(it.id+":"+(it.rarity||"shop"))}
@@ -153,6 +157,41 @@ io.on("connection",s=>{
  emit(r);cb({ok:true});
   }catch(e){if(claim)secureQueue.release(claim);cb({ok:false,error:e.status?e.message:"Unable to verify character save."})}
   finally{restoring=false}
+ });
+ // GM Foundation: both Secure Saves and server-owned identity must be enabled.
+ s.on("gmStatus",async({accessToken}={},cb=()=>{})=>{
+  const r=findRoom(s),claim=verifiedCharacters.get(s.id);
+  const allowed=!!r&&!!r.players.get(s.id)?.verified&&await gm.authorize({config:gmConfig,claim,token:accessToken,authenticate:secure.authenticate});
+  cb({ok:true,isGM:allowed});
+ });
+ s.on("gmGrant",async(input={},cb=()=>{})=>{
+  const r=findRoom(s),owner=r?.players.get(s.id),claim=verifiedCharacters.get(s.id);
+  if(!gmConfig.enabled||!owner?.verified||!await gm.authorize({config:gmConfig,claim,token:input.accessToken,authenticate:secure.authenticate}))
+   return cb({ok:false,error:"GM authorization denied."});
+  if(!gm.eligible(r))return cb({ok:false,error:"GM gifts can only be sent outside battles."});
+  const targetId=typeof input.targetId==="string"?input.targetId:"";
+  const recipient=gm.goodTarget(r,targetId,verifiedCharacters);
+  if(!recipient)return cb({ok:false,error:"Recipient must be a verified online account in your party."});
+  if(gmPending.has(targetId))return cb({ok:false,error:"A reward for that player is already processing."});
+  const target=recipient.target,recipientClaim=recipient.claim;
+  gmPending.add(targetId);
+  try{
+   // Flush existing changes; never award on a failing cloud save.
+   if(!await secureQueue.persist(recipientClaim,target))return cb({ok:false,error:"Recipient cloud save is unavailable. No reward given."});
+   if(findRoom(s)!==r||r.players.get(targetId)!==target||verifiedCharacters.get(targetId)!==recipientClaim||!gm.eligible(r))
+    return cb({ok:false,error:"Party or recipient changed; gift cancelled."});
+   const result=gm.grant(target,input,shopItems);
+   if(!result.ok)return cb({ok:false,error:result.error});
+   if(result.duplicate)return cb({ok:true,duplicate:true});
+   const saved=await secureQueue.persist(recipientClaim,target);
+   if(!saved){result.undo();return cb({ok:false,error:"Reward save failed. Changes were rolled back; check cloud saves."})}
+   say(r,"👑 GM gifted "+result.receipt.name+" ×"+result.receipt.amount+" to "+target.name+".");
+   // Receipt persists with recipient save; this audit event contains no secret or token.
+   console.info("[GM-GRANT]",JSON.stringify({recipientUserId:recipientClaim.userId,slot:recipientClaim.slot,receipt:result.receipt}));
+   emit(r);
+   cb({ok:true,receipt:result.receipt});
+  }catch(e){cb({ok:false,error:"GM gift failed. Check cloud save status."})}
+  finally{gmPending.delete(targetId)}
  });
  s.on("rollRace",(_,cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if((p.racePoints||0)<1)return cb({ok:false,error:"You need 1 Race Point."});p.racePoints--;const total=races.reduce((n,x)=>n+x.weight,0);let roll=Math.random()*total,chosen=races[0];for(const x of races){roll-=x.weight;if(roll<=0){chosen=x;break}}applyRace(p,chosen.id);p.worldProgress=world.normalizeProgress(p.worldProgress);
  p.worldProgress.raceSeen=[...new Set([...(p.worldProgress.raceSeen||[]),chosen.id])].slice(-300);
