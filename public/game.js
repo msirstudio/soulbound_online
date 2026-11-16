@@ -20,6 +20,7 @@ window.SoulboundCityShopV47={
  }
 };
 const cfg=window.SOULBOUND_SUPABASE||{};if(cfg.url&&cfg.anonKey&&!cfg.anonKey.includes("PASTE_YOUR")&&window.supabase)supabaseClient=window.supabase.createClient(cfg.url,cfg.anonKey);
+const V065_SEASON="rebirth-2026-11"; // New progression epoch. Previous game saves are not eligible.
 let v40SchemaAvailable=null;
 function v40MergeWorld(cloud,local){
  const a=cloud&&typeof cloud==="object"?cloud:{},b=local&&typeof local==="object"?local:{};
@@ -29,7 +30,7 @@ function v40MergeWorld(cloud,local){
  return{version:44,bossDefeats,defeatedBossIds:[...new Set([...(a.defeatedBossIds||[]),...(b.defeatedBossIds||[]),...Object.keys(bossDefeats).filter(id=>bossDefeats[id]>0)])],
   lootSeen:union(a.lootSeen,b.lootSeen),raceSeen:union(a.raceSeen,b.raceSeen)};
 }
-function v40WorldKeyFor(slot){return "soulbound_world_progress_v040_"+(guestMode?"guest":currentUser?.id||"unknown")+(slot===1?"":"_slot_"+slot)}
+function v40WorldKeyFor(slot){return "soulbound_world_progress_v065_"+V065_SEASON+"_"+(guestMode?"guest":currentUser?.id||"unknown")+(slot===1?"":"_slot_"+slot)}
 function v40WorldKey(){return v40WorldKeyFor(v561Slot)}
 function v40SavedWorld(){try{return JSON.parse(localStorage.getItem(v40WorldKey())||"null")}catch(e){return null}}
 function v40CacheWorld(p){if(!p)return;try{localStorage.setItem(v40WorldKey(),JSON.stringify(p))}catch(e){}}
@@ -57,6 +58,14 @@ async function v57Api(method,route,payload){
 }
 
 /* v0.64 · Class-independent hero identities; legacy profile columns remain unchanged. */
+function v065LegacyMarker(){return "soulbound_epoch_v065_"+(guestMode?"guest":currentUser?.id||"unknown")}
+function v065AcceptSave(slot,data){
+ if(!data?.class_id)return null;
+ if(data.season_id===V065_SEASON)return data;
+ // Legacy account Slot 1 cannot store season_id without a SQL migration.
+ if(slot===1&&!guestMode&&!v57Mode&&localStorage.getItem(v065LegacyMarker())===V065_SEASON)return {...data,season_id:V065_SEASON};
+ return null;
+}
 function v064Key(slot=v561Slot){return 'soulbound_character_v064_'+(guestMode?'guest':currentUser?.id||'unknown')+'_'+slot}
 function v064SelectedId(){return window.SoulboundCharacterSelectV064?.getSelectedId()||null}
 function v064RememberId(id,slot=v561Slot){const v=window.SoulboundCharactersV064?.normalize(id);if(v)try{localStorage.setItem(v064Key(slot),v)}catch(e){}return v||null}
@@ -90,16 +99,16 @@ async function v561Load(){
  if(v57Mode&&!guestMode){
   const response=await v57Api("GET","/api/secure-saves");
   v57Revisions={1:null,2:null,3:null};
-  for(const row of response.slots||[]){if(row.slot>=1&&row.slot<=3){v561Slots[row.slot-1]=row.data||null;v57Revisions[row.slot]=Number(row.revision)}}
+  for(const row of response.slots||[]){if(row.slot>=1&&row.slot<=3){v561Slots[row.slot-1]=v065AcceptSave(row.slot,row.data);v57Revisions[row.slot]=Number(row.revision)}}
   v561CloudSlots=true;v561Slot=1;v561Select(1);return;
  }
- if(guestMode)v561Slots[0]=v561ReadLocal(1);
- else v561Slots[0]=await loadProfile();
- for(let n=2;n<=3;n++)v561Slots[n-1]=v561ReadLocal(n);
+ if(guestMode)v561Slots[0]=v065AcceptSave(1,v561ReadLocal(1));
+ else v561Slots[0]=v065AcceptSave(1,await loadProfile());
+ for(let n=2;n<=3;n++)v561Slots[n-1]=v065AcceptSave(n,v561ReadLocal(n));
  if(!guestMode&&supabaseClient&&currentUser){
   const {data,error}=await supabaseClient.from("hero_save_slots").select("slot,data").eq("user_id",currentUser.id);
   if(!error){v561CloudSlots=true;for(const row of data||[]){
-   if(row.slot===2||row.slot===3){v561Slots[row.slot-1]=row.data||null;if(row.data)v561WriteLocal(row.slot,row.data)}
+   if(row.slot===2||row.slot===3){v561Slots[row.slot-1]=v065AcceptSave(row.slot,row.data);if(v561Slots[row.slot-1])v561WriteLocal(row.slot,v561Slots[row.slot-1])}
   }}
  }
  v561Slot=1;
@@ -117,6 +126,10 @@ function v561Render(){
  box.querySelectorAll("[data-v561-pick]").forEach(btn=>btn.onclick=()=>v561Select(Number(btn.dataset.v561Pick)));
  box.querySelectorAll("[data-v561-delete]").forEach(btn=>btn.onclick=()=>v561Delete(Number(btn.dataset.v561Delete)));
  $("continueGame").disabled=!v561Slots[v561Slot-1]?.class_id;
+ window.SoulboundV065?.setSlots(v561Slots.map(data=>data?.class_id?{
+  exists:true,name:data.username||"Adventurer",level:data.level||1,
+  className:data.class_id,characterId:data.character_id||null
+ }:{exists:false}));
 }
 function v561Select(n){
  if(v561SlotBusy||n<1||n>3)return;
@@ -156,7 +169,7 @@ async function v561Delete(n){
    if(n!==1&&v561CloudSlots)q=q.eq("slot",n);
    if(n===1||v561CloudSlots){const {error}=await q;if(error)throw error}
   }
-  if(n===1){localStorage.removeItem(v40WorldKeyFor(1));if(guestMode)localStorage.removeItem("soulbound_guest_save_v1")}
+  if(n===1){localStorage.removeItem(v40WorldKeyFor(1));localStorage.removeItem(v065LegacyMarker());if(guestMode)localStorage.removeItem("soulbound_guest_save_v1")}
   else{localStorage.removeItem(v561Key(n));localStorage.removeItem(v40WorldKeyFor(n))}
   v561Slots[n-1]=null;localStorage.removeItem(v064Key(n));
  }catch(e){notice("Cannot delete Slot "+n+": "+e.message,true)}
@@ -165,7 +178,7 @@ async function v561Delete(n){
 function authNotice(m,e=false){$("authNotice").textContent=m;$("authNotice").className=e?"notice error":"notice"}function notice(m,e=false){$("notice").textContent=m;$("notice").className=e?"notice error":"notice"}function call(ev,data={}){return new Promise(resolve=>socket.emit(ev,data,r=>resolve(r||{ok:false,error:"No response"})))}
 // 0.59: reconnect tokens are per-session secrets; never send them in public state.
 let v59ResumeBusy=false;
-function v59StorageKey(){return "soulbound_reconnect_v059_"+(guestMode?"guest":currentUser?.id||"anon")}
+function v59StorageKey(){return "soulbound_reconnect_v065_"+V065_SEASON+"_"+(guestMode?"guest":currentUser?.id||"anon")}
 function v59RememberRoom(reply){
  if(!reply?.ticket||!reply.code)return;
  try{sessionStorage.setItem(v59StorageKey(),JSON.stringify({code:reply.code,ticket:reply.ticket,at:Date.now()}))}catch(e){}
