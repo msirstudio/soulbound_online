@@ -269,20 +269,23 @@ $("newGame").onclick=async()=>{$("classId").disabled=false;if(!v064SelectedId())
 /* Character appearance is stored locally, outside the existing Supabase schema;
    the server validates gender and broadcasts the actual selection for multiplayer. */
 function v30GenderKey(){return "soulbound_hero_gender_v030_"+(guestMode?"guest":currentUser?.id||"guest")+(v561Slot===1?"":"_slot_"+v561Slot)}
-function v30SelectedGender(){return document.querySelector('input[name="heroGender"]:checked')?.value==="female"?"female":"male"}
+function v30SelectedGender(){return window.SoulboundCharactersV064?.gender(v064SelectedId())||(document.querySelector('input[name="heroGender"]:checked')?.value==="female"?"female":"male")}
 function v30SaveGender(){try{localStorage.setItem(v30GenderKey(),v30SelectedGender())}catch(e){}}
 function v30UpdatePreview(){
  const cls=$("classId").value,gender=v30SelectedGender();
- $("v30HeroPreview").src=window.SoulboundHeroArt?.preview(cls,gender)||"";window.SoulboundSprite?.preview(cls,gender);
- $("v30PreviewLabel").textContent=cls.toUpperCase()+" · "+gender.toUpperCase();
+ const identity=window.SoulboundCharactersV064?.byId(v064SelectedId());
+ $("v30HeroPreview").src=identity?"assets/character-select/"+identity.full:window.SoulboundHeroArt?.preview(cls,gender)||"";
+ $("v30HeroPreview").onerror=()=>{$("v30HeroPreview").onerror=null;$("v30HeroPreview").src=window.SoulboundHeroArt?.preview(cls,gender)||""};
+ window.SoulboundSprite?.preview(cls,gender);
+ $("v30PreviewLabel").textContent=(identity?identity.name.toUpperCase()+" · ":"")+cls.toUpperCase()+" · "+gender.toUpperCase();
  document.querySelectorAll("[data-hero-class]").forEach(b=>{const selected=b.dataset.heroClass===cls;b.classList.toggle("selected",selected);b.setAttribute("aria-pressed",String(selected))});
 }
 document.querySelectorAll("[data-hero-class]").forEach(b=>b.onclick=()=>{$("classId").value=b.dataset.heroClass;classInfo();v30UpdatePreview()});
 document.querySelectorAll('input[name="heroGender"]').forEach(b=>b.onchange=()=>{v30UpdatePreview();v30SaveGender()});
 $("classId").onchange=()=>{classInfo();v30UpdatePreview()};
 v30UpdatePreview();$("guestPlay").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));guestMode=true;currentUser=null;showAccount({email:"Guest Player"});$("accountEmail").textContent="GUEST · LOCAL SAVE";$("signup").hidden=true;$("signin").hidden=true;$("email").hidden=true;$("password").hidden=true;$("guestPlay").hidden=true;await prepare();authNotice("Guest mode ready. Friends can join your room with its code.")};
-$("create").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("createRoom",{name:$("name").value,classId:$("classId").value,gender:v30SelectedGender(),guest:guestMode});if(r.ok){v59RememberRoom(r);v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
-$("join").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value,classId:$("classId").value,gender:v30SelectedGender(),guest:guestMode});if(r.ok){v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
+$("create").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("createRoom",{name:$("name").value,classId:$("classId").value,gender:v30SelectedGender(),characterId:v064SavedId()||v064SelectedId(),guest:guestMode});if(r.ok){v59RememberRoom(r);v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
+$("join").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value,classId:$("classId").value,gender:v30SelectedGender(),characterId:v064SavedId()||v064SelectedId(),guest:guestMode});if(r.ok){v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
 function syncMusicUI(on){["musicToggle","musicQuick"].forEach(id=>{const b=$(id);if(!b)return;b.textContent="♫ MUSIC · "+(on?"ON":"OFF");b.classList.toggle("music-on",on);b.setAttribute("aria-pressed",String(on))})}function toggleMusic(){const on=window.SoulboundAudio.setMusic(!window.SoulboundAudio.musicOn);syncMusicUI(on)}$("musicToggle").onclick=toggleMusic;$("musicQuick").onclick=toggleMusic;$("musicVolume").oninput=e=>{window.SoulboundAudio.setVolume(Number(e.target.value)/100);if($("gameMusicVolume"))$("gameMusicVolume").value=e.target.value};
 const sfxSlider=$("sfxVolume");
 if(sfxSlider)sfxSlider.oninput=e=>{window.SoulboundAudio.setSfxVolume(Number(e.target.value)/100);if($("gameSfxVolume"))$("gameSfxVolume").value=e.target.value};
