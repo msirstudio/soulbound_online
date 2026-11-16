@@ -1,0 +1,28 @@
+name: SOULBOUND v0.67 — Owner GM Foundation
+on:
+  push:
+    branches: [v0.67-gm-foundation]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Check GM/server/frontend JavaScript syntax
+        run: |
+          node --check server.js
+          node --check gm/gm-v067.js
+          node --check persistence/secure-saves-v057.js
+          node --check public/game.js
+          node --check public/gm-panel-v067.js
+          node --check tests/v067-gm.test.js
+      - name: Full SOULBOUND test suite
+        run: npm test
