@@ -2,6 +2,16 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.68",date:"2026-11-17",title:"The Ancient Forge — Blacksmith & Ancient Guardians",notes:[
+  "New clickable Blacksmith and Ancient Portal entrances directly on the Central City screen.",
+  "Upgrade any owned equipment from +0 to +10 using Gold and three levels of Enhancement Stone. Success rates: 100, 90, 80, 70, 60, 45, 35, 25, 15, 10 percent.",
+  "Failed upgrades consume Gold and stones but never break equipment or lower the current enhancement level. Bonuses increase core item stats up to +45 percent.",
+  "Battle rewards now roll enhancement materials; regular enemies can drop basic stones, mini-bosses can drop refined stones, and region bosses can drop Ancient Stones at higher regions.",
+  "Added two optional repeatable Ancient Guardians: Gorthan after Stage 10 and Selunara after Stage 20, with new sprites and scalable 1–4-player battles.",
+  "The Blacksmith features an animated charging forge, sparks, success glow, failed-smith effect and audio cues. Upgrade materials are separate from the 40-slot equipment inventory.",
+  "Secure Save profiles and guest saves retain enhancement levels, material balances, and unique attempt receipts. Server validation prevents client-forged odds, currency and item rewards.",
+  "GM panel can grant basic, refined and ancient stones. All existing 40 story stages and Save Slots remain intact."
+ ]},
  {version:"0.67",date:"2026-11-16",title:"GM Foundation — Verified Owner Party Gifts",notes:[
   "Added a server-authorized, owner-only Game Master panel for verified Supabase accounts.",
   "The GM may grant Gold (1–100,000), Race Points (1–20), or one registered weapon/chest armor at a time to an online verified member in the same party.",

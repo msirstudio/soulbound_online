@@ -1,8 +1,8 @@
 {
   "name": "soulbound-online",
-  "version": "0.67.0",
+  "version": "0.68.0",
   "private": true,
-  "description": "SOULBOUND v0.67 — secure owner GM panel and verified party gifts",
+  "description": "SOULBOUND v0.68 — Ancient Forge, enhancement stones and optional Guardians",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
