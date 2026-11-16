@@ -66,7 +66,7 @@ function v065AcceptSave(slot,data){
  if(slot===1&&!guestMode&&!v57Mode&&localStorage.getItem(v065LegacyMarker())===V065_SEASON)return {...data,season_id:V065_SEASON};
  return null;
 }
-function v064Key(slot=v561Slot){return 'soulbound_character_v064_'+(guestMode?'guest':currentUser?.id||'unknown')+'_'+slot}
+function v064Key(slot=v561Slot){return 'soulbound_character_v065_'+V065_SEASON+'_'+(guestMode?'guest':currentUser?.id||'unknown')+'_'+slot}
 function v064SelectedId(){return window.SoulboundCharacterSelectV064?.getSelectedId()||null}
 function v064RememberId(id,slot=v561Slot){const v=window.SoulboundCharactersV064?.normalize(id);if(v)try{localStorage.setItem(v064Key(slot),v)}catch(e){}return v||null}
 function v064SavedId(slot=v561Slot,data=savedCharacter){return window.SoulboundCharactersV064?.normalize(data?.character_id)||window.SoulboundCharactersV064?.normalize(localStorage.getItem(v064Key(slot)))||null}
@@ -222,7 +222,7 @@ async function loadProfile(){const {data,error}=await supabaseClient.from("profi
 async function saveProfile(p){if(!restoreComplete||!p)return;if(v57Mode&&!guestMode)return;const data={username:p.name,class_id:p.classId,class_path:p.classPath||null,level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,small_health:p.smallHealth||p.potions||0,medium_health:p.mediumHealth||0,large_health:p.largeHealth||0,small_mana:p.smallMana||p.manaPotions||0,medium_mana:p.mediumMana||0,large_mana:p.largeMana||0,weapon:p.weapon,armor:p.armor,inventory:p.inventory||[],weapon_item:p.weaponItem||null,armor_item:p.armorItem||null,food_items:p.foodItems||{},food_buffs:p.foodBuffs||{},race_id:p.raceId||"human",race_points:p.racePoints||0,strength:p.strength||0,vitality:p.vitality||0,intelligence:p.intelligence||0,agility:p.agility||0,stat_points:p.statPoints||0,speed:p.speed||10};const worldProgress=p.worldProgress||v40SavedWorld()||{version:40,bossDefeats:{},defeatedBossIds:[]};v40CacheWorld(worldProgress);const full={...data,season_id:V065_SEASON,character_id:window.SoulboundCharactersV064?.normalize(p.characterId)||v064SavedId(),world_progress:worldProgress};v064RememberId(full.character_id);v561Slots[v561Slot-1]=full;
  if(v561Slot!==1){await v561PersistExtra(v561Slot,full);return}
  if(guestMode){v561WriteLocal(1,full);authNotice("Guest Slot 1 saved in this browser.");return}
- try{localStorage.setItem(v065LegacyMarker(),V065_SEASON)}catch(e){}if(!supabaseClient||!currentUser)return;let {error}=await supabaseClient.from("profiles").upsert({...data,...(v40SchemaAvailable===false?{}:{world_progress:worldProgress}),id:currentUser.id,updated_at:new Date().toISOString()},{onConflict:"id"});
+if(!supabaseClient||!currentUser)return;let {error}=await supabaseClient.from("profiles").upsert({...data,...(v40SchemaAvailable===false?{}:{world_progress:worldProgress}),id:currentUser.id,updated_at:new Date().toISOString()},{onConflict:"id"});
  if(error&&/world_progress|schema cache|column/i.test(error.message||"")){
   v40SchemaAvailable=false;({error}=await supabaseClient.from("profiles").upsert({...data,id:currentUser.id,updated_at:new Date().toISOString()},{onConflict:"id"}));
   if(!error){authNotice("Hero saved. World progress backed up in this browser; install v0.40 SQL for cloud sync.",true);return}
