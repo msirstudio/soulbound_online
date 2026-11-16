@@ -63,8 +63,15 @@ function v064RememberId(id,slot=v561Slot){const v=window.SoulboundCharactersV064
 function v064SavedId(slot=v561Slot,data=savedCharacter){return window.SoulboundCharactersV064?.normalize(data?.character_id)||window.SoulboundCharactersV064?.normalize(localStorage.getItem(v064Key(slot)))||null}
 document.addEventListener('soulbound:v064-hero-selected',event=>{
  const d=event.detail||{},identity=window.SoulboundCharactersV064?.byId(d.characterId);if(!identity)return;
+ // Changing a character must never silently reuse CONTINUE from a different save.
+ selectedGameMode=null;
+ $('continueGame').classList.remove('selected');
+ $('newGame').classList.remove('selected');
+ $('create').disabled=true;$('join').disabled=true;
+ $('classId').disabled=false;
  $('classId').value=d.classId;$('name').value=identity.name;
  const radio=document.querySelector('input[name="heroGender"][value="'+identity.gender+'"]');if(radio)radio.checked=true;
+ $('saveMode').textContent='New hero selected · Choose NEW GAME in this slot to create '+identity.name+'. Existing saves require confirmation before replacement.';
  classInfo();v30UpdatePreview();
 });
 function v561Key(slot){return "soulbound_hero_slot_v561_"+(guestMode?"guest":currentUser?.id||"unknown")+"_"+slot}
