@@ -202,6 +202,15 @@ async function v561Delete(n){
  }finally{v561SlotBusy=false;v561Select(n)}
 }
 function authNotice(m,e=false){$("authNotice").textContent=m;$("authNotice").className=e?"notice error":"notice"}function notice(m,e=false){$("notice").textContent=m;$("notice").className=e?"notice error":"notice"}function call(ev,data={}){return new Promise(resolve=>socket.emit(ev,data,r=>resolve(r||{ok:false,error:"No response"})))}
+window.SoulboundGMBridgeV067={
+ canUse:()=>!!v57Mode&&!guestMode&&restoreComplete&&!!currentUser,
+ token:async()=>{
+  if(!v57Mode||guestMode||!restoreComplete||!currentUser||!supabaseClient)return null;
+  const result=await supabaseClient.auth.getSession();
+  return result?.data?.session?.access_token||null;
+ },
+ send:(event,payload)=>call(event,payload)
+};
 // 0.59: reconnect tokens are per-session secrets; never send them in public state.
 let v59ResumeBusy=false;
 function v59StorageKey(){return "soulbound_reconnect_v065_"+V065_SEASON+"_"+(guestMode?"guest":currentUser?.id||"anon")}
@@ -233,7 +242,7 @@ async function v59TryResume(){
    return false;
   }
   v59RememberRoom(result);
-  restoreComplete=true;selectedGameMode="continue";
+  restoreComplete=true;window.SoulboundGMV067?.refresh();selectedGameMode="continue";
   $("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;
   $("code").textContent=result.code;
   window.SoulboundUIV41?.enterGame();
@@ -277,6 +286,7 @@ async function afterJoin(){
   accessToken,slot:v561Slot,guest:guestMode,gender:v30SelectedGender()});
  if(!r.ok){notice("Character restore blocked: "+r.error,true);return false;}
  restoreComplete=true;
+ window.SoulboundGMV067?.refresh();
  const p=gameState?.players.find(x=>x.id===myId);if(p)saveProfile(p);
  return true;
 }
@@ -533,7 +543,7 @@ function v0560OnState(last,s){
   });
  }
 }
-socket.on("state",s=>{const last=gameState;gameState=s;render();v0560OnState(last,s);window.SoulboundWeaponFxV61?.onState(last,s);window.SoulboundRewardV411?.show(last,s,myId);if(restoreComplete){
+socket.on("state",s=>{const last=gameState;gameState=s;render();window.SoulboundGMV067?.onState(s,myId);v0560OnState(last,s);window.SoulboundWeaponFxV61?.onState(last,s);window.SoulboundRewardV411?.show(last,s,myId);if(restoreComplete){
  const p=s.players.find(x=>x.id===myId);if(p){clearTimeout(saveTimer);
  const justCleared=s.status==="regionClear"&&last?.status!=="regionClear";
  if(justCleared)saveProfile(p);else saveTimer=setTimeout(()=>saveProfile(p),500)
