@@ -125,3 +125,27 @@ test("Selunara phase 2 applies a Moonlit Curse and recurring MP drain",()=>{
  assert.equal(guardians.onAttack(room),true);
  assert.equal(p.mp,before-20);
 });
+
+test("Actual combat Phase 2 triggers for both Ancient Guardians at half HP only",()=>{
+ const combat=require("../combat-v055");
+ for(const id of ["gorthan","selunara"]){
+  const enemy=guardians.createEnemy(guardians.byId(id),2);
+  combat.beginEncounter(enemy,{players:new Map()});
+  assert.equal(enemy.phase,1,id+" should start with Phase 1");
+  const sayLog=[];
+  const room={monster:enemy,players:new Map(),status:"battle"};
+  enemy.hp=Math.ceil(enemy.maxHp*.51);
+  assert.equal(combat.checkPhase(room,(_room,msg)=>sayLog.push(msg)),false,id+" should not phase above 50%");
+  enemy.hp=Math.floor(enemy.maxHp*.5);
+  assert.equal(combat.checkPhase(room,(_room,msg)=>sayLog.push(msg)),true,id+" should enter Phase 2");
+  assert.equal(enemy.phase,2);
+  assert.ok(enemy.intent?.name,id+" Phase 2 move should be defined");
+  assert.equal(enemy.intent.charge,true);
+  assert.equal(guardians.onPhase(room,(_room,msg)=>sayLog.push(msg)),true);
+  assert.equal(combat.checkPhase(room,()=>{}),false,"Phase 2 is one-time");
+  assert.ok(sayLog.length>=2,id+" should announce both phase and unique mechanic");
+ }
+ const unrelated={boss:true,stage:10,regionId:"dreadforge_bastion",maxHp:100,hp:50,atk:20};
+ combat.beginEncounter(unrelated,{players:new Map()});
+ assert.equal(unrelated.phase,null,"Original stage 10 story boss must not gain Phase 2");
+});
