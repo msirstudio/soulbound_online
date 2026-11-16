@@ -1,5 +1,5 @@
 /* SOULBOUND v0.64: asset-backed scene, character interactions, six-class modal.
-   No separate game.html: existing save slots, sockets and navigation are preserved. */
+   No additional gameplay document: existing save slots, sockets and navigation are preserved. */
 (()=>{
 "use strict";
 const data=window.SoulboundCharactersV064;
