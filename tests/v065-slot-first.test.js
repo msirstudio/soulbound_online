@@ -67,6 +67,7 @@ test("one-time global reset SQL backs up data and preserves user accounts",()=>{
 test("slot landing builds exactly three buttons without overlaying the guild",()=>{
  class Fake{
   constructor(){this.hidden=false;this.innerHTML="";this.style={};this.classList={add(){},remove(){},toggle(){}}}
+  setAttribute(){}
   querySelectorAll(){return []}
   querySelector(){return this.bar||null}
   before(x){this.inserted=x}
