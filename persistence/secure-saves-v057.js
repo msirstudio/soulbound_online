@@ -102,21 +102,21 @@ const profileFromPlayer=p=>({
  inventory:p.inventory,food_items:p.foodItems,food_buffs:p.foodBuffs,
  race_id:p.raceId,race_points:p.racePoints,strength:p.strength,vitality:p.vitality,
  intelligence:p.intelligence,agility:p.agility,stat_points:p.statPoints,speed:p.speed,
- world_progress:p.worldProgress,updated_at:new Date().toISOString()
+ world_progress:p.worldProgress,gm_grants:Array.isArray(p.gmGrants)?p.gmGrants.slice(-50):[],updated_at:new Date().toISOString()
 });
 function createQueue(onError=()=>{}){
  const claims=new Map();
  const key=claim=>claim.userId+":"+claim.slot;
  const register=claim=>{const k=key(claim);if(claims.has(k))fail("This character slot is already active in another game session.",409);claims.set(k,{...claim,queue:Promise.resolve(),last:""});return claims.get(k)};
  const persist=(claim,player)=>{
-  if(!claim||!player)return Promise.resolve();
-  const active=claims.get(key(claim));if(!active||active!==claim)return Promise.resolve();
+  if(!claim||!player)return Promise.resolve(false);
+  const active=claims.get(key(claim));if(!active||active!==claim)return Promise.resolve(false);
   const profile=profileFromPlayer(player),signature=JSON.stringify({...profile,updated_at:undefined});
   if(active.last===signature)return active.queue;
   active.last=signature;
-  active.queue=active.queue.catch(()=>{}).then(async()=>{
-   try{active.revision=await compareAndSwap(active.userId,active.slot,active.revision,profile)}
-   catch(e){active.last="";onError(e,active)}
+  active.queue=active.queue.catch(()=>false).then(async()=>{
+   try{active.revision=await compareAndSwap(active.userId,active.slot,active.revision,profile);return true}
+   catch(e){active.last="";onError(e,active);return false}
   });
   return active.queue;
  };
