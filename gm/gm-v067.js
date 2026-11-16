@@ -5,11 +5,12 @@
  * Grants are limited to online, verified players in the same party.
  */
 const {randomUUID}=require("node:crypto");
+const forge=require("../forge/forge-v068.js");
 const OWNER=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const SAFE_ID=/^[0-9a-f-]{36}$/i;
 const SAFE_STATES=new Set(["city","shop","victory","regionClear"]);
 const LOG_LIMIT=50;
-const ALLOWED_KINDS=new Set(["gold","race_points","equipment"]);
+const ALLOWED_KINDS=new Set(["gold","race_points","equipment","material"]);
 function setup(ownerId,secureEnabled){
  const owner=String(ownerId||"").trim().toLowerCase();
  return{owner,enabled:!!secureEnabled&&OWNER.test(owner)};
@@ -36,6 +37,13 @@ function resolveReward(input,target,shopItems){
   if(!Number.isSafeInteger(target[field])||target[field]+input.amount>limit)return{ok:false,error:"Recipient has reached the maximum allowed amount."};
   return{ok:true,kind:input.kind,amount:input.amount,name:input.kind==="gold"?"Gold":"Race Points"};
  }
+ if(input.kind==="material"){
+  if(typeof input.stoneType!=="string"||!forge.STONES[input.stoneType])return{ok:false,error:"Unknown enhancement stone."};
+  if(!Number.isSafeInteger(input.amount)||input.amount<1||input.amount>20)return{ok:false,error:"Stone gifts must be 1–20."};
+  if(forge.normalizeMaterials(target.materials)[input.stoneType]+input.amount>forge.MAX_MATERIAL)
+   return{ok:false,error:"Recipient material storage is full."};
+  return{ok:true,kind:"material",amount:input.amount,name:forge.STONES[input.stoneType].name,stoneType:input.stoneType};
+ }
  if(input.kind==="equipment"){
   if(typeof input.itemId!=="string"||input.itemId.length>80)return{ok:false,error:"Invalid equipment ID."};
   const source=shopItems.find(it=>it.id===input.itemId&&["weapon","armor"].includes(it.slot));
@@ -55,21 +63,22 @@ function grant(target,input,shopItems,{now=()=>new Date().toISOString(),uid=rand
  const before={
   gold:target.gold,racePoints:target.racePoints,
   inventory:target.inventory,worldProgress:target.worldProgress,
-  gmGrants:target.gmGrants
+  gmGrants:target.gmGrants,materials:target.materials
  };
  if(reward.kind==="gold")target.gold+=reward.amount;
  if(reward.kind==="race_points")target.racePoints+=reward.amount;
+ if(reward.kind==="material"){target.materials=forge.normalizeMaterials(target.materials);target.materials[reward.stoneType]+=reward.amount}
  if(reward.kind==="equipment"){
   target.inventory=[...(target.inventory||[]),{...reward.item,uid:uid()}];
   if(target.worldProgress&&typeof target.worldProgress==="object"){
    target.worldProgress={...target.worldProgress,lootSeen:[...new Set([...(target.worldProgress.lootSeen||[]),reward.item.id+":gm"])].slice(-300)};
   }
  }
- const receipt={requestId:input.requestId,kind:reward.kind,itemId:reward.item?.id||null,
+ const receipt={requestId:input.requestId,kind:reward.kind,itemId:reward.item?.id||null,stoneType:reward.stoneType||null,
   amount:reward.amount,name:reward.name,at:now()};
  target.gmGrants=[...(Array.isArray(target.gmGrants)?target.gmGrants:[]).slice(-(LOG_LIMIT-1)),receipt];
  return{ok:true,receipt,
   undo:()=>{target.gold=before.gold;target.racePoints=before.racePoints;target.inventory=before.inventory;
-   target.worldProgress=before.worldProgress;target.gmGrants=before.gmGrants;}};
+   target.worldProgress=before.worldProgress;target.gmGrants=before.gmGrants;target.materials=before.materials;}};
 }
 module.exports={setup,authorize,goodTarget,eligible,resolveReward,grant,LOG_LIMIT};

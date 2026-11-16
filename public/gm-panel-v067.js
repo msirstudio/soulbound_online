@@ -15,9 +15,9 @@ modal.innerHTML=[
  '<div class="v067-gm-window"><header><span>👑 SOULBOUND · GAME MASTER</span><button id="v067GMClose" type="button" aria-label="Close GM panel">✕</button></header>',
  '<p class="v067-gm-sub">OWNER ONLY · Give rewards to verified online party members. Changes are saved to their secure character slot.</p>',
  '<label for="v067GMTarget">TARGET PLAYER</label><select id="v067GMTarget"></select>',
- '<label for="v067GMKind">REWARD TYPE</label><select id="v067GMKind"><option value="gold">🪙 Gold</option><option value="race_points">💎 Race Points</option><option value="equipment">⚔ Equipment / Armor</option></select>',
+ '<label for="v067GMKind">REWARD TYPE</label><select id="v067GMKind"><option value="gold">🪙 Gold</option><option value="race_points">💎 Race Points</option><option value="equipment">⚔ Equipment / Armor</option><option value="material">💎 Enhancement Stones</option></select>',
  '<div id="v067GMAmountWrap"><label for="v067GMAmount">AMOUNT</label><input id="v067GMAmount" type="number" min="1" max="100000" step="1" value="1000"></div>',
- '<div id="v067GMItemWrap" hidden><label for="v067GMItem">ITEM TO SPAWN</label><select id="v067GMItem"></select><small>The receiver must match the class/armor weight. High-level items cannot be equipped early.</small></div>',
+ '<div id="v067GMStoneWrap" hidden><label for="v067GMStone">STONE TYPE</label><select id="v067GMStone"><option value="basic">🔹 Enhancement Stone</option><option value="refined">💠 Refined Stone</option><option value="ancient">💎 Ancient Stone</option></select></div><div id="v067GMItemWrap" hidden><label for="v067GMItem">ITEM TO SPAWN</label><select id="v067GMItem"></select><small>The receiver must match the class/armor weight. High-level items cannot be equipped early.</small></div>',
  '<div id="v067GMInfo" class="v067-gm-status" role="status" aria-live="polite">Rewards are available only outside battle.</div>',
  '<div class="v067-gm-actions"><button type="button" id="v067GMCancel">CANCEL</button><button type="button" id="v067GMGive">👑 GIVE REWARD</button></div></div>'
 ].join("");
@@ -29,9 +29,10 @@ const status=(message,error=false)=>{const el=$("v067GMInfo");el.textContent=mes
 const updateKind=()=>{
  const gear=$("v067GMKind").value==="equipment";
  $("v067GMItemWrap").hidden=!gear;
+ $("v067GMStoneWrap").hidden=$("v067GMKind").value!=="material";
  $("v067GMAmountWrap").hidden=gear;
- $("v067GMAmount").max=$("v067GMKind").value==="race_points"?"20":"100000";
- if($("v067GMKind").value==="race_points"&&Number($("v067GMAmount").value)>20)$("v067GMAmount").value="1";
+ $("v067GMAmount").max=["race_points","material"].includes($("v067GMKind").value)?"20":"100000";
+ if(["race_points","material"].includes($("v067GMKind").value)&&Number($("v067GMAmount").value)>20)$("v067GMAmount").value="1";
 };
 function updateTargets(){
  if(!allowed||!room)return;
@@ -69,6 +70,7 @@ $("v067GMGive").onclick=async()=>{
   const v=Number($("v067GMAmount").value);
   if(!Number.isSafeInteger(v)||v<1||v>(kind==="gold"?100000:20))return status("Invalid reward amount.",true);
   payload.amount=v;
+  if(kind==="material")payload.stoneType=$("v067GMStone").value;
  }
  busy=true;$("v067GMGive").disabled=true;status("Authenticating GM and saving reward…");
  try{
