@@ -12,12 +12,12 @@ function audit(){
  const check=(label,test)=>(test?passed:failed).push(label);
  check("package version is semver",/^\d+\.\d+\.\d+$/.test(pkg.version));
  check("visible game version matches package",html.includes("<small>v"+pkg.version.replace(/\.0$/,"")+"</small>"));
- check("menu version matches package",html.includes("VERSION "+pkg.version.replace(/\.0$/,"")+" · ARCHER CLASS"));
+ check("menu version matches package",html.includes("VERSION "+pkg.version.replace(/\.0$/,"")+" · ASSASSIN + PRIEST"));
  check("API version uses canonical package value",server.includes('readFileSync(path.join(__dirname,"package.json")')&&
   server.includes("version:APP_VERSION")&&server.includes("adventureIndex.buildIndex(APP_VERSION)"));
- check("version sync client present",html.includes('version-v0564.js?v=0.62'));
+ check("version sync client present",html.includes('version-v0564.js?v=0.63'));
  check("save export controller loads before game.js",html.indexOf("save-guard-v0564.js")>=0&&
-  html.indexOf("save-guard-v0564.js")<html.indexOf("game.js?v=0.62"));
+  html.indexOf("save-guard-v0564.js")<html.indexOf("game.js?v=0.63"));
  check("all 3 save slots remain selectable",game.includes("v561Slots=[null,null,null]")&&
   game.includes('data-v561-pick'));
  check("pre-delete backup is required",game.includes('snapshot(v564Owner(),n,v564SnapshotData(n,v561Slots[n-1]),"before-delete")'));
