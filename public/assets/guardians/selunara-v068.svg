@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" shape-rendering="crispEdges">
+<title>Selunara — The Fallen Oracle, ancient guardian</title>
+<defs><linearGradient id="robe" x2=".8" y2="1"><stop stop-color="#b5c2df"/><stop offset=".45" stop-color="#68589e"/><stop offset="1" stop-color="#232047"/></linearGradient><radialGradient id="aura"><stop stop-color="#f6eafe" stop-opacity=".7"/><stop offset=".55" stop-color="#7b78d5" stop-opacity=".32"/><stop offset="1" stop-color="#2a2b6b" stop-opacity="0"/></radialGradient><filter id="soft"><feGaussianBlur stdDeviation="8"/></filter></defs>
+<circle cx="160" cy="151" r="143" fill="url(#aura)"/>
+<circle cx="160" cy="111" r="89" fill="none" stroke="#a2b6e8" stroke-width="6" opacity=".4" stroke-dasharray="11 7"/>
+<path d="M157 9a78 78 0 1 0 88 127 88 88 0 1 1-88-127" fill="#e8e5ff" opacity=".74"/>
+<path d="M31 162 67 117l34 37-16 47-48 17zM286 161l-37-44-33 33 18 55 45 17z" fill="#8f92ca" stroke="#3b3469" stroke-width="8"/>
+<path d="M101 113 128 99l67 0 26 23 3 46 38 114-35 16-37-21-29 26-32-27-40 24-36-17 36-119z" fill="url(#robe)" stroke="#30284d" stroke-width="8"/>
+<path d="M117 168 132 279l-33 15M204 165 187 279l27 14" stroke="#c2b6e8" stroke-width="5" fill="none"/>
+<path d="M139 140 156 268l17-105" fill="none" stroke="#f1d7af" stroke-width="7"/>
+<path d="M92 119 54 160 66 182l64-31zM225 119l44 38-11 22-72-30z" fill="#9b8dc8" stroke="#453b70" stroke-width="7"/>
+<path d="M52 158 23 135l-12 19 37 33 28-11zM258 164l32-31 16 25-29 32-28-12z" fill="#d5c5e3" stroke="#3b3058" stroke-width="6"/>
+<path d="M128 105 123 60l21-30 35 0 22 31-2 45-28 33z" fill="#d0a5a5" stroke="#4a355b" stroke-width="8"/>
+<path d="M121 72 114 45l28-32 37 3 31 29-12 29-15-24-42 1z" fill="#d9d9f0" stroke="#524977" stroke-width="7"/>
+<path d="M137 78h21v7h-21zM169 78h21v7h-21z" fill="#302e68"/><path d="M141 79h15v5h-15zM174 79h13v5h-13z" fill="#a8ebff"/>
+<path d="M142 98h35l-17 7z" fill="#8a526e"/>
+<path d="M115 33 153 3l30 3 25 30-19 3-36-21-21 20z" fill="#eeeaff" stroke="#706aab" stroke-width="5"/>
+<path d="M144 117h33l17 30-29 35-36-31z" fill="#38305c" stroke="#bdafd7" stroke-width="6"/>
+<path d="M157 125h10v55h-10zM140 145h47v10h-47z" fill="#e0edff"/>
+<circle cx="34" cy="100" r="13" fill="#bddcfb" opacity=".8"/><circle cx="279" cy="87" r="14" fill="#d9b8fa" opacity=".8"/>
+<path d="M23 90h24M35 77v25M269 87h23M280 76v25M88 235l-18 16 19 22M234 245l20 13-21 19" fill="none" stroke="#e7d8ff" stroke-width="5"/>
+<path d="M55 52h8v8h-8zM268 41h10v10h-10zM48 251h8v8h-8zM275 243h8v8h-8z" fill="#d7ecff"/>
+</svg>
