@@ -20,7 +20,7 @@ window.SoulboundCityShopV47={
  }
 };
 const cfg=window.SOULBOUND_SUPABASE||{};if(cfg.url&&cfg.anonKey&&!cfg.anonKey.includes("PASTE_YOUR")&&window.supabase)supabaseClient=window.supabase.createClient(cfg.url,cfg.anonKey);
-const V065_SEASON="rebirth-2026-11"; // New progression epoch. Previous game saves are not eligible.
+const V065_SEASON=window.SoulboundSeasonV065?.ID||"rebirth-2026-11"; // Reset older progression.
 let v40SchemaAvailable=null;
 function v40MergeWorld(cloud,local){
  const a=cloud&&typeof cloud==="object"?cloud:{},b=local&&typeof local==="object"?local:{};
