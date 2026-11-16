@@ -18,6 +18,8 @@ function install(){
  '<button type="button" class="v047-hotspot v047-weapons" data-v047-shop="weapon" title="Weapon shop"><span>⚔ WEAPON SHOP</span></button>'+
  '<button type="button" class="v047-hotspot v047-armor" data-v047-shop="armor" title="Armor shop"><span>🛡 ARMOR SHOP</span></button>'+
  '<button type="button" class="v047-hotspot v047-crystal" id="v047Adventure" aria-label="Adventure: open World Map"><span>✦ ADVENTURE</span></button>'+
+ '<button id="v068CityForge" type="button" class="v068-city-action" title="Visit the Ancient Forge blacksmith">⚒ BLACKSMITH</button>'+
+ '<button id="v068CityPortal" type="button" class="v068-city-action" title="Challenge the Ancient Guardians">✦ ANCIENT PORTAL</button>'+
  '</nav>'+
  '<div class="v040-city-inner" aria-label="City utility controls">'+
  '<h2 id="v040CityHeading" class="v048-visually-hidden">THE FORGOTTEN CAPITAL</h2>'+
@@ -47,6 +49,8 @@ function install(){
  document.body.appendChild(overlay);
  $("v040WorldOpen").onclick=show;$("v040Merchant").onclick=()=>actions?.openShop();
  $("v047Adventure").onclick=show;
+ $("v068CityForge").onclick=()=>window.SoulboundForgeV068?.open();
+ $("v068CityPortal").onclick=()=>window.SoulboundForgeV068?.openPortal();
  city.querySelectorAll("[data-v047-shop]").forEach(btn=>btn.addEventListener("click",async()=>{
    if(btn.disabled)return;
    const category=btn.dataset.v047Shop;
@@ -125,6 +129,8 @@ function render(s,me,isLeader,handlers){
  $("v040Merchant").hidden=s.status!=="city"&&s.status!=="regionClear";
  $("v040Merchant").disabled=!leader;
  $("v047Adventure").disabled=s.status==="shop"||!["city","regionClear","defeat"].includes(s.status);
+ $("v068CityForge").disabled=s.status!=="city";
+ $("v068CityPortal").disabled=s.status!=="city";
  $("v040City").querySelectorAll("[data-v047-shop]").forEach(btn=>{
    btn.disabled=!["city","regionClear","shop"].includes(s.status)||!leader;
  });
