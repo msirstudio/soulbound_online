@@ -78,7 +78,7 @@ test("server and browser no longer contain competing enemy templates or skill nu
  assert.ok(!game.includes("const skillTips=tank?"));
  assert.ok(!game.includes("skill3Cost=elf?"));
  assert.ok(game.includes("SoulboundSkillViewV062"));
- assert.ok(html.includes("skill-view-v062.js?v=foundation-1"));
+ assert.ok(html.includes("skill-view-v062.js?v=0.63"));
  assert.ok(indexUi.includes("skillDetail(sk)"));
 });
 
