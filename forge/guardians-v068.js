@@ -44,5 +44,36 @@ function markClear(p,id){
  const original=p.worldProgress.guardianClears||{};
  p.worldProgress.guardianClears={...original,[id]:Math.min(99999,clearCount(p,id)+1)};
 }
+function onPhase(room,logger=()=>{}){
+ const m=room?.monster;
+ if(!m||!m.guardianId||m.guardianPhaseTriggered||m.phase!==2)return false;
+ m.guardianPhaseTriggered=true;
+ if(m.guardianId==="gorthan"){
+  m.def=Math.max(1,Math.round(m.def*.55));m.atk=Math.max(1,Math.round(m.atk*1.14));
+  logger(room,"🗿 GORTHAN — STONE SHELL SHATTERS! DEF falls, crushing power surges.");
+ }else if(m.guardianId==="selunara"){
+  m.atk=Math.max(1,Math.round(m.atk*1.1));
+  for(const p of room.players.values()){
+   if(p.hp>0)p.mp=Math.max(0,p.mp-Math.max(1,Math.ceil(p.maxMp*.12)));
+  }
+  logger(room,"🌙 SELUNARA — MOONLIT CURSE! The party loses 12% max MP as illusions gather.");
+ }
+ return true;
+}
+function onAttack(room,logger=()=>{}){
+ const m=room?.monster;
+ if(!m?.guardianId||room.status!=="battle")return false;
+ m.guardianTurn=(m.guardianTurn||0)+1;
+ if(m.guardianId==="selunara"&&m.phase===2&&m.guardianTurn%3===0){
+  const targets=[...room.players.values()].filter(p=>p.hp>0);
+  if(!targets.length)return false;
+  const target=targets[m.guardianTurn%targets.length];
+  const drained=Math.min(target.mp,Math.max(1,Math.ceil(target.maxMp*.08)));
+  target.mp-=drained;
+  logger(room,"🌙 Selunara's mirror echo drains "+drained+" MP from "+target.name+".");
+  return true;
+ }
+ return false;
+}
 const publicList=()=>LIST.map(b=>({id:b.id,name:b.name,unlockStage:b.unlockStage,hint:b.hint,icon:b.icon,sprite:b.sprite}));
-module.exports={LIST,byId,clearCount,unlocked,eligible,createEnemy,markClear,publicList};
+module.exports={LIST,byId,clearCount,unlocked,eligible,createEnemy,markClear,onPhase,onAttack,publicList};
