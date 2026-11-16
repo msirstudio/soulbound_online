@@ -58,7 +58,7 @@ test("city world UI, world map assets and additive cloud migration exist",()=>{
  const html=fs.readFileSync(path.join(__dirname,"../public/index.html"),"utf8");
  const ui=fs.readFileSync(path.join(__dirname,"../public/world-ui-v040.js"),"utf8");
  const sql=fs.readFileSync(path.join(__dirname,"../supabase-migration-v0.40.sql"),"utf8");
- assert.match(html,/src="world-ui-v040\.js"/);
+ assert.match(html,/src="world-ui-v040\.js\?v=0\.68"/);
  assert.match(html,/href="v040\.css"/);
  assert.match(ui,/v040MapPins/);assert.match(ui,/v040Travel/);assert.match(ui,/v040MapDetail/);
  assert.match(sql,/ADD COLUMN IF NOT EXISTS world_progress jsonb/);

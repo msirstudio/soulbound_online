@@ -12,7 +12,7 @@ test("hero HUD remains visible in city and merchant scenes",()=>{
 });
 test("boss clear remains in defeated monster scene; player chooses next map or city",()=>{
  const server=read("server.js"),ui=read("public/world-ui-v040.js");
- assert.match(server,/r\.status=r\.stage%5===0\?"regionClear":"victory"/);
+ assert.ok(server.includes('guardianId?"guardianVictory":r.stage%5===0?"regionClear":"victory"'));
  assert.match(ui,/s\.shopOrigin==="city"/);
  assert.match(ui,/CHOOSE NEXT REGION/);
  assert.match(ui,/\["city","victory","regionClear","defeat"\]\.includes\(latest\?\.status\)\)show/);
@@ -34,7 +34,7 @@ test("closing merchant does not reset stage, region, monster or player stats",()
 });
 test("v0.55 version is shown and Update Log describes the fix",()=>{
  const html=read("public/index.html"),pkg=require("../package.json"),log=read("public/update-log-v045.js");
- assert.equal(pkg.version,"0.67.0");
- assert.ok(html.includes("VERSION 0.67 · GM FOUNDATION"));
+ assert.equal(pkg.version,"0.68.0");
+ assert.ok(html.includes("VERSION 0.68 · THE ANCIENT FORGE"));
  assert.ok(log.includes('version:"0.48.1"'));
 });
