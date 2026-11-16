@@ -114,5 +114,5 @@ test("Shop UI shows class filtering, locks and precise per-copy equip and releas
  assert.ok(server.includes('it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion"'));
  assert.equal(JSON.parse(read("package.json")).version,"0.64.0");
  assert.ok(html.includes("<small>v0.64</small>"));
- assert.ok(html.includes('game.js?v=0.64'));
+ assert.ok(html.includes('game.js?v=0.65'));
 });
