@@ -50,7 +50,7 @@ test("boss records count repeat victories without removing earlier region clears
 test("authoritative server rejects a leader trying to bypass party level gates",()=>{
  const source=fs.readFileSync(path.join(__dirname,"../server.js"),"utf8");
  assert.match(source,/s\.on\("travelRegion"/);
- assert.match(source,/r\.players\.values\(\)\]\.filter\(p=>!world\.canEnter\(p\.level,index\)\)/);
+ assert.ok(source.includes("party.battleReadiness(r,index,{secureEnabled:secure.enabled})"));
  assert.match(source,/s\.on\("returnCity"/);
  assert.match(source,/r\.stage%5===0/);
 });

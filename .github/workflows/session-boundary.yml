@@ -1,9 +1,9 @@
-name: Session boundary regression
+name: Session and party regression
 on:
   pull_request:
-    branches: [v0.62-foundation-single-source]
+    branches: [v0.62-foundation-single-source, audit/session-boundary-hardening]
   push:
-    branches: [audit/session-boundary-hardening]
+    branches: [audit/session-boundary-hardening, fix/party-leadership-readiness]
 permissions:
   contents: read
 jobs:
@@ -20,5 +20,6 @@ jobs:
         run: |
           node --check server.js
           node --check multiplayer/socket-boundary.js
+          node --check multiplayer/party-policy.js
           node --check public/game.js
       - run: npm test
