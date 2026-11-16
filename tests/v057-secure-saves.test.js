@@ -16,7 +16,7 @@ test("Strict mode verifies JWT via Auth, never through a client-supplied user id
  const urls=[],api=testBackend(async(url,opts)=>{
   urls.push({url,auth:opts.headers.Authorization,key:opts.headers.apikey});
   if(url.endsWith("/auth/v1/user"))return result(200,{id:uid});
-  return result(200,[{slot:1,revision:4,data:{class_id:"swordsman",attack:214,level:27}}]);
+  return result(200,[{slot:1,revision:4,data:{season_id:require("../public/season-v065").ID,class_id:"swordsman",attack:214,level:27}}]);
  });
  assert.equal(api.enabled,true);
  const saved=await api.load("valid-jwt-token-".padEnd(45,"x"),1);
