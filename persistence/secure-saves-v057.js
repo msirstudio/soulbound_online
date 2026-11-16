@@ -54,7 +54,7 @@ function starter(cls,name,characterId=null){
   small_mana:2,medium_mana:0,large_mana:0,
   weapon:extra?extra.weapon:bow?archer.weapon:tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",
   armor:extra?extra.armor:bow?archer.armor:tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",
-  inventory:[],weapon_item:null,armor_item:null,
+  inventory:[],weapon_item:null,armor_item:null,materials:{basic:0,refined:0,ancient:0},forge_history:[],
   food_items:{roast_meat:0,herb_stew:0,mana_tart:0},food_buffs:{atk:0,def:0,skill:0},
   race_id:"human",race_points:0,strength:0,vitality:0,intelligence:0,agility:0,stat_points:0,speed:extra?extra.speed:bow?archer.speed:10,
   world_progress:{version:44,bossDefeats:{},defeatedBossIds:[],lootSeen:[],raceSeen:[]},
@@ -99,7 +99,7 @@ const profileFromPlayer=p=>({
  small_health:p.smallHealth,medium_health:p.mediumHealth,large_health:p.largeHealth,
  small_mana:p.smallMana,medium_mana:p.mediumMana,large_mana:p.largeMana,
  weapon:p.weapon,armor:p.armor,weapon_item:p.weaponItem,armor_item:p.armorItem,
- inventory:p.inventory,food_items:p.foodItems,food_buffs:p.foodBuffs,
+ inventory:p.inventory,materials:require("../forge/forge-v068").normalizeMaterials(p.materials),forge_history:require("../forge/forge-v068").record(p.forgeHistory),food_items:p.foodItems,food_buffs:p.foodBuffs,
  race_id:p.raceId,race_points:p.racePoints,strength:p.strength,vitality:p.vitality,
  intelligence:p.intelligence,agility:p.agility,stat_points:p.statPoints,speed:p.speed,
  world_progress:p.worldProgress,gm_grants:Array.isArray(p.gmGrants)?p.gmGrants.slice(-50):[],updated_at:new Date().toISOString()

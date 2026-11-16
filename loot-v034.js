@@ -5,6 +5,7 @@
  */
 const {randomUUID}=require("node:crypto");
 const armorRules=require("./items/armor-shop-v066");
+const forge=require("./forge/forge-v068.js");
 const SLOTS=["head","chest","pants","boots","main","offhand","neck","ring_left","ring_right"];
 const RARITIES=["common","uncommon","rare","epic","legendary"];
 const ICONS={head:"🪖",chest:"🛡️",pants:"👖",boots:"🥾",main:"⚔️",offhand:"🗡️",neck:"💎",ring_left:"💍",ring_right:"💍"};
@@ -84,6 +85,7 @@ function canonical(saved,shopItems){
  item.uid=typeof saved.uid==="string"&&/^[a-zA-Z0-9_-]{8,80}$/.test(saved.uid)?saved.uid:randomUUID();
  const equippedSlot=String(saved.equippedSlot||"");
  if(SLOTS.includes(equippedSlot)&&((equippedSlot===slotOf(item))||(slotOf(item)==="ring_left"&&equippedSlot==="ring_right")))item.equippedSlot=equippedSlot;
+ if(forge.levelOf(saved)>0)item=forge.upgradeStats(item,forge.levelOf(saved));
  return item;
 }
 function normalizeInventory(raw,shopItems){
