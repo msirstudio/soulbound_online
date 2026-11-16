@@ -16,6 +16,6 @@ test("v0.55 includes the earlier cover and updates the version",()=>{
  const html=read("public/index.html"),log=read("public/update-log-v045.js"),pkg=require("../package.json");
  assert.equal(pkg.version,"0.66.0");
  assert.ok(html.includes("VERSION 0.66 · ARMOR SYSTEM"));
- assert.ok(html.includes("ONLINE RPG · v0.66 · SLOT FIRST"));
+ assert.ok(html.includes("ONLINE RPG · v0.66 · ARMOR SYSTEM"));
  assert.ok(log.includes('version:"0.48.2"'));
 });
