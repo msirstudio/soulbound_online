@@ -1,0 +1,14 @@
+/* SOULBOUND 0.66 — armor weight labels. Neutral, compact inventory/merchant badges. */
+.v066-armor-chip{
+ display:inline-flex;align-items:center;align-self:flex-start;max-width:100%;
+ padding:3px 7px;border:1px solid #a78b63;border-radius:3px;
+ background:#2f2927;color:#e8d7b5;font:700 10px Cinzel,Georgia,serif;
+ line-height:1.45;letter-spacing:.035em;white-space:normal;
+}
+.v066-armor-chip.v066-heavy{border-color:#cda66e;background:#40352d;color:#ffe5bb}
+.v066-armor-chip.v066-medium{border-color:#7aab83;background:#263b30;color:#cbe8cb}
+.v066-armor-chip.v066-light{border-color:#898ac3;background:#303048;color:#d7d9ff}
+#shopItems .v066-armor-chip{margin:2px 0 3px}
+#v032Bag .v066-armor-chip{font:700 9px Cinzel,Georgia,serif;padding:1px 5px;margin:2px 0}
+#v032Bag .v032-item.v044-incompatible .v066-armor-chip{opacity:.72}
+@media(max-width:650px){#shopItems .v066-armor-chip{font-size:9px;padding:2px 5px}}
