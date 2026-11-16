@@ -57,7 +57,7 @@ test("server releases canonical package version and UI fallback agrees",()=>{
  const server=read("server.js"),html=read("public/index.html");
  assert.ok(server.includes('version:APP_VERSION'));
  assert.ok(server.includes('readFileSync(path.join(__dirname,"package.json"),"utf8")'));
- assert.ok(html.includes("v0.63"));
+ assert.ok(html.includes("v0.64"));
  assert.ok(html.includes('version-v0564.js?v=0.64'));
 });
 
