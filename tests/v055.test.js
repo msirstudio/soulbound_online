@@ -150,6 +150,6 @@ test("Codex and gameplay integration keep Phase 2 exclusive and preserve existin
   assert.ok(index.includes(t),t);
  assert.deepEqual(base.PHASE_TWO_STAGES,[35,40]);
  assert.ok(!js.includes("ADD COLUMN")&&!js.includes("DROP TABLE"));
- const pkg=require("../package.json");assert.equal(pkg.version,"0.66.0");
- assert.ok(html.includes("VERSION 0.66 · ARMOR SYSTEM"));
+ const pkg=require("../package.json");assert.equal(pkg.version,"0.67.0");
+ assert.ok(html.includes("VERSION 0.67 · GM FOUNDATION"));
 });
