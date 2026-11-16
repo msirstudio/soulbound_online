@@ -174,7 +174,7 @@ function v564SnapshotData(slot,data){
 async function v561Delete(n){
  if(v561SlotBusy||n<1||n>3||!v561Slots[n-1]?.class_id)return{ok:false,error:"This slot is empty or busy."};
  const heroName=String(v561Slots[n-1].username||"Adventurer").slice(0,40);
- if(!confirm("DELETE SLOT "+n+" — "+heroName+"?\\n\\nLevel, gear, gold and boss progress in THIS SLOT will be deleted permanently. Other slots are safe.\\n\\nA local backup will be created first."))return{ok:false,cancelled:true};
+ if(!confirm("DELETE SLOT "+n+" — "+heroName+"?\n\nLevel, gear, gold and boss progress in THIS SLOT will be deleted permanently. Other slots are safe.\n\nA local backup will be created first."))return{ok:false,cancelled:true};
  if(!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),n,v564SnapshotData(n,v561Slots[n-1]),"before-delete")){
   notice("Backup failed. Slot NOT deleted. Free browser storage, then try again.",true);
   return{ok:false,error:"Backup failed; Slot "+n+" was NOT deleted."};
