@@ -41,19 +41,20 @@ async function list(token){const id=await authenticate(token);return{userId:id,s
 async function load(token,slot){slot=slotId(slot);if(!slot)fail("Invalid slot",400);const {userId,slots}=await list(token);const row=slots.find(x=>x.slot===slot);if(!row?.data?.class_id)fail("Slot is empty; create a hero first",404);return{userId,slot,revision:Number(row.revision),data:row.data}}
 function starter(cls,name){
  const mage=cls==="mage",tank=cls==="tank",bow=cls==="archer",archer=require("../classes/archer-v062").STARTER;
- if(!["swordsman","mage","tank","archer"].includes(cls))fail("Invalid class",400);
+ const extra=cls==="assassin"?require("../classes/assassin-v063").STARTER:cls==="priest"?require("../classes/priest-v063").STARTER:null;
+ if(!["swordsman","mage","tank","archer","assassin","priest"].includes(cls))fail("Invalid class",400);
  const username=String(name||"Adventurer").trim().replace(/[<>]/g,"").slice(0,16)||"Adventurer";
  return{username,class_id:cls,class_path:null,level:1,xp:0,gold:80,
-  hp:bow?archer.hp:tank?180:mage?120:130,max_hp:bow?archer.hp:tank?180:mage?120:130,
-  mp:bow?archer.mp:tank?55:mage?65:40,max_mp:bow?archer.mp:tank?55:mage?65:40,
-  attack:bow?archer.atk:tank?16:mage?25:22,defense:bow?archer.def:tank?16:mage?8:10,
+  hp:extra?extra.hp:bow?archer.hp:tank?180:mage?120:130,max_hp:extra?extra.hp:bow?archer.hp:tank?180:mage?120:130,
+  mp:extra?extra.mp:bow?archer.mp:tank?55:mage?65:40,max_mp:extra?extra.mp:bow?archer.mp:tank?55:mage?65:40,
+  attack:extra?extra.atk:bow?archer.atk:tank?16:mage?25:22,defense:extra?extra.def:bow?archer.def:tank?16:mage?8:10,
   potions:3,mana_potions:2,small_health:3,medium_health:0,large_health:0,
   small_mana:2,medium_mana:0,large_mana:0,
-  weapon:bow?archer.weapon:tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",
-  armor:bow?archer.armor:tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",
+  weapon:extra?extra.weapon:bow?archer.weapon:tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",
+  armor:extra?extra.armor:bow?archer.armor:tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",
   inventory:[],weapon_item:null,armor_item:null,
   food_items:{roast_meat:0,herb_stew:0,mana_tart:0},food_buffs:{atk:0,def:0,skill:0},
-  race_id:"human",race_points:0,strength:0,vitality:0,intelligence:0,agility:0,stat_points:0,speed:bow?archer.speed:10,
+  race_id:"human",race_points:0,strength:0,vitality:0,intelligence:0,agility:0,stat_points:0,speed:extra?extra.speed:bow?archer.speed:10,
   world_progress:{version:44,bossDefeats:{},defeatedBossIds:[],lootSeen:[],raceSeen:[]},
   updated_at:new Date().toISOString()};
 }
