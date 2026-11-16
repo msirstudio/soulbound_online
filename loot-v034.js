@@ -4,6 +4,7 @@
  * inventory column (items have equippedSlot and unique uid).
  */
 const {randomUUID}=require("node:crypto");
+const armorRules=require("./items/armor-shop-v066");
 const SLOTS=["head","chest","pants","boots","main","offhand","neck","ring_left","ring_right"];
 const RARITIES=["common","uncommon","rare","epic","legendary"];
 const ICONS={head:"🪖",chest:"🛡️",pants:"👖",boots:"🥾",main:"⚔️",offhand:"🗡️",neck:"💎",ring_left:"💍",ring_right:"💍"};
@@ -77,7 +78,7 @@ function encounterDrops(stage){
 function canonical(saved,shopItems){
  if(!saved||typeof saved!=="object")return null;
  const id=String(saved.id||"");let item;
- if(validLootId(id)){item=factory(id,String(saved.rarity||"common").toLowerCase());}
+ if(validLootId(id)){item=armorRules.restoreLoot(factory(id,String(saved.rarity||"common").toLowerCase()),saved);}
  else{const itemFromShop=shopItems.find(x=>x.id===id&&["weapon","armor"].includes(x.slot));if(itemFromShop)item={...itemFromShop};}
  if(!item)return null;
  item.uid=typeof saved.uid==="string"&&/^[a-zA-Z0-9_-]{8,80}$/.test(saved.uid)?saved.uid:randomUUID();
@@ -115,7 +116,7 @@ function dropEncounterLoot(player,stage,logger=()=>{},explicitRegion,explicitMin
  // Independent checks: no weighted sum, no one-item limit.
  for(const entry of table){
   if(Math.random()*100>=entry.chance)continue;
-  const item=factory((isMini?"mini":"boss")+region+"_"+entry.slot,entry.rarity);
+  const item=armorRules.brandLoot(factory((isMini?"mini":"boss")+region+"_"+entry.slot,entry.rarity),player.classId);
   if(!item)continue;
   if(bagUsed(player)>=40){missed.push(item.name);continue}
   item.uid=randomUUID();player.inventory.push(item);won.push(item);
@@ -153,6 +154,7 @@ function equip(p,rawId,targetSlot,shopItems){
  if(slot==="ring_left"&&targetSlot==="ring_right"){}else if(slot!==targetSlot)return{ok:false,error:"This gear does not match that equipment slot."};
  if(!SLOTS.includes(targetSlot))return{ok:false,error:"Invalid equipment slot."};
  if(item.class&&item.class!==p.classId)return{ok:false,error:"This item belongs to a different class."};
+  const armorGate=armorRules.checkPurchase(p,item);if(!armorGate.ok)return armorGate;
  if(p.level<(item.level||1))return{ok:false,error:"You must reach level "+item.level+"."};
  if(item.equippedSlot===targetSlot)return{ok:true};
  const old=equipped(p,targetSlot);
