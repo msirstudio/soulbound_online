@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" shape-rendering="crispEdges">
+<title>Gorthan — The Stone Tyrant, ancient guardian</title>
+<defs><linearGradient id="rock" x2=".9" y2="1"><stop stop-color="#b5b0a0"/><stop offset=".4" stop-color="#626b67"/><stop offset="1" stop-color="#292f35"/></linearGradient><radialGradient id="core"><stop stop-color="#d1ffb8"/><stop offset=".4" stop-color="#70f8a5"/><stop offset="1" stop-color="#146a57"/></radialGradient><filter id="glow"><feGaussianBlur stdDeviation="6"/></filter></defs>
+<ellipse cx="160" cy="288" rx="120" ry="20" fill="#14261b" opacity=".55"/>
+<path d="M44 270h226l-21 17H72z" fill="#3c463e"/>
+<path d="M86 172 66 226l5 55 54 7 22-62-7-48z" fill="#394440" stroke="#101d1f" stroke-width="8"/>
+<path d="M178 178 179 242l19 46 57-13-3-70-29-38z" fill="#3c4845" stroke="#172124" stroke-width="8"/>
+<path d="M66 278l52-9 6 25H59zM198 269l54 4 10 24h-74z" fill="#8a8b70" stroke="#1e2824" stroke-width="7"/>
+<path d="M40 108 16 145l11 71 35 20 37-24-6-70zM240 111l35 24 24 78-28 27-44-23-18-64z" fill="url(#rock)" stroke="#202c2d" stroke-width="9"/>
+<path d="M22 188h43l12 37-30 25-32-18zM252 184h40l19 40-27 27-33-27z" fill="#515d50" stroke="#16211f" stroke-width="7"/>
+<path d="M87 95 141 71l66 5 39 39-13 111-43 37-97-18-27-95z" fill="url(#rock)" stroke="#171f25" stroke-width="11"/>
+<path d="M89 132 117 116l24 12-1 29-36 10zM184 119l31 6 14 30-29 22-20-14z" fill="#859781"/>
+<path d="M133 159 162 140l31 17 2 39-35 25-37-28z" fill="#213d35" stroke="#0f2926" stroke-width="6"/>
+<path d="M124 153 161 137l38 17-8 45-30 20-40-19z" fill="#60edac" opacity=".55" filter="url(#glow)"/>
+<path d="M140 162h42v33h-42z" fill="url(#core)"/><path d="M156 147h9v64h-9zM132 173h60v9h-60z" fill="#ccffb0"/>
+<path d="M88 90 98 42l43-21 26 34 34-37 32 36-14 51-49 28-48-4z" fill="url(#rock)" stroke="#202b2b" stroke-width="9"/>
+<path d="M104 84h34v18h-34zM184 85h32v17h-32z" fill="#0b2822"/><path d="M111 86h21v11h-21zM188 86h20v11h-20z" fill="#82ffb9"/>
+<path d="M133 108h58l-7 17-36 7z" fill="#192626"/>
+<path d="M70 124 39 150l5 33 28 14M245 126l21 31-6 36-32 17M116 55l13 26-12 36M207 54l-21 31 19 31" fill="none" stroke="#74c995" stroke-width="5" stroke-linecap="square"/>
+<path d="M23 215 7 242l35-3 23 12-10-31M294 220l17 19-36 2-20 16 4-26" fill="#707f6b" stroke="#162523" stroke-width="6"/>
+<path d="M55 67h10v12H55zM263 55h7v13h-7zM42 263h8v7h-8zM286 277h7v7h-7z" fill="#9dffb1"/>
+</svg>
