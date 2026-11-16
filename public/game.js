@@ -154,7 +154,9 @@ function v59RememberRoom(reply){
 function v59PendingRoom(){
  try{
   const item=JSON.parse(sessionStorage.getItem(v59StorageKey())||"null");
-  if(item?.code&&item?.ticket&&Date.now()-(item.at||0)<120000)return item;
+  // The server starts its 120-second reservation when the socket disconnects.
+  // A ticket may have been issued hours earlier during an uninterrupted game.
+  if(item?.code&&item?.ticket)return item;
  }catch(e){}
  return null;
 }
@@ -260,7 +262,7 @@ document.querySelectorAll('input[name="heroGender"]').forEach(b=>b.onchange=()=>
 $("classId").onchange=()=>{classInfo();v30UpdatePreview()};
 v30UpdatePreview();$("guestPlay").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));guestMode=true;currentUser=null;showAccount({email:"Guest Player"});$("accountEmail").textContent="GUEST · LOCAL SAVE";$("signup").hidden=true;$("signin").hidden=true;$("email").hidden=true;$("password").hidden=true;$("guestPlay").hidden=true;await prepare();authNotice("Guest mode ready. Friends can join your room with its code.")};
 $("create").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("createRoom",{name:$("name").value,classId:$("classId").value,gender:v30SelectedGender(),guest:guestMode});if(r.ok){v59RememberRoom(r);v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
-$("join").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value,classId:$("classId").value,gender:v30SelectedGender(),guest:guestMode});if(r.ok){v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
+$("join").onclick=async()=>{if(!selectedGameMode)return notice("Choose Continue or New Game first.",true);const r=await call("joinRoom",{name:$("name").value,code:$("roomCode").value,classId:$("classId").value,gender:v30SelectedGender(),guest:guestMode});if(r.ok){v59RememberRoom(r);v30SaveGender();$("account").hidden=true;$("lobby").hidden=true;$("game").hidden=false;$("code").textContent=r.code;window.SoulboundUIV41?.enterGame();await afterJoin()}else notice(r.error,true)};
 function syncMusicUI(on){["musicToggle","musicQuick"].forEach(id=>{const b=$(id);if(!b)return;b.textContent="♫ MUSIC · "+(on?"ON":"OFF");b.classList.toggle("music-on",on);b.setAttribute("aria-pressed",String(on))})}function toggleMusic(){const on=window.SoulboundAudio.setMusic(!window.SoulboundAudio.musicOn);syncMusicUI(on)}$("musicToggle").onclick=toggleMusic;$("musicQuick").onclick=toggleMusic;$("musicVolume").oninput=e=>{window.SoulboundAudio.setVolume(Number(e.target.value)/100);if($("gameMusicVolume"))$("gameMusicVolume").value=e.target.value};
 const sfxSlider=$("sfxVolume");
 if(sfxSlider)sfxSlider.oninput=e=>{window.SoulboundAudio.setSfxVolume(Number(e.target.value)/100);if($("gameSfxVolume"))$("gameSfxVolume").value=e.target.value};
@@ -405,6 +407,12 @@ socket.on("state",s=>{const last=gameState;gameState=s;render();v0560OnState(las
  if(justCleared)saveProfile(p);else saveTimer=setTimeout(()=>saveProfile(p),500)
  }}});
 async function restoreSession(){if(!supabaseClient)return;const {data:{session}}=await supabaseClient.auth.getSession();if(session?.user){showAccount(session.user);await prepare()}else showAccount(null);supabaseClient.auth.onAuthStateChange((ev,session)=>{if(ev==="SIGNED_OUT"){currentUser=null;savedCharacter=null;showAccount(null)}})}restoreSession();
+function isPartyLeader(state){
+ // Older servers identify the leader by player order; current servers send an
+ // explicit identity because combat speed order is independent of leadership.
+ const leader=Object.prototype.hasOwnProperty.call(state||{},"leaderId")?state.leaderId:state?.players?.[0]?.id;
+ return !!myId&&leader===myId;
+}
 function render(){const s=gameState;if(!s)return;
  // Server chooses the shared shop for the whole party; individual purchases remain personal.
  if(s.status==="shop"){
@@ -414,7 +422,7 @@ function render(){const s=gameState;if(!s)return;
 const v040Me=s.players.find(p=>p.id===myId);
 window.SoulboundIndex?.updateHero(v040Me,s);
 window.SoulboundUIV41?.updateGame(s,v040Me);
-window.SoulboundWorldV40?.render(s,v040Me,s.players[0]?.id===myId,{
+window.SoulboundWorldV40?.render(s,v040Me,isPartyLeader(s),{
  travel:async regionIndex=>call("travelRegion",{regionIndex}),
  returnCity:async()=>{const r=await call("returnCity");if(!r.ok)alert(r.error);return r},
  openShop:async(category)=>{const r=await call("openShop",{category:category||"potion"});if(!r.ok)alert(r.error);return r}
@@ -539,7 +547,7 @@ for(const id of ["v055Break","v055Cleanse"]){const button=$(id);if(button){const
  button.title=(button.dataset.action==="break"?"Heavy Stagger · ":"Remove party ailment · ")+(cd>0?"Cooldown "+cd+" turns":"Available");
  button.textContent=(button.dataset.action==="break"?"💥 BREAK STRIKE":"✨ CLEANSE")+(cd>0?" · CD "+cd:"");
 }}
-$("start").hidden=s.status!=="city";$("start").disabled=s.players[0]?.id!==myId;$("next").hidden=!(s.status==="victory"&&s.stage%5!==0);$("next").disabled=s.players[0]?.id!==myId;$("openShop").hidden=!(s.status==="victory"&&s.stage%5===4&&!!s.monster?.miniBoss);$("openShop").textContent="🏕 TRAVELING MERCHANT";$("openShop").disabled=s.players[0]?.id!==myId;$("continueShop").textContent="✕ CLOSE SHOP";$("continueShop").hidden=true;$("continueShop").disabled=s.players[0]?.id!==myId;$("restart").textContent="🏰 RETURN TO CITY";$("restart").hidden=!["regionClear","defeat"].includes(s.status);$("restart").disabled=s.players[0]?.id!==myId;$("shopPanel").hidden=s.status!=="shop"||v23ShopCollapsed;
+$("start").hidden=s.status!=="city";$("start").disabled=!isPartyLeader(s);$("next").hidden=!(s.status==="victory"&&s.stage%5!==0);$("next").disabled=!isPartyLeader(s);$("openShop").hidden=!(s.status==="victory"&&s.stage%5===4&&!!s.monster?.miniBoss);$("openShop").textContent="🏕 TRAVELING MERCHANT";$("openShop").disabled=!isPartyLeader(s);$("continueShop").textContent="✕ CLOSE SHOP";$("continueShop").hidden=true;$("continueShop").disabled=!isPartyLeader(s);$("restart").textContent="🏰 RETURN TO CITY";$("restart").hidden=!["regionClear","defeat"].includes(s.status);$("restart").disabled=!isPartyLeader(s);$("shopPanel").hidden=s.status!=="shop"||v23ShopCollapsed;
 $("v23ShopToggle").hidden=s.status!=="shop";
 $("v23ShopToggle").setAttribute("aria-expanded",String(s.status==="shop"&&!v23ShopCollapsed));
 
@@ -630,7 +638,7 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",
   hide();
   // The party never left the city. Closing the shared shop must not call
   // returnCity (which resets the selected region/stage and heals the party).
-  if(gameState?.status==="shop"&&gameState.players[0]?.id===myId)
+  if(gameState?.status==="shop"&&isPartyLeader(gameState))
    call("closeShop").then(result=>{if(!result.ok)notice(result.error,true)});
  };
  close.addEventListener("click",closeMerchant);

@@ -2,6 +2,14 @@
 (()=>{
 "use strict";
 const entries=[
+ {version:"0.63",date:"2026-11-16",title:"Multiplayer Fixes — Party Leadership & Reconnect",notes:[
+  "Party leadership now stays with the founder independently of combat speed order; all shared controls use the server's leader identity.",
+  "A reconnecting leader keeps the same hero and permissions. After the existing 120-second grace expires, leadership passes in original join order.",
+  "Joining players now retain their private reconnect ticket, and long sessions can reconnect within the server's disconnect grace period.",
+  "All encounter entry paths consistently wait for disconnected heroes, verify signed-in heroes in Secure Save mode, and check party level requirements.",
+  "Malformed commands, duplicate room membership and overlapping restore/reconnect requests are safely rejected.",
+  "Keeps the v0.62 foundation catalogs, Archer class, existing save fields, inventory IDs and combat balance. No Supabase SQL migration is required."
+ ]},
  {version:"0.62",date:"2026-11-15",title:"Archer — The Fourth Playable Class",notes:[
   "Added Archer, the first ranged class, with separate starter HP, MP, ATK, DEF, speed, a green hooded SVG character and a visible bow.",
   "Seven skills: Quick Shot, Arrow Volley, Pinning Arrow, Piercing Shot, Hunter's Mark, Rain of Arrows and Heartseeker.",

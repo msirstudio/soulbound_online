@@ -1,0 +1,25 @@
+name: Session and party regression
+on:
+  pull_request:
+    branches: [v0.62-foundation-single-source, audit/session-boundary-hardening]
+  push:
+    branches: [audit/session-boundary-hardening, fix/party-leadership-readiness, v0.63-multiplayer-fixes]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Syntax
+        run: |
+          node --check server.js
+          node --check multiplayer/socket-boundary.js
+          node --check multiplayer/party-policy.js
+          node --check public/game.js
+      - run: npm test

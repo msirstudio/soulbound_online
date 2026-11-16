@@ -1,5 +1,7 @@
 const express=require("express"),http=require("http"),path=require("path");
-const {Server}=require("socket.io");const archer=require(path.join(__dirname,"classes","archer-v062.js"));const weaponPassives=require(path.join(__dirname,"items","weapon-passives-v061.js"));const multi=require(path.join(__dirname,"multiplayer","session-v059.js"));const {randomUUID}=require("node:crypto");const formulas=require(path.join(__dirname,"combat","formulas.js"));const skillCore=require(path.join(__dirname,"combat","skills.js"));const loot=require("./loot-v034");const secure=require(path.join(__dirname,"persistence","secure-saves-v057.js"));const APP_VERSION=JSON.parse(require("fs").readFileSync(path.join(__dirname,"package.json"),"utf8")).version.replace(/\.0$/,"");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
+const {bindSocket}=require(path.join(__dirname,"multiplayer","socket-boundary.js"));
+const party=require(path.join(__dirname,"multiplayer","party-policy.js"));
+const {Server}=require("socket.io");const archer=require(path.join(__dirname,"classes","archer-v062.js"));const weaponPassives=require(path.join(__dirname,"items","weapon-passives-v061.js"));const multi=require(path.join(__dirname,"multiplayer","session-v059.js"));const {randomUUID,randomInt}=require("node:crypto");const formulas=require(path.join(__dirname,"combat","formulas.js"));const skillCore=require(path.join(__dirname,"combat","skills.js"));const loot=require("./loot-v034");const secure=require(path.join(__dirname,"persistence","secure-saves-v057.js"));const APP_VERSION=JSON.parse(require("fs").readFileSync(path.join(__dirname,"package.json"),"utf8")).version.replace(/\.0$/,"");const app=express(),server=http.createServer(app),io=new Server(server),PORT=process.env.PORT||3000;
 app.use(express.static(path.join(__dirname,"public")));if(secure.enabled)app.use(express.json({limit:"8kb"}));
 app.get("/health",(_,res)=>res.json({ok:true,game:"SOULBOUND Online",version:APP_VERSION,secureSavesEnabled:secure.enabled}));
 const credential=req=>String(req.headers.authorization||"").replace(/^Bearer\s+/i,"");
@@ -32,9 +34,9 @@ function encounter(n){return world.encounter(n,normal,bosses)}
 /* v0.35 in-game index: generated from the actual encounter, shop and boss loot rules.
    Read-only route: no player data, saves, combat state or database changes. */
 app.get("/api/index",(_,res)=>{res.set("Cache-Control","no-store, max-age=0");res.json(adventureIndex.buildIndex(APP_VERSION));});
-function publicRoom(r){return{code:r.code,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,enemies:pack.publicEnemies(r),partyWardReduction:r.partyWardReduction||0,enemyWindup:!!r.pendingEnemy,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0,skillBook:publicSkills.skillsFor(p.classId)})),turnIndex:r.turnIndex,status:r.status,partyWardTurns:r.partyWardTurns||0,shopCategory:r.shopCategory||null,shopOrigin:r.shopOrigin||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),weaponFx:(r.weaponFx||[]).slice(-16),log:r.log.slice(-40),chat:(r.chat||[]).slice(-40)}}
+function publicRoom(r){return{code:r.code,leaderId:r.leaderId,stage:r.stage,totalStages:world.totalStages,scene:sceneFor(r.stage),regionIndex:r.regionIndex,region:world.regions[r.regionIndex],regions:world.regions.map(({normalNames,miniName,...data})=>({...data,miniName})),monster:r.monster,enemies:pack.publicEnemies(r),partyWardReduction:r.partyWardReduction||0,enemyWindup:!!r.pendingEnemy,players:[...r.players.values()].map(p=>({...p,alive:p.hp>0,skillBook:publicSkills.skillsFor(p.classId)})),turnIndex:r.turnIndex,status:r.status,partyWardTurns:r.partyWardTurns||0,shopCategory:r.shopCategory||null,shopOrigin:r.shopOrigin||null,shopItems:shopItems.map(it=>({...it,category:it.category||(it.slot==="weapon"?"weapon":it.slot==="armor"?"armor":"potion")})),weaponFx:(r.weaponFx||[]).slice(-16),log:r.log.slice(-40),chat:(r.chat||[]).slice(-40)}}
 function emit(r){io.to(r.code).emit("state",publicRoom(r));saveVerifiedRoom(r)}function say(r,m){r.log.push(m);if(r.log.length>40)r.log.shift()}
-function createRoom(code){const r={code,stage:1,regionIndex:0,monster:null,enemies:[],players:new Map(),turnIndex:0,status:"city",log:[],chat:[],reconnectPaused:false};rooms.set(code,r);return r}
+function createRoom(code){const r={code,stage:1,regionIndex:0,monster:null,enemies:[],players:new Map(),leaderId:null,memberOrder:[],turnIndex:0,status:"city",log:[],chat:[],reconnectPaused:false};rooms.set(code,r);return r}
 function findRoom(s){return [...rooms.values()].find(r=>r.players.has(s.id))}function current(r){const a=[...r.players.values()];return a.length?a[r.turnIndex%a.length]:null}function alive(r){return [...r.players.values()].filter(p=>p.hp>0)}
 function player(id,name,c="swordsman",gender="male"){const mage=c==="mage",tank=c==="tank",bow=c==="archer",starter=archer.STARTER;return{id,name:cleanName(name),gender:gender==="female"?"female":"male",inventory:[],weaponItem:null,armorItem:null,foodItems:{roast_meat:0,herb_stew:0,mana_tart:0},foodBuffs:{atk:0,def:0,skill:0},classId:bow?"archer":tank?"tank":mage?"mage":"swordsman",className:bow?"Archer":tank?"Tank":mage?"Mage":"Swordsman",hp:bow?starter.hp:tank?180:mage?120:130,maxHp:bow?starter.hp:tank?180:mage?120:130,mp:bow?starter.mp:tank?55:mage?65:40,maxMp:bow?starter.mp:tank?55:mage?65:40,level:1,xp:0,gold:80,potions:3,manaPotions:2,smallHealth:3,mediumHealth:0,largeHealth:0,smallMana:2,mediumMana:0,largeMana:0,classPath:null,tauntTurns:0,damageAmpTurns:0,damageReductionTurns:0,atk:bow?starter.atk:tank?16:mage?25:22,def:bow?starter.def:tank?16:mage?8:10,weapon:bow?starter.weapon:tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",armor:bow?starter.armor:tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",raceId:"human",racePoints:0,raceName:"Human",raceRarity:"common",racePassive:races[0].passive,raceBuffs:races[0].buffs,strength:0,vitality:0,intelligence:0,agility:0,statPoints:0,speed:bow?starter.speed:10,cooldowns:{},worldProgress:world.normalizeProgress(null)}}
 function monsterStrike(r){
@@ -99,11 +101,38 @@ function nextTurn(r){const a=[...r.players.values()],living=alive(r);if(!living.
 function finish(r){if(r.encounterId&&r.rewardedEncounter===r.encounterId)return; if(r.encounterId)r.rewardedEncounter=r.encounterId;const m=r.monster;r.status=r.stage%5===0?"regionClear":"victory";for(const p of r.players.values()){if(p.hp<=0){p.hp=Math.max(1,Math.ceil(p.maxHp*.3));p.mp=Math.ceil(p.maxMp*.2);say(r,p.name+" is revived after the victory with 30% HP and 20% MP.")}p.xp+=m.xp;p.gold+=m.gold;if(m.boss){p.worldProgress=world.markBossClear(p.worldProgress,m.regionId);p.racePoints=(p.racePoints||0)+1;say(r,p.name+" earned 1 Race Point for defeating a boss!");}if(m.boss||m.miniBoss)loot.dropEncounterLoot(p,r.stage,msg=>say(r,msg),world.regionForStage(r.stage).index+1,!!m.miniBoss);if(p.raceId==="human")p.xp+=Math.ceil(m.xp*.05);if(p.raceId==="sylvan")p.hp=Math.min(p.maxHp,p.hp+Math.ceil(p.maxHp*.03));while(p.xp>=p.level*100){p.xp-=p.level*100;p.level++;p.statPoints=(p.statPoints||0)+3;p.maxHp+=p.classId==="tank"?22:p.classId==="swordsman"?16:p.classId==="archer"?14:10;p.maxMp+=p.classId==="mage"?12:p.classId==="tank"?8:p.classId==="archer"?8:6;p.atk+=p.classId==="mage"?3:p.classId==="tank"?2:p.classId==="archer"?3:4;p.def+=p.classId==="tank"?4:p.classId==="swordsman"?2:p.classId==="archer"?2:1;p.hp=p.maxHp;p.mp=p.maxMp;say(r,p.name+" reached level "+p.level+"! +3 STAT POINTS. Allocate them in the character panel.")}}say(r,"Victory! "+m.name+" defeated. +"+m.xp+" EXP · +"+m.gold+" GOLD.");if(r.stage===40)say(r,"THE ECLIPSE SOVEREIGN HAS FALLEN. THE KINGDOM IS FREE! All regions can be replayed.")}
 function valid(s,r){const p=r.players.get(s.id);return r.status==="battle"&&!r.pendingEnemy&&!multi.hasMissing(r)&&p&&(!secure.enabled||p.verified||p.guest)&&p.hp>0&&current(r)?.id===s.id}
 io.on("connection",s=>{
- let restoring=false;
- s.on("createRoom",({name,classId,gender,guest}={},cb=()=>{})=>{const code=Math.random().toString(36).slice(2,7).toUpperCase(),r=createRoom(code);r.players.set(s.id,player(s.id,name,classId,gender));r.players.get(s.id).guest=!!guest;r.accountMode=secure.enabled?(guest?"guest":"account"):"legacy";s.join(code);const ticket=multi.issue(r,s.id);say(r,cleanName(name)+" founded the party.");emit(r);cb({ok:true,code,ticket})});
- s.on("joinRoom",({code,name,classId,gender,guest}={},cb=()=>{})=>{code=String(code||"").trim().toUpperCase();const r=rooms.get(code);if(!r)return cb({ok:false,error:"Room not found. Check the code."});if(r.players.size>=4)return cb({ok:false,error:"Party full (maximum 4)."});if(secure.enabled&&r.accountMode!==(guest?"guest":"account"))return cb({ok:false,error:"Secure account heroes and Guest heroes must use separate party rooms."});if(r.status!=="city")return cb({ok:false,error:"Adventure already started."});const p=player(s.id,name,classId,gender);p.guest=!!guest;r.players.set(s.id,p);s.join(code);const ticket=multi.issue(r,s.id);say(r,p.name+" joined the party.");emit(r);cb({ok:true,code,ticket})});
+ s.on=bindSocket(s);
+ let restoring=false,resuming=false,disconnected=false;
+ const sessionBusy=()=>restoring||resuming||disconnected||!!findRoom(s);
+ s.on("createRoom",({name,classId,gender,guest}={},cb=()=>{})=>{
+  if(sessionBusy())return cb({ok:false,error:"Already connected to a party or session operation in progress."});
+  const p=player(s.id,name,classId,gender);
+  let code;
+  do{code=randomInt(36**5).toString(36).padStart(5,"0").toUpperCase()}while(rooms.has(code));
+  const r=createRoom(code);
+  p.guest=!!guest;r.players.set(s.id,p);party.addMember(r,s.id);
+  r.accountMode=secure.enabled?(guest?"guest":"account"):"legacy";
+  s.join(code);
+  const ticket=multi.issue(r,s.id);
+  say(r,p.name+" founded the party.");emit(r);cb({ok:true,code,ticket});
+ });
+ s.on("joinRoom",({code,name,classId,gender,guest}={},cb=()=>{})=>{
+  if(sessionBusy())return cb({ok:false,error:"Already connected to a party or session operation in progress."});
+  code=String(code||"").trim().toUpperCase();
+  const r=rooms.get(code);
+  if(!r)return cb({ok:false,error:"Room not found. Check the code."});
+  if(r.players.size>=4)return cb({ok:false,error:"Party full (maximum 4)."});
+  if(secure.enabled&&r.accountMode!==(guest?"guest":"account"))return cb({ok:false,error:"Secure account heroes and Guest heroes must use separate party rooms."});
+  if(r.status!=="city")return cb({ok:false,error:"Adventure already started."});
+  const p=player(s.id,name,classId,gender);p.guest=!!guest;
+  r.players.set(s.id,p);party.addMember(r,s.id);s.join(code);
+  const ticket=multi.issue(r,s.id);
+  say(r,p.name+" joined the party.");emit(r);cb({ok:true,code,ticket});
+ });
  s.on("resumeRoom",async({code,ticket,accessToken}={},cb=()=>{})=>{
-  if(findRoom(s))return cb({ok:false,error:"Already connected to a party."});
+  if(sessionBusy())return cb({ok:false,error:"Already connected to a party or session operation in progress."});
+  resuming=true;
+  try{
   const match=multi.find(rooms,String(code||"").trim().toUpperCase(),ticket);
   if(!match)return cb({ok:false,error:"Reconnect expired or invalid. Return to the lobby."});
   const claim=verifiedCharacters.get(match.id);
@@ -112,15 +141,19 @@ io.on("connection",s=>{
    try{const id=await secure.authenticate(accessToken);if(id!==claim.userId)return cb({ok:false,error:"This account does not own the reconnecting hero."})}
    catch(e){return cb({ok:false,error:e.status?e.message:"Unable to authenticate reconnect."})}
   }
+  if(disconnected||findRoom(s))return cb({ok:false,error:"Party changed during reconnect."});
   const result=multi.resume(match,s.id);
   if(!result)return cb({ok:false,error:"Reconnect expired. Join a new party."});
+  party.remapMember(result.room,result.oldId,s.id);
   if(claim){verifiedCharacters.delete(result.oldId);claim.socketId=s.id;verifiedCharacters.set(s.id,claim)}
   s.join(result.room.code);
   say(result.room,result.player.name+" returned to the party.");
   cb({ok:true,code:result.room.code,ticket:result.ticket,resumed:true});
   emit(result.room);
+  }finally{resuming=false}
  });
  s.on("restoreCharacter",async(v={},cb=()=>{})=>{
+  if(disconnected||resuming||verifiedCharacters.has(s.id))return cb({ok:false,error:"Character session is already restored or reconnecting."});
   let r=findRoom(s);
   if(!r||r.status!=="city")return cb({ok:false,error:"Restore only works in the waiting room."});
   if(restoring)return cb({ok:false,error:"Character restore already in progress."});if(secure.enabled&&!!v.guest!==!!r.players.get(s.id)?.guest)return cb({ok:false,error:"Character auth mode does not match party."});
@@ -130,7 +163,7 @@ io.on("connection",s=>{
    if(secure.enabled&&!v.guest){
     const record=await secure.load(v.accessToken,v.slot);
     r=findRoom(s);
-    if(!r||r.status!=="city")return cb({ok:false,error:"Party changed during restore."});
+    if(disconnected||!r||r.status!=="city"||verifiedCharacters.has(s.id))return cb({ok:false,error:"Party changed during restore."});
     v={...record.data,gender:v.gender};
     claim=secureQueue.register({userId:record.userId,slot:record.slot,revision:record.revision,socketId:s.id});
    }else if(secure.enabled&&!r.players.get(s.id)?.guest){return cb({ok:false,error:"Authenticated restore requires a verified account."})}
@@ -158,25 +191,35 @@ io.on("connection",s=>{
  say(r,p.name+" awakened the "+chosen.name+" bloodline ("+chosen.rarity.toUpperCase()+")!");emit(r);cb({ok:true,race:{id:chosen.id,name:chosen.name,rarity:chosen.rarity,icon:chosen.icon,passive:chosen.passive,buffs:chosen.buffs},racePoints:p.racePoints})});
  s.on("travelRegion",({regionIndex}={},cb=()=>{})=>{
   const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a party first."});
-  if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only the party leader can choose a region."});
+  if(!party.isLeader(r,s.id))return cb({ok:false,error:"Only the party leader can choose a region."});
   if(!["city","regionClear","defeat"].includes(r.status))return cb({ok:false,error:"Finish the current encounter or return to the city."});
   const index=Number(regionIndex),region=Number.isInteger(index)?world.regions[index]:null;
   if(!region)return cb({ok:false,error:"Unknown region."});
-  const blocked=[...r.players.values()].filter(p=>!world.canEnter(p.level,index));
-  if(blocked.length)return cb({ok:false,error:"Region locked: "+blocked.map(p=>p.name).join(", ")+" must reach LV "+region.requiredLevel+"."});
+  const error=party.battleReadiness(r,index,{secureEnabled:secure.enabled});
+  if(error)return cb({ok:false,error});
   r.regionIndex=index;r.stage=region.firstStage;r.monster=null;r.enemies=[];
   say(r,"Party traveled from the Central City to "+region.name+".");start(r);emit(r);
   cb({ok:true,regionId:region.id,stage:r.stage});
  });
  s.on("returnCity",(_,cb=()=>{})=>{
   const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a party first."});
-  if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only the party leader can return to the city."});
+  if(!party.isLeader(r,s.id))return cb({ok:false,error:"Only the party leader can return to the city."});
   if(r.status==="battle")return cb({ok:false,error:"Finish the battle first."});
   r.status="city";r.shopOrigin=null;r.shopCategory=null;r.monster=null;r.enemies=[];r.stage=world.regions[r.regionIndex].firstStage;
   for(const p of r.players.values()){p.hp=p.maxHp;p.mp=p.maxMp;p.cooldowns={}}
   say(r,"The party returned to the Central City and rested.");emit(r);cb({ok:true});
  });
- s.on("startBattle",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a room first."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can start."});if(r.status!=="city")return cb({ok:false,error:"Return to the city to start a region."});if(secure.enabled&&[...r.players.values()].some(p=>!p.verified&&!p.guest))return cb({ok:false,error:"All signed-in heroes must finish secure restore first."});if(multi.hasMissing(r))return cb({ok:false,error:"Wait for disconnected party members to return."});if([...r.players.values()].some(p=>!world.canEnter(p.level,r.regionIndex)))return cb({ok:false,error:"A party member does not meet this region\u0027s level requirement."});r.stage=world.regions[r.regionIndex].firstStage;start(r);say(r,"The party sets out into "+world.regions[r.regionIndex].name+".");emit(r);cb({ok:true})});
+ s.on("startBattle",(_,cb=()=>{})=>{
+  const r=findRoom(s);
+  if(!r)return cb({ok:false,error:"Join a room first."});
+  if(!party.isLeader(r,s.id))return cb({ok:false,error:"Only party leader can start."});
+  if(r.status!=="city")return cb({ok:false,error:"Return to the city to start a region."});
+  const error=party.battleReadiness(r,r.regionIndex,{secureEnabled:secure.enabled});
+  if(error)return cb({ok:false,error});
+  r.stage=world.regions[r.regionIndex].firstStage;
+  start(r);say(r,"The party sets out into "+world.regions[r.regionIndex].name+".");
+  emit(r);cb({ok:true});
+ });
  s.on("action",({type,targetId,actionId}={},cb=()=>{})=>{
  const r=findRoom(s);if(!r)return cb({ok:false,error:"Join a room first."});
  if(!multi.isValidActionId(actionId))return cb({ok:false,error:"Invalid action ID."});
@@ -255,7 +298,7 @@ combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status
  s.on("openShop",({category}={},cb=()=>{})=>{
   const r=findRoom(s);
   if(!r)return cb({ok:false,error:"Room not found."});
-  if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can open shop."});
+  if(!party.isLeader(r,s.id))return cb({ok:false,error:"Only party leader can open shop."});
   const status=r.status;
   const fromCity=status==="city"||(status==="shop"&&r.shopOrigin==="city");
   // Exactly one roadside merchant per region, after defeating its mini-boss:
@@ -276,7 +319,7 @@ combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status
  s.on("closeShop",(_,cb=()=>{})=>{
   const r=findRoom(s);
   if(!r)return cb({ok:false,error:"Join a party first."});
-  if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only the party leader may close the shared merchant."});
+  if(!party.isLeader(r,s.id))return cb({ok:false,error:"Only the party leader may close the shared merchant."});
   if(r.status!=="shop")return cb({ok:false,error:"The party is not visiting a shop."});
   const roadside=r.shopOrigin==="camp";
   r.status=roadside&&["victory","regionClear"].includes(r.shopReturnStatus)?r.shopReturnStatus:"city";
@@ -289,12 +332,22 @@ combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status
  s.on("unequipItem",({slot}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if(!["city","shop","victory","regionClear"].includes(r.status))return cb({ok:false,error:"Equipment can only be changed between battles."});const result=loot.unequip(p,String(slot||""));if(result.ok){say(r,p.name+" unequipped "+slot+".");emit(r)}cb(result)});
 
  s.on("discardItem",({uid}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if(!["city","shop","victory","regionClear"].includes(r.status))return cb({ok:false,error:"Items can only be discarded between battles."});const index=(p.inventory||[]).findIndex(it=>it.uid===String(uid||""));if(index<0)return cb({ok:false,error:"Item not found in bag."});const item=p.inventory[index];if(item.equippedSlot||(p.weaponItem&&p.weaponItem.uid===item.uid)||(p.armorItem&&p.armorItem.uid===item.uid))return cb({ok:false,error:"Unequip this item first."});p.inventory.splice(index,1);say(r,p.name+" discarded "+item.name+".");emit(r);cb({ok:true})});
- s.on("nextStage",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Room not found."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can continue."});if(r.status!=="victory"||r.stage%5===0)return cb({ok:false,error:"Finish a non-boss stage before advancing."});r.stage++;start(r);say(r,"The party advances to stage "+r.stage+" of "+world.totalStages+".");emit(r);cb({ok:true})});
- s.on("restart",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Room not found."});if([...r.players.keys()][0]!==s.id)return cb({ok:false,error:"Only party leader can restart."});if(r.status==="battle")return cb({ok:false,error:"Cannot reset a dungeon during an active battle."});r.stage=world.regions[r.regionIndex].firstStage;r.status="city";r.monster=null;r.enemies=[];for(const p of r.players.values()){p.hp=p.maxHp;p.mp=p.maxMp}r.log=["Returned to the Central City. Your hero progress and equipment are kept."];emit(r);cb({ok:true})});
+ s.on("nextStage",(_,cb=()=>{})=>{
+  const r=findRoom(s);
+  if(!r)return cb({ok:false,error:"Room not found."});
+  if(!party.isLeader(r,s.id))return cb({ok:false,error:"Only party leader can continue."});
+  if(r.status!=="victory"||r.stage%5===0)return cb({ok:false,error:"Finish a non-boss stage before advancing."});
+  const error=party.battleReadiness(r,world.regionForStage(r.stage+1).index,{secureEnabled:secure.enabled});
+  if(error)return cb({ok:false,error});
+  r.stage++;start(r);say(r,"The party advances to stage "+r.stage+" of "+world.totalStages+".");
+  emit(r);cb({ok:true});
+ });
+ s.on("restart",(_,cb=()=>{})=>{const r=findRoom(s);if(!r)return cb({ok:false,error:"Room not found."});if(!party.isLeader(r,s.id))return cb({ok:false,error:"Only party leader can restart."});if(r.status==="battle")return cb({ok:false,error:"Cannot reset a dungeon during an active battle."});r.stage=world.regions[r.regionIndex].firstStage;r.status="city";r.monster=null;r.enemies=[];for(const p of r.players.values()){p.hp=p.maxHp;p.mp=p.maxMp}r.log=["Returned to the Central City. Your hero progress and equipment are kept."];emit(r);cb({ok:true})});
  s.on("chooseClassPath",({path:chosen}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if(p.level<15)return cb({ok:false,error:"Class specialization unlocks at level 15."});const choices={swordsman:["berserker","knight"],mage:["archmage","warlock"],tank:["guardian","paladin"]};if(!choices[p.classId]?.includes(chosen))return cb({ok:false,error:"Invalid specialization for this class."});if(p.classPath)return cb({ok:false,error:"You have already chosen your path."});p.classPath=chosen;p.className=({berserker:"Berserker",knight:"Knight",archmage:"Archmage",warlock:"Warlock",guardian:"Guardian",paladin:"Paladin"})[chosen];if(chosen==="guardian"){p.maxHp+=50;p.hp+=50;p.def+=6}else if(chosen==="paladin"){p.maxHp+=25;p.hp+=25;p.def+=3;p.atk+=6;p.maxMp+=10;p.mp+=10}else if(chosen==="berserker"){p.atk+=6;p.def=Math.max(1,p.def-2)}else if(chosen==="knight"){p.def+=5;p.maxHp+=20;p.hp+=20}else if(chosen==="archmage"){p.maxMp+=30;p.mp+=30;p.atk+=4}else if(chosen==="warlock"){p.atk+=6;p.maxHp+=10;p.hp+=10}say(r,p.name+" chose the "+p.className+" path!");emit(r);cb({ok:true})});
  s.on("allocateStat",({stat}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});if((p.statPoints||0)<1)return cb({ok:false,error:"No stat points available."});const key=String(stat||"");if(!["strength","vitality","intelligence","agility"].includes(key))return cb({ok:false,error:"Unknown stat."});p.statPoints--;p[key]=(p[key]||0)+1;if(key==="strength")p.atk+=2;if(key==="vitality"){p.maxHp+=12;p.hp+=12}if(key==="intelligence"){p.maxMp+=10;p.mp+=10}if(key==="agility")p.speed=(p.speed||10)+2;say(r,p.name+" increased "+key.toUpperCase()+".");emit(r);cb({ok:true})});
  s.on("partyChat",({message}={},cb=()=>{})=>{const r=findRoom(s),p=r?.players.get(s.id);if(!r||!p)return cb({ok:false,error:"Join a party first."});const body=String(message||"").replace(/[<>]/g,"").trim().slice(0,180);if(!body)return cb({ok:false,error:"Message is empty."});r.chat=r.chat||[];r.chat.push({name:p.name,id:p.id,message:body,time:Date.now()});if(r.chat.length>60)r.chat.shift();emit(r);cb({ok:true})});
  s.on("disconnect",()=>{
+  disconnected=true;
   const r=findRoom(s);
   if(r&&multi.markDisconnected(r,s.id,{schedule:setTimeout,onExpire:(room,id,p)=>{
    const claim=verifiedCharacters.get(id);
@@ -302,7 +355,7 @@ combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status
    if(claim){secureQueue.persist(claim,p).finally(()=>secureQueue.release(claim))}
    const keys=[...room.players.keys()],index=keys.indexOf(id);
    if(index<0)return;
-   room.players.delete(id);
+   room.players.delete(id);party.removeMember(room,id);
    if(!room.players.size){rooms.delete(room.code);return}
    if(index<room.turnIndex)room.turnIndex--;
    else if(index===room.turnIndex)room.turnIndex%=room.players.size;
@@ -322,4 +375,4 @@ combat.checkPhase(r,say);const previousIndex=r.turnIndex;nextTurn(r);if(r.status
  });
 
 });
-server.listen(PORT,()=>console.log("SOULBOUND Online v0.40.0 running on "+PORT));
+server.listen(PORT,()=>console.log("SOULBOUND Online v"+APP_VERSION+" running on "+PORT));
