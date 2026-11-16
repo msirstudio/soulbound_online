@@ -251,7 +251,7 @@ async function v59TryResume(){
  }catch(e){return false}
  finally{v59ResumeBusy=false}
 }
-function showAccount(u){currentUser=u;$("account").hidden=false;$("lobby").hidden=!u;$("accountInfo").hidden=!u;$("accountEmail").textContent=u?.email||"";$("signup").hidden=!!u;$("signin").hidden=!!u;$("guestPlay").hidden=!!u;$("email").disabled=!!u;$("password").disabled=!!u;if(u)authNotice("Signed in. Your hero data is linked to this account.");window.SoulboundUIV41?.onAuth(u)}
+function showAccount(u){currentUser=u;$("account").hidden=false;$("lobby").hidden=!u;$("accountInfo").hidden=!u;$("accountEmail").textContent=u?.email||"";$("signup").hidden=!!u;$("signin").hidden=!!u;$("guestPlay").hidden=!!u;$("email").disabled=!!u;$("password").disabled=!!u;if(u){v067ShowResend(false);authNotice("Signed in. Your hero data is linked to this account.");}window.SoulboundUIV41?.onAuth(u)}
 function profile(p){return{id:currentUser.id,username:p.name,class_id:p.classId,class_path:p.classPath||null,level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,small_health:p.smallHealth||p.potions||0,medium_health:p.mediumHealth||0,large_health:p.largeHealth||0,small_mana:p.smallMana||p.manaPotions||0,medium_mana:p.mediumMana||0,large_mana:p.largeMana||0,weapon:p.weapon,armor:p.armor,inventory:p.inventory||[],weapon_item:p.weaponItem||null,armor_item:p.armorItem||null,food_items:p.foodItems||{},food_buffs:p.foodBuffs||{},race_id:p.raceId||"human",race_points:p.racePoints||0,strength:p.strength||0,vitality:p.vitality||0,intelligence:p.intelligence||0,agility:p.agility||0,stat_points:p.statPoints||0,speed:p.speed||10,updated_at:new Date().toISOString()}}
 async function loadProfile(){const {data,error}=await supabaseClient.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();if(error)throw error;if(data)return data;const fresh={id:currentUser.id,username:(currentUser.email||"Adventurer").split("@")[0].slice(0,16)||"Adventurer"};const {data:created,error:e}=await supabaseClient.from("profiles").insert(fresh).select().single();if(e)throw e;return created}
 async function saveProfile(p){if(!restoreComplete||!p)return;if(v57Mode&&!guestMode)return;const data={username:p.name,class_id:p.classId,class_path:p.classPath||null,level:p.level,xp:p.xp,gold:p.gold,hp:p.hp,max_hp:p.maxHp,mp:p.mp,max_mp:p.maxMp,attack:p.atk,defense:p.def,potions:p.potions,mana_potions:p.manaPotions,small_health:p.smallHealth||p.potions||0,medium_health:p.mediumHealth||0,large_health:p.largeHealth||0,small_mana:p.smallMana||p.manaPotions||0,medium_mana:p.mediumMana||0,large_mana:p.largeMana||0,weapon:p.weapon,armor:p.armor,inventory:p.inventory||[],weapon_item:p.weaponItem||null,armor_item:p.armorItem||null,food_items:p.foodItems||{},food_buffs:p.foodBuffs||{},race_id:p.raceId||"human",race_points:p.racePoints||0,strength:p.strength||0,vitality:p.vitality||0,intelligence:p.intelligence||0,agility:p.agility||0,stat_points:p.statPoints||0,speed:p.speed||10};const worldProgress=p.worldProgress||v40SavedWorld()||{version:40,bossDefeats:{},defeatedBossIds:[]};v40CacheWorld(worldProgress);const full={...data,season_id:V065_SEASON,character_id:window.SoulboundCharactersV064?.normalize(p.characterId)||v064SavedId(),world_progress:worldProgress};v064RememberId(full.character_id);v561Slots[v561Slot-1]=full;
@@ -301,9 +301,56 @@ function classInfo(){
  };
  $("classInfo").textContent=info[$("classId").value]||info.swordsman;
 }
-if(!supabaseClient){$("signup").disabled=true;$("signin").disabled=true;authNotice("Supabase unavailable. You can still play as guest.",true)}
-$("signup").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));const email=$("email").value.trim(),password=$("password").value;if(!email||password.length<6)return authNotice("Enter email and password (at least 6 characters).",true);const {data,error}=await supabaseClient.auth.signUp({email,password});if(error)return authNotice(error.message,true);if(data.session){showAccount(data.user);await prepare()}else authNotice("Account created. Check your email to confirm, then sign in.")};
-$("signin").onclick=async()=>{if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));const {data,error}=await supabaseClient.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});if(error)return authNotice(error.message,true);showAccount(data.user);await prepare()};
+/* v0.67 Auth reliability: Supabase accepting signup does NOT prove confirmation email
+   was delivered. The built-in email service only sends to project team members. */
+function v067AuthDeliveryError(error){
+ const code=String(error?.code||"").toLowerCase(),message=String(error?.message||"");
+ if(code==="email_address_not_authorized"||/email address not authorized/i.test(message))
+  return "Email delivery blocked by Supabase default SMTP. Configure Authentication > SMTP Settings with a custom email provider to send to non-team email addresses. (email_address_not_authorized)";
+ if(code==="over_email_send_rate_limit"||error?.status===429||/email rate limit exceeded|too many requests/i.test(message))
+  return "Supabase email sending limit reached. The default provider is limited to 2 emails per hour for the entire project. Wait before retrying or configure Custom SMTP. (email rate limit)";
+ return message||"Supabase authentication request failed. Check Authentication > Logs for the error.";
+}
+function v067ShowResend(visible){$("resendConfirmation").hidden=!visible;}
+if(!supabaseClient){$("signup").disabled=true;$("signin").disabled=true;$("resendConfirmation").disabled=true;authNotice("Supabase unavailable. You can still play as guest.",true)}
+$("signup").onclick=async()=>{
+ if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));
+ const email=$("email").value.trim(),password=$("password").value;
+ if(!email||!email.includes("@")||password.length<6)return authNotice("Enter a valid email and password (at least 6 characters).",true);
+ $("signup").disabled=true;v067ShowResend(false);
+ try{
+  const {data,error}=await supabaseClient.auth.signUp({email,password});
+  if(error)return authNotice(v067AuthDeliveryError(error),true);
+  if(data?.session){showAccount(data.user);await prepare();}
+  else if(data?.user){
+   v067ShowResend(true);
+   authNotice("Signup request accepted, but email delivery is not guaranteed. Check Inbox/Spam, then use RESEND CONFIRMATION if needed. If no email arrives, the Supabase owner must configure Custom SMTP.");
+  }else authNotice("Supabase did not return an account. Check Authentication > Logs.",true);
+ }catch(error){authNotice(v067AuthDeliveryError(error),true)}
+ finally{$("signup").disabled=false}
+};
+$("resendConfirmation").onclick=async()=>{
+ const btn=$("resendConfirmation"),email=$("email").value.trim();
+ if(!supabaseClient||!email.includes("@"))return authNotice("Enter your signup email before requesting another confirmation.",true);
+ btn.disabled=true;
+ try{
+  const {error}=await supabaseClient.auth.resend({type:"signup",email});
+  if(error){authNotice(v067AuthDeliveryError(error),true);btn.disabled=false;return}
+  authNotice("Confirmation resend requested. Check Inbox/Spam. If nothing arrives, inspect Supabase Authentication > Logs and configure Custom SMTP.");
+  setTimeout(()=>{btn.disabled=false},60000);
+ }catch(error){authNotice(v067AuthDeliveryError(error),true);btn.disabled=false}
+};
+$("signin").onclick=async()=>{
+ if(!window.SoulboundAudio.musicOn)syncMusicUI(window.SoulboundAudio.setMusic(true));
+ try{
+  const {data,error}=await supabaseClient.auth.signInWithPassword({email:$("email").value.trim(),password:$("password").value});
+  if(error){
+   if(error.code==="email_not_confirmed"||/email not confirmed/i.test(error.message||""))v067ShowResend(true);
+   return authNotice(v067AuthDeliveryError(error),true);
+  }
+  showAccount(data.user);await prepare();
+ }catch(error){authNotice(v067AuthDeliveryError(error),true)}
+};
 $("signout").onclick=async()=>{try{sessionStorage.removeItem(v59StorageKey())}catch(e){}if(guestMode){guestMode=false;savedCharacter=null;restoreComplete=false;location.reload();return}await supabaseClient.auth.signOut();currentUser=null;savedCharacter=null;restoreComplete=false;$("game").hidden=true;$("lobby").hidden=true;showAccount(null);authNotice("Signed out.")};
 $("v564ExportSlot").onclick=()=>{
  const data=v561Slots[v561Slot-1];
