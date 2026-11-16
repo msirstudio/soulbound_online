@@ -407,6 +407,12 @@ socket.on("state",s=>{const last=gameState;gameState=s;render();v0560OnState(las
  if(justCleared)saveProfile(p);else saveTimer=setTimeout(()=>saveProfile(p),500)
  }}});
 async function restoreSession(){if(!supabaseClient)return;const {data:{session}}=await supabaseClient.auth.getSession();if(session?.user){showAccount(session.user);await prepare()}else showAccount(null);supabaseClient.auth.onAuthStateChange((ev,session)=>{if(ev==="SIGNED_OUT"){currentUser=null;savedCharacter=null;showAccount(null)}})}restoreSession();
+function isPartyLeader(state){
+ // Older servers identify the leader by player order; current servers send an
+ // explicit identity because combat speed order is independent of leadership.
+ const leader=Object.prototype.hasOwnProperty.call(state||{},"leaderId")?state.leaderId:state?.players?.[0]?.id;
+ return !!myId&&leader===myId;
+}
 function render(){const s=gameState;if(!s)return;
  // Server chooses the shared shop for the whole party; individual purchases remain personal.
  if(s.status==="shop"){
@@ -416,7 +422,7 @@ function render(){const s=gameState;if(!s)return;
 const v040Me=s.players.find(p=>p.id===myId);
 window.SoulboundIndex?.updateHero(v040Me,s);
 window.SoulboundUIV41?.updateGame(s,v040Me);
-window.SoulboundWorldV40?.render(s,v040Me,s.players[0]?.id===myId,{
+window.SoulboundWorldV40?.render(s,v040Me,isPartyLeader(s),{
  travel:async regionIndex=>call("travelRegion",{regionIndex}),
  returnCity:async()=>{const r=await call("returnCity");if(!r.ok)alert(r.error);return r},
  openShop:async(category)=>{const r=await call("openShop",{category:category||"potion"});if(!r.ok)alert(r.error);return r}
@@ -541,7 +547,7 @@ for(const id of ["v055Break","v055Cleanse"]){const button=$(id);if(button){const
  button.title=(button.dataset.action==="break"?"Heavy Stagger · ":"Remove party ailment · ")+(cd>0?"Cooldown "+cd+" turns":"Available");
  button.textContent=(button.dataset.action==="break"?"💥 BREAK STRIKE":"✨ CLEANSE")+(cd>0?" · CD "+cd:"");
 }}
-$("start").hidden=s.status!=="city";$("start").disabled=s.players[0]?.id!==myId;$("next").hidden=!(s.status==="victory"&&s.stage%5!==0);$("next").disabled=s.players[0]?.id!==myId;$("openShop").hidden=!(s.status==="victory"&&s.stage%5===4&&!!s.monster?.miniBoss);$("openShop").textContent="🏕 TRAVELING MERCHANT";$("openShop").disabled=s.players[0]?.id!==myId;$("continueShop").textContent="✕ CLOSE SHOP";$("continueShop").hidden=true;$("continueShop").disabled=s.players[0]?.id!==myId;$("restart").textContent="🏰 RETURN TO CITY";$("restart").hidden=!["regionClear","defeat"].includes(s.status);$("restart").disabled=s.players[0]?.id!==myId;$("shopPanel").hidden=s.status!=="shop"||v23ShopCollapsed;
+$("start").hidden=s.status!=="city";$("start").disabled=!isPartyLeader(s);$("next").hidden=!(s.status==="victory"&&s.stage%5!==0);$("next").disabled=!isPartyLeader(s);$("openShop").hidden=!(s.status==="victory"&&s.stage%5===4&&!!s.monster?.miniBoss);$("openShop").textContent="🏕 TRAVELING MERCHANT";$("openShop").disabled=!isPartyLeader(s);$("continueShop").textContent="✕ CLOSE SHOP";$("continueShop").hidden=true;$("continueShop").disabled=!isPartyLeader(s);$("restart").textContent="🏰 RETURN TO CITY";$("restart").hidden=!["regionClear","defeat"].includes(s.status);$("restart").disabled=!isPartyLeader(s);$("shopPanel").hidden=s.status!=="shop"||v23ShopCollapsed;
 $("v23ShopToggle").hidden=s.status!=="shop";
 $("v23ShopToggle").setAttribute("aria-expanded",String(s.status==="shop"&&!v23ShopCollapsed));
 
@@ -632,7 +638,7 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",
   hide();
   // The party never left the city. Closing the shared shop must not call
   // returnCity (which resets the selected region/stage and heals the party).
-  if(gameState?.status==="shop"&&gameState.players[0]?.id===myId)
+  if(gameState?.status==="shop"&&isPartyLeader(gameState))
    call("closeShop").then(result=>{if(!result.ok)notice(result.error,true)});
  };
  close.addEventListener("click",closeMerchant);
