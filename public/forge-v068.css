@@ -1,0 +1,64 @@
+/* SOULBOUND v0.68 · Blacksmith with glowing result stage, no body scroll. */
+#v068Overlay[hidden],#v068ForgeView[hidden],#v068PortalView[hidden]{display:none!important}
+.v068-overlay{position:fixed;inset:0;display:grid;place-items:center;z-index:99999;background:rgba(8,6,13,.86);padding:12px}
+.v068-window{box-sizing:border-box;display:flex;flex-direction:column;gap:10px;width:min(880px,100%);max-height:calc(100dvh - 24px);overflow-y:auto;color:#f5dfb5;border:2px solid #c29854;box-shadow:0 14px 90px #000,inset 0 0 0 4px #25212a;background:linear-gradient(150deg,#26222e,#161521 62%,#221b23);padding:18px 22px}
+.v068-head{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #756345;padding-bottom:8px}
+.v068-head small,.v068-guardian small{font:10px Cinzel,Georgia,serif;letter-spacing:1px;color:#b5a98d}
+.v068-head h2{margin:2px 0;color:#ffdda0;font:700 clamp(17px,2.1vw,25px) Cinzel,Georgia,serif;letter-spacing:1px}
+.v068-head button,.v068-bottom button,.v068-tabs button,.v068-merchant button,.v068-guardian button{border:1px solid #a98d65;border-radius:3px;background:#322b32;color:#f5dfb5;font:700 11px Cinzel,Georgia,serif;padding:9px 11px;cursor:pointer}
+.v068-head button:hover,.v068-bottom button:hover,.v068-tabs button:hover,.v068-merchant button:hover,.v068-guardian button:hover{background:#574334}
+.v068-tabs{display:flex;gap:7px}
+.v068-tabs button{flex:1}.v068-tabs button.active{background:#6f4d24;color:#ffedae;border-color:#ffce75}
+.v068-stock{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap}
+.v068-stone,.v068-gold-stock{flex:1 1 142px;display:flex;align-items:center;gap:8px;border:1px solid #6d5b45;padding:8px;background:#181925}
+.v068-stone>span,.v068-gold-stock>span{font-size:27px}
+.v068-stone strong,.v068-gold-stock strong{font-size:12px;display:block}
+.v068-stone small{font-size:10px;color:#b8ad98}
+.v068-workbench{display:grid;grid-template-columns:minmax(230px,.94fr) minmax(270px,1.06fr);gap:14px;min-height:270px}
+.v068-gear-list{border:1px solid #705b3e;background:#111420;padding:10px;overflow:hidden;min-height:255px}
+.v068-gear-list h3{font:700 12px Cinzel,Georgia,serif;color:#edcd96;margin:0 0 8px}
+#v068GearList{display:flex;flex-direction:column;gap:5px;max-height:270px;overflow-y:auto}
+.v068-gear{display:flex;align-items:center;text-align:left;gap:9px;background:#202333;border:1px solid #4b4c55;color:#ebddc0;border-radius:2px;padding:7px;cursor:pointer}
+.v068-gear:hover,.v068-gear.is-selected{border-color:#ecc77b;background:#3b3240}
+.v068-gear>span:first-child{font-size:25px}
+.v068-gear strong{font-size:11px}.v068-gear small{display:block;font-size:10px;color:#bcae99}.v068-gear b{color:#a4f2ba}
+.v068-upgrade{border:1px solid #705b3e;background:radial-gradient(ellipse at 50% 20%,#333242,#161722 65%);padding:9px;display:flex;align-items:center;flex-direction:column;gap:6px;text-align:center}
+.v068-anvil{position:relative;width:105px;height:105px;border-radius:50%;background:radial-gradient(circle,#4c3659,#211d2e 62%,#121620 72%);border:2px solid #8c795d;display:grid;place-items:center;margin:3px 0;isolation:isolate}
+#v068AnvilIcon{font-size:42px;z-index:2;text-shadow:0 0 15px #9baafa}
+.v068-ring{position:absolute;inset:9px;border:2px dashed #997e55;border-radius:50%;animation:v068IdleSpin 13s linear infinite}
+.v068-sparks{position:absolute;inset:-20px;display:grid;place-items:center;color:#e8c890;opacity:0;pointer-events:none;font-size:19px}
+.v068-anvil.v068-high{border-color:#d7a854;box-shadow:0 0 19px #c2943350}
+.v068-anvil.v068-working{animation:v068Heat .32s ease-in-out infinite alternate;box-shadow:0 0 34px #9c75e9aa,0 0 45px #e9ae56bb;transform-origin:50% 50%}
+.v068-working .v068-ring{animation:v068IdleSpin .6s linear infinite;border-color:#ffd77b}
+.v068-working .v068-sparks{opacity:1;animation:v068Spark .4s ease-in-out infinite alternate}
+.v068-anvil.v068-win{animation:v068Success .65s ease-out 2;background:radial-gradient(circle,#fff4b4,#98793b 60%,#251e22);box-shadow:0 0 80px 25px #f9d677bb}
+.v068-anvil.v068-fail{animation:v068Failure .38s linear 3;box-shadow:0 0 50px 8px #d95262bb}
+.v068-upgrade h3{font:700 12px Cinzel,Georgia,serif;margin:1px 0;color:#f2dbad}
+.v068-details{width:100%}.v068-details>div:not(.v068-max){display:flex;justify-content:space-between;gap:9px;padding:4px 3px;border-bottom:1px dotted #625248;font:11px Georgia,serif;text-align:left}
+.v068-details span{color:#b7ac9b}.v068-details strong{color:#f4dda6}.v068-details .v068-rate{color:#ffdc7d;font-size:17px}
+.v068-details small{font-weight:normal;font-size:10px}.v068-max{font:700 15px Cinzel,Georgia,serif;color:#a7ffbb;padding:22px}
+#v068Enhance,.v068-gold{min-height:35px;width:100%;background:linear-gradient(#956e36,#584021);border:1px solid #e8c67f;border-radius:3px;color:#fff2d0;font:700 12px Cinzel,Georgia,serif;cursor:pointer}
+.v068-merchant{display:flex;align-items:center;gap:9px;border:1px solid #655645;padding:8px 11px;background:#181923}
+.v068-merchant>div{flex:1}.v068-merchant strong{display:block;font-size:11px}.v068-merchant small{display:block;color:#bbad97;font-size:10px;line-height:1.3}
+.v068-merchant select{background:#29242d;color:#ffdfa8;border:1px solid #88673d;padding:8px;max-width:65px}
+.v068-result{min-height:28px;padding:8px;border:1px solid #6c604d;background:#191a25;color:#f9dfaf;text-align:center;font:12px Cinzel,Georgia,serif}
+.v068-result.error{color:#ffb2ba;border-color:#b75d67}
+.v068-bottom{display:flex;align-items:center;justify-content:space-between;gap:8px;color:#bcb0a0;font-size:10px}
+.v068-portal-intro{font-size:12px;color:#c5b6a0;line-height:1.6;margin:4px}
+.v068-guardians{display:grid;grid-template-columns:1fr 1fr;gap:10px;max-height:410px;overflow-y:auto}
+.v068-guardian{border:1px solid #8b6d4d;background:#161826;padding:10px;display:flex;gap:11px;align-items:center}
+.v068-guardian img{width:110px;min-width:100px;height:150px;object-fit:contain;filter:drop-shadow(0 0 9px #9d92c58a)}
+.v068-guardian h3{font:700 13px Cinzel,Georgia,serif;margin:4px 0;color:#f4d9a4}
+.v068-guardian p{font-size:11px;line-height:1.5;color:#bfbaa7;margin:6px 0}
+.v068-window button:disabled{opacity:.48;cursor:default}
+#v040City .v068-city-action{position:absolute;z-index:30;bottom:9%;min-width:130px;max-width:38%;padding:7px 8px;border:2px solid #e6be76;background:linear-gradient(110deg,#393040ee,#7b552edc);color:#fff1bd;font:700 clamp(9px,1.1vw,14px) Cinzel,Georgia,serif;box-shadow:0 3px 8px #0009;cursor:pointer}
+#v040City .v068-city-action:hover{transform:translateY(-2px);background:#68422b}
+#v040City #v068CityForge{left:3%}#v040City #v068CityPortal{right:3%}
+#v040City .v068-city-action:disabled{opacity:.5;cursor:default}
+@keyframes v068IdleSpin{to{transform:rotate(360deg)}}
+@keyframes v068Heat{from{transform:scale(.96) rotate(-2deg)}to{transform:scale(1.06) rotate(2deg)}}
+@keyframes v068Spark{from{transform:scale(.7);filter:brightness(1)}to{transform:scale(1.3);filter:brightness(1.9)}}
+@keyframes v068Success{0%{transform:scale(.85)}40%{transform:scale(1.45)}100%{transform:scale(1)}}
+@keyframes v068Failure{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+@media(max-width:670px){.v068-window{padding:11px;gap:7px}.v068-workbench{grid-template-columns:1fr;min-height:0}.v068-gear-list{min-height:0}#v068GearList{max-height:140px}.v068-anvil{width:74px;height:74px}#v068AnvilIcon{font-size:31px}.v068-guardians{grid-template-columns:1fr}.v068-guardian img{width:80px;min-width:80px;height:115px}#v040City .v068-city-action{min-width:105px;font-size:9px}}
+@media(prefers-reduced-motion:reduce){.v068-anvil,.v068-ring,.v068-sparks{animation:none!important}}
