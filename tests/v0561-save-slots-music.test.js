@@ -17,7 +17,7 @@ test("Three independent save slot buttons and scoped delete controls render in t
  assert.ok(game.includes('if(!savedCharacter?.class_id)return notice('));
 });
 test("Slot 1 uses the legacy profile and subsequent slots use a separate table",()=>{
- assert.ok(game.includes('if(guestMode)v561Slots[0]=v561ReadLocal(1)'));
+ assert.ok(game.includes('if(guestMode)v561Slots[0]=v065AcceptSave(1,v561ReadLocal(1))'));
  assert.ok(game.includes('else v561Slots[0]=await loadProfile()'));
  assert.ok(game.includes('supabaseClient.from("hero_save_slots").select("slot,data")'));
  assert.ok(game.includes('await v561PersistExtra(v561Slot,full);return'));
