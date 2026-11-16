@@ -30,7 +30,7 @@ function init(){
  '<div class="v032-paperdoll"><div class="v033-group-titles"><span>ARMOR</span><span>WEAPONS & ACCESSORIES</span></div><div id="v032Slots" class="v032-slots"></div><div class="v032-hero"><div id="v032HeroArt" class="v032-hero-art"></div><strong id="v032HeroName">HERO</strong><small id="v032HeroStats"></small></div></div>'+
  '<div class="v032-note" id="v032EquipStatus"></div></section>'+
  '<section class="v032-bag"><div class="v032-bag-top"><div class="v032-section-title">✦ INVENTORY ✦</div><span id="v032BagCount">0 ITEMS</span></div>'+
- '<div id="v044Actions" class="v044-bag-actions" aria-live="polite"><span id="v044Selected">Select an item</span><button type="button" data-v044-action="equip" disabled>EQUIP</button><button type="button" data-v044-action="unequip" disabled>UNEQUIP</button></div><div id="v032Bag" class="v032-bag-grid"></div><div class="v032-quick-help">Green = compatible · Red = class/level locked · Click EQUIP, or drag onto a slot.</div></section></div>'+
+ '<div id="v044Actions" class="v044-bag-actions" aria-live="polite"><span id="v044Selected">Select an item</span><button type="button" data-v044-action="equip" disabled>EQUIP</button><button type="button" data-v044-action="unequip" disabled>UNEQUIP</button></div><div id="v032Bag" class="v032-bag-grid"></div><div class="v032-quick-help">Green = compatible · Red = locked · Heavy: Swordsman/Tank · Medium: Archer/Assassin · Light: Mage/Priest.</div></section></div>'+
  '<footer class="v032-foot"><span id="v032Hint" role="status" aria-live="polite">Gear may only be changed between battles.</span><div class="v034-foot-buttons"><button id="v034Discard" type="button" title="Permanently discard the selected unequipped item">🗑 DISCARD SELECTED</button><button id="v032Done" type="button">CLOSE</button></div></footer></section>';
  document.body.appendChild(el);modal=el;
  openButton=document.getElementById("toggleEquipment");
@@ -132,7 +132,7 @@ function close(){
 }
 function toggle(){if(!modal)init();modal.hidden?open():close()}
 const canChange=()=>["city","shop","victory","regionClear"].includes(room?.status);
-const allowed=item=>!!item&&(!item.class||item.class===me?.classId)&&Number(me?.level||1)>=Number(item.level||1);
+const allowed=item=>!!item&&(!item.class||item.class===me?.classId)&&(!item.allowedClasses||item.allowedClasses.includes(me?.classId))&&Number(me?.level||1)>=Number(item.level||1);
 function updateActions(){
  if(!modal)return;
  const it=selectedItem(selected),actions=modal.querySelector("#v044Actions");
@@ -184,8 +184,8 @@ function v061Trait(item){
  return passive?String(live.element||"physical").toUpperCase()+" · "+passive.name+" ("+Math.round(passive.chance*100)+"%) · "+passive.description:"";
 }
 function slotMarkup(key,emoji,label,item,active){
- const name=item?.name||"EMPTY",trait=v061Trait(item);
- return '<button type="button" draggable="'+(item?"true":"false")+'" class="v032-slot '+(item?"filled":"")+'" data-v032-slot="'+key+'" aria-label="'+esc(label+": "+name+(trait?" · "+trait:""))+'" title="'+esc(trait||name)+'" data-tooltip="'+esc(trait||name)+'">'+
+ const name=item?.name||"EMPTY",trait=v061Trait(item),armorInfo=item?.armorType?item.armorType.toUpperCase()+" ARMOR · "+(item.allowedClasses||[]).join("/"):"";
+ return '<button type="button" draggable="'+(item?"true":"false")+'" class="v032-slot '+(item?"filled":"")+'" data-v032-slot="'+key+'" aria-label="'+esc(label+": "+name+(trait?" · "+trait:""))+'" title="'+esc(armorInfo||trait||name)+'" data-tooltip="'+esc(armorInfo||trait||name)+'">'+
  '<span class="v032-slot-icon">'+emoji+'</span><strong>'+esc(label)+'</strong><small title="'+esc(name)+'">'+esc(name)+'</small></button>';
 }
 function draw(){
@@ -240,9 +240,9 @@ function draw(){
   const key=displaySlot(it),icon=it.icon||(key==="main"?"⚔":key==="chest"?"🛡":key.includes("ring")?"💍":key==="boots"?"🥾":"✦");
   const stats=["value","defense","maxHp","maxMp"].map((k,j)=>Number(it[k])>0?"+"+it[k]+" "+["ATK","DEF","HP","MP"][j]:"").filter(Boolean).join(" · ")||key.toUpperCase();
   const id=itemKey(it),rarity=["common","uncommon","rare","epic","legendary"].includes(it.rarity)?it.rarity:"common";
-  const compatible=allowed(it),trait=v061Trait(it);
+  const compatible=allowed(it),trait=v061Trait(it),armorWeight=it.armorType?String(it.armorType).toUpperCase():"";
   return '<button type="button" draggable="true" class="v032-item v044-bag-cell v034-rarity-'+rarity+' '+(compatible?"v044-compatible":"v044-incompatible")+' '+(id===selected?"selected":"")+'" data-v032-item="'+esc(id)+'" title="'+esc(it.name)+' · '+esc(stats)+(trait?" · "+esc(trait):"")+'" data-tooltip="'+esc(it.name)+" · "+esc(stats)+(trait?" · "+esc(trait):"")+'">'+
-   '<span class="v032-item-icon">'+esc(icon)+'</span><strong>'+esc(it.name)+'</strong><small>'+esc(stats)+'</small>'+(trait?'<small class="v061-weapon-fx-label">'+esc(trait)+'</small>':'')+'<span class="v034-rarity-name">'+rarity.toUpperCase()+'</span>'+(it.class?'<em>'+esc(it.class.toUpperCase())+'</em>':'')+'</button>';
+   '<span class="v032-item-icon">'+esc(icon)+'</span><strong>'+esc(it.name)+'</strong>'+(armorWeight?'<small class="v066-armor-chip v066-'+esc(it.armorType)+'">'+esc(armorWeight)+' ARMOR</small>':"")+'<small>'+esc(stats)+'</small>'+(trait?'<small class="v061-weapon-fx-label">'+esc(trait)+'</small>':'')+'<span class="v034-rarity-name">'+rarity.toUpperCase()+'</span>'+(it.class?'<em>'+esc(it.class.toUpperCase())+'</em>':'')+'</button>';
  });
  const empty=Array.from({length:Math.max(0,40-bag.length)},(_,i)=>'<div class="v044-empty-cell" aria-label="Empty inventory slot">+</div>');
  modal.querySelector("#v032Bag").innerHTML=[...safe,...empty].join("");
