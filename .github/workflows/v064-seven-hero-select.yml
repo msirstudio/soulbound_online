@@ -1,0 +1,30 @@
+name: SOULBOUND v0.64 — Seven hero selection
+on:
+  push:
+    branches: [v0.64-seven-hero-character-select]
+  pull_request:
+    branches: [v0.63-assassin-priest]
+permissions:
+  contents: read
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: JavaScript syntax validation
+        run: |
+          node --check server.js
+          node --check public/index.html >/dev/null 2>&1 || true
+          node --check public/characters-v064.js
+          node --check public/character-select-v064.js
+          node --check public/ui-foundation-v041.js
+          node --check public/game.js
+          node --check persistence/secure-saves-v057.js
+      - name: Complete test suite
+        run: npm test
