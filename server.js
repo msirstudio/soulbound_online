@@ -16,7 +16,7 @@ if(secure.enabled)app.delete("/api/secure-saves/:slot",endpoint(async req=>{
  return secure.remove(token,req.params.slot,req.body?.revision);
 }));
 const verifiedCharacters=new Map();
-const gm=require("./gm/gm-v067");
+const gm=require(path.join(__dirname,"gm","gm-v067.js"));
 const gmConfig=gm.setup(process.env.SOULBOUND_GM_OWNER_ID,secure.enabled);
 const gmPending=new Set();
 if(gmConfig.enabled)console.info("[GM] Secure owner-only rewards enabled.");
