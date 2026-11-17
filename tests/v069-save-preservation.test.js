@@ -42,12 +42,14 @@ test("old-season slots remain separate from current season, never silently overw
  const backingStore=new Map();
  const context={
   V065_SEASON:"rebirth-2026-11",guestMode:true,v57Mode:false,
+  v069PriorSeasonSlots:[null,null,null],
   localStorage:{getItem:key=>backingStore.get(key)||null},
   v065LegacyMarker:()=> "legacy-marker"
  };
  vm.runInNewContext(game.slice(start,end),context);
  const old={class_id:"mage",level:27,inventory:[{id:"legendary_staff"}]};
  assert.equal(context.v065AcceptSave(1,old),null,"old save is not auto-loaded into a new season");
+ assert.strictEqual(context.v069PriorSeasonSlots[0],old,"archive candidate is kept in memory for an explicit safe replacement");
  assert.equal(old.level,27);
  assert.equal(old.inventory[0].id,"legendary_staff");
  const current={...old,season_id:"rebirth-2026-11"};
@@ -62,6 +64,39 @@ test("three slots are still available, and Guest/account storage keys are namesp
  assert.match(game,/slot===1&&guestMode\?"soulbound_guest_save_v1":v561Key\(slot\)/);
  assert.match(game,/if\(savedCharacter\?\.class_id&&!confirm\("Replace SLOT "/);
  assert.match(game,/before-new-game/,"replacement must create a backup before writing");
+});
+
+test("replacing an old-season slot creates a distinct durable archive, never overwriting it",()=>{
+ const game=read("public/game.js");
+ const start=game.indexOf("function v069ArchivePriorSeason(slot,data){");
+ const end=game.indexOf("\nfunction v564SnapshotData(",start);
+ assert.ok(start>0&&end>start);
+ const data=new Map();
+ const store={getItem:key=>data.get(key)||null,setItem:(key,value)=>data.set(key,value)};
+ const ctx={localStorage:store,v564Owner:()=>"guest"};
+ vm.runInNewContext(game.slice(start,end),ctx);
+ const first={class_id:"mage",level:42,season_id:"old-season",materials:{ancient:7}};
+ assert.equal(ctx.v069ArchivePriorSeason(1,first),true);
+ const archiveName=[...data.keys()][0];
+ assert.match(archiveName,/guest_slot_1_old-season$/);
+ assert.equal(JSON.parse(data.get(archiveName)).level,42);
+ assert.equal(ctx.v069ArchivePriorSeason(1,{class_id:"mage",level:1,season_id:"old-season"}),true);
+ assert.equal(JSON.parse(data.get(archiveName)).level,42,"first archive must be immutable");
+ ctx.v564Owner=()=>"account-123";
+ assert.equal(ctx.v069ArchivePriorSeason(1,first),true);
+ assert.equal(data.size,2,"different owners must never share archive keys");
+});
+
+test("recovery backups preserve character, season, materials, Forge history and GM grants",()=>{
+ const data=new Map(),ctx={window:{},localStorage:{setItem:(k,v)=>data.set(k,v),getItem:k=>data.get(k)||null}};
+ vm.runInNewContext(read("public/save-guard-v0564.js"),ctx);
+ const hero={username:"Lyra",class_id:"mage",character_id:"lyra",gender:"female",
+  season_id:"rebirth-2026-11",level:22,materials:{ancient:3},forge_history:[{requestId:"id-01"}],
+  gm_grants:[{requestId:"gm-01"}]};
+ assert.equal(ctx.window.SoulboundSaveGuardV564.snapshot("guest",2,hero,"before-replace"),true);
+ const backup=JSON.parse([...data.values()][0]).character;
+ for(const k of ["character_id","gender","season_id","materials","forge_history","gm_grants"])
+  assert.deepEqual(backup[k],hero[k],k+" must survive backup serialization");
 });
 
 test("all seven character identities have real portraits and full-body art on disk",()=>{
