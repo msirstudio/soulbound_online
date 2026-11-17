@@ -1,0 +1,29 @@
+name: SOULBOUND v0.69 — Safe Startup & Regression Audit
+on:
+  push:
+    branches: [v0.69-safe-startup-audit]
+  pull_request:
+    branches: [v0.68-ancient-forge]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  full-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Validate syntax
+        run: |
+          node --check server.js
+          node --check public/game.js
+          node --check persistence/secure-saves-v057.js
+          node --check forge/forge-v068.js
+          node --check tests/v069-save-preservation.test.js
+      - name: Full test suite (save, slot, forge, multiplayer, UI and balance)
+        run: npm test
