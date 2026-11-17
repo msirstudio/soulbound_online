@@ -20,22 +20,16 @@ window.SoulboundCityShopV47={
  }
 };
 const cfg=window.SOULBOUND_SUPABASE||{};if(cfg.url&&cfg.anonKey&&!cfg.anonKey.includes("PASTE_YOUR")&&window.supabase)supabaseClient=window.supabase.createClient(cfg.url,cfg.anonKey);
-const V065_SEASON=window.SoulboundSeasonV065?.ID||"rebirth-2026-11"; // Reset older progression.
-/* One-time browser cleanup: clear only pre-v0.65 gameplay state, never Auth tokens,
-   UI preferences, or users' exported JSON backup files. */
+const V065_SEASON=window.SoulboundSeasonV065?.ID||"rebirth-2026-11"; // Legacy saves remain archived and invisible to the current season.
+let v069PriorSeasonSlots=[null,null,null]; // Read-only references; never rewrite old saves automatically.
+/* v0.69 SAFE STARTUP: never delete browser saves during initial page load.
+   v0.65 intentionally ignores saves from older seasons when selecting slots;
+   hiding an older save must NOT erase it, including guest saves, old character
+   identities, world progress or reconnect state. Explicit slot deletion still
+   requires confirmation and a successful backup. Keep this compatibility hook
+   so older UI initialization paths continue working without data loss. */
 function v065PurgeOldLocalSaves(){
- const key="soulbound_v065_client_epoch";
- try{
-  if(localStorage.getItem(key)===V065_SEASON)return;
-  const old=/^soulbound_(?:guest_save_v1$|hero_slot_v561_|world_progress_v040_|hero_gender_v030_|character_v064_)/;
-  const toRemove=[];
-  for(let i=0;i<localStorage.length;i++){const name=localStorage.key(i);if(old.test(name))toRemove.push(name)}
-  for(const name of toRemove)localStorage.removeItem(name);
-  try{
-   for(let i=sessionStorage.length-1;i>=0;i--){const name=sessionStorage.key(i);if(name?.startsWith("soulbound_reconnect_v059_"))sessionStorage.removeItem(name)}
-  }catch(e){}
-  localStorage.setItem(key,V065_SEASON);
- }catch(e){}
+ return false; // Preserved: no automatic purge or migration of prior-season data.
 }
 v065PurgeOldLocalSaves();
 let v40SchemaAvailable=null;
@@ -81,6 +75,7 @@ function v065AcceptSave(slot,data){
  if(data.season_id===V065_SEASON)return data;
  // Legacy account Slot 1 cannot store season_id without a SQL migration.
  if(slot===1&&!guestMode&&!v57Mode&&localStorage.getItem(v065LegacyMarker())===V065_SEASON)return {...data,season_id:V065_SEASON};
+ if(slot>=1&&slot<=3)v069PriorSeasonSlots[slot-1]=data;
  return null;
 }
 function v064Key(slot=v561Slot){return 'soulbound_character_v065_'+V065_SEASON+'_'+(guestMode?'guest':currentUser?.id||'unknown')+'_'+slot}
@@ -112,7 +107,7 @@ async function v561PersistExtra(slot,data){
  if(error){v561CloudSlots=false;$("v561SlotNotice").textContent="Cloud slot unavailable; Slot "+slot+" is backed up in this browser. "+error.message}
 }
 async function v561Load(){
- v561Slots=[null,null,null];v561CloudSlots=false;
+ v561Slots=[null,null,null];v069PriorSeasonSlots=[null,null,null];v561CloudSlots=false;
  if(v57Mode&&!guestMode){
   const response=await v57Api("GET","/api/secure-saves");
   v57Revisions={1:null,2:null,3:null};
@@ -166,6 +161,19 @@ function v561Select(n){
  $("v561SlotNotice").textContent=n===1?"Slot 1 uses your existing save.":guestMode?"Slots are stored on this browser.":v561CloudSlots?"Slots 2–3 use encrypted-connection account storage.":"Slots 2–3 are local to this browser until the Save Slots SQL is installed.";
 }
 function v564Owner(){return guestMode?"guest":currentUser?.id||"unknown"}
+function v069ArchivePriorSeason(slot,data){
+ // An explicit New Game may replace an archived old-season slot. Copy the
+ // complete prior record to a separate owner+slot+season key FIRST; never
+ // replace an earlier archive and never proceed if local storage is full.
+ if(!Number.isInteger(slot)||slot<1||slot>3||!data?.class_id)return false;
+ const owner=String(v564Owner()).replace(/[^a-zA-Z0-9_-]/g,"_").slice(0,100);
+ const season=String(data.season_id||"pre-v065").replace(/[^a-zA-Z0-9_-]/g,"_").slice(0,60);
+ const key="soulbound_legacy_archive_v069_"+owner+"_slot_"+slot+"_"+season;
+ try{
+  if(!localStorage.getItem(key))localStorage.setItem(key,JSON.stringify(data));
+  return !!localStorage.getItem(key);
+ }catch(e){return false}
+}
 function v564SnapshotData(slot,data){
  let localWorld=null;
  try{localWorld=JSON.parse(localStorage.getItem(v40WorldKeyFor(slot))||"null")}catch(e){}
@@ -364,14 +372,17 @@ $("v564ExportBackup").onclick=()=>{
  else notice("No local recovery backup exists yet for this slot.",true);
 };
 $("continueGame").onclick=()=>{if(!savedCharacter?.class_id)return notice("This slot is empty. Choose New Game first.",true);selectedGameMode="continue";if(savedCharacter?.class_id)$("classId").value=savedCharacter.class_id;const oldIdentity=v064SavedId();if(oldIdentity)window.SoulboundCharacterSelectV064?.setSelected(oldIdentity);$("classId").disabled=true;$("continueGame").classList.add("selected");$("newGame").classList.remove("selected");$("create").disabled=false;$("join").disabled=false;$("saveMode").textContent="CONTINUE selected · Your saved level, XP, gold, and equipment will be kept.";notice("Continue selected. Create a new party or join a friend.");};
-$("newGame").onclick=async()=>{$("classId").disabled=false;if(!v064SelectedId())return notice("Choose a character in the guild first.",true);if(!guestMode&&(!currentUser||!supabaseClient))return notice("Sign in first.",true);if(savedCharacter?.class_id&&!confirm("Replace SLOT "+v561Slot+"? The character in that slot will be reset."))return;if(savedCharacter?.class_id&&!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),v561Slot,v564SnapshotData(v561Slot,savedCharacter),"before-new-game"))return notice("Backup failed. New Game cancelled. Free browser storage before retrying.",true);const cls=$("classId").value,mage=cls==="mage",tank=cls==="tank",archer=cls==="archer";const newClass={assassin:{hp:120,mp:58,atk:26,def:7,speed:14,weapon:"Training Daggers",armor:"Rogue Tunic"},priest:{hp:145,mp:90,atk:18,def:10,speed:10,weapon:"Novice Scepter",armor:"Pilgrim Robe"}}[cls];const fresh={season_id:V065_SEASON,id:currentUser?.id||null,username:$("name").value.trim()||savedCharacter?.username||"Adventurer",character_id:v064SelectedId(),gender:v30SelectedGender(),class_id:cls,class_path:null,level:1,xp:0,gold:80,hp:newClass?newClass.hp:archer?135:tank?180:mage?120:130,max_hp:newClass?newClass.hp:archer?135:tank?180:mage?120:130,mp:newClass?newClass.mp:archer?55:tank?55:mage?65:40,max_mp:newClass?newClass.mp:archer?55:tank?55:mage?65:40,attack:newClass?newClass.atk:archer?23:tank?16:mage?25:22,defense:newClass?newClass.def:archer?9:tank?16:mage?8:10,potions:3,mana_potions:2,small_health:3,medium_health:0,large_health:0,small_mana:2,medium_mana:0,large_mana:0,weapon:newClass?newClass.weapon:archer?"Oak Shortbow":tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",armor:newClass?newClass.armor:archer?"Ranger Leathers":tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",inventory:[],weapon_item:null,armor_item:null,food_items:{roast_meat:0,herb_stew:0,mana_tart:0},food_buffs:{atk:0,def:0,skill:0},race_id:"human",race_points:0,strength:0,vitality:0,intelligence:0,agility:0,stat_points:0,speed:newClass?newClass.speed:archer?12:10,updated_at:new Date().toISOString()};const freshWorld={version:40,bossDefeats:{},defeatedBossIds:[]};if(v57Mode&&!guestMode){
+$("newGame").onclick=async()=>{$("classId").disabled=false;if(!v064SelectedId())return notice("Choose a character in the guild first.",true);if(!guestMode&&(!currentUser||!supabaseClient))return notice("Sign in first.",true);if(savedCharacter?.class_id&&!confirm("Replace SLOT "+v561Slot+"? The character in that slot will be reset."))return;if(savedCharacter?.class_id&&!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),v561Slot,v564SnapshotData(v561Slot,savedCharacter),"before-new-game"))return notice("Backup failed. New Game cancelled. Free browser storage before retrying.",true);const archived=v069PriorSeasonSlots[v561Slot-1];if(archived?.class_id){
+ if(!confirm("SLOT "+v561Slot+" contains an OLD-SEASON save that is hidden on this screen. Replacing it requires a local archive of the original. Continue?"))return;
+ if(!window.SoulboundSaveGuardV564?.snapshot(v564Owner(),v561Slot,archived,"before-archived-season-new-game")||!v069ArchivePriorSeason(v561Slot,archived))return notice("Old-season archive failed. New Game cancelled; your original save is unchanged.",true);
+}const cls=$("classId").value,mage=cls==="mage",tank=cls==="tank",archer=cls==="archer";const newClass={assassin:{hp:120,mp:58,atk:26,def:7,speed:14,weapon:"Training Daggers",armor:"Rogue Tunic"},priest:{hp:145,mp:90,atk:18,def:10,speed:10,weapon:"Novice Scepter",armor:"Pilgrim Robe"}}[cls];const fresh={season_id:V065_SEASON,id:currentUser?.id||null,username:$("name").value.trim()||savedCharacter?.username||"Adventurer",character_id:v064SelectedId(),gender:v30SelectedGender(),class_id:cls,class_path:null,level:1,xp:0,gold:80,hp:newClass?newClass.hp:archer?135:tank?180:mage?120:130,max_hp:newClass?newClass.hp:archer?135:tank?180:mage?120:130,mp:newClass?newClass.mp:archer?55:tank?55:mage?65:40,max_mp:newClass?newClass.mp:archer?55:tank?55:mage?65:40,attack:newClass?newClass.atk:archer?23:tank?16:mage?25:22,defense:newClass?newClass.def:archer?9:tank?16:mage?8:10,potions:3,mana_potions:2,small_health:3,medium_health:0,large_health:0,small_mana:2,medium_mana:0,large_mana:0,weapon:newClass?newClass.weapon:archer?"Oak Shortbow":tank?"Guardian Mace":mage?"Apprentice Staff":"Training Sword",armor:newClass?newClass.armor:archer?"Ranger Leathers":tank?"Guardian Armor":mage?"Novice Robe":"Traveler Armor",inventory:[],weapon_item:null,armor_item:null,food_items:{roast_meat:0,herb_stew:0,mana_tart:0},food_buffs:{atk:0,def:0,skill:0},race_id:"human",race_points:0,strength:0,vitality:0,intelligence:0,agility:0,stat_points:0,speed:newClass?newClass.speed:archer?12:10,updated_at:new Date().toISOString()};const freshWorld={version:40,bossDefeats:{},defeatedBossIds:[]};if(v57Mode&&!guestMode){
  try{const response=await v57Api("POST","/api/secure-saves/"+v561Slot+"/new",{classId:cls,name:fresh.username,characterId:fresh.character_id,revision:v57Revisions[v561Slot]});
   v57Revisions[v561Slot]=response.revision;
   Object.assign(fresh,response.data);
  }catch(e){return notice("Secure New Game failed: "+e.message,true)}
  }else if(v561Slot!==1){await v561PersistExtra(v561Slot,{...fresh,world_progress:freshWorld})}else if(guestMode){v561WriteLocal(1,{...fresh,world_progress:freshWorld})}else{const {character_id:_identity,gender:_gender,season_id:_season,...sqlFresh}=fresh;let {error}=await supabaseClient.from("profiles").upsert({...sqlFresh,world_progress:freshWorld},{onConflict:"id"});
  if(error&&/world_progress|schema cache|column/i.test(error.message||""))({error}=await supabaseClient.from("profiles").upsert(sqlFresh,{onConflict:"id"}));
- if(error)return notice("Could not reset save: "+error.message,true)}v40CacheWorld(freshWorld);try{localStorage.setItem(v065LegacyMarker(),V065_SEASON)}catch(e){}v064RememberId(fresh.character_id);savedCharacter={...fresh,world_progress:freshWorld};v561Slots[v561Slot-1]=savedCharacter;v561Render();selectedGameMode="new";$("continueGame").classList.remove("selected");$("newGame").classList.add("selected");$("create").disabled=false;$("join").disabled=false;$("saveMode").textContent="NEW GAME selected · Level 1, fresh stats, starting gear and supplies.";notice("New hero ready in Slot "+v561Slot+".");return true;};
+ if(error)return notice("Could not reset save: "+error.message,true)}v40CacheWorld(freshWorld);try{localStorage.setItem(v065LegacyMarker(),V065_SEASON)}catch(e){}v064RememberId(fresh.character_id);savedCharacter={...fresh,world_progress:freshWorld};v561Slots[v561Slot-1]=savedCharacter;v069PriorSeasonSlots[v561Slot-1]=null;v561Render();selectedGameMode="new";$("continueGame").classList.remove("selected");$("newGame").classList.add("selected");$("create").disabled=false;$("join").disabled=false;$("saveMode").textContent="NEW GAME selected · Level 1, fresh stats, starting gear and supplies.";notice("New hero ready in Slot "+v561Slot+".");return true;};
 /* Character appearance is stored locally, outside the existing Supabase schema;
    the server validates gender and broadcasts the actual selection for multiplayer. */
 function v30GenderKey(){return "soulbound_hero_gender_v030_"+(guestMode?"guest":currentUser?.id||"guest")+(v561Slot===1?"":"_slot_"+v561Slot)}
