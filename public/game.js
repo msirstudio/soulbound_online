@@ -20,22 +20,15 @@ window.SoulboundCityShopV47={
  }
 };
 const cfg=window.SOULBOUND_SUPABASE||{};if(cfg.url&&cfg.anonKey&&!cfg.anonKey.includes("PASTE_YOUR")&&window.supabase)supabaseClient=window.supabase.createClient(cfg.url,cfg.anonKey);
-const V065_SEASON=window.SoulboundSeasonV065?.ID||"rebirth-2026-11"; // Reset older progression.
-/* One-time browser cleanup: clear only pre-v0.65 gameplay state, never Auth tokens,
-   UI preferences, or users' exported JSON backup files. */
+const V065_SEASON=window.SoulboundSeasonV065?.ID||"rebirth-2026-11"; // Legacy saves remain archived and invisible to the current season.
+/* v0.69 SAFE STARTUP: never delete browser saves during initial page load.
+   v0.65 intentionally ignores saves from older seasons when selecting slots;
+   hiding an older save must NOT erase it, including guest saves, old character
+   identities, world progress or reconnect state. Explicit slot deletion still
+   requires confirmation and a successful backup. Keep this compatibility hook
+   so older UI initialization paths continue working without data loss. */
 function v065PurgeOldLocalSaves(){
- const key="soulbound_v065_client_epoch";
- try{
-  if(localStorage.getItem(key)===V065_SEASON)return;
-  const old=/^soulbound_(?:guest_save_v1$|hero_slot_v561_|world_progress_v040_|hero_gender_v030_|character_v064_)/;
-  const toRemove=[];
-  for(let i=0;i<localStorage.length;i++){const name=localStorage.key(i);if(old.test(name))toRemove.push(name)}
-  for(const name of toRemove)localStorage.removeItem(name);
-  try{
-   for(let i=sessionStorage.length-1;i>=0;i--){const name=sessionStorage.key(i);if(name?.startsWith("soulbound_reconnect_v059_"))sessionStorage.removeItem(name)}
-  }catch(e){}
-  localStorage.setItem(key,V065_SEASON);
- }catch(e){}
+ return false; // Preserved: no automatic purge or migration of prior-season data.
 }
 v065PurgeOldLocalSaves();
 let v40SchemaAvailable=null;
