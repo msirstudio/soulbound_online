@@ -11,7 +11,9 @@
   "medium_mana","large_mana","weapon","armor","inventory",
   "weapon_item","armor_item","food_items","food_buffs",
   "race_id","race_points","strength","vitality","intelligence",
-  "agility","stat_points","speed","world_progress","updated_at"
+  "agility","stat_points","speed","world_progress","updated_at",
+  // Keep modern identity and Forge/GM data in pre-change recovery exports.
+  "season_id","character_id","gender","materials","forge_history","gm_grants"
  ];
  const cleanOwner=owner=>String(owner||"guest").replace(/[^a-zA-Z0-9_-]/g,"_").slice(0,100);
  const validSlot=slot=>Number.isInteger(slot)&&slot>=1&&slot<=3;
